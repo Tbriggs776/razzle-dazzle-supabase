@@ -266,15 +266,18 @@ const auth = {
 // call them don't crash. Real port: each base44 Deno function -> a Supabase
 // Edge Function (also Deno), invoked here via supabase.functions.invoke.
 // ---------------------------------------------------------------------------
-// Flip to true (and set VITE_EDGE_FUNCTIONS_ENABLED=true) once you start porting
-// base44 Deno functions to Supabase Edge Functions. Until then we short-circuit to
-// a safe stub so the app doesn't fire failing cross-origin requests for every call.
-const EDGE_FUNCTIONS_ENABLED = import.meta.env.VITE_EDGE_FUNCTIONS_ENABLED === 'true';
+// base44 Deno functions ported to Supabase Edge Functions. Calls to a name in
+// this set hit the real deployed function; every other call safely stubs until
+// that function is ported — so no failing cross-origin requests in the meantime.
+// Add a name here the moment its Edge Function is deployed.
+const DEPLOYED_FUNCTIONS = new Set([
+  'getAppUrl',
+  'logAppointmentAction',
+]);
 
 const functions = {
   async invoke(name, payload = {}) {
-    if (!EDGE_FUNCTIONS_ENABLED) {
-      console.info(`[base44 shim] functions.invoke('${name}') stubbed (edge functions not enabled).`);
+    if (!DEPLOYED_FUNCTIONS.has(name)) {
       return { data: null, error: null, stub: true };
     }
     try {
@@ -295,8 +298,17 @@ const functions = {
 const integrations = {
   Core: {
     async UploadFile({ file } = {}) {
-      console.warn('[base44 shim] UploadFile stubbed — wire to Supabase Storage for real uploads.');
-      return { file_url: file?.name ? `stub://uploads/${file.name}` : 'stub://uploads/file' };
+      if (!file) return { file_url: null };
+      const ext = (file.name?.split('.').pop() || 'bin').toLowerCase();
+      const path = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from('uploads').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type || undefined,
+      });
+      if (error) throw new Error(`[base44 shim] UploadFile: ${error.message}`);
+      const { data } = supabase.storage.from('uploads').getPublicUrl(path);
+      return { file_url: data.publicUrl };
     },
     async SendEmail(args) {
       console.warn('[base44 shim] SendEmail stubbed.', args);
