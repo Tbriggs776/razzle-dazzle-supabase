@@ -6,6 +6,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
 const svc = () => createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
 async function getSecret(name: string): Promise<string | null> {
@@ -27,6 +28,21 @@ async function handle(job: any): Promise<Record<string, unknown>> {
         details: { job_id: job.id, ...job.payload },
       });
       return { logged: true };
+    case 'send_sms':
+    case 'send_email': {
+      // Delegate to the unified send path. A skip/suppress/failed delivery is a
+      // valid terminal outcome (recorded in communication); only a transport
+      // error retries — so we never re-send on a provider rejection.
+      const channel = job.type === 'send_sms' ? 'sms' : 'email';
+      const internal = await getSecret('CRON_SECRET');
+      const r = await fetch(`${FUNCTIONS_BASE}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-internal-secret': internal || '' },
+        body: JSON.stringify({ channel, ...(job.payload || {}) }),
+      });
+      if (r.status >= 500) throw new Error(`sendMessage HTTP ${r.status}`);
+      return await r.json();
+    }
     default:
       throw new Error(`No handler for job type "${job.type}"`);
   }
