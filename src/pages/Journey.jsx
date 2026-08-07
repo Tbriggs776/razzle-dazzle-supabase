@@ -1,0 +1,476 @@
+import React, { useState } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Loader2, X, Map, LayoutGrid, Layers, LogOut, User, ChevronDown, ChevronRight, Navigation, Bell, HardHat } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import RegionMapEditor from '@/components/journey/RegionMapEditor';
+import RegionSidebar from '@/components/journey/RegionSidebar';
+import JourneyCalendar from '@/components/journey/JourneyCalendar';
+import FieldInspector from '@/components/journey/FieldInspector';
+import JourneySettings from '@/components/journey/JourneySettings';
+import JourneyProjectsList from '@/components/journey/JourneyProjectsList';
+import ManagerView from '@/components/journey/ManagerView';
+import MyQueue from '@/components/journey/MyQueue';
+import InstallerView from '@/components/journey/InstallerView';
+import { Settings as SettingsIcon, ClipboardList, Users, Globe } from 'lucide-react';
+import { LanguageProvider, useLanguage } from '@/lib/i18n/LanguageContext';
+
+const VIEWS = [
+  { id: 'map', labelKey: 'map', icon: Map },
+  { id: 'board', labelKey: 'calendar', icon: LayoutGrid },
+  { id: 'regions', labelKey: 'regions', icon: Layers },
+  { id: 'field', labelKey: 'fieldInspector', icon: Navigation },
+];
+
+const MANAGE_VIEWS = [
+  { id: 'projects', labelKey: 'projects', icon: ClipboardList },
+  { id: 'manager', labelKey: 'managerView', icon: Users },
+];
+
+function JourneyInner() {
+  const { t, language, changeLanguage } = useLanguage();
+  const queryClient = useQueryClient();
+  const initialView = new URLSearchParams(window.location.search).get('view') || 'map';
+  // Normalize 'installer' view param — falls through to 'map' if not recognized
+  const validViews = ['map', 'board', 'regions', 'field', 'projects', 'manager', 'queue', 'settings', 'installer'];
+  const [activeView, setActiveView] = useState(validViews.includes(initialView) ? initialView : 'map');
+  const [navigateExpanded, setNavigateExpanded] = useState(true);
+  const [manageExpanded, setManageExpanded] = useState(false);
+  const [drawingRegion, setDrawingRegion] = useState(null);
+  const [regionsOverlayOpen, setRegionsOverlayOpen] = useState(true);
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: appSettings } = useQuery({
+    queryKey: ['appSettings'],
+    queryFn: async () => {
+      const settings = await base44.entities.AppSettings.list();
+      return settings[0] || {};
+    },
+    enabled: !!user,
+    staleTime: 0,
+    refetchOnMount: 'always'
+  });
+  const navigateNavEnabled = appSettings?.journey_nav_item_enabled !== false;
+
+  const { data: regions = [], refetch: refetchRegions } = useQuery({
+    queryKey: ['journeyRegions'],
+    queryFn: () => base44.entities.RegionAssignment.list(),
+    enabled: !!user,
+  });
+
+  const { data: journeyOrders = [] } = useQuery({
+    queryKey: ['journeyOrders'],
+    queryFn: () => base44.entities.JourneyOrder.list('-created_date', 500),
+    enabled: !!user,
+  });
+
+  const { data: teamMembers = [] } = useQuery({
+    queryKey: ['teamMembersJourney'],
+    queryFn: () => base44.entities.TeamMember.filter({ is_active: true }),
+    enabled: !!user,
+  });
+
+  const { data: crewsData } = useQuery({
+    queryKey: ['rfmsCrewsJourney'],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('getRFMSCrews', {});
+      return res.data?.crews?.detail || [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const crews = crewsData || [];
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      </div>
+    );
+  }
+
+  // --- Region CRUD ---
+  const handleAddRegion = async (form) => {
+    const created = await base44.entities.RegionAssignment.create({
+      ...form,
+      polygon_coordinates: [],
+      zip_codes: [],
+      is_active: true,
+    });
+    refetchRegions();
+    return created;
+  };
+
+  const handleStartDrawing = async (formOrRegion) => {
+    if (!formOrRegion.id) {
+      const created = await base44.entities.RegionAssignment.create({
+        ...formOrRegion,
+        polygon_coordinates: [],
+        zip_codes: [],
+        is_active: true,
+      });
+      await refetchRegions();
+      setDrawingRegion({ ...formOrRegion, id: created.id });
+    } else {
+      setDrawingRegion(formOrRegion);
+    }
+    setActiveView('map');
+  };
+
+  const handlePolygonDrawn = async (coords) => {
+    if (!drawingRegion?.id) return;
+    const regionId = drawingRegion.id;
+    setDrawingRegion(null);
+
+    await base44.entities.RegionAssignment.update(regionId, {
+      polygon_coordinates: coords,
+      zip_codes: [],
+    });
+    refetchRegions();
+
+    try {
+      const zipRes = await base44.functions.invoke('getZipsInPolygon', { polygon_coordinates: coords });
+      const zip_codes = zipRes.data?.zip_codes || [];
+      if (zip_codes.length > 0) {
+        await base44.entities.RegionAssignment.update(regionId, { zip_codes });
+        refetchRegions();
+      }
+    } catch (e) {
+      console.error('ZIP lookup failed', e);
+    }
+  };
+
+  const handleEditRegion = async (id, form) => {
+    await base44.entities.RegionAssignment.update(id, form);
+    refetchRegions();
+  };
+
+  const handleDeleteRegion = async (id) => {
+    await base44.entities.RegionAssignment.delete(id);
+    refetchRegions();
+  };
+
+  const regionSidebarProps = {
+    regions, teamMembers, crews,
+    onAddRegion: handleAddRegion,
+    onEditRegion: handleEditRegion,
+    onDeleteRegion: handleDeleteRegion,
+    onStartDrawing: handleStartDrawing,
+    drawingRegion,
+    journeyOrders,
+  };
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      {/* Left Sidebar */}
+      <aside className="w-56 bg-white border-r border-slate-200 flex flex-col shrink-0">
+        {/* Logo */}
+        <div className="h-14 flex items-center px-5 border-b border-slate-200 shrink-0">
+          <div>
+            <h1 className="text-base font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent leading-none">
+              Journey
+            </h1>
+            <p className="text-[9px] font-sans tracking-wider text-slate-400 uppercase mt-0.5">
+              BY FLOOR DADDY
+            </p>
+          </div>
+        </div>
+
+        {/* Nav items */}
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          {/* My Queue */}
+          <button
+            onClick={() => setActiveView('queue')}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+              activeView === 'queue'
+                ? "bg-indigo-50 text-indigo-600"
+                : "text-slate-600 hover:bg-slate-50"
+            )}
+          >
+            <Bell className="w-4 h-4" />
+            <span className="flex-1 text-left">{t('fieldManagerView')}</span>
+          </button>
+
+          {/* Installer View */}
+          <button
+            onClick={() => setActiveView('installer')}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+              activeView === 'installer'
+                ? "bg-indigo-50 text-indigo-600"
+                : "text-slate-600 hover:bg-slate-50"
+            )}
+          >
+            <HardHat className="w-4 h-4" />
+            <span className="flex-1 text-left">{t('installerView')}</span>
+          </button>
+
+          {/* Navigate parent */}
+          {navigateNavEnabled && (
+          <>
+          <button
+            onClick={() => setNavigateExpanded(e => !e)}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
+          >
+            <Navigation className="w-4 h-4" />
+            <span className="flex-1 text-left">{t('navigate')}</span>
+            {navigateExpanded
+              ? <ChevronDown className="w-4 h-4 text-slate-400" />
+              : <ChevronRight className="w-4 h-4 text-slate-400" />}
+          </button>
+
+          {navigateExpanded && (
+            <div className="ml-6 space-y-0.5">
+              {VIEWS.map(v => {
+                const Icon = v.icon;
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => setActiveView(v.id)}
+                    className={cn(
+                      "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                      activeView === v.id
+                        ? "bg-indigo-50 text-indigo-600"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                    )}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {t(v.labelKey)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          </>
+          )}
+
+          {/* Manage parent */}
+          <button
+            onClick={() => setManageExpanded(e => !e)}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all mt-1"
+          >
+            <SettingsIcon className="w-4 h-4" />
+            <span className="flex-1 text-left">{t('manage')}</span>
+            {manageExpanded
+              ? <ChevronDown className="w-4 h-4 text-slate-400" />
+              : <ChevronRight className="w-4 h-4 text-slate-400" />}
+          </button>
+
+          {manageExpanded && (
+            <div className="ml-6 space-y-0.5">
+              {MANAGE_VIEWS.map(v => {
+                const Icon = v.icon;
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => setActiveView(v.id)}
+                    className={cn(
+                      "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                      activeView === v.id
+                        ? "bg-indigo-50 text-indigo-600"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                    )}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {t(v.labelKey)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-3 border-t border-slate-200 shrink-0 space-y-2">
+          <button
+            onClick={() => setActiveView('settings')}
+            className={cn(
+              "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+              activeView === 'settings'
+                ? "bg-indigo-50 text-indigo-600"
+                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+            )}
+          >
+            <SettingsIcon className="w-3.5 h-3.5" />
+            {t('settings')}
+          </button>
+          <div className="flex items-center gap-2 px-2 py-1.5 bg-slate-50 rounded-lg">
+            <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+              <User className="w-3.5 h-3.5 text-indigo-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-slate-700 truncate">{user?.full_name}</p>
+              <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => base44.auth.logout()}
+            className="w-full flex items-center justify-center gap-2 text-xs text-red-500 hover:bg-red-50 py-1.5 rounded-lg transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            {t('logout')}
+          </button>
+          {/* Language toggle */}
+          <div className="flex items-center gap-1.5 px-1 py-1">
+            <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <button
+              onClick={() => changeLanguage('en')}
+              className={cn(
+                "flex-1 px-2 py-1 rounded text-[11px] font-medium transition-all",
+                language === 'en'
+                  ? "bg-indigo-50 text-indigo-600"
+                  : "text-slate-500 hover:bg-slate-50"
+              )}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => changeLanguage('es')}
+              className={cn(
+                "flex-1 px-2 py-1 rounded text-[11px] font-medium transition-all",
+                language === 'es'
+                  ? "bg-indigo-50 text-indigo-600"
+                  : "text-slate-500 hover:bg-slate-50"
+              )}
+            >
+              ES
+            </button>
+          </div>
+          <p className="text-[10px] text-slate-400 text-center">v1.7.7</p>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Drawing banner */}
+        {drawingRegion && (
+          <div className="h-10 bg-indigo-50 border-b border-indigo-200 flex items-center px-4 gap-2 shrink-0">
+            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: drawingRegion.color || '#4F46E5' }} />
+            <span className="text-xs font-medium text-indigo-700">{t('drawing')}: {drawingRegion.region_name}</span>
+            <button onClick={() => setDrawingRegion(null)} className="text-indigo-400 hover:text-indigo-600 ml-1">
+              <X className="w-3.5 h-3.5" />
+            </button>
+            <span className="ml-auto text-xs text-indigo-500">{t('regionsOrders', { regions: regions.length, orders: journeyOrders.length })}</span>
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="flex-1 overflow-hidden relative">
+
+          {/* Map View */}
+          {activeView === 'map' && (
+            <div className="absolute inset-0 p-4">
+              <RegionMapEditor
+                regions={regions}
+                journeyOrders={journeyOrders}
+                onPolygonDrawn={handlePolygonDrawn}
+                drawingRegion={drawingRegion}
+              />
+
+              {/* Regions overlay — top right of map */}
+              <div className="absolute top-6 right-6 w-72 z-[1000] flex flex-col" style={{ maxHeight: 'calc(100% - 3rem)' }}>
+                <button
+                  onClick={() => setRegionsOverlayOpen(o => !o)}
+                  className="self-end flex items-center gap-1.5 bg-white border border-slate-200 shadow-md rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors mb-1"
+                >
+                  <Layers className="w-3.5 h-3.5 text-indigo-500" />
+                  {t('regionsButton')}
+                  {!regionsOverlayOpen && (
+                    <span className="bg-indigo-100 text-indigo-600 rounded px-1 ml-0.5">{regions.length}</span>
+                  )}
+                </button>
+
+                {regionsOverlayOpen && (
+                  <div className="bg-white border border-slate-200 shadow-xl rounded-xl p-3 overflow-y-auto" style={{ maxHeight: 'calc(100% - 2.5rem)' }}>
+                    <RegionSidebar {...regionSidebarProps} />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Regions View */}
+          {activeView === 'regions' && (
+            <div className="absolute inset-0 p-6 overflow-y-auto">
+              <div className="max-w-sm">
+                <RegionSidebar {...regionSidebarProps} />
+              </div>
+            </div>
+          )}
+
+          {/* Calendar View */}
+          {activeView === 'board' && (
+            <div className="absolute inset-0 overflow-hidden">
+              <JourneyCalendar
+                journeyOrders={journeyOrders}
+                regions={regions}
+              />
+            </div>
+          )}
+
+          {/* Field Inspector View */}
+          {activeView === 'field' && (
+            <div className="absolute inset-0 overflow-hidden">
+              <FieldInspector
+                journeyOrders={journeyOrders}
+                regions={regions}
+                teamMembers={teamMembers}
+                currentUser={user}
+                onOrdersUpdated={() => queryClient.invalidateQueries({ queryKey: ['journeyOrders'] })}
+              />
+            </div>
+          )}
+
+          {/* Settings View */}
+          {activeView === 'settings' && (
+            <div className="absolute inset-0 overflow-y-auto">
+              <JourneySettings />
+            </div>
+          )}
+
+          {/* Projects View */}
+          {activeView === 'projects' && (
+            <div className="absolute inset-0 overflow-y-auto p-6">
+              <JourneyProjectsList />
+            </div>
+          )}
+
+          {/* Manager View */}
+          {activeView === 'manager' && (
+            <div className="absolute inset-0 overflow-y-auto p-6">
+              <ManagerView />
+            </div>
+          )}
+
+          {/* My Queue View */}
+          {activeView === 'queue' && (
+            <div className="absolute inset-0 overflow-y-auto p-6">
+              <MyQueue />
+            </div>
+          )}
+
+          {/* Installer View */}
+          {activeView === 'installer' && (
+            <div className="absolute inset-0 overflow-y-auto p-6">
+              <InstallerView />
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Journey() {
+  return (
+    <LanguageProvider>
+      <JourneyInner />
+    </LanguageProvider>
+  );
+}
