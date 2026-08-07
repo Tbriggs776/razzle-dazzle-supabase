@@ -1,7 +1,7 @@
 import React, { useState, createContext, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Users, UserCog, CalendarDays, ClipboardCheck, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, FileText, Truck } from 'lucide-react';
+import { Users, UserCog, CalendarDays, ClipboardCheck, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, FileText, Truck, Plug } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -359,6 +359,7 @@ export default function Layout({ children, currentPageName }) {
       ]
     },
     { name: 'Settings', icon: SettingsIcon, href: 'Settings', pages: ['Settings'] },
+    { name: 'Integrations', icon: Plug, href: 'Integrations', pages: ['Integrations'], adminOnly: true },
     {
       name: 'Development',
       icon: Activity,

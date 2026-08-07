@@ -8,6 +8,7 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import Login from '@/components/Login';
+import IntegrationsPage from './pages/Integrations';
 import ClaimsDashboardPage from './pages/ClaimsDashboard';
 import CommunicationHubPage from './pages/CommunicationHub';
 import DesignModViewPage from './pages/DesignModView';
@@ -112,6 +113,7 @@ const AuthenticatedApp = () => {
       <Route path="/JourneyProjectDetail" element={<JourneyProjectDetailPage />} />
       <Route path="/MarketingPerformance" element={<LayoutWrapper currentPageName="MarketingPerformance"><MarketingPerformancePage /></LayoutWrapper>} />
       <Route path="/DCPerformanceMatrix" element={<LayoutWrapper currentPageName="DCPerformanceMatrix"><DCPerformanceMatrixPage /></LayoutWrapper>} />
+      <Route path="/Integrations" element={<LayoutWrapper currentPageName="Integrations"><IntegrationsPage /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

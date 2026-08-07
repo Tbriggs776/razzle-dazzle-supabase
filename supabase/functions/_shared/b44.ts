@@ -150,6 +150,25 @@ export function createClientFromRequest(req: Request) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Secret access. Integration secrets are stored in Supabase Vault and entered
+// via the admin Integrations UI. Edge Functions read them here (service-role
+// only, cached per invocation), falling back to Deno.env during transition.
+// ---------------------------------------------------------------------------
+const _secretCache = new Map<string, string | null>();
+export async function getSecret(name: string): Promise<string | null> {
+  if (_secretCache.has(name)) return _secretCache.get(name) ?? null;
+  let value: string | null = null;
+  try {
+    const service = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+    const { data, error } = await service.rpc('get_secret', { p_name: name });
+    if (!error && data) value = data as string;
+  } catch (_) { /* fall through to env */ }
+  if (value == null) value = Deno.env.get(name) ?? null;
+  _secretCache.set(name, value);
+  return value;
+}
+
 // CORS helper for browser-invoked functions.
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
