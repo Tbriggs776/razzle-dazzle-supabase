@@ -1,83 +1,101 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/lib/supabaseClient';
 
 /**
- * Supabase-backed AuthContext (POC).
+ * Session-based auth, backed by Supabase Auth + the modular access model.
  *
- * Keeps the exact same interface the app consumed from base44's AuthContext
- * (user, isAuthenticated, isLoadingAuth, isLoadingPublicSettings, authError,
- * appPublicSettings, logout, navigateToLogin, checkAppState) so no page code
- * had to change. In the POC it resolves to a seeded demo user immediately.
- *
- * To move to real auth: replace `base44.auth.me()` handling with a Supabase
- * sign-in flow and gate `isAuthenticated` on the session.
+ * Exposes the same fields the app already consumed (user, isAuthenticated,
+ * isLoadingAuth, isLoadingPublicSettings, authError, appPublicSettings, logout,
+ * navigateToLogin, checkAppState) plus `access`, `can()` and `login()` for the
+ * data-driven nav and route guards.
  */
 const AuthContext = createContext();
 
+const LEVEL = { none: 0, view: 1, edit: 2, admin: 3 };
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [access, setAccess] = useState(null); // { user, modules: [{key,permission,pages,...}] }
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
   const [authError, setAuthError] = useState(null);
-  const [appPublicSettings, setAppPublicSettings] = useState(null);
 
-  useEffect(() => {
-    checkAppState();
-  }, []);
-
-  const checkAppState = async () => {
+  const loadUser = useCallback(async () => {
     try {
-      setIsLoadingPublicSettings(true);
-      setAuthError(null);
-      // No remote public-settings call in the POC; the app is open.
-      setAppPublicSettings({ id: 'razzle-dazzle', public_settings: {} });
-      setIsLoadingPublicSettings(false);
-      await checkUserAuth();
-    } catch (error) {
-      console.error('App state check failed:', error);
-      setAuthError({ type: 'unknown', message: error.message || 'Failed to load app' });
-      setIsLoadingPublicSettings(false);
-      setIsLoadingAuth(false);
-    }
-  };
-
-  const checkUserAuth = async () => {
-    try {
-      setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      const [me, acc] = await Promise.all([base44.auth.me(), base44.auth.getAccess()]);
+      setUser(me);
+      setAccess(acc);
       setIsAuthenticated(true);
-    } catch (error) {
-      console.error('User auth check failed:', error);
+      setAuthError(null);
+    } catch (e) {
+      setUser(null);
+      setAccess(null);
       setIsAuthenticated(false);
+      if (e?.status && e.status !== 401) setAuthError({ type: 'unknown', message: e.message });
     } finally {
       setIsLoadingAuth(false);
     }
+  }, []);
+
+  useEffect(() => {
+    loadUser();
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        loadUser();
+      } else {
+        setUser(null);
+        setAccess(null);
+        setIsAuthenticated(false);
+        setIsLoadingAuth(false);
+      }
+    });
+    return () => sub?.subscription?.unsubscribe?.();
+  }, [loadUser]);
+
+  const login = async (email, password) => {
+    setAuthError(null);
+    await base44.auth.login(email, password);
+    // onAuthStateChange fires loadUser(); do it eagerly too for snappy UX.
+    await loadUser();
   };
 
   const logout = async () => {
-    setUser(null);
-    setIsAuthenticated(false);
     await base44.auth.logout();
+    setUser(null);
+    setAccess(null);
+    setIsAuthenticated(false);
   };
 
-  const navigateToLogin = () => {
-    base44.auth.redirectToLogin(window.location.href);
-  };
+  const permFor = useCallback(
+    (moduleKey) => {
+      if (user?.role === 'admin') return 'admin';
+      return access?.modules?.find((m) => m.key === moduleKey)?.permission || 'none';
+    },
+    [access, user]
+  );
+
+  const can = useCallback(
+    (moduleKey, level = 'view') => LEVEL[permFor(moduleKey)] >= LEVEL[level],
+    [permFor]
+  );
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        access,
         isAuthenticated,
         isLoadingAuth,
-        isLoadingPublicSettings,
+        isLoadingPublicSettings: false,
         authError,
-        appPublicSettings,
+        appPublicSettings: { id: 'razzle-dazzle', public_settings: {} },
+        login,
         logout,
-        navigateToLogin,
-        checkAppState,
+        permFor,
+        can,
+        navigateToLogin: () => {},
+        checkAppState: loadUser,
       }}
     >
       {children}

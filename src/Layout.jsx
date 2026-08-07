@@ -4,6 +4,7 @@ import { createPageUrl } from '@/utils';
 import { Users, UserCog, CalendarDays, ClipboardCheck, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, FileText, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AudioRecorder from '@/components/AudioRecorder';
@@ -27,6 +28,15 @@ export default function Layout({ children, currentPageName }) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [recordingAppointmentId, setRecordingAppointmentId] = useState(null);
+
+  // Modular access model: the set of pages the signed-in user may open, derived
+  // from their role -> module -> permission grants (server-enforced by RLS).
+  const { access } = useAuth();
+  const allowedPageKeys = React.useMemo(() => {
+    const s = new Set();
+    (access?.modules || []).forEach((m) => (m.pages || []).forEach((p) => s.add(p.key)));
+    return s;
+  }, [access]);
 
   const { data: currentUser, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
@@ -121,10 +131,34 @@ export default function Layout({ children, currentPageName }) {
     };
   }, [isDragging, dragOffset]);
 
-  // Public pages that should not show the layout
-  const publicPages = ['LeadAppointmentView', 'RequesterTicketView', 'DesignConsultantTicketView', 'CustomerProjectView'];
+  // Public (external-facing) pages render without the app shell or access guard.
+  const publicPages = [
+    'LeadAppointmentView', 'ConsultantAppointmentView', 'RequesterTicketView',
+    'DesignConsultantTicketView', 'CustomerProjectView', 'ManualSalesContractView',
+    'DesignModView', 'PreInstallChecklistView', 'SubmitTicket',
+  ];
   if (publicPages.includes(currentPageName)) {
     return <>{children}</>;
+  }
+
+  // Module-based route guard. RLS is the real enforcement; this shows a clean
+  // "no access" screen instead of an empty page for routes outside the user's modules.
+  if (access && currentPageName && !allowedPageKeys.has(currentPageName)) {
+    const home = access?.modules?.[0]?.pages?.[0]?.key || 'Dashboard';
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-200 p-8 text-center">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-5">
+            <ShieldCheck className="w-8 h-8 text-slate-400" />
+          </div>
+          <h1 className="text-xl font-bold text-slate-800 mb-2">No access to this page</h1>
+          <p className="text-slate-500 mb-6">Your role doesn't include this area. Contact an administrator if you think this is a mistake.</p>
+          <Link to={createPageUrl(home)} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors">
+            Go to my workspace
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   // Show login splash if user is not logged in and trying to access protected pages
@@ -341,11 +375,28 @@ export default function Layout({ children, currentPageName }) {
     return navItem.pages.includes(currentPageName);
   };
 
-  // Filter navigation based on role permissions
+  // Data-driven nav: show items whose target/pages are in the user's allowed
+  // module pages (from the access model). RLS + the route guard are the real
+  // enforcement; this just shapes the menu to what the user can reach.
   const getFilteredNavigation = () => {
-    // If user data or permissions aren't loaded yet, show nothing to prevent showing wrong menu
+    if (!access) return [];
+    const isAdmin = currentUser?.role === 'admin';
+    return navigation.filter((item) => {
+      if (item.hiddenWhen?.()) return false;
+      if (isAdmin) return true; // org admins see the full menu
+      const keys = [
+        item.href,
+        ...(item.pages || []),
+        ...((item.subItems || []).flatMap((s) => [s.href, ...(s.pages || [])])),
+      ].filter(Boolean);
+      return keys.some((k) => allowedPageKeys.has(k));
+    });
+  };
+
+  // eslint-disable-next-line no-unused-vars
+  const _legacyGetFilteredNavigation = () => {
+    // (superseded by the module-based filter above; kept for reference)
     if (!currentUser || permissionsLoading) {
-      console.debug('[Layout] No user or permissions loading', { currentUser: !!currentUser, permissionsLoading });
       return [];
     }
 

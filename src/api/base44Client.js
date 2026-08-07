@@ -213,36 +213,51 @@ const entities = new Proxy(
 // Swapping to full Supabase Auth (email magic-link / password) is a drop-in
 // here: return the real supabase.auth.getUser() profile instead.
 // ---------------------------------------------------------------------------
-const DEMO_USER = {
-  id: 'demo-admin',
-  email: import.meta.env.VITE_DEMO_USER_EMAIL || 'admin@razzledazzle.app',
-  full_name: 'Demo Admin',
-  role: 'admin',
-};
-
 const auth = {
+  // Returns the signed-in user's profile. Throws (401) when unauthenticated so
+  // the AuthContext can show the login screen.
   async me() {
-    // If a real Supabase session exists, prefer it; else fall back to demo.
-    const { data } = await supabase.auth.getUser();
-    if (data?.user) {
-      return {
-        id: data.user.id,
-        email: data.user.email,
-        full_name: data.user.user_metadata?.full_name || data.user.email,
-        role: data.user.user_metadata?.role || 'admin',
-      };
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data?.user) {
+      const e = new Error('Not authenticated');
+      e.status = 401;
+      throw e;
     }
-    return DEMO_USER;
+    const u = data.user;
+    // Derive the app role from the access model (org admins => 'admin', which the
+    // existing pages check via currentUser.role === 'admin').
+    let isOrgAdmin = false;
+    try {
+      const { data: acc } = await supabase.rpc('my_access');
+      isOrgAdmin = acc?.user?.is_org_admin ?? false;
+    } catch (_) { /* fall through to metadata role */ }
+    return {
+      id: u.id,
+      email: u.email,
+      full_name: u.user_metadata?.full_name || u.email,
+      role: isOrgAdmin ? 'admin' : (u.user_metadata?.role || 'member'),
+    };
   },
-  async isAuthenticated() {
-    return true;
+  async login(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
   },
   async logout() {
-    try { await supabase.auth.signOut(); } catch (_) { /* noop for demo */ }
+    await supabase.auth.signOut();
+  },
+  async isAuthenticated() {
+    const { data } = await supabase.auth.getSession();
+    return !!data?.session;
+  },
+  // The user's accessible modules + per-module permission + pages (drives nav + guards).
+  async getAccess() {
+    const { data, error } = await supabase.rpc('my_access');
+    if (error) throw error;
+    return data;
   },
   redirectToLogin() {
-    // No hosted login in the POC; the demo user is always "logged in".
-    console.info('[base44 shim] redirectToLogin() is a no-op in the POC.');
+    // Login is rendered in-app by AuthContext; nothing to redirect to.
   },
 };
 
