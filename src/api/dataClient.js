@@ -428,6 +428,18 @@ function warnUnavailable(name) {
   } catch (_) { /* toast host not mounted (e.g. SSR/tests) */ }
 }
 
+// Unmapped functions whose whole purpose is to PERSIST data. Returning a fake-success stub for
+// these hides data loss — the caller's onSuccess runs and the UI advances (e.g. a "Signed!"
+// screen) though nothing was written. Throw instead so the mutation's onError fires. Read /
+// degrade-style unmapped calls still return { stub:true } gracefully. (submit* signing +
+// submitCheckpoint + post-conversion/installer notifications are the known unported writes.)
+const WRITE_STUBS = new Set([
+  'submitCheckpoint', 'submitDesignMod', 'submitManualSalesContract', 'submitPreInstallChecklist',
+  'handlePostConversion', 'notifyInstallerAssigned',
+]);
+const isWriteStub = (name) =>
+  WRITE_STUBS.has(name) || /^(submit|create|update|delete|save|approve|reject|assign)/i.test(name);
+
 const functions = {
   async invoke(name, payload = {}) {
     const alias = EDGE_ALIASES[name];
@@ -444,6 +456,9 @@ const functions = {
     }
     if (!DEPLOYED_FUNCTIONS.has(name)) {
       warnUnavailable(name);
+      if (isWriteStub(name)) {
+        throw new Error(`Action "${name}" is not available yet — nothing was saved. This workflow hasn't been ported to Supabase.`);
+      }
       return { data: null, error: null, stub: true };
     }
     try {
