@@ -6,8 +6,9 @@ import { queryClientInstance } from '@/lib/query-client'
 import VisualEditAgent from '@/lib/VisualEditAgent'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
+import SignDocumentPage from './pages/SignDocument';
 import Login from '@/components/Login';
 import IntegrationsPage from './pages/Integrations';
 import ClaimsDashboardPage from './pages/ClaimsDashboard';
@@ -51,6 +52,17 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated, authError } = useAuth();
+  const location = useLocation();
+
+  // Truly-public routes: customers signing a document are NOT logged in, so these
+  // render before the auth gate (access is authorized by the token in the URL).
+  if (location.pathname.startsWith('/SignDocument')) {
+    return (
+      <Routes>
+        <Route path="/SignDocument" element={<SignDocumentPage />} />
+      </Routes>
+    );
+  }
 
   // Show loading spinner while checking the session
   if (isLoadingAuth) {

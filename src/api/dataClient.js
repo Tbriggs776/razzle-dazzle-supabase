@@ -292,6 +292,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'shortenUrl',
   'emailDispatch',
   'pdfEmail',
+  'esign',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -320,6 +321,12 @@ const RPC_FUNCTIONS = {
   // Public (anon) pages read a curated single-record projection by id — the only
   // anon-reachable surface for these tables (RLS denies direct anon reads).
   getPublicAppointment: (p) => ['get_public_appointment', { p_id: p.id }],
+  // Admin e-sign config (is_org_admin gated server-side).
+  adminGetEsignTypes: () => ['admin_get_esign_types', {}],
+  adminSetEsignType: (p) => ['admin_set_esign_type', {
+    p_document_type: p.document_type, p_esign_enabled: p.esign_enabled ?? null, p_require_sms_otp: p.require_sms_otp ?? null,
+    p_consent_text: p.consent_text ?? null, p_expiry_days: p.expiry_days ?? null, p_notify_emails: p.notify_emails ?? null,
+  }],
 };
 
 // Is a serverless function actually wired (Edge Function or RPC)? UI can use this
