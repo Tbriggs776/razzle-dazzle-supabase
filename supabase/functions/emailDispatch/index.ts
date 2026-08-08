@@ -49,6 +49,15 @@ function money(n: unknown): string {
   return n != null && n !== '' ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—';
 }
 
+// Long human date (e.g. "Monday, August 10, 2026"); date-only strings are read as
+// local midnight so the weekday doesn't drift a day.
+function fmtDate(d: unknown): string {
+  if (!d) return 'N/A';
+  const dt = new Date(typeof d === 'string' && d.length === 10 ? d + 'T00:00:00' : (d as string));
+  if (isNaN(dt.getTime())) return 'N/A';
+  return dt.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+
 async function one(s: any, table: string, id: string | null) {
   if (!id) return null;
   const { data } = await s.from(table).select('*').eq('id', id).maybeSingle();
@@ -78,6 +87,16 @@ async function enqueueEmail(s: any, recipients: string[], subject: string, body:
     p_payload: { to: recipients[0], bcc: recipients.slice(1), subject, body, sent_by: 'System', ...refs },
   });
   return recipients.length;
+}
+
+// Customer-facing notification: one visible `to`, the team CC list carried as bcc, and
+// an optional reply_to. Drops the recipient from the CC list so they aren't doubled.
+async function enqueueNotify(s: any, to: string, ccList: string[], replyTo: string | null, subject: string, body: string, refs: Record<string, unknown>) {
+  const bcc = (ccList || []).filter((e) => e && e !== to);
+  await s.rpc('enqueue_job', {
+    p_type: 'send_email',
+    p_payload: { to, bcc, ...(replyTo ? { reply_to: replyTo } : {}), subject, body, sent_by: 'System', ...refs },
+  });
 }
 
 // When e-sign is enabled for a document type, hand off to the signature engine
@@ -239,6 +258,149 @@ async function handleType(s: any, type: string, p: any): Promise<Record<string, 
         `<p>Or copy this link: ${shortUrl}</p><p>Thank you,<br/>Floor Daddy Team</p>`;
       await enqueueEmail(s, [c.customer_email], 'Your Sales Contract - Please Sign', html, {});
       return { queued: true, type, recipients: 1, short_url: shortUrl };
+    }
+
+    case 'notification': {
+      // Generic customer-facing notification dispatcher (ported from base44's
+      // sendNotificationEmail). notify_type selects entity + sms_settings template.
+      // Sends to the lead/customer, carries the team CC list as bcc, honors per-type
+      // send/divert toggles, and stamps confirmation timestamps like the original.
+      const nt = p.notify_type === 'customer_sale_confirmation' ? 'sale_confirmed' : p.notify_type;
+      const { data: ssList } = await s.from('sms_settings').select('*').limit(1);
+      const cfg: any = ssList?.[0] || {};
+      const cc: string[] = Array.isArray(cfg.cc_emails) ? cfg.cc_emails : [];
+      const replyTo: string | null = cfg.reply_to_email || null;
+      const appUrl: string = p.appUrl || APP_URL;
+
+      if (nt === 'appointment_created' || nt === 'appointment_rescheduled' || nt === 'appointment_cancelled') {
+        const appt = await one(s, 'appointment', p.entityId);
+        if (!appt) return { error: 'Appointment not found' };
+        const lead = await one(s, 'lead', appt.customer);
+        if (!lead) return { error: 'Lead not found' };
+        const key = nt === 'appointment_created' ? 'lead_appointment_created'
+          : nt === 'appointment_rescheduled' ? 'lead_rescheduled' : 'lead_cancelled';
+        if (cfg[`send_${key}_email`] === false) return { skipped: 'disabled', notify_type: nt };
+        const dc = await one(s, 'team_member', appt.assigned_dc);
+        const csr = await one(s, 'team_member', appt.assigned_csr);
+        const vars = {
+          lead_name: `${lead.first_name} ${lead.last_name}`, lead_first_name: lead.first_name, lead_last_name: lead.last_name,
+          lead_phone: lead.phone, lead_email: lead.email,
+          appointment_date: fmtDate(appt.appointment_date), appointment_time: appt.appointment_block || 'N/A', appointment_block: appt.appointment_block || 'N/A',
+          location_address: appt.location_address || 'N/A',
+          dc_name: dc ? `${dc.first_name} ${dc.last_name}` : 'N/A', csr_name: csr ? `${csr.first_name} ${csr.last_name}` : 'N/A',
+          appointment_detail_url: `${appUrl}/AppointmentDetail?id=${appt.id}`,
+          lead_tracking_url: appt.lead_short_url || `${appUrl}/LeadAppointmentView?id=${appt.id}`,
+        };
+        const to = (cfg[`divert_${key}_email`] && cfg.divert_emails_to) ? cfg.divert_emails_to : lead.email;
+        if (!to) return { error: 'No lead email available' };
+        await enqueueNotify(s, to, cc, replyTo, render(cfg[`${key}_email_subject`] || 'Appointment update', vars), render(cfg[`${key}_email_template`], vars), { lead_id: lead.id, appointment_id: appt.id });
+        if (nt !== 'appointment_cancelled') await s.from('appointment').update({ confirmation_email_sent_at: new Date().toISOString() }).eq('id', appt.id);
+        return { queued: true, notify_type: nt, to };
+      }
+
+      if (nt === 'sale_confirmed') {
+        const sale = await one(s, 'sale', p.entityId);
+        if (!sale) return { error: 'Sale not found' };
+        if (cfg.send_customer_sale_confirmation_email === false) return { skipped: 'disabled', notify_type: nt };
+        const customer = await one(s, 'customer', sale.customer);
+        const appt = await one(s, 'appointment', sale.appointment);
+        const dc = await one(s, 'team_member', sale.assigned_dc);
+        // Prefer the lead email (via appointment), else fall back to the customer email.
+        let email = customer?.email || null;
+        if (appt?.customer) { const lead = await one(s, 'lead', appt.customer); if (lead?.email) email = lead.email; }
+        if (!email) return { error: 'No lead/customer email available' };
+        let tracker = 'N/A';
+        const { data: projs } = await s.from('project').select('id,project_tracker_url').eq('sale', sale.id).limit(1);
+        if (projs?.[0]) tracker = projs[0].project_tracker_url || `${appUrl}/CustomerProjectView?id=${projs[0].id}`;
+        const vars = {
+          customer_name: customer ? `${customer.first_name} ${customer.last_name}` : 'N/A',
+          customer_first_name: customer?.first_name || 'N/A', customer_last_name: customer?.last_name || 'N/A',
+          sale_amount: money(sale.sale_amount), consultant_name: dc ? `${dc.first_name} ${dc.last_name}` : 'N/A',
+          appointment_date: appt ? fmtDate(appt.appointment_date) : 'N/A', location_address: appt?.location_address || 'N/A',
+          sale_detail_url: `${appUrl}/SaleDetail?id=${sale.id}`, project_tracker_url: tracker,
+        };
+        const to = (cfg.divert_customer_sale_confirmation_email && cfg.divert_emails_to) ? cfg.divert_emails_to : email;
+        await enqueueNotify(s, to, cc, replyTo, render(cfg.customer_sale_confirmation_email_subject, vars), render(cfg.customer_sale_confirmation_email_template, vars), { customer_id: customer?.id ?? null });
+        return { queued: true, notify_type: nt, to };
+      }
+
+      if (nt === 'not_sold') {
+        const appt = await one(s, 'appointment', p.entityId);
+        if (!appt) return { error: 'Appointment not found' };
+        const lead = await one(s, 'lead', appt.customer);
+        if (!lead?.email) return { error: 'No lead email available' };
+        if (cfg.send_lead_not_sold_email === false) return { skipped: 'disabled', notify_type: nt };
+        const vars = { lead_name: `${lead.first_name} ${lead.last_name}`, lead_first_name: lead.first_name, lead_last_name: lead.last_name };
+        const to = (cfg.divert_lead_not_sold_email && cfg.divert_emails_to) ? cfg.divert_emails_to : lead.email;
+        await enqueueNotify(s, to, cc, replyTo, render(cfg.lead_not_sold_email_subject, vars), render(cfg.lead_not_sold_email_template, vars), { lead_id: lead.id, appointment_id: appt.id });
+        return { queued: true, notify_type: nt, to };
+      }
+
+      if (nt === 'project_created') {
+        const project = await one(s, 'project', p.entityId);
+        if (!project) return { error: 'Project not found' };
+        const customer = await one(s, 'customer', project.customer);
+        if (!customer?.email) return { error: 'Customer email not found' };
+        if (cfg.send_customer_project_created_email === false) return { skipped: 'disabled', notify_type: nt };
+        const sale = await one(s, 'sale', project.sale);
+        const pm = await one(s, 'team_member', project.project_manager);
+        const im = await one(s, 'team_member', project.installation_manager);
+        let locationAddress = 'N/A';
+        if (sale?.appointment) { const a = await one(s, 'appointment', sale.appointment); locationAddress = a?.location_address || 'N/A'; }
+        const fullTracker = `${appUrl}/CustomerProjectView?id=${project.id}`;
+        const tracker = project.project_tracker_url || await shorten(fullTracker);
+        const vars = {
+          customer_name: `${customer.first_name} ${customer.last_name}`, customer_first_name: customer.first_name, customer_last_name: customer.last_name,
+          project_manager_name: pm ? `${pm.first_name} ${pm.last_name}` : 'N/A', installation_manager_name: im ? `${im.first_name} ${im.last_name}` : 'N/A',
+          installation_date: project.installation_date ? fmtDate(project.installation_date) : 'N/A', location_address: locationAddress,
+          project_detail_url: `${appUrl}/ProjectDetail?id=${project.id}`, project_tracker_url: tracker,
+          project_tracker_with_video_url: await shorten(`${fullTracker}&showCeoVideo=true`),
+        };
+        const to = (cfg.divert_customer_project_created_email && cfg.divert_emails_to) ? cfg.divert_emails_to : customer.email;
+        await enqueueNotify(s, to, cc, replyTo, render(cfg.customer_project_created_email_subject, vars), render(cfg.customer_project_created_email_template, vars), { customer_id: customer.id });
+        return { queued: true, notify_type: nt, to };
+      }
+
+      return { error: `Unknown notify_type ${p.notify_type}` };
+    }
+
+    case 'test_email': {
+      // Admin template preview (ported from base44 sendTestEmail): render the chosen
+      // notification template with fixed dummy data and send a [TEST]-prefixed copy to
+      // the configured divert address. Reuses the durable send pipeline like everything else.
+      const { data: ssList } = await s.from('sms_settings').select('*').limit(1);
+      const cfg: any = ssList?.[0] || {};
+      const to: string | null = cfg.divert_emails_to || null;
+      if (!to) return { error: 'No divert email configured' };
+      const MAP: Record<string, [string, string]> = {
+        appointment_created:     ['lead_appointment_created_email_subject', 'lead_appointment_created_email_template'],
+        appointment_rescheduled: ['lead_rescheduled_email_subject', 'lead_rescheduled_email_template'],
+        appointment_cancelled:   ['lead_cancelled_email_subject', 'lead_cancelled_email_template'],
+        sale_confirmed:          ['customer_sale_confirmation_email_subject', 'customer_sale_confirmation_email_template'],
+        not_sold:                ['lead_not_sold_email_subject', 'lead_not_sold_email_template'],
+        reminder:                ['lead_reminder_email_subject', 'lead_reminder_email_template'],
+        project_created:         ['customer_project_created_email_subject', 'customer_project_created_email_template'],
+        day1_followup:           ['lead_day1_followup_email_subject', 'lead_day1_followup_email_template'],
+        day2_followup:           ['lead_day2_followup_email_subject', 'lead_day2_followup_email_template'],
+        day3_followup:           ['lead_day3_followup_email_subject', 'lead_day3_followup_email_template'],
+      };
+      const pair = MAP[p.emailType];
+      if (!pair) return { error: `Invalid email type: ${p.emailType}` };
+      const DUMMY = {
+        lead_name: 'John Doe', lead_first_name: 'John', lead_last_name: 'Doe', lead_phone: '(602) 555-0100', lead_email: 'john.doe@example.com',
+        customer_name: 'John Doe', customer_first_name: 'John', customer_last_name: 'Doe',
+        appointment_date: 'Monday, February 15, 2026', appointment_time: '9am to 11am', appointment_block: '9am to 11am',
+        location_address: '123 Main St, Phoenix, AZ 85001', dc_name: 'Jane Smith', csr_name: 'Mike Johnson',
+        consultant_name: 'Jane Smith', sale_amount: '$12,500.00',
+        project_manager_name: 'Sarah Williams', installation_manager_name: 'Tom Brown', installation_date: 'Friday, February 26, 2026',
+        appointment_detail_url: `${APP_URL}/AppointmentDetail?id=test`, lead_tracking_url: `${APP_URL}/LeadAppointmentView?id=test`,
+        sale_detail_url: `${APP_URL}/SaleDetail?id=test`, project_detail_url: `${APP_URL}/ProjectDetail?id=test`,
+        project_tracker_url: `${APP_URL}/CustomerProjectView?id=test`, project_tracker_with_video_url: `${APP_URL}/CustomerProjectView?id=test`,
+      };
+      const subject = `[TEST] ${render(cfg[pair[0]] || 'Test Email', DUMMY)}`;
+      const body = render(cfg[pair[1]], DUMMY);
+      await enqueueEmail(s, [to], subject, body, {});
+      return { queued: true, type: 'test_email', emailType: p.emailType, to };
     }
 
     default:

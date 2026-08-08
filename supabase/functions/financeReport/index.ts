@@ -6,8 +6,15 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const APP_URL = 'https://razzle-dazzle-supabase.vercel.app';
 const svc = () => createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
 
 async function getSecret(name: string): Promise<string | null> {
   const { data, error } = await svc().rpc('get_secret', { p_name: name });
@@ -15,23 +22,40 @@ async function getSecret(name: string): Promise<string | null> {
   return Deno.env.get(name) ?? null;
 }
 
+// Dual auth: the daily cron passes the internal secret; the manual "Send Report Now"
+// button passes an authenticated admin's JWT. Either is allowed.
+async function currentUser(req: Request) {
+  const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!jwt) return null;
+  const asUser = createClient(SUPABASE_URL, ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${jwt}` } },
+    auth: { persistSession: false },
+  });
+  const { data } = await asUser.auth.getUser();
+  return data?.user ?? null;
+}
+
 function money(n: unknown): string {
   return n != null && n !== '' ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—';
 }
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
   const internal = await getSecret('CRON_SECRET');
-  if (!internal || req.headers.get('x-internal-secret') !== internal) {
-    return new Response('forbidden', { status: 401 });
+  const isInternal = !!internal && req.headers.get('x-internal-secret') === internal;
+  if (!isInternal) {
+    const user = await currentUser(req);
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors });
   }
 
   const s = svc();
   const { data: ss } = await s.from('sms_settings').select('finance_report_emails').limit(1);
   const recipients: string[] = Array.isArray(ss?.[0]?.finance_report_emails) ? ss[0].finance_report_emails : [];
-  if (!recipients.length) return Response.json({ skipped: 'no finance recipients configured' });
+  if (!recipients.length) return Response.json({ skipped: 'no finance recipients configured' }, { headers: cors });
 
   const { data: projects } = await s.from('project').select('*').eq('installation_date_status', 'pending payment');
-  if (!projects || !projects.length) return Response.json({ skipped: 'no pending-payment projects' });
+  if (!projects || !projects.length) return Response.json({ skipped: 'no pending-payment projects' }, { headers: cors });
 
   const custIds = [...new Set(projects.map((p: any) => p.customer).filter(Boolean))];
   const saleIds = [...new Set(projects.map((p: any) => p.sale).filter(Boolean))];
@@ -68,5 +92,5 @@ Deno.serve(async (req) => {
     p_payload: { to: recipients[0], bcc: recipients.slice(1), subject: `Finance Report: ${projects.length} Pending Payment Project(s) — ${today}`, body: html, sent_by: 'System' },
   });
 
-  return Response.json({ queued: true, projects: projects.length, recipients: recipients.length });
+  return Response.json({ queued: true, projects: projects.length, recipients: recipients.length }, { headers: cors });
 });

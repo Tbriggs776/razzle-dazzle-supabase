@@ -293,6 +293,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'emailDispatch',
   'pdfEmail',
   'esign',
+  'financeReport',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -306,9 +307,19 @@ const EDGE_ALIASES = {
   sendDesignModEmail:             (p) => ['emailDispatch', { ...p, type: 'design_mod' }],
   sendPreInstallEmail:            (p) => ['emailDispatch', { ...p, type: 'pre_install' }],
   sendManualSalesContractEmail:   (p) => ['emailDispatch', { ...p, type: 'manual_sales_contract' }],
+  // Generic customer-notification dispatcher: base44 called invoke('sendNotificationEmail',
+  // {type, entityId, appUrl}) where `type` is the notification kind (appointment_created,
+  // sale_confirmed, project_created, not_sold, ...). Route to emailDispatch's `notification`
+  // handler, keeping the kind under notify_type (emailDispatch's own `type` is 'notification').
+  sendNotificationEmail:          (p) => ['emailDispatch', { type: 'notification', notify_type: p.type, entityId: p.entityId ?? p.appointmentId, appUrl: p.appUrl }],
   sendReceiptEmail:               (p) => ['pdfEmail', { ...p, type: 'receipt' }],
   sendInspectionReportEmail:      (p) => ['pdfEmail', { ...p, type: 'inspection' }],
   sendProjectClaimEmail:          (p) => ['pdfEmail', { ...p, type: 'claim' }],
+  // Admin template preview -> emailDispatch test_email (renders a template with dummy
+  // data and sends a [TEST] copy to the divert address).
+  sendTestEmail:                  (p) => ['emailDispatch', { type: 'test_email', emailType: p.emailType }],
+  // Manual "Send Report Now" button on the Finance page -> the (dual-auth) financeReport fn.
+  sendFinanceReport:              () => ['financeReport', {}],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —
