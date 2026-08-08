@@ -297,6 +297,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'smsDispatch',
   'invokeLLM',
   'analyzeRecording',
+  'rfmsQuery',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -356,6 +357,21 @@ const EDGE_ALIASES = {
   // invoked by name (in DEPLOYED_FUNCTIONS) from the "Analyze Call" button.
   triggerAnalysis:                (p) => ['analyzeRecording', { appointmentId: p.appointmentId }],
   retryStuckRecording:            (p) => ['analyzeRecording', { appointmentId: p.appointmentId }],
+
+  // ── RFMS ERP (Enterprise). All reads + thin write-enqueues route to the rfmsQuery dispatcher
+  // (Basic auth + async {status} polling centralized in supabase/functions/_shared/rfms.ts). The
+  // GP flow (Sale invoice_number -> fetch order -> low_gp) runs off a Postgres trigger, not here.
+  // getOnHoldCache stays a Postgres RPC (P1). Names preserved so call sites are unchanged.
+  getRFMSOrders:                  (p) => ['rfmsQuery', { ...p, type: 'order_search' }],
+  getRFMSCrews:                   (p) => ['rfmsQuery', { ...p, type: 'crews' }],
+  getRFMSJobs:                    (p) => ['rfmsQuery', { ...p, type: 'jobs' }],
+  getRFMSOrderNotes:              (p) => ['rfmsQuery', { ...p, type: 'order_notes' }],
+  getRFMSJobsFind:                (p) => ['rfmsQuery', { ...p, type: 'jobs_find' }],
+  getRFMSCustomers:               (p) => ['rfmsQuery', { ...p, type: 'customers_search' }],
+  getRFMSOrder:                   (p) => ['rfmsQuery', { type: 'check_order', documentNumbers: p.documentNumbers }],
+  testOrderDirect:                (p) => ['rfmsQuery', { ...p, type: 'order_get' }],
+  appendRFMSOrderNotes:           (p) => ['rfmsQuery', { ...p, type: 'append_note' }],
+  sendToRFMS:                     (p) => ['rfmsQuery', { appointmentId: p.appointmentId, type: 'send_customer' }],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —

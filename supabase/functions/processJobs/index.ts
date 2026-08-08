@@ -4,6 +4,7 @@
 // delegate to the unified sendMessage path via queued send_sms/send_email jobs.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { fetchTranscript, shapeAnalysis } from '../_shared/recordingAnalysis.ts';
+import { rfmsContext, rfmsCall } from '../_shared/rfms.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -246,6 +247,112 @@ async function handle(job: any): Promise<Record<string, unknown>> {
       });
       if (r.status >= 500) throw new Error(`invokeLLM HTTP ${r.status}`);
       return await r.json();
+    }
+
+    // ── RFMS (async store-and-forward). Every handler polls once; on the API's {status:'waiting'}
+    // it RE-ENQUEUES itself with exponential-minute backoff (keeping 'waiting' out of fail_job's
+    // retry budget) until success or a poll cap. rfmsCall centralizes Basic auth + the envelope. ──
+    case 'fetch_rfms_order': {
+      const ctx = await rfmsContext(s);
+      if (!ctx) return { stub: true, skipped: 'rfms disabled' };
+      const { saleId, invoiceNumber, poll_attempt = 0 } = job.payload || {};
+      if (!saleId || !invoiceNumber) return { skipped: 'missing saleId/invoiceNumber' };
+      const isQuote = String(invoiceNumber).toUpperCase().startsWith('ES');
+      const res = await rfmsCall(s, ctx, isQuote ? `/quote/${invoiceNumber}` : `/order/${invoiceNumber}`, { poll: { inRequest: false } });
+      if (res.waiting) {
+        if (poll_attempt >= 8) { await s.from('sale').update({ rfms_sync_status: 'error', rfms_sync_error: 'RFMS waiting timeout' }).eq('id', saleId); return { waiting: true, gave_up: true }; }
+        await s.rpc('enqueue_job', { p_type: 'fetch_rfms_order', p_payload: { saleId, invoiceNumber, poll_attempt: poll_attempt + 1 }, p_run_at: new Date(Date.now() + Math.min(2 ** poll_attempt, 15) * 60000).toISOString() });
+        return { waiting: true, requeued: true, poll_attempt: poll_attempt + 1 };
+      }
+      await s.from('sale').update({ rfms_order_data: res.raw, rfms_sync_date: new Date().toISOString(), rfms_sync_status: 'synced', rfms_sync_error: null }).eq('id', saleId);
+      const lines = res.result?.lines || [];
+      if (lines.length > 0) {
+        const totalCost = lines.reduce((sum: number, l: any) => sum + ((l.unitCost || 0) * (l.quantity || 0)), 0);
+        const orderTotal = lines.reduce((sum: number, l: any) => sum + (l.total || 0), 0);
+        const gpPercent = orderTotal > 0 ? ((orderTotal - totalCost) / orderTotal) * 100 : 0;
+        const { data: sale } = await s.from('sale').select('customer,assigned_dc').eq('id', saleId).maybeSingle();
+        let customerName = 'N/A', consultantName = 'N/A';
+        if (sale?.customer) { const { data: c } = await s.from('customer').select('first_name,last_name').eq('id', sale.customer).maybeSingle(); if (c) customerName = `${c.first_name} ${c.last_name}`; }
+        if (sale?.assigned_dc) { const { data: m } = await s.from('team_member').select('first_name,last_name').eq('id', sale.assigned_dc).maybeSingle(); if (m) consultantName = `${m.first_name} ${m.last_name}`; }
+        const internal = await getSecret('CRON_SECRET');
+        await fetch(`${FUNCTIONS_BASE}/smsDispatch`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-internal-secret': internal || '' }, body: JSON.stringify({ type: 'low_gp', saleId, customerName, consultantName, consultantId: sale?.assigned_dc, gpPercent, orderTotal, invoiceNumber }) });
+        return { fetched: true, gpPercent };
+      }
+      return { fetched: true, lines: 0 };
+    }
+    case 'rfms_check_order': {
+      const ctx = await rfmsContext(s);
+      if (!ctx) return { stub: true };
+      const { documentNumber, poll_attempt = 0 } = job.payload || {};
+      if (!documentNumber) return { skipped: 'no documentNumber' };
+      const isQuote = String(documentNumber).toUpperCase().startsWith('ES');
+      const res = await rfmsCall(s, ctx, isQuote ? `/quote/${documentNumber}` : `/order/${documentNumber}`, { poll: { inRequest: false } });
+      if (res.waiting) {
+        if (poll_attempt >= 8) return { waiting: true, gave_up: true };
+        await s.rpc('enqueue_job', { p_type: 'rfms_check_order', p_payload: { documentNumber, poll_attempt: poll_attempt + 1 }, p_run_at: new Date(Date.now() + Math.min(2 ** poll_attempt, 15) * 60000).toISOString() });
+        return { waiting: true, requeued: true };
+      }
+      const lines = res.result?.lines || [];
+      const hasOnOrder = lines.some((l: any) => l.lineStatus === 'OnOrder');
+      const lineStatuses = [...new Set(lines.map((l: any) => l.lineStatus).filter(Boolean))];
+      await s.from('rfms_order_status').upsert({ document_number: documentNumber, has_on_order: hasOnOrder, line_statuses: lineStatuses, checked_at: new Date().toISOString() }, { onConflict: 'document_number' });
+      return { checked: true, documentNumber, hasOnOrder };
+    }
+    case 'rfms_customer_create': {
+      // Replaces base44's Zapier PII webhook with a direct RFMS Customers create.
+      const ctx = await rfmsContext(s);
+      if (!ctx) return { stub: true };
+      const { appointmentId, poll_attempt = 0 } = job.payload || {};
+      const { data: appt } = await s.from('appointment').select('*').eq('id', appointmentId).maybeSingle();
+      if (!appt) return { skipped: 'no appointment' };
+      const { data: lead } = await s.from('lead').select('*').eq('id', appt.customer).maybeSingle();
+      if (!lead) { await s.from('appointment').update({ rfms_sync_status: 'error', rfms_sync_error: 'No lead' }).eq('id', appointmentId); return { error: 'no lead' }; }
+      let address1 = lead.address_line1 || '', city = lead.city || '', state = lead.state || '', postalCode = lead.zip || '';
+      if ((!address1 || !city || !state || !postalCode) && appt.location_address) {
+        const parts = String(appt.location_address).split(',').map((p: string) => p.trim());
+        if (parts.length >= 3) { address1 = parts[0]; city = parts[1]; const sz = parts[2].split(' ').filter(Boolean); if (sz.length >= 2) { state = sz[0]; postalCode = sz[sz.length - 1]; } }
+      }
+      const phone = lead.phone ? (String(lead.phone).startsWith('+1') ? lead.phone : `+1${String(lead.phone).replace(/\D/g, '')}`) : '';
+      // NOTE: exact create path + field names are a live-spike open question (base44 used Zapier, never the API).
+      const res = await rfmsCall(s, ctx, '/customer/create', { method: 'POST', body: { firstName: lead.first_name, lastName: lead.last_name, phone1: phone, email: lead.email, address1, city, state, postalCode }, poll: { inRequest: false } });
+      if (res.waiting) {
+        if (poll_attempt >= 8) { await s.from('appointment').update({ rfms_sync_status: 'error', rfms_sync_error: 'RFMS waiting timeout' }).eq('id', appointmentId); return { waiting: true, gave_up: true }; }
+        await s.rpc('enqueue_job', { p_type: 'rfms_customer_create', p_payload: { appointmentId, poll_attempt: poll_attempt + 1 }, p_run_at: new Date(Date.now() + Math.min(2 ** poll_attempt, 15) * 60000).toISOString() });
+        return { waiting: true, requeued: true };
+      }
+      const custId = res.result?.customerSeqNum ?? res.result?.customerId ?? res.result?.id ?? null;
+      await s.from('appointment').update({ rfms_sync_status: 'synced', rfms_sync_date: new Date().toISOString(), rfms_sync_error: null, rfms_customer_id: custId }).eq('id', appointmentId);
+      return { created: true, appointmentId, rfms_customer_id: custId };
+    }
+    case 'rfms_append_note': {
+      const ctx = await rfmsContext(s);
+      if (!ctx) return { stub: true };
+      const { documentNumber, noteType = 'publicNotes', noteText, userName = 'System' } = job.payload || {};
+      if (!documentNumber || !noteText) return { skipped: 'missing note' };
+      const ts = new Date().toLocaleString('en-US', { timeZone: 'America/Phoenix' });
+      const res = await rfmsCall(s, ctx, '/order/notes', { method: 'POST', body: { number: documentNumber, [noteType]: `[${userName} - ${ts}]\n${noteText}` }, poll: { inRequest: false } });
+      if (res.waiting) return { waiting: true };
+      return { appended: true, documentNumber };
+    }
+    case 'sync_rfms_jobs': {
+      const ctx = await rfmsContext(s);
+      if (!ctx) return { stub: true };
+      const { startDate, endDate } = job.payload || {};
+      const res = await rfmsCall(s, ctx, '/jobs/find', { method: 'POST', body: { startDate, endDate, recordStatus: 'Both' }, poll: { inRequest: true } });
+      if (res.waiting) return { waiting: true };
+      const jobs = Array.isArray(res.result) ? res.result : (res.result?.detail || []);
+      const docs = [...new Set(jobs.map((j: any) => j.documentNumber).filter(Boolean))].slice(0, 25);
+      let cached = 0;
+      for (const doc of docs) {
+        try {
+          const o = await rfmsCall(s, ctx, `/order/${doc}?locked=false&includeAttachments=false`, { poll: { inRequest: true, maxAttempts: 3 } });
+          if (o.waiting) continue;
+          const r: any = o.result || {};
+          await s.from('rfms_order_cache').upsert({ document_number: doc, customer_name: r.customer?.lastName ?? null, address: r.customer?.address1 ?? null, city: r.customer?.city ?? null, state: r.customer?.state ?? null, zip_code: r.customer?.postalCode ?? null, line_items: r.lines || [], order_total: r.grandTotal ?? r.orderTotal ?? null, cached_at: new Date().toISOString() }, { onConflict: 'document_number' });
+          cached++;
+        } catch (_) { /* skip a bad doc */ }
+      }
+      return { synced: jobs.length, cached };
     }
     default:
       throw new Error(`No handler for job type ${job.type}`);
