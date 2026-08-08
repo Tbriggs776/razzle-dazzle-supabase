@@ -3,6 +3,7 @@
 // succeeded or failed-with-retry. Handlers for real work (sends, dispatchers)
 // delegate to the unified sendMessage path via queued send_sms/send_email jobs.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { fetchTranscript, shapeAnalysis } from '../_shared/recordingAnalysis.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -199,6 +200,52 @@ async function handle(job: any): Promise<Record<string, unknown>> {
       const { data, error } = await s.rpc('backfill_followup_tasks');
       if (error) throw new Error(error.message);
       return { created: data ?? 0 };
+    }
+    case 'reconcile_stuck_recordings': {
+      // Safety net for the AssemblyAI pipeline (replaces retryStuckRecording's 10-min
+      // in-request loop). Polls AssemblyAI once per stuck appointment per tick; writes the
+      // analysis via the SAME shared builder the webhook uses. Bounded (limit 25) + age-gated
+      // so a just-submitted row isn't polled and the tick stays under the edge wall clock.
+      const { data: integ } = await s.from('integration').select('is_enabled').eq('key', 'assemblyai').maybeSingle();
+      if (!integ?.is_enabled) return { skipped: 'assemblyai disabled' };
+      const apiKey = await getSecret('ASSEMBLYAI_API_KEY');
+      if (!apiKey) return { skipped: 'no assemblyai key' };
+      const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+      const { data: stuck } = await s.from('appointment').select('id,recording_transcript_id,updated_date')
+        .eq('recording_status', 'analyzing').not('recording_transcript_id', 'is', null).lt('updated_date', cutoff).limit(25);
+      let done = 0, errored = 0, still = 0;
+      for (const appt of stuck || []) {
+        try {
+          const t = await fetchTranscript(appt.recording_transcript_id, apiKey);
+          if (t.status === 'completed') {
+            await s.from('appointment').update({ recording_analysis: shapeAnalysis(t), recording_status: 'completed', recording_duration: t.audio_duration }).eq('id', appt.id);
+            if (t.text) await s.rpc('enqueue_job', { p_type: 'analyze_value_adds', p_payload: { appointmentId: appt.id } });
+            done++;
+          } else if (t.status === 'error') {
+            await s.from('appointment').update({ recording_analysis: { error: 'Transcription failed', details: t.error || 'Unknown error' }, recording_status: 'completed' }).eq('id', appt.id);
+            errored++;
+          } else {
+            // Still queued/processing. Time out after ~30 min so nothing is stuck forever.
+            if (Date.now() - new Date(appt.updated_date).getTime() > 30 * 60 * 1000) {
+              await s.from('appointment').update({ recording_analysis: { error: 'Transcription timed out' }, recording_status: 'completed' }).eq('id', appt.id);
+              errored++;
+            } else still++;
+          }
+        } catch (_) { still++; }
+      }
+      return { reconciled: (stuck || []).length, done, errored, still };
+    }
+    case 'analyze_value_adds': {
+      // Delegate to the LLM bridge (task 'analyze_value_adds'), which reads the transcript
+      // utterances + runs the value-add compliance check. Enqueued after transcription lands.
+      const internal = await getSecret('CRON_SECRET');
+      const r = await fetch(`${FUNCTIONS_BASE}/invokeLLM`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-internal-secret': internal || '' },
+        body: JSON.stringify({ task: 'analyze_value_adds', appointmentId: job.payload?.appointmentId }),
+      });
+      if (r.status >= 500) throw new Error(`invokeLLM HTTP ${r.status}`);
+      return await r.json();
     }
     default:
       throw new Error(`No handler for job type ${job.type}`);

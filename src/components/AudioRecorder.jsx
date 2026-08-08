@@ -5,7 +5,6 @@ import { Mic, Square, Pause, Play, Upload, Loader2, CheckCircle2 } from 'lucide-
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
-import * as Bytescale from "@bytescale/sdk";
 
 export default function AudioRecorder({ appointmentId, onUploadComplete }) {
   const [isRecording, setIsRecording] = useState(false);
@@ -110,16 +109,15 @@ export default function AudioRecorder({ appointmentId, onUploadComplete }) {
     try {
       const fileName = `recording-${Date.now()}.webm`;
       const file = new File([audioBlob], fileName, { type: 'audio/webm' });
-      
-      const uploadManager = new Bytescale.UploadManager({
-        apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x"
-      });
 
-      const { fileUrl } = await uploadManager.upload({ 
-        data: file,
-        path: `/appointment-recordings/${appointmentId}/${fileName}`
-      });
-      
+      // Upload to the public 'uploads' Storage bucket (AssemblyAI fetches this URL). Replaces
+      // base44's hardcoded Bytescale public key.
+      const path = `appointment-recordings/${appointmentId}/${fileName}`;
+      const { error: upErr } = await base44.supabase.storage.from('uploads').upload(path, file, { contentType: 'audio/webm', upsert: false });
+      if (upErr) throw new Error(upErr.message);
+      const { data: pub } = base44.supabase.storage.from('uploads').getPublicUrl(path);
+      const fileUrl = pub.publicUrl;
+
       // Update appointment with recording URL, duration, and set status to analyzing
       await base44.entities.Appointment.update(appointmentId, {
         recording_url: fileUrl,

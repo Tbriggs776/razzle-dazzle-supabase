@@ -178,6 +178,115 @@ Respond with ONLY the category name from the list above, nothing else.`,
       return { success: true, analyzed_reason: analyzedReason, original_note: lastNote.content };
     }
 
+    // analyzeValueAdds: check a call transcript for which sales "value adds" the DC offered.
+    // Reads appointment.recording_analysis.utterances (from the AssemblyAI pipeline), runs one
+    // batched LLM compliance pass, and merges the result into recording_analysis.value_adds.
+    case 'analyze_value_adds': {
+      const appointmentId = p.appointmentId || p.event?.entity_id;
+      if (!appointmentId) return { error: 'appointmentId is required' };
+      const appt = await one(s, 'appointment', appointmentId);
+      if (!appt?.recording_analysis?.utterances) return { error: 'No transcript utterances to analyze' };
+
+      const valueAdds = [
+        { id: 'basic_floor_prep_included', canonical_title: 'Includes Basic Floor Prep', definition: 'The quoted installation includes basic floor preparation as part of the job, at no added charge (e.g., minor leveling, patching, scraping as defined by your policy).', must_have_any: ['prep', 'preparation', 'floor prep', 'prep work'], should_have_any: ['included', 'part of', 'we handle', 'no extra', 'standard', 'in the price', 'we take care of'], disallowed_any: ['subfloor replacement', 'major repair', 'extra charge', 'additional cost', 'change order', 'not included'] },
+        { id: 'dustless_tile_demo', canonical_title: 'Dustless Tile Demo', definition: 'We remove/demo tile using dust-control methods (e.g., HEPA containment/vac systems) to minimize dust during demolition.', must_have_any: ['dustless', 'no dust', 'minimal dust', 'hepa', 'containment'], should_have_any: ['tile demo', 'tile removal', 'demolition', 'vacuum', 'negative air', 'dust control', 'cleaner process'], disallowed_any: ["it'll be dusty", 'lots of dust', 'no containment', 'standard demo'] },
+        { id: 'financing_up_to_60_months_0_interest', canonical_title: 'Up to 60 Months 0% Interest', definition: 'We offer promotional financing with 0% interest for up to 60 months (subject to approval/terms).', must_have_any: ['0%', 'zero percent', 'no interest'], should_have_any: ['60 months', 'five years', 'financing', 'payment plan', 'monthly payments', 'on approved credit', 'promotional'], disallowed_any: ['high interest', 'apr', 'variable rate', 'deferred interest'] },
+        { id: 'painted_base_provided', canonical_title: 'We can provide painted base', definition: 'We can supply and/or install baseboards that are already painted (or we handle painting the base), reducing extra steps for the homeowner.', must_have_any: ['base', 'baseboard'], should_have_any: ['painted', 'pre-painted', 'we paint', 'finish', 'white base', 'included', 'we can provide', 'we can handle'], disallowed_any: ['unpainted only', 'you paint', 'painter required', 'not included'] },
+        { id: 'include_half_inch_carpet_pad_all_jobs', canonical_title: 'Include 1/2" carpet pad on all carpet jobs', definition: 'Every carpet installation includes 1/2-inch carpet pad as standard, with no add-on charge.', must_have_any: ['pad', 'padding'], should_have_any: ['half inch', '1/2', 'included', 'standard', 'comes with', 'all carpet jobs', 'every carpet install'], disallowed_any: ['upgrade', 'optional', 'extra cost', 'separate line item', 'choose your pad'] },
+        { id: 'free_air_duct_cleaning_qualified_purchases', canonical_title: 'Clean Air Ducts For Free on Qualified Purchases', definition: 'For qualifying purchases/projects (as defined by your rules), air duct cleaning is included at no cost.', must_have_any: ['duct', 'ducts'], should_have_any: ['free', 'included', 'no charge', 'air duct cleaning', 'qualify', 'qualified purchase', 'threshold', 'minimum'], disallowed_any: ['add-on', 'optional', 'extra fee', 'additional charge', 'we can quote it'] },
+        { id: 'field_manager_checkin_final_walkthrough', canonical_title: 'Field Manager Check in and Do Final Walkthrough', definition: 'A field manager will check in during the job and/or perform a final walkthrough/quality inspection with the homeowner at completion.', must_have_any: ['walkthrough', 'walk through', 'final inspection', 'quality check', 'field manager'], should_have_any: ['check in', 'site visit', 'project manager', 'ensure everything', 'punch list', 'before we leave', 'sign off'], disallowed_any: ['no walkthrough', 'you handle', 'installer only', 'no manager'] },
+        { id: 'lifetime_labor_guarantee', canonical_title: 'Lifetime Labor Guarantee', definition: 'We provide lifetime coverage/guarantee on installation labor/workmanship (per your policy terms), not just materials.', must_have_any: ['lifetime', 'labor'], should_have_any: ['workmanship', 'installation', 'install', 'we stand behind', 'guarantee', 'covered', 'labor warranty'], disallowed_any: ['materials only', 'manufacturer only', 'one year labor', 'limited labor'] },
+        { id: 'one_time_warranty_transfer_new_homeowner', canonical_title: 'One Time Transfer of Warranties To New Homeowner', definition: 'The warranty can be transferred one time to the next homeowner/new owner if the home is sold, so coverage continues for the new homeowner.', must_have_any: ['warranty', 'transfer'], should_have_any: ['one time', 'next owner', 'new homeowner', 'new owner', 'sell', 'selling', 'when you move', 'home sale'], disallowed_any: ['not transferable', 'non-transferable', 'only original owner', 'cannot transfer'] },
+      ];
+
+      // DC utterances only (speaker B or 1), with ids + second timestamps.
+      const dcUtterances = (appt.recording_analysis.utterances as any[])
+        .filter((u) => u.speaker === 'B' || u.speaker === '1')
+        .map((u, idx) => ({ utterance_id: `u_${idx}`, timestamp: u.start / 1000, text: u.text }));
+      const fullTranscript = dcUtterances.map((u) => `[${u.utterance_id}] ${u.text}`).join('\n');
+
+      const batchPrompt = `You are a transcript compliance verifier for a flooring sales team.
+
+Analyze the full Design Consultant transcript and identify which value adds were AFFIRMATIVELY OFFERED.
+
+IMPORTANT PRINCIPLES
+- Match the IDEA, not exact wording
+- Value adds must be OFFERED as included, available, covered, or provided
+- Do NOT mark matched=true if only mentioned hypothetically or as extra-cost add-on
+- If explicitly negated (e.g., "not included"), matched MUST be false
+- Evidence must be exact substrings from transcript
+
+---
+
+VALUE ADDS TO CHECK:
+${valueAdds.map((va) => `
+ID: ${va.id}
+Title: ${va.canonical_title}
+Definition: ${va.definition}
+Must contain: ${va.must_have_any.join(', ')}
+Should contain: ${va.should_have_any.join(', ')}
+Disallowed: ${va.disallowed_any.join(', ')}
+`).join('\n---\n')}
+
+---
+
+FULL TRANSCRIPT (Design Consultant):
+${fullTranscript}
+
+---
+
+For each value add, determine:
+1. matched: true only if clearly offered as included/free/standard
+2. confidence: 0.0-1.0 (0.9+ = explicit, 0.7-0.89 = clear, 0.5-0.69 = ambiguous)
+3. Find the best matching utterance(s) and extract exact phrases as evidence
+4. If matched=false, leave highlights empty unless there's a negation
+
+Return JSON array with results for ALL value adds.`;
+
+      const analysis = await llmInvoke(s, {
+        prompt: batchPrompt,
+        response_json_schema: {
+          type: 'object',
+          properties: {
+            results: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  value_add_id: { type: 'string' },
+                  matched: { type: 'boolean' },
+                  confidence: { type: 'number' },
+                  utterance_ids: { type: 'array', items: { type: 'string' } },
+                  highlights: { type: 'array', items: { type: 'object', properties: { utterance_id: { type: 'string' }, text: { type: 'string' } } } },
+                  explanation: { type: 'string' },
+                },
+                required: ['value_add_id', 'matched'],
+              },
+            },
+          },
+        },
+      });
+      if (analysis?.stub) return { stub: true, success: false };
+
+      const utteranceMap = new Map(dcUtterances.map((u) => [u.utterance_id, u]));
+      const resultsWithTimestamps = ((analysis.results as any[]) || []).map((result) => {
+        const va = valueAdds.find((v) => v.id === result.value_add_id);
+        const mentions: any[] = [];
+        if (result.matched && Array.isArray(result.highlights)) {
+          for (const h of result.highlights) {
+            const utt = utteranceMap.get(h.utterance_id);
+            if (utt) mentions.push({ text: utt.text, timestamp: utt.timestamp, matchingWords: h.text, explanation: result.explanation });
+          }
+        }
+        return { keyword: va?.canonical_title || result.value_add_id, mentioned: !!result.matched, confidence: Math.round((result.confidence || 0) * 100), mentions };
+      });
+
+      // Re-read + merge only value_adds so a concurrent webhook write isn't clobbered.
+      const { data: fresh } = await s.from('appointment').select('recording_analysis').eq('id', appt.id).maybeSingle();
+      await s.from('appointment').update({ recording_analysis: { ...(fresh?.recording_analysis || appt.recording_analysis), value_adds: resultsWithTimestamps } }).eq('id', appt.id);
+      return { success: true, results: resultsWithTimestamps };
+    }
+
     default:
       return { error: `Unknown task ${task}` };
   }

@@ -296,6 +296,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'financeReport',
   'smsDispatch',
   'invokeLLM',
+  'analyzeRecording',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -342,10 +343,19 @@ const EDGE_ALIASES = {
   sendUnassignedDCAlerts:         () => ['smsDispatch', { type: 'unassigned_dc' }],
 
   // ── LLM (Anthropic Claude) -> the invokeLLM bridge. The raw InvokeLLM contract lives on
-  // integrations.Core.InvokeLLM (below); these two server functions call the bridge + update
-  // a record. analyzeValueAdds is deferred to P7 (needs recording_analysis transcripts).
+  // integrations.Core.InvokeLLM (below); these server functions call the bridge + update a record.
   extractContractData:            (p) => ['invokeLLM', { task: 'extract_contract', contractUrl: p.contractUrl, saleId: p.saleId }],
   analyzeNotSoldReason:           (p) => ['invokeLLM', { task: 'analyze_not_sold', appointmentId: p.appointmentId, event: p.event }],
+  // Value-add compliance check on a call transcript (P7 recording pipeline). Also auto-run by
+  // the assemblyAIWebhook -> analyze_value_adds job after transcription lands.
+  analyzeValueAdds:               (p) => ['invokeLLM', { task: 'analyze_value_adds', appointmentId: p.appointmentId }],
+
+  // ── AssemblyAI recordings. triggerAnalysis + the admin retry button both collapse to a fresh
+  // analyzeRecording submit (base44's fire-and-forget indirection isn't needed — submit is <1s,
+  // and the reconcile-stuck-recordings cron is the durable poll). analyzeRecording itself is
+  // invoked by name (in DEPLOYED_FUNCTIONS) from the "Analyze Call" button.
+  triggerAnalysis:                (p) => ['analyzeRecording', { appointmentId: p.appointmentId }],
+  retryStuckRecording:            (p) => ['analyzeRecording', { appointmentId: p.appointmentId }],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —
