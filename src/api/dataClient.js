@@ -298,6 +298,9 @@ const RPC_FUNCTIONS = {
   getAppointmentsByDC: (p) => ['get_appointments_by_dc', { p_start_date: p.startDate, p_end_date: p.endDate }],
   getSalesByDC:        (p) => ['get_sales_by_dc', { p_start_date: p.startDate, p_end_date: p.endDate }],
   getOnHoldCache:      () => ['get_on_hold_cache', {}],
+  // Public (anon) pages read a curated single-record projection by id — the only
+  // anon-reachable surface for these tables (RLS denies direct anon reads).
+  getPublicAppointment: (p) => ['get_public_appointment', { p_id: p.id }],
 };
 
 // Is a serverless function actually wired (Edge Function or RPC)? UI can use this

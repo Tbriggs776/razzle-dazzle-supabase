@@ -155,52 +155,22 @@ export default function LeadAppointmentView() {
   const urlParams = new URLSearchParams(window.location.search);
   const appointmentId = urlParams.get('id');
 
-  const { data: appointment, isLoading } = useQuery({
-    queryKey: ['appointment', appointmentId],
+  // Public page (renders outside the auth guard). Anon has no direct table access,
+  // so fetch a curated, read-only projection through a token-scoped RPC keyed by the
+  // unguessable appointment id — see migration 0011 / get_public_appointment.
+  const { data, isLoading } = useQuery({
+    queryKey: ['publicAppointment', appointmentId],
     queryFn: async () => {
-      try {
-        const appointments = await base44.entities.Appointment.filter({ id: appointmentId });
-        return appointments[0];
-      } catch (error) {
-        console.error('Error fetching appointment:', error);
-        return null;
-      }
+      const { data } = await base44.functions.invoke('getPublicAppointment', { id: appointmentId });
+      return data || null;
     },
     enabled: !!appointmentId,
     retry: false
   });
 
-  const { data: lead } = useQuery({
-    queryKey: ['lead', appointment?.customer],
-    queryFn: async () => {
-      if (!appointment?.customer) return null;
-      try {
-        const leads = await base44.entities.Lead.filter({ id: appointment.customer });
-        return leads[0];
-      } catch (error) {
-        console.error('Error fetching lead:', error);
-        return null;
-      }
-    },
-    enabled: !!appointment?.customer,
-    retry: false
-  });
-
-  const { data: dc } = useQuery({
-    queryKey: ['teamMember', appointment?.assigned_dc],
-    queryFn: async () => {
-      if (!appointment?.assigned_dc) return null;
-      try {
-        const members = await base44.entities.TeamMember.filter({ id: appointment.assigned_dc });
-        return members[0];
-      } catch (error) {
-        console.error('Error fetching DC:', error);
-        return null;
-      }
-    },
-    enabled: !!appointment?.assigned_dc,
-    retry: false
-  });
+  const appointment = data?.appointment;
+  const lead = data?.lead;
+  const dc = data?.dc;
 
   if (isLoading) {
     return (
