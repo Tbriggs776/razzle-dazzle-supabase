@@ -96,6 +96,10 @@ Deno.serve(async (req) => {
       const isHtml = (p.body ?? '').trim().startsWith('<');
       const payload: any = { from: cfg.from_email, to: [to], subject: p.subject ?? '' };
       payload[isHtml ? 'html' : 'text'] = p.body ?? '';
+      // Optional additional recipients / reply-to for transactional senders.
+      if (Array.isArray(p.cc) && p.cc.length) payload.cc = p.cc;
+      if (Array.isArray(p.bcc) && p.bcc.length) payload.bcc = p.bcc;
+      if (p.reply_to) payload.reply_to = p.reply_to;
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       });

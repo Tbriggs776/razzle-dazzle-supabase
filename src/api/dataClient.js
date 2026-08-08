@@ -289,7 +289,17 @@ const auth = {
 const DEPLOYED_FUNCTIONS = new Set([
   'getAppUrl',
   'logAppointmentAction',
+  'shortenUrl',
+  'emailDispatch',
 ]);
+
+// base44 email-sender names -> the single emailDispatch function with a `type`
+// discriminator, so existing call sites (invoke('sendSaleConfirmationEmail', {saleId}))
+// work unchanged while all email logic lives in one deployed function. Add a sender
+// = one entry here + one case in emailDispatch (no new deploy).
+const EDGE_ALIASES = {
+  sendSaleConfirmationEmail: (p) => ['emailDispatch', { type: 'sale_confirmation', saleId: p.saleId }],
+};
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —
 // invoked via supabase.rpc. Each entry maps the payload to the RPC's args; the
@@ -323,6 +333,8 @@ function warnUnavailable(name) {
 
 const functions = {
   async invoke(name, payload = {}) {
+    const alias = EDGE_ALIASES[name];
+    if (alias) { const [n, pl] = alias(payload || {}); name = n; payload = pl; }
     const rpc = RPC_FUNCTIONS[name];
     if (rpc) {
       const [fn, args] = rpc(payload || {});
