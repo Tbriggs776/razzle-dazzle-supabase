@@ -294,6 +294,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'pdfEmail',
   'esign',
   'financeReport',
+  'smsDispatch',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -320,6 +321,24 @@ const EDGE_ALIASES = {
   sendTestEmail:                  (p) => ['emailDispatch', { type: 'test_email', emailType: p.emailType }],
   // Manual "Send Report Now" button on the Finance page -> the (dual-auth) financeReport fn.
   sendFinanceReport:              () => ['financeReport', {}],
+
+  // ── SMS fleet -> the single smsDispatch function (SMS mirror of emailDispatch). Each
+  // base44 Twilio sender maps to a `type`; call sites are unchanged. See supabase/functions/
+  // smsDispatch. Inbound (incomingSMS) is Twilio-only, so it needs no alias here.
+  sendAppointmentSMS:             (p) => ['smsDispatch', { type: p.type, appointmentId: p.appointmentId, customerId: p.customerId }],
+  // Generic direct SMS is SYNCHRONOUS: smsDispatch returns the legacy { success, messageSid,
+  // twilioStatus, to } shape so the ~13 call sites that read the response keep working.
+  sendSMS:                        (p) => ['smsDispatch', { type: 'direct', to: p.to, message: p.message }],
+  sendTicketMessageSMS:           (p) => ['smsDispatch', { type: 'ticket_message', ticketId: p.ticketId, senderName: p.senderName, message: p.message, senderRole: p.senderRole }],
+  sendCancellationSaveAttempt:    (p) => ['smsDispatch', { type: 'cancellation_save_attempt', project_id: p.project_id }],
+  sendCancellationUpdate:         (p) => ['smsDispatch', { type: 'cancellation_update', project_id: p.project_id, message: p.message }],
+  // base44's payload.type (cancelled|cleared) is remapped to `subtype` so it doesn't collide
+  // with smsDispatch's own `type` discriminator.
+  sendCancellationStatusAlert:    (p) => ['smsDispatch', { type: 'cancellation_status', subtype: p.type, customerName: p.customerName, invoiceNumber: p.invoiceNumber, installDate: p.installDate, reason: p.reason, clearedBy: p.clearedBy }],
+  sendLowGPAlert:                 (p) => ['smsDispatch', { type: 'low_gp', saleId: p.saleId, customerName: p.customerName, consultantName: p.consultantName, consultantId: p.consultantId, gpPercent: p.gpPercent, orderTotal: p.orderTotal, invoiceNumber: p.invoiceNumber }],
+  sendPastDueProjectsAlert:       () => ['smsDispatch', { type: 'past_due' }],
+  sendPendingCancellationAlert:   () => ['smsDispatch', { type: 'pending_cancellation' }],
+  sendUnassignedDCAlerts:         () => ['smsDispatch', { type: 'unassigned_dc' }],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —
