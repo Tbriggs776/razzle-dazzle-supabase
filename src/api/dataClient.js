@@ -298,6 +298,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'invokeLLM',
   'analyzeRecording',
   'rfmsQuery',
+  'googleMaps',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -372,6 +373,12 @@ const EDGE_ALIASES = {
   testOrderDirect:                (p) => ['rfmsQuery', { ...p, type: 'order_get' }],
   appendRFMSOrderNotes:           (p) => ['rfmsQuery', { ...p, type: 'append_note' }],
   sendToRFMS:                     (p) => ['rfmsQuery', { appointmentId: p.appointmentId, type: 'send_customer' }],
+
+  // ── Google Maps (API-key: Geocoding + Street View Static) -> the googleMaps dispatcher.
+  // Google Calendar/Sheets (OAuth) are a separate, pending decision.
+  getStreetView:                  (p) => ['googleMaps', { ...p, type: 'street_view' }],
+  journeyGeocode:                 (p) => ['googleMaps', { ...p, type: 'geocode' }],
+  getZipsInPolygon:               (p) => ['googleMaps', { ...p, type: 'zips_in_polygon' }],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —
