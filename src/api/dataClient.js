@@ -291,6 +291,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'logAppointmentAction',
   'shortenUrl',
   'emailDispatch',
+  'pdfEmail',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -304,6 +305,7 @@ const EDGE_ALIASES = {
   sendDesignModEmail:             (p) => ['emailDispatch', { ...p, type: 'design_mod' }],
   sendPreInstallEmail:            (p) => ['emailDispatch', { ...p, type: 'pre_install' }],
   sendManualSalesContractEmail:   (p) => ['emailDispatch', { ...p, type: 'manual_sales_contract' }],
+  sendReceiptEmail:               (p) => ['pdfEmail', { ...p, type: 'receipt' }],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —

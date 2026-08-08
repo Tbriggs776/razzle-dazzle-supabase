@@ -6,6 +6,7 @@
 // Internal-secret gated (x-internal-secret == CRON_SECRET) — called by
 // processJobs handlers and other server-side code, never the browser.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { encodeBase64 } from 'jsr:@std/encoding/base64';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -100,6 +101,18 @@ Deno.serve(async (req) => {
       if (Array.isArray(p.cc) && p.cc.length) payload.cc = p.cc;
       if (Array.isArray(p.bcc) && p.bcc.length) payload.bcc = p.bcc;
       if (p.reply_to) payload.reply_to = p.reply_to;
+      // Attachments arrive as [{ filename, url }] (a Storage URL) so job payloads
+      // stay small; fetch each and hand Resend the base64 content.
+      if (Array.isArray(p.attachments) && p.attachments.length) {
+        const atts: any[] = [];
+        for (const a of p.attachments) {
+          try {
+            const fr = await fetch(a.url);
+            if (fr.ok) atts.push({ filename: a.filename, content: encodeBase64(new Uint8Array(await fr.arrayBuffer())) });
+          } catch (_) { /* skip a bad attachment rather than fail the whole send */ }
+        }
+        if (atts.length) payload.attachments = atts;
+      }
       const r = await fetch('https://api.resend.com/emails', {
         method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       });
