@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { base44 } from '@/api/dataClient';
 import { getIntegrations, setSecret, clearSecret, setIntegration, testIntegration } from '@/lib/integrationsApi';
-import { Plug, Loader2, Check, X, AlertTriangle, Save, Zap, ShieldCheck } from 'lucide-react';
+import { Plug, Loader2, Check, X, AlertTriangle, Save, Zap, ShieldCheck, FileSignature } from 'lucide-react';
+
+function Toggle({ on, onClick, label }) {
+  return (
+    <label className="flex items-center gap-2 cursor-pointer select-none">
+      <span className="text-sm text-slate-600">{label}</span>
+      <button type="button" onClick={onClick} className={`relative w-11 h-6 rounded-full transition-colors ${on ? 'bg-indigo-600' : 'bg-slate-300'}`} aria-pressed={on}>
+        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${on ? 'translate-x-5' : ''}`} />
+      </button>
+    </label>
+  );
+}
 
 const STATUS = {
   not_configured: { label: 'Not configured', cls: 'bg-slate-100 text-slate-600 border-slate-200' },
@@ -140,6 +152,93 @@ function IntegrationCard({ integ, onChanged }) {
   );
 }
 
+function EsignTypeCard({ t }) {
+  const [enabled, setEnabled] = useState(t.esign_enabled);
+  const [otp, setOtp] = useState(t.require_sms_otp);
+  const [consent, setConsent] = useState(t.consent_text || '');
+  const [expiry, setExpiry] = useState(t.expiry_days || 14);
+  const [notify, setNotify] = useState((t.notify_emails || []).join(', '));
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  const save = async () => {
+    setSaving(true); setMsg(null);
+    try {
+      const { error } = await base44.functions.invoke('adminSetEsignType', {
+        document_type: t.document_type, esign_enabled: enabled, require_sms_otp: otp,
+        consent_text: consent, expiry_days: Number(expiry) || 14,
+        notify_emails: notify.split(',').map((s) => s.trim()).filter(Boolean),
+      });
+      if (error) throw error;
+      setMsg({ ok: true, text: 'Saved.' });
+    } catch (e) { setMsg({ ok: false, text: e.message || 'Save failed' }); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex items-center gap-2.5">
+          <h3 className="text-lg font-bold text-slate-800">{t.label}</h3>
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${enabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>{enabled ? 'E-sign on' : 'E-sign off'}</span>
+        </div>
+        <Toggle on={enabled} onClick={() => setEnabled((v) => !v)} label="Require e-signature" />
+      </div>
+      <div className="space-y-4">
+        <Toggle on={otp} onClick={() => setOtp((v) => !v)} label="Require SMS code to sign" />
+        <div>
+          <label className="text-sm font-medium text-slate-700">Consent statement shown to the signer</label>
+          <textarea value={consent} onChange={(e) => setConsent(e.target.value)} rows={4} className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-slate-700">Link expires after (days)</label>
+            <input type="number" min="1" value={expiry} onChange={(e) => setExpiry(e.target.value)} className="mt-1 w-full h-10 px-3 border border-slate-300 rounded-lg text-sm" />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">Notify on completion (comma-separated)</label>
+            <input value={notify} onChange={(e) => setNotify(e.target.value)} placeholder="ops@floordaddy.com" className="mt-1 w-full h-10 px-3 border border-slate-300 rounded-lg text-sm" />
+          </div>
+        </div>
+      </div>
+      {msg && (
+        <div className={`mt-4 text-sm flex items-center gap-2 rounded-lg px-3 py-2 border ${msg.ok ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+          {msg.ok ? <Check className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}<span>{msg.text}</span>
+        </div>
+      )}
+      <div className="flex items-center mt-5 pt-4 border-t border-slate-100">
+        <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 h-9 px-4 text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded-lg">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EsignSettings() {
+  const [types, setTypes] = useState(null);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    base44.functions.invoke('adminGetEsignTypes')
+      .then(({ data, error }) => { if (error) throw error; setTypes(data || []); })
+      .catch((e) => setError(e.message || 'Failed to load'));
+  }, []);
+  return (
+    <div className="mt-12">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-11 h-11 rounded-xl bg-indigo-100 flex items-center justify-center"><FileSignature className="w-6 h-6 text-indigo-600" /></div>
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">E-Signature</h2>
+          <p className="text-slate-500 mt-0.5">Choose which documents require a signature, and how signers verify their identity.</p>
+        </div>
+      </div>
+      {error ? <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{error}</div>
+        : !types ? <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
+        : <div className="space-y-5">{types.map((t) => <EsignTypeCard key={t.document_type} t={t} />)}</div>}
+    </div>
+  );
+}
+
 export default function Integrations() {
   const [integrations, setIntegrations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -185,6 +284,8 @@ export default function Integrations() {
             ))}
           </div>
         )}
+
+        <EsignSettings />
       </div>
     </div>
   );

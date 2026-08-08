@@ -13,6 +13,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const APP_URL = 'https://razzle-dazzle-supabase.vercel.app';
+const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
 const svc = () => createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
 const cors = {
@@ -77,6 +78,21 @@ async function enqueueEmail(s: any, recipients: string[], subject: string, body:
     p_payload: { to: recipients[0], bcc: recipients.slice(1), subject, body, sent_by: 'System', ...refs },
   });
   return recipients.length;
+}
+
+// When e-sign is enabled for a document type, hand off to the signature engine
+// (creates a signature_request + emails the secure signing link). Returns null when
+// e-sign is off for that type, so the caller falls back to the legacy sign-link email.
+async function maybeEsign(s: any, docType: string, docId: string): Promise<Record<string, unknown> | null> {
+  const { data: cfg } = await s.from('esign_document_type').select('esign_enabled').eq('document_type', docType).maybeSingle();
+  if (!cfg?.esign_enabled) return null;
+  const internal = await getSecret('CRON_SECRET');
+  const r = await fetch(`${FUNCTIONS_BASE}/esign`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-internal-secret': internal || '' },
+    body: JSON.stringify({ action: 'create', document_type: docType, document_id: docId }),
+  });
+  return { esign: true, ...(await r.json()) };
 }
 
 async function handleType(s: any, type: string, p: any): Promise<Record<string, unknown>> {
@@ -166,7 +182,9 @@ async function handleType(s: any, type: string, p: any): Promise<Record<string, 
     }
 
     case 'design_mod': {
-      // Customer e-sign request. Stamp the record, then email the sign link.
+      const es = await maybeEsign(s, 'design_mod', p.designModId);
+      if (es) return es;
+      // Legacy sign-link email (e-sign off). Stamp the record, then email the sign link.
       const mod = await one(s, 'design_mod', p.designModId);
       if (!mod) return { error: 'Design mod not found' };
       const shortUrl = await shorten(`${APP_URL}/DesignModView?id=${mod.id}`);
@@ -187,6 +205,8 @@ async function handleType(s: any, type: string, p: any): Promise<Record<string, 
     }
 
     case 'pre_install': {
+      const es = await maybeEsign(s, 'pre_install', p.checklistId);
+      if (es) return es;
       const cl = await one(s, 'standalone_pre_install_checklist', p.checklistId);
       if (!cl) return { error: 'Checklist not found' };
       const shortUrl = await shorten(`${APP_URL}/PreInstallChecklistView?id=${cl.id}`);
@@ -205,6 +225,8 @@ async function handleType(s: any, type: string, p: any): Promise<Record<string, 
     }
 
     case 'manual_sales_contract': {
+      const es = await maybeEsign(s, 'manual_sales_contract', p.contractId);
+      if (es) return es;
       const c = await one(s, 'manual_sales_contract', p.contractId);
       if (!c) return { error: 'Contract not found' };
       const shortUrl = await shorten(`${APP_URL}/ManualSalesContractView?id=${c.id}`);
