@@ -302,6 +302,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'syncCalendarEvent',
   'googleSheets',
   'ghl',
+  'submitCheckpoint',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`

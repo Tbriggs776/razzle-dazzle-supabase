@@ -1,0 +1,334 @@
+// Installation-journey checkpoint state machine (ports base44 submitCheckpoint). Drives the
+// job-start -> floor-prep -> installation -> final-walkthrough flow on project_checkpoint, with
+// field-manager / installer / customer / ops notifications, the asbestos HARD-STOP (halts the
+// project), material-shortage / change-order / five-star alerts, and test/customer divert.
+//
+// Actions: submit | approve | reject | approve_prep | submit_install | approve_final |
+//          submit_for_payment | resend_notification | resend_installer_notification.
+//
+// Notifications route through the durable queue (enqueue_job send_email/send_sms -> sendMessage:
+// suppression, delivery tracking, retry, skip-when-unconfigured) instead of base44's direct
+// Resend/Twilio calls. Auth: an authenticated user (installer/manager) OR internal secret.
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+const APP_URL = 'https://razzle-dazzle-supabase.vercel.app';
+const svc = () => createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
+
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+const STEP_LABELS: Record<string, string> = {
+  pre_install_checklist: 'Pre-Install Checklist', job_start_checklist: 'Job Start Checklist',
+  floor_prep_checklist: 'Floor Prep Checklist', final_walkthrough_checklist: 'Final Walkthrough Checklist',
+};
+
+async function getSecret(s: any, name: string): Promise<string | null> {
+  const { data, error } = await s.rpc('get_secret', { p_name: name });
+  if (!error && data) return data as string;
+  return Deno.env.get(name) ?? null;
+}
+
+async function currentUser(req: Request) {
+  const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!jwt) return null;
+  const u = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: `Bearer ${jwt}` } }, auth: { persistSession: false } });
+  const { data } = await u.auth.getUser();
+  return data?.user ?? null;
+}
+
+async function one(s: any, table: string, id: string | null | undefined) {
+  if (!id) return null;
+  const { data } = await s.from(table).select('*').eq('id', id).maybeSingle();
+  return data;
+}
+
+// Test divert wins for everything; customer divert redirects customer-facing email; else real recipient.
+function divertEmail(cfg: any, to: string, isCustomer: boolean): string | null {
+  if (cfg.test_divert_enabled && cfg.test_divert_email) return cfg.test_divert_email;
+  if (isCustomer && cfg.customer_divert_enabled && cfg.customer_divert_email) return cfg.customer_divert_email;
+  return to || null;
+}
+function divertSms(cfg: any, to: string): string | null {
+  if (cfg.test_divert_enabled && cfg.test_divert_phone) return cfg.test_divert_phone;
+  return to || null;
+}
+async function qEmail(s: any, cfg: any, to: string, subject: string, body: string, isCustomer = false): Promise<boolean> {
+  const dest = divertEmail(cfg, to, isCustomer);
+  if (!dest) return false;
+  await s.rpc('enqueue_job', { p_type: 'send_email', p_payload: { to: dest, subject, body, sent_by: 'System' } });
+  return true;
+}
+async function qSms(s: any, cfg: any, to: string, body: string): Promise<boolean> {
+  const dest = divertSms(cfg, to);
+  if (!dest) return false;
+  await s.rpc('enqueue_job', { p_type: 'send_sms', p_payload: { to: dest, body, sent_by: 'System' } });
+  return true;
+}
+
+async function matchRegion(s: any, customer: any) {
+  if (!customer?.zip) return null;
+  const { data: regions } = await s.from('region_assignment').select('*').eq('is_active', true);
+  return (regions || []).find((r: any) => (r.zip_codes || []).includes(customer.zip)) || null;
+}
+async function alertMembers(s: any, groupName: string): Promise<any[]> {
+  const { data: groups } = await s.from('alert_group').select('*').eq('name', groupName).eq('enabled', true).limit(1);
+  const g = groups?.[0];
+  if (!g || !(g.member_ids || []).length) return [];
+  const { data: members } = await s.from('team_member').select('id,first_name,email,phone').in('id', g.member_ids);
+  return members || [];
+}
+async function installerOf(s: any, project: any) {
+  if (!project?.installer_crew_id) return null;
+  const { data } = await s.from('installer').select('*').eq('crew_id', project.installer_crew_id).limit(1);
+  return data?.[0] || null;
+}
+async function projectCtx(s: any, projectId: string) {
+  const project = await one(s, 'project', projectId);
+  const customer = project?.customer ? await one(s, 'customer', project.customer) : null;
+  const customerName = customer ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unknown' : 'Unknown';
+  return { project, customer, customerName, url: `${APP_URL}/JourneyProjectDetail?project_id=${projectId}` };
+}
+async function upsertCheckpoint(s: any, checkpointId: string | null, insertRow: any, updateFields: any) {
+  if (checkpointId) { const { data } = await s.from('project_checkpoint').update(updateFields).eq('id', checkpointId).select().maybeSingle(); return data; }
+  const { data } = await s.from('project_checkpoint').insert(insertRow).select().maybeSingle(); return data;
+}
+
+async function handle(s: any, body: any, user: any): Promise<{ status: number; body: Record<string, unknown> }> {
+  const { checkpoint_id, project_id, step_key, checklist_data, action, rejection_notes } = body;
+  const userName = user?.user_metadata?.full_name || user?.email || 'System';
+  const userEmail = user?.email || null;
+  const nowIso = new Date().toISOString();
+  const label = STEP_LABELS[step_key] || step_key;
+  const { data: ssList } = await s.from('sms_settings').select('*').limit(1);
+  const cfg: any = ssList?.[0] || {};
+
+  switch (action) {
+    case 'submit': {
+      if (step_key === 'floor_prep_checklist' && checklist_data?.prep?.is_billable && !checklist_data?.change_order?.signed_and_paid)
+        return { status: 400, body: { error: 'Change order must be signed and paid before submitting' } };
+      const fields = { checklist_data, status: 'SubmittedForApproval', submitted_by_name: userName, submitted_by_email: userEmail, submitted_date: nowIso };
+      const checkpoint = await upsertCheckpoint(s, checkpoint_id, { project_id, step_key, ...fields }, fields);
+
+      const { project, customer, customerName, url } = await projectCtx(s, project_id);
+      const region = await matchRegion(s, customer);
+      const fmId = region?.field_manager_id || project?.field_manager_id;
+      if (fmId) {
+        const fm = await one(s, 'team_member', fmId);
+        if (fm) {
+          const regionName = region?.region_name || 'Unassigned';
+          await qEmail(s, cfg, fm.email, `[Field Manager] Approval Needed: ${label} — ${customerName}`,
+            `Hi ${fm.first_name || 'Manager'},\n\n${label} has been submitted for approval and is awaiting your review.\n\nCustomer: ${customerName}\nSubmitted by: ${userName}\nRegion: ${regionName}\n\nReview and approve here: ${url}`);
+          await qSms(s, cfg, fm.phone, `Floor Daddy: ${label} submitted for ${customerName} in ${regionName}. Approval needed: ${url}`);
+        }
+      }
+      if (step_key === 'final_walkthrough_checklist' && customer)
+        await qEmail(s, cfg, customer.email, '[Customer] Your project is nearing completion',
+          `Hi ${customer.first_name || 'there'},\n\nYour project is nearing completion. A final walkthrough is being scheduled.\n\nThank you for choosing Floor Daddy!`, true);
+
+      const asbestos = checklist_data?.safety?.asbestos_suspected === true;
+      if (asbestos) {
+        for (const m of await alertMembers(s, 'asbestos_hard_stop'))
+          await qEmail(s, cfg, m.email, '[Alert Team] 🚨 HARD STOP — Asbestos Suspected',
+            `Asbestos suspected at project ${project_id}. Installation HALTED. Customer must engage a licensed abatement company and provide a clearance certificate before work resumes.`);
+        await s.from('project').update({ installation_date_status: 'on hold' }).eq('id', project_id);
+      }
+      if (checklist_data?.verification?.material_shortage === true) {
+        const cnt = checklist_data?.verification?.shortage_count || 0;
+        const notes = checklist_data?.verification?.shortage_notes || 'No details provided';
+        for (const m of await alertMembers(s, 'material_shortage'))
+          await qEmail(s, cfg, m.email, '[Alert Team] ⚠️ Material Shortage / Discrepancy',
+            `Material shortage reported on project ${project_id}.\n\nShortage count: ${cnt}\nDetails: ${notes}\n\nPlease review and coordinate.`);
+      }
+      if (step_key === 'floor_prep_checklist' && checklist_data?.prep?.is_billable && region) {
+        const ids = [region.install_coordinator_id, region.order_entry_id].filter(Boolean);
+        if (ids.length) {
+          const { data: recs } = await s.from('team_member').select('*').in('id', ids);
+          const amt = checklist_data?.change_order?.amount || 'N/A';
+          const notes = checklist_data?.change_order?.notes || 'No details provided';
+          for (const m of recs || [])
+            await qEmail(s, cfg, m.email, `[Ops Team] Change Order — Billable Floor Prep — ${customerName}`,
+              `Hi ${m.first_name},\n\nA billable floor prep change order has been submitted for ${customerName}.\n\nAmount: $${amt}\nNotes: ${notes}\nRegion: ${region.region_name}\n\nProject: ${url}`);
+        }
+      }
+      return { status: 200, body: { success: true, checkpoint, asbestos_halt: asbestos } };
+    }
+
+    case 'approve_prep': {
+      const existing = await one(s, 'project_checkpoint', checkpoint_id);
+      const checkpoint = await upsertCheckpoint(s, checkpoint_id, null, {
+        status: 'Completed',
+        checklist_data: { ...(existing?.checklist_data || {}), prep_approved_by_name: userName, prep_approved_by_email: userEmail, prep_approved_date: nowIso },
+      });
+      const { project, customer, customerName, url } = await projectCtx(s, project_id);
+      if (customer) await qEmail(s, cfg, customer.email, '[Customer] Floor preparation complete and approved',
+        `Hi ${customer.first_name || 'there'},\n\nFloor preparation is complete and approved. Installation can now begin.\n\nThank you for choosing Floor Daddy!`, true);
+      const installer = await installerOf(s, project);
+      if (installer) {
+        await qEmail(s, cfg, installer.email, `[Installer] Prep Approved — Installation Unlocked — ${customerName}`,
+          `Hi ${installer.crew_name},\n\nFloor prep has been approved by ${userName}. You are clear to begin installation.\n\nProject: ${url}`);
+        await qSms(s, cfg, installer.phone, `Floor Daddy: Prep APPROVED for ${customerName}. Installation unlocked — you're clear to lay floor.`);
+        await s.from('project_checkpoint').update({ checklist_data: { ...(checkpoint?.checklist_data || {}), installer_notified_date: nowIso, installer_notified_name: installer.crew_name } }).eq('id', checkpoint_id);
+      }
+      return { status: 200, body: { success: true, checkpoint } };
+    }
+
+    case 'submit_install': {
+      const existing = checkpoint_id ? await one(s, 'project_checkpoint', checkpoint_id) : null;
+      const prev = existing?.checklist_data || {};
+      const merged = {
+        ...prev,
+        install_core: checklist_data?.install_core ?? prev.install_core,
+        install_hard_surface: checklist_data?.install_hard_surface ?? prev.install_hard_surface,
+        install_carpet: checklist_data?.install_carpet ?? prev.install_carpet,
+        install_tile: checklist_data?.install_tile ?? prev.install_tile,
+      };
+      const fields = { status: 'Completed', checklist_data: merged, submitted_by_name: userName, submitted_by_email: userEmail, submitted_date: nowIso };
+      const checkpoint = await upsertCheckpoint(s, checkpoint_id, { project_id, step_key, ...fields }, fields);
+      const { customer, customerName, url } = await projectCtx(s, project_id);
+      const region = await matchRegion(s, customer);
+      if (region?.install_coordinator_id) {
+        const ic = await one(s, 'team_member', region.install_coordinator_id);
+        if (ic) await qEmail(s, cfg, ic.email, `[Install Coordinator] Midpoint Cleared — ${customerName}`,
+          `Hi ${ic.first_name},\n\nFloor prep and installation are underway for ${customerName}. Midpoint has been cleared.\n\nRegion: ${region.region_name}\nProject: ${url}`);
+      }
+      return { status: 200, body: { success: true, checkpoint } };
+    }
+
+    case 'approve': {
+      const checkpoint = await upsertCheckpoint(s, checkpoint_id, null, {
+        status: 'Completed', approved_by_name: userName, approved_by_email: userEmail, approved_date: nowIso, rejection_notes: null,
+      });
+      const { project, customer, customerName, url } = await projectCtx(s, project_id);
+      if (step_key === 'job_start_checklist') {
+        for (const m of await alertMembers(s, 'job_started'))
+          await qEmail(s, cfg, m.email, '[Alert Team] Job Started — Installation Underway',
+            `Installation has started for ${customerName} (Project ${project_id}). Job start checklist approved by ${userName}.`);
+        if (customer) await qEmail(s, cfg, customer.email, '[Customer] Your installation is underway',
+          `Hi ${customer.first_name || 'there'},\n\nYour installer has arrived and your installation is now underway.\n\nThank you for choosing Floor Daddy!`, true);
+      }
+      const installer = await installerOf(s, project);
+      if (installer) {
+        await qEmail(s, cfg, installer.email, `[Installer] Approved: ${label} — ${customerName}`,
+          `Hi ${installer.crew_name},\n\nYour ${label} for ${customerName} has been approved. You're clear to proceed.\n\nProject: ${url}`);
+        await qSms(s, cfg, installer.phone, `Floor Daddy: Your ${label} for ${customerName} has been APPROVED. You're clear to proceed.`);
+      }
+      return { status: 200, body: { success: true, checkpoint } };
+    }
+
+    case 'approve_final': {
+      const existing = await one(s, 'project_checkpoint', checkpoint_id);
+      const checkpoint = await upsertCheckpoint(s, checkpoint_id, null, {
+        status: 'PrepApproved',
+        checklist_data: { ...(existing?.checklist_data || {}), final_approved_by_name: userName, final_approved_by_email: userEmail, final_approved_date: nowIso },
+      });
+      const { project, customerName, url } = await projectCtx(s, project_id);
+      const installer = await installerOf(s, project);
+      if (installer) {
+        await qEmail(s, cfg, installer.email, `[Installer] Final Walkthrough Approved — Payment Unlocked — ${customerName}`,
+          `Hi ${installer.crew_name},\n\nFinal walkthrough has been approved by ${userName}. Payment submission is now unlocked.\n\nProject: ${url}`);
+        await qSms(s, cfg, installer.phone, `Floor Daddy: Final walkthrough APPROVED for ${customerName}. Payment submission unlocked.`);
+        await s.from('project_checkpoint').update({ checklist_data: { ...(checkpoint?.checklist_data || {}), installer_notified_date: nowIso, installer_notified_name: installer.crew_name } }).eq('id', checkpoint_id);
+      }
+      return { status: 200, body: { success: true, checkpoint } };
+    }
+
+    case 'submit_for_payment': {
+      const existing = await one(s, 'project_checkpoint', checkpoint_id);
+      const merged = { ...(existing?.checklist_data || {}), ...(checklist_data || {}) };
+      const checkpoint = await upsertCheckpoint(s, checkpoint_id, null, {
+        status: 'Completed',
+        checklist_data: { ...merged, payment_submitted_by_name: userName, payment_submitted_by_email: userEmail, payment_submitted_date: nowIso },
+      });
+      const { customer, customerName, url } = await projectCtx(s, project_id);
+      const region = await matchRegion(s, customer);
+      if (region) {
+        const ids = [region.field_manager_id, region.install_coordinator_id, region.order_entry_id].filter(Boolean);
+        if (ids.length) {
+          const { data: recs } = await s.from('team_member').select('*').in('id', ids);
+          for (const m of recs || [])
+            await qEmail(s, cfg, m.email, `[Ops Team] Job Complete — Payment Submitted — ${customerName}`,
+              `Hi ${m.first_name},\n\nThe final walkthrough is complete and payment has been submitted for ${customerName}.\n\nRegion: ${region.region_name}\nProject: ${url}`);
+        }
+      }
+      if (customer) await qEmail(s, cfg, customer.email, '[Customer] Your installation is complete',
+        `Hi ${customer.first_name || 'there'},\n\nYour installation is complete. Thank you for choosing Floor Daddy!`, true);
+      if (merged?.five_star_review?.review_request_made) {
+        for (const r of await alertMembers(s, 'five_star_review'))
+          await qEmail(s, cfg, r.email, `[Review Team] 5-Star Review Request — ${customerName}`,
+            `Hi ${r.first_name},\n\nA 5-star review request was made onsite for ${customerName}. Please close the loop and follow up.\n\nProject: ${url}`);
+      }
+      return { status: 200, body: { success: true, checkpoint } };
+    }
+
+    case 'reject': {
+      const notes = rejection_notes || 'Please review and resubmit.';
+      const checkpoint = await upsertCheckpoint(s, checkpoint_id, null, { status: 'Rejected', rejection_notes: notes });
+      const { project, customerName, url } = await projectCtx(s, project_id);
+      const installer = await installerOf(s, project);
+      if (installer) {
+        await qEmail(s, cfg, installer.email, `[Installer] Action Needed: ${label} Rejected — ${customerName}`,
+          `Hi ${installer.crew_name},\n\nYour ${label} for ${customerName} was rejected and needs revisions.\n\nReason: ${notes}\n\nProject: ${url}`);
+        await qSms(s, cfg, installer.phone, `Floor Daddy: Your ${label} for ${customerName} was REJECTED. ${String(notes).substring(0, 100)}`);
+      }
+      return { status: 200, body: { success: true, checkpoint } };
+    }
+
+    case 'resend_notification': {
+      const cp = await one(s, 'project_checkpoint', checkpoint_id);
+      if (!cp) return { status: 404, body: { error: 'Checkpoint not found' } };
+      const { project, customer, customerName, url } = await projectCtx(s, cp.project_id || project_id);
+      const region = await matchRegion(s, customer);
+      const fmId = region?.field_manager_id || project?.field_manager_id;
+      if (!fmId) return { status: 404, body: { error: 'No field manager assigned to this region or project' } };
+      const fm = await one(s, 'team_member', fmId);
+      if (!fm) return { status: 404, body: { error: 'Field manager not found' } };
+      const cpLabel = STEP_LABELS[cp.step_key] || cp.step_key;
+      const regionName = region?.region_name || 'Unassigned';
+      const emailSent = await qEmail(s, cfg, fm.email, `[Field Manager] Approval Needed: ${cpLabel} — ${customerName}`,
+        `Hi ${fm.first_name || 'Manager'},\n\n${cpLabel} has been submitted for approval and is awaiting your review.\n\nCustomer: ${customerName}\nSubmitted by: ${cp.submitted_by_name || 'Installer'}\nRegion: ${regionName}\n\nReview and approve here: ${url}`);
+      const smsSent = await qSms(s, cfg, fm.phone, `Floor Daddy: ${cpLabel} submitted for ${customerName} in ${regionName}. Approval needed: ${url}`);
+      return { status: 200, body: { success: true, emailSent, smsSent, fieldManager: `${fm.first_name} ${fm.last_name}` } };
+    }
+
+    case 'resend_installer_notification': {
+      const cp = await one(s, 'project_checkpoint', checkpoint_id);
+      if (!cp) return { status: 404, body: { error: 'Checkpoint not found' } };
+      const { project, customerName, url } = await projectCtx(s, cp.project_id || project_id);
+      const installer = await installerOf(s, project);
+      if (!installer) return { status: 404, body: { error: 'No installer assigned' } };
+      const emailSent = await qEmail(s, cfg, installer.email, `[Installer] Prep Approved — Installation Unlocked — ${customerName}`,
+        `Hi ${installer.crew_name},\n\nFloor prep has been approved by ${userName}. You are clear to begin installation.\n\nProject: ${url}`);
+      const smsSent = await qSms(s, cfg, installer.phone, `Floor Daddy: Prep APPROVED for ${customerName}. Installation unlocked — you're clear to lay floor.`);
+      await s.from('project_checkpoint').update({ checklist_data: { ...(cp.checklist_data || {}), installer_notified_date: nowIso, installer_notified_name: installer.crew_name } }).eq('id', checkpoint_id);
+      return { status: 200, body: { success: true, emailSent, smsSent, installer: installer.crew_name } };
+    }
+
+    default:
+      return { status: 400, body: { error: 'Unknown action' } };
+  }
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  const s = svc();
+  const internal = await getSecret(s, 'CRON_SECRET');
+  const isInternal = !!internal && req.headers.get('x-internal-secret') === internal;
+  let user: any = null;
+  if (!isInternal) { user = await currentUser(req); if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors }); }
+
+  try {
+    const body = await req.json();
+    if (!body?.action) return Response.json({ error: 'action required' }, { status: 400, headers: cors });
+    const result = await handle(s, body, user);
+    return Response.json(result.body, { status: result.status, headers: cors });
+  } catch (e) {
+    return Response.json({ error: (e as Error).message }, { status: 500, headers: cors });
+  }
+});
