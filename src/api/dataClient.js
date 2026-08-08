@@ -295,6 +295,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'esign',
   'financeReport',
   'smsDispatch',
+  'invokeLLM',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -339,6 +340,12 @@ const EDGE_ALIASES = {
   sendPastDueProjectsAlert:       () => ['smsDispatch', { type: 'past_due' }],
   sendPendingCancellationAlert:   () => ['smsDispatch', { type: 'pending_cancellation' }],
   sendUnassignedDCAlerts:         () => ['smsDispatch', { type: 'unassigned_dc' }],
+
+  // ── LLM (Anthropic Claude) -> the invokeLLM bridge. The raw InvokeLLM contract lives on
+  // integrations.Core.InvokeLLM (below); these two server functions call the bridge + update
+  // a record. analyzeValueAdds is deferred to P7 (needs recording_analysis transcripts).
+  extractContractData:            (p) => ['invokeLLM', { task: 'extract_contract', contractUrl: p.contractUrl, saleId: p.saleId }],
+  analyzeNotSoldReason:           (p) => ['invokeLLM', { task: 'analyze_not_sold', appointmentId: p.appointmentId, event: p.event }],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —
@@ -434,8 +441,13 @@ const integrations = {
       return { success: true, stub: true };
     },
     async InvokeLLM(args) {
-      console.warn('[dataClient] InvokeLLM stubbed.', args);
-      return { stub: true };
+      // Backed by the invokeLLM edge function (Anthropic Claude). Returns the LLM result
+      // directly: the parsed object when args.response_json_schema is given, else the text
+      // string; { stub: true } when the AI integration isn't connected yet (callers already
+      // handle result?.stub). Errors bubble up so callers can surface credit/quota messages.
+      const { data, error } = await supabase.functions.invoke('invokeLLM', { body: args });
+      if (error) throw error;
+      return data;
     },
     async GenerateImage(args) {
       console.warn('[dataClient] GenerateImage stubbed.', args);
