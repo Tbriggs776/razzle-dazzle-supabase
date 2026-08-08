@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import PhotoLightboxModal from './PhotoLightboxModal';
+import { toast } from 'sonner';
 
 function ChecklistRow({ label, checked, onChange, disabled, required, missing }) {
   return (
@@ -153,7 +154,7 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
     } catch (e) {
       console.error('Submit failed', e);
-      alert('Failed to submit. Please try again.');
+      toast.error('Failed to submit. Please try again.');
     } finally {
       setSaving(false);
     }

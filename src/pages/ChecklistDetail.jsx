@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Calendar, Trash2, Loader2, Save, Clock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ChecklistPanel from '@/components/appointments/ChecklistPanel';
+import { toast } from 'sonner';
 
 // Convert checklist time block format to appointment format
 const convertTimeBlock = (checklistBlock) => {
@@ -306,7 +307,7 @@ export default function ChecklistDetail() {
     },
     onError: (error) => {
       // Show error dialog
-      alert(`Failed to convert to appointment: ${error.message}`);
+      toast.error(`Failed to convert to appointment: ${error.message}`);
     }
   });
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -372,11 +373,11 @@ export default function ProjectDetail() {
 
         queryClient.invalidateQueries({ queryKey: ['projectLogs', projectId] });
         
-        alert('SMS sent successfully!');
+        toast.success('SMS sent successfully!');
       }
     } catch (error) {
       console.error('Failed to send SMS:', error);
-      alert('Failed to send SMS');
+      toast.error('Failed to send SMS');
     } finally {
       setSendingSMS(false);
     }
@@ -415,7 +416,7 @@ export default function ProjectDetail() {
       queryClient.invalidateQueries({ queryKey: ['projectLogs', projectId] });
     } catch (error) {
       console.error('Failed to log action:', error);
-      alert('Failed to log action');
+      toast.error('Failed to log action');
     }
   };
 
@@ -444,7 +445,7 @@ export default function ProjectDetail() {
       }
     } catch (error) {
       console.error('Failed to add note:', error);
-      alert('Failed to add note');
+      toast.error('Failed to add note');
     }
   };
 
@@ -498,7 +499,7 @@ export default function ProjectDetail() {
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
     } catch (error) {
       console.error('Failed to upload image:', error);
-      alert('Failed to upload image');
+      toast.error('Failed to upload image');
     } finally {
       setUploadingImage(false);
       event.target.value = '';
@@ -520,7 +521,7 @@ export default function ProjectDetail() {
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
     } catch (error) {
       console.error('Failed to delete image:', error);
-      alert('Failed to delete image');
+      toast.error('Failed to delete image');
     }
   };
 
@@ -545,7 +546,7 @@ export default function ProjectDetail() {
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
     } catch (error) {
       console.error('Failed to upload file:', error);
-      alert('Failed to upload file');
+      toast.error('Failed to upload file');
     } finally {
       setUploadingFile(false);
       event.target.value = '';
@@ -559,7 +560,7 @@ export default function ProjectDetail() {
       queryClient.invalidateQueries({ queryKey: ['project', projectId] });
     } catch (error) {
       console.error('Failed to delete file:', error);
-      alert('Failed to delete file');
+      toast.error('Failed to delete file');
     }
   };
 

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 // AudioRecorder component
 import { Button } from "@/components/ui/button";
 import { Mic, Square, Pause, Play, Upload, Loader2, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 import * as Bytescale from "@bytescale/sdk";
@@ -68,7 +69,7 @@ export default function AudioRecorder({ appointmentId, onUploadComplete }) {
       }, 1000);
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      alert('Could not access microphone. Please grant permission and try again.');
+      toast.error('Could not access microphone. Please grant permission and try again.');
     }
   };
 
@@ -144,7 +145,7 @@ export default function AudioRecorder({ appointmentId, onUploadComplete }) {
       }, 2000);
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload recording. Please try again.');
+      toast.error('Failed to upload recording. Please try again.');
     } finally {
       setIsUploading(false);
     }

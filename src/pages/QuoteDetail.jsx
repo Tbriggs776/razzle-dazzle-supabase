@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -138,7 +139,7 @@ export default function QuoteDetail() {
       const { fileUrl } = await uploadManager.upload({ data: file });
       await updateMutation.mutateAsync({ quote_file_url: fileUrl });
     } catch (err) {
-      alert('Failed to upload quote PDF');
+      toast.error('Failed to upload quote PDF');
     } finally {
       setUploadingQuotePdf(false);
     }
@@ -159,7 +160,7 @@ export default function QuoteDetail() {
         if (data?.success && data?.total) setConvertAmount(data.total.toString());
       } catch {}
     } catch (err) {
-      alert('Failed to upload contract');
+      toast.error('Failed to upload contract');
     } finally {
       setUploadingContract(false);
     }
@@ -290,7 +291,7 @@ export default function QuoteDetail() {
       setShowConvertDialog(false);
       navigate(createPageUrl('SaleDetail') + `?id=${saleId}`);
     },
-    onError: (err) => alert('Failed to convert quote: ' + err.message)
+    onError: (err) => toast.error('Failed to convert quote: ' + err.message)
   });
 
   // Save deposit info to quote
@@ -311,7 +312,7 @@ export default function QuoteDetail() {
   // Generate receipt PDF and upload it, then save URL
   const handleGenerateReceipt = async () => {
     if (!quoteDepositAmount || !quoteDepositMethod) {
-      alert('Please enter a deposit amount and payment method first.');
+      toast.error('Please enter a deposit amount and payment method first.');
       return;
     }
     setGeneratingReceipt(true);
@@ -343,7 +344,7 @@ export default function QuoteDetail() {
       // Also trigger browser download
       doc.save(`receipt-${lead?.last_name || 'customer'}-${new Date().toLocaleDateString('en-US').replace(/\//g, '-')}.pdf`);
     } catch (err) {
-      alert('Failed to generate receipt: ' + err.message);
+      toast.error('Failed to generate receipt: ' + err.message);
     } finally {
       setGeneratingReceipt(false);
     }

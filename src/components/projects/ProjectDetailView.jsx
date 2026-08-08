@@ -1,5 +1,6 @@
 import React from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -165,11 +166,11 @@ export default function ProjectDetailView({
 
         queryClient.invalidateQueries({ queryKey: ['projectLogs', project.id] });
         
-        alert('SMS sent successfully!');
+        toast.success('SMS sent successfully!');
       }
     } catch (error) {
       console.error('Failed to send SMS:', error);
-      alert('Failed to send SMS');
+      toast.error('Failed to send SMS');
     } finally {
       setSendingSMS(false);
     }
@@ -207,7 +208,7 @@ export default function ProjectDetailView({
       queryClient.invalidateQueries({ queryKey: ['projectLogs', project.id] });
     } catch (error) {
       console.error('Failed to log action:', error);
-      alert('Failed to log action');
+      toast.error('Failed to log action');
     }
   };
 
@@ -230,7 +231,7 @@ export default function ProjectDetailView({
       setNewNote('');
     } catch (error) {
       console.error('Failed to add note:', error);
-      alert('Failed to add note');
+      toast.error('Failed to add note');
     }
   };
 
@@ -260,7 +261,7 @@ export default function ProjectDetailView({
       queryClient.invalidateQueries({ queryKey: ['project', project.id] });
     } catch (error) {
       console.error('Failed to upload image:', error);
-      alert('Failed to upload image');
+      toast.error('Failed to upload image');
     } finally {
       setUploadingImage(false);
     }
@@ -273,7 +274,7 @@ export default function ProjectDetailView({
       queryClient.invalidateQueries({ queryKey: ['project', project.id] });
     } catch (error) {
       console.error('Failed to delete image:', error);
-      alert('Failed to delete image');
+      toast.error('Failed to delete image');
     }
   };
 

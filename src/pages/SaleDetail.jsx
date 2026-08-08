@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -290,7 +291,7 @@ export default function SaleDetail() {
         contract_extraction_status: 'error'
       });
       queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
-      alert('Failed to extract contract data from contract');
+      toast.error('Failed to extract contract data from contract');
     }
   };
 
@@ -301,9 +302,9 @@ export default function SaleDetail() {
         saleId,
         appUrl: window.location.origin
       });
-      alert(`Email sent successfully to ${data.recipientCount} recipient(s)`);
+      toast.success(`Email sent successfully to ${data.recipientCount} recipient(s)`);
     } catch (error) {
-      alert(`Failed to send email: ${error.message}`);
+      toast.error(`Failed to send email: ${error.message}`);
     } finally {
       setSendingEmail(false);
     }
@@ -312,7 +313,7 @@ export default function SaleDetail() {
   const handleSendGPAlert = async () => {
     const lines = sale.rfms_order_data?.order?.result?.lines || sale.rfms_order_data?.result?.lines || [];
     if (lines.length === 0) {
-      alert('No RFMS line item data available. Fetch RFMS data first.');
+      toast.error('No RFMS line item data available. Fetch RFMS data first.');
       return;
     }
     setSendingGPAlert(true);
@@ -330,12 +331,12 @@ export default function SaleDetail() {
         invoiceNumber: sale.invoice_number
       });
       if (data.sent > 0) {
-        alert(`GP alert sent to ${data.sent} recipient(s). GP%: ${gpPercent.toFixed(1)}%`);
+        toast.success(`GP alert sent to ${data.sent} recipient(s). GP%: ${gpPercent.toFixed(1)}%`);
       } else {
-        alert(`No alert sent. ${data.message || `GP ${gpPercent.toFixed(1)}% is above the configured threshold.`}`);
+        toast(`No alert sent. ${data.message || `GP ${gpPercent.toFixed(1)}% is above the configured threshold.`}`);
       }
     } catch (error) {
-      alert(`Failed to send GP alert: ${error.message}`);
+      toast.error(`Failed to send GP alert: ${error.message}`);
     } finally {
       setSendingGPAlert(false);
     }
@@ -343,7 +344,7 @@ export default function SaleDetail() {
 
   const handleFetchRFMSOrder = async () => {
     if (!sale?.invoice_number) {
-      alert('No invoice number found on this sale');
+      toast.error('No invoice number found on this sale');
       return;
     }
 
@@ -385,14 +386,14 @@ export default function SaleDetail() {
           }
         }
 
-        alert('RFMS order data fetched successfully!');
+        toast.success('RFMS order data fetched successfully!');
       } else {
         console.error('RFMS fetch failed:', data);
-        alert(`Failed to fetch RFMS order: ${data.error || 'Unknown error'}`);
+        toast.error(`Failed to fetch RFMS order: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('RFMS fetch error:', error);
-      alert(`Failed to fetch RFMS order: ${error.message}`);
+      toast.error(`Failed to fetch RFMS order: ${error.message}`);
     } finally {
       setFetchingRFMS(false);
     }
@@ -428,7 +429,7 @@ export default function SaleDetail() {
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload contract');
+      toast.error('Failed to upload contract');
     } finally {
       setUploadingNewContract(false);
     }
@@ -452,7 +453,7 @@ export default function SaleDetail() {
       setEditAmount('');
     } catch (error) {
       console.error('Failed to replace contract:', error);
-      alert('Failed to replace contract');
+      toast.error('Failed to replace contract');
     }
   };
 

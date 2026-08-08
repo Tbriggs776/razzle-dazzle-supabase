@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { cn } from '@/lib/utils';
 import * as Bytescale from "@bytescale/sdk";
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 const CHECKLIST_ITEMS = [
   {
@@ -220,7 +221,7 @@ export default function PreInstallChecklistModal({ open, onClose, onComplete, le
       onComplete({ productInfo: productInfo.trim(), signatureUrl: fileUrl });
     } catch (err) {
       console.error('Signature upload failed:', err);
-      alert('Failed to save signature. Please try again.');
+      toast.error('Failed to save signature. Please try again.');
     } finally {
       setUploading(false);
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ReactQuill from 'react-quill';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -670,9 +671,9 @@ export default function Settings() {
     try {
       const payload = selectedTestAppointment !== 'all' ? { appointmentId: selectedTestAppointment } : {};
       const { data } = await base44.functions.invoke('sendAppointmentReminders', payload);
-      alert(`Test complete!\n\nSent: ${data.sent || 0}\nFailed: ${data.failed || 0}\nSkipped: ${data.skipped || 0}`);
+      toast.success(`Test complete!\n\nSent: ${data.sent || 0}\nFailed: ${data.failed || 0}\nSkipped: ${data.skipped || 0}`);
     } catch (error) {
-      alert('Test failed: ' + error.message);
+      toast.error('Test failed: ' + error.message);
     } finally {
       setTestingReminders(false);
     }
@@ -683,9 +684,9 @@ export default function Settings() {
     try {
       const payload = selectedTestDC !== 'all' ? { dcId: selectedTestDC } : {};
       const { data } = await base44.functions.invoke('sendFollowUpReminders', payload);
-      alert(`Test complete!\n\nSent: ${data.sentCount || 0} reminders to ${data.totalDCs || 0} DCs`);
+      toast.success(`Test complete!\n\nSent: ${data.sentCount || 0} reminders to ${data.totalDCs || 0} DCs`);
     } catch (error) {
-      alert('Test failed: ' + error.message);
+      toast.error('Test failed: ' + error.message);
     } finally {
       setTestingFollowUpReminders(false);
     }
@@ -693,16 +694,16 @@ export default function Settings() {
 
   const testEmail = async (emailType) => {
     if (!formData.divert_emails_to) {
-      alert('Please set a divert email address first');
+      toast.error('Please set a divert email address first');
       return;
     }
     
     setTestingEmail(emailType);
     try {
       const { data } = await base44.functions.invoke('sendTestEmail', { emailType });
-      alert(`Test email sent to ${formData.divert_emails_to}!`);
+      toast.success(`Test email sent to ${formData.divert_emails_to}!`);
     } catch (error) {
-      alert('Test failed: ' + error.message);
+      toast.error('Test failed: ' + error.message);
     } finally {
       setTestingEmail(null);
     }
@@ -903,9 +904,9 @@ export default function Settings() {
                     setSendingPastDueAlert(true);
                     try {
                       await base44.functions.invoke('sendPastDueProjectsAlert', {});
-                      alert('Alert sent!');
+                      toast.success('Alert sent!');
                     } catch (e) {
-                      alert('Failed: ' + e.message);
+                      toast.error('Failed: ' + e.message);
                     } finally {
                       setSendingPastDueAlert(false);
                     }
@@ -980,9 +981,9 @@ export default function Settings() {
                     setSendingPendingCancellationAlert(true);
                     try {
                       const { data } = await base44.functions.invoke('sendPendingCancellationAlert', {});
-                      alert(`Alert sent! ${data.jobCount} job(s) included.`);
+                      toast.success(`Alert sent! ${data.jobCount} job(s) included.`);
                     } catch (e) {
-                      alert('Failed: ' + e.message);
+                      toast.error('Failed: ' + e.message);
                     } finally {
                       setSendingPendingCancellationAlert(false);
                     }
@@ -1141,9 +1142,9 @@ export default function Settings() {
                   onClick={async () => {
                     try {
                       const { data } = await base44.functions.invoke('sendUnassignedDCAlerts', {});
-                      alert(`Done! Sent to ${data.sent} number(s).`);
+                      toast.success(`Done! Sent to ${data.sent} number(s).`);
                     } catch (e) {
-                      alert('Failed: ' + e.message);
+                      toast.error('Failed: ' + e.message);
                     }
                   }}
                   className="border-red-300 text-red-700 hover:bg-red-50"

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -52,9 +53,9 @@ export default function CreateQuoteDialog({ open, onClose, lead, appointment, ap
       });
 
       handleClose();
-      alert('Quote created successfully! You can manage it from My Quotes.');
+      toast.success('Quote created successfully! You can manage it from My Quotes.');
     } catch (err) {
-      alert('Failed to create quote: ' + err.message);
+      toast.error('Failed to create quote: ' + err.message);
     } finally {
       setSubmittingQuote(false);
     }

@@ -42,6 +42,7 @@ import PreInstallChecklistModal from '@/components/PreInstallChecklistModal';
 import ChecklistDisplay from '@/components/appointments/ChecklistDisplay';
 import ChecklistV2Display from '@/components/appointments/ChecklistV2Display';
 import CreateQuoteDialog from '@/components/appointments/CreateQuoteDialog';
+import { toast } from 'sonner';
 
 const statusColors = {
   'Lead': 'bg-slate-100 text-slate-700 border-slate-200',
@@ -512,7 +513,7 @@ export default function ConsultantAppointmentView() {
     },
     onError: (error) => {
       console.error('Failed to update status:', error);
-      alert('Failed to update appointment status: ' + (error?.message || 'Unknown error. Please try again.'));
+      toast.error('Failed to update appointment status: ' + (error?.message || 'Unknown error. Please try again.'));
     }
   });
 
@@ -562,7 +563,7 @@ export default function ConsultantAppointmentView() {
       }
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload contract');
+      toast.error('Failed to upload contract');
     } finally {
       setUploadingContract(false);
     }
@@ -582,7 +583,7 @@ export default function ConsultantAppointmentView() {
       setFolderPhotoUrl(fileUrl);
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload photo');
+      toast.error('Failed to upload photo');
     } finally {
       setUploadingFolderPhoto(false);
     }
@@ -602,7 +603,7 @@ export default function ConsultantAppointmentView() {
       setYardSignPhotoUrl(fileUrl);
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload photo');
+      toast.error('Failed to upload photo');
     } finally {
       setUploadingYardSignPhoto(false);
     }
@@ -618,7 +619,7 @@ export default function ConsultantAppointmentView() {
       setProductPhotos(prev => [...prev, fileUrl]);
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload photo');
+      toast.error('Failed to upload photo');
     } finally {
       setUploadingProductPhoto(false);
     }
@@ -638,7 +639,7 @@ export default function ConsultantAppointmentView() {
       setDriverLicensePhotoUrl(fileUrl);
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload photo');
+      toast.error('Failed to upload photo');
     } finally {
       setUploadingDriverLicensePhoto(false);
     }
@@ -660,7 +661,7 @@ export default function ConsultantAppointmentView() {
       setStandaloneSent(true);
     } catch (err) {
       console.error('Failed to send checklist:', err);
-      alert('Failed to send checklist email');
+      toast.error('Failed to send checklist email');
     } finally {
       setSendingStandaloneChecklist(false);
     }

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw, Mail, Phone, Loader2, Save, HardHat, UserPlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 export default function InstallerManager() {
   const queryClient = useQueryClient();
@@ -47,7 +48,7 @@ export default function InstallerManager() {
       queryClient.invalidateQueries({ queryKey: ['installers'] });
     } catch (e) {
       console.error('Sync failed', e);
-      alert('Failed to sync crews: ' + e.message);
+      toast.error('Failed to sync crews: ' + e.message);
     } finally {
       setSyncing(false);
     }
@@ -69,7 +70,7 @@ export default function InstallerManager() {
       queryClient.invalidateQueries({ queryKey: ['installers'] });
     } catch (e) {
       console.error('Save failed', e);
-      alert('Failed to save: ' + e.message);
+      toast.error('Failed to save: ' + e.message);
     } finally {
       setSavingId(null);
     }
@@ -92,7 +93,7 @@ export default function InstallerManager() {
 
   const handleAddManual = async () => {
     if (!newCrew.crew_name.trim()) {
-      alert('Crew name is required.');
+      toast.error('Crew name is required.');
       return;
     }
     setAdding(true);
@@ -110,7 +111,7 @@ export default function InstallerManager() {
       queryClient.invalidateQueries({ queryKey: ['installers'] });
     } catch (e) {
       console.error('Add manual crew failed', e);
-      alert('Failed to add crew: ' + e.message);
+      toast.error('Failed to add crew: ' + e.message);
     } finally {
       setAdding(false);
     }

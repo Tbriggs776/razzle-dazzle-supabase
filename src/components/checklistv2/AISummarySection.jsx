@@ -73,6 +73,10 @@ export default function AISummarySection({ formData, onChange }) {
     setGenerateError('');
     try {
       const summary = await base44.integrations.Core.InvokeLLM({ prompt: buildPrompt() });
+      if (summary?.stub) {
+        setGenerateError('AI summary is not available yet — it turns on once the AI integration is connected. You can type one manually below.');
+        return;
+      }
       onChange('ai_summary', summary);
     } catch (err) {
       console.error('AI summary failed:', err);

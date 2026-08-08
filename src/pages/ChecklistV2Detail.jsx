@@ -27,6 +27,7 @@ import AppointmentSchedulingSection from '@/components/checklistv2/AppointmentSc
 import RecapSection from '@/components/checklistv2/RecapSection';
 import OutroSection from '@/components/checklistv2/OutroSection';
 import AISummarySection from '@/components/checklistv2/AISummarySection';
+import { toast } from 'sonner';
 
 // Convert en-dash time block to "to" format for Appointment entity
 const convertTimeBlock = (block) => block ? block.replace(/–/g, ' to ') : undefined;
@@ -198,7 +199,7 @@ export default function ChecklistV2Detail() {
       navigate(createPageUrl('AppointmentDetail') + `?id=${appointmentId}`);
     },
     onError: (error) => {
-      alert(`Failed to convert: ${error.message}`);
+      toast.error(`Failed to convert: ${error.message}`);
     }
   });
 

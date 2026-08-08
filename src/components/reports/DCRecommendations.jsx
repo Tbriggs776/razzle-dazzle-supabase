@@ -120,6 +120,10 @@ ${JSON.stringify(payload, null, 2)}`,
           }
         }
       });
+      if (result?.stub) {
+        setRecommendation('AI recommendations are not available yet — they turn on once the AI integration is connected.');
+        return;
+      }
       setRecommendation(result.recommendation || 'No recommendation generated.');
     } catch (e) {
       setRecommendation('Unable to generate recommendation at this time. Please try refreshing.');

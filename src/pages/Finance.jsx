@@ -7,6 +7,7 @@ import { ArrowLeft, DollarSign, Loader2, MapPin, Calendar, CheckCircle2, Send } 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 export default function Finance() {
   const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ export default function Finance() {
     setSendingReport(true);
     await base44.functions.invoke('sendFinanceReport', {});
     setSendingReport(false);
-    alert('Finance report sent!');
+    toast.success('Finance report sent!');
   };
 
   const handleMarkFundsReceived = async (e, projectId) => {

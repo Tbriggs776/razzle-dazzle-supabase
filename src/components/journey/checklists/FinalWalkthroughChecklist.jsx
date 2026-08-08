@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Send, CheckCircle2, XCircle, Lock, ShieldCheck, DollarSign, Star, FileSignature, ClipboardCheck, Layers } from 'lucide-react';
@@ -206,7 +207,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       onSubmitted?.();
     } catch (e) {
       console.error('Submit failed', e);
-      alert('Failed to submit. Please try again.');
+      toast.error('Failed to submit. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -265,7 +266,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       onSubmitted?.();
     } catch (e) {
       console.error('Submit for payment failed', e);
-      alert('Failed to submit for payment. Please try again.');
+      toast.error('Failed to submit for payment. Please try again.');
     } finally {
       setSaving(false);
     }

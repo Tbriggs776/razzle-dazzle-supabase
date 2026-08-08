@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Send, CheckCircle2, XCircle, Lock, DollarSign, ShieldCheck } from 'lucide-react';
@@ -181,7 +182,7 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
     } catch (e) {
       console.error('Submit failed', e);
-      alert('Failed to submit. Please try again.');
+      toast.error('Failed to submit. Please try again.');
     } finally {
       setSaving(false);
     }

@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import FieldManagerNotificationBadge from './FieldManagerNotificationBadge';
 import PhotoLightboxModal from './PhotoLightboxModal';
+import { toast } from 'sonner';
 
 function ChecklistRow({ label, checked, onChange, disabled, required, missing }) {
   return (
@@ -183,13 +184,13 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
       });
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
       if (res.data?.asbestos_halt) {
-        alert('⚠️ HARD STOP: Asbestos suspected. Installation halted. Field Manager, Zone Manager, and Ops have been alerted.');
+        toast('⚠️ HARD STOP: Asbestos suspected. Installation halted. Field Manager, Zone Manager, and Ops have been alerted.');
       }
       setMode('review');
       onSubmitted?.();
     } catch (e) {
       console.error('Submit failed', e);
-      alert('Failed to submit checklist. Please try again.');
+      toast.error('Failed to submit checklist. Please try again.');
     } finally {
       setSaving(false);
     }

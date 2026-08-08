@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -44,7 +45,7 @@ export default function SalesReports() {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
     } catch (error) {
       console.error('Failed to analyze:', error);
-      alert('Failed to analyze: ' + error.message);
+      toast.error('Failed to analyze: ' + error.message);
     } finally {
       setAnalyzingId(null);
     }

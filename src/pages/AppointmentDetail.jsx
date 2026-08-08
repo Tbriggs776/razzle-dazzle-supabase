@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -699,7 +700,7 @@ export default function AppointmentDetail() {
           navigate(createPageUrl('Appointments'));
         },
         onError: (error) => {
-          alert(`Failed to delete appointment: ${error.message}`);
+          toast.error(`Failed to delete appointment: ${error.message}`);
         }
       });
 

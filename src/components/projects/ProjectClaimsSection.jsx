@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -144,7 +145,7 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
       await base44.functions.invoke('sendProjectClaimEmail', { claimId: claim.id });
       queryClient.invalidateQueries({ queryKey: ['projectClaims', project.id] });
     } catch (e) {
-      alert('Failed to send: ' + e.message);
+      toast.error('Failed to send: ' + e.message);
     }
     setSendingId(null);
   };
