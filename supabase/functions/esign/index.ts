@@ -84,10 +84,20 @@ async function reqByToken(s: any, token: string) {
   const { data } = await s.from('signature_request').select('*').eq('token', token).maybeSingle();
   return data;
 }
-async function uploadToStorage(s: any, bytes: Uint8Array, path: string, contentType: string): Promise<string> {
-  const up = await s.storage.from('uploads').upload(path, bytes, { contentType, upsert: false });
+// Signed artifacts live in the PRIVATE 'esign' bucket. We store the storage PATH on the
+// record and mint short-lived signed URLs on demand (client download, email attach, admin view)
+// — never a public URL.
+const ESIGN_BUCKET = 'esign';
+async function uploadPrivate(s: any, bytes: Uint8Array, path: string, contentType: string): Promise<string> {
+  const up = await s.storage.from(ESIGN_BUCKET).upload(path, bytes, { contentType, upsert: true });
   if (up.error) throw new Error(`upload failed: ${up.error.message}`);
-  return s.storage.from('uploads').getPublicUrl(path).data.publicUrl;
+  return path;
+}
+async function signedUrl(s: any, path: string, ttlSeconds = 3600): Promise<string | null> {
+  if (!path) return null;
+  const { data, error } = await s.storage.from(ESIGN_BUCKET).createSignedUrl(path, ttlSeconds);
+  if (error) return null;
+  return data.signedUrl;
 }
 
 // ---- sealed PDF (document snapshot + signature + audit certificate) ----
@@ -116,7 +126,8 @@ async function buildSealedPdf(s: any, request: any, config: any, events: any[]):
 
   y = cbrk(doc, y, 60); y = secH(doc, 'Signature', y, C);
   y = lv(doc, 'Electronically signed by', request.signer_printed_name || request.signer_name, 20, y, 170);
-  if (request.signature_image_url) { try { const r = await fetch(request.signature_image_url); if (r.ok) { const b = encodeBase64(new Uint8Array(await r.arrayBuffer())); doc.addImage(`data:image/png;base64,${b}`, 'PNG', 20, y, 70, 26); y += 30; } } catch (_) { /* skip */ } }
+  // signature_image_url holds the private-bucket PATH; download the bytes server-side.
+  if (request.signature_image_url) { try { const { data: blob } = await s.storage.from(ESIGN_BUCKET).download(request.signature_image_url); if (blob) { const b = encodeBase64(new Uint8Array(await blob.arrayBuffer())); doc.addImage(`data:image/png;base64,${b}`, 'PNG', 20, y, 70, 26); y += 30; } } catch (_) { /* skip */ } }
   y = lv(doc, 'Signed at', request.signed_at, 20, y, 170);
 
   // Audit certificate page.
@@ -169,7 +180,7 @@ async function actCreate(s: any, req: Request, p: any) {
 async function actGet(s: any, req: Request, p: any) {
   const r = await reqByToken(s, p.token);
   if (!r) return json({ error: 'not found' }, 404);
-  if (r.status === 'signed') return json({ status: 'signed', signed_at: r.signed_at, sealed_pdf_url: r.sealed_pdf_url });
+  if (r.status === 'signed') return json({ status: 'signed', signed_at: r.signed_at, sealed_pdf_url: await signedUrl(s, r.sealed_pdf_url, 3600) });
   if (r.expires_at && new Date(r.expires_at) < new Date()) { await s.from('signature_request').update({ status: 'expired' }).eq('id', r.id); return json({ status: 'expired' }); }
   if (r.status === 'sent') await s.from('signature_request').update({ status: 'viewed', viewed_at: new Date().toISOString() }).eq('id', r.id);
   await logEvent(s, r.id, 'viewed', req);
@@ -217,11 +228,11 @@ async function actSubmit(s: any, req: Request, p: any) {
   if (!map) return json({ error: 'no mapping' }, 400);
 
   const now = new Date().toISOString();
-  // store the drawn signature image
+  // store the drawn signature image in the private bucket (path on the record)
   const sigBytes = decodeBase64(String(p.signature).split(',').pop() || '');
-  const sigUrl = await uploadToStorage(s, sigBytes, `signatures/${r.id}/signature.png`, 'image/png');
+  const sigPath = await uploadPrivate(s, sigBytes, `signatures/${r.id}/signature.png`, 'image/png');
 
-  await s.from('signature_request').update({ status: 'signed', signed_at: now, consent_agreed: true, signer_printed_name: p.printed_name, signature_image_url: sigUrl, updated_date: now }).eq('id', r.id);
+  await s.from('signature_request').update({ status: 'signed', signed_at: now, consent_agreed: true, signer_printed_name: p.printed_name, signature_image_url: sigPath, updated_date: now }).eq('id', r.id);
   await logEvent(s, r.id, 'consented', req);
   await logEvent(s, r.id, 'signed', req, { printed_name: p.printed_name });
 
@@ -229,25 +240,28 @@ async function actSubmit(s: any, req: Request, p: any) {
   const config = (await s.from('esign_document_type').select('*').eq('document_type', r.document_type).maybeSingle()).data;
   const { data: events } = await s.from('signature_event').select('event, at, ip, user_agent').eq('request_id', r.id).order('at', { ascending: true });
   const sealed = await buildSealedPdf(s, fresh, config, events || []);
-  const sealedUrl = await uploadToStorage(s, sealed, `signatures/${r.id}/signed.pdf`, 'application/pdf');
+  const sealedPath = await uploadPrivate(s, sealed, `signatures/${r.id}/signed.pdf`, 'application/pdf');
   const sealedHash = await sha256hex(sealed);
-  await s.from('signature_request').update({ sealed_pdf_url: sealedUrl, sealed_pdf_hash: sealedHash }).eq('id', r.id);
+  await s.from('signature_request').update({ sealed_pdf_url: sealedPath, sealed_pdf_hash: sealedHash }).eq('id', r.id);
 
-  // stamp the underlying record
-  await s.from(map.table).update(map.stamp(sigUrl, p.printed_name)).eq('id', r.document_id);
+  // Signed URLs: short-lived for the client download + email attachment (the send job fetches
+  // within ~1 min); long-lived for the admin-facing record stamp so the signature still renders.
+  const sealedDownloadUrl = await signedUrl(s, sealedPath, 3600);
+  const sigDisplayUrl = await signedUrl(s, sigPath, 60 * 60 * 24 * 365);
+  await s.from(map.table).update(map.stamp(sigDisplayUrl || sigPath, p.printed_name)).eq('id', r.document_id);
 
   // email the signer their sealed copy + notify internal recipients
   const filename = `${r.document_type}-signed-${r.document_id}.pdf`;
-  if (r.signer_email) {
+  if (r.signer_email && sealedDownloadUrl) {
     const body = `<p>Hi ${r.signer_printed_name || 'there'},</p><p>Thank you for signing your ${config.label}. A copy is attached for your records.</p><p style='color:#888;font-size:12px;'>- Floor Daddy Team</p>`;
-    await s.rpc('enqueue_job', { p_type: 'send_email', p_payload: { to: r.signer_email, subject: `Signed: ${config.label}`, body, sent_by: 'System', attachments: [{ filename, url: sealedUrl }] } });
+    await s.rpc('enqueue_job', { p_type: 'send_email', p_payload: { to: r.signer_email, subject: `Signed: ${config.label}`, body, sent_by: 'System', attachments: [{ filename, url: sealedDownloadUrl }] } });
   }
   const notify: string[] = Array.isArray(config?.notify_emails) ? config.notify_emails : [];
-  if (notify.length) {
+  if (notify.length && sealedDownloadUrl) {
     const body = `<p>${config.label} signed by ${r.signer_name || r.signer_printed_name} on ${now}.</p>`;
-    await s.rpc('enqueue_job', { p_type: 'send_email', p_payload: { to: notify[0], bcc: notify.slice(1), subject: `Signed: ${config.label} - ${r.signer_name || ''}`, body, sent_by: 'System', attachments: [{ filename, url: sealedUrl }] } });
+    await s.rpc('enqueue_job', { p_type: 'send_email', p_payload: { to: notify[0], bcc: notify.slice(1), subject: `Signed: ${config.label} - ${r.signer_name || ''}`, body, sent_by: 'System', attachments: [{ filename, url: sealedDownloadUrl }] } });
   }
-  return json({ signed: true, sealed_pdf_url: sealedUrl });
+  return json({ signed: true, sealed_pdf_url: sealedDownloadUrl });
 }
 
 Deno.serve(async (req) => {
