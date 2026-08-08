@@ -298,7 +298,12 @@ const DEPLOYED_FUNCTIONS = new Set([
 // work unchanged while all email logic lives in one deployed function. Add a sender
 // = one entry here + one case in emailDispatch (no new deploy).
 const EDGE_ALIASES = {
-  sendSaleConfirmationEmail: (p) => ['emailDispatch', { type: 'sale_confirmation', saleId: p.saleId }],
+  sendSaleConfirmationEmail:      (p) => ['emailDispatch', { ...p, type: 'sale_confirmation' }],
+  sendFundsReceivedEmail:         (p) => ['emailDispatch', { ...p, type: 'funds_received' }],
+  sendProjectClaimCompletedEmail: (p) => ['emailDispatch', { ...p, type: 'project_claim_completed' }],
+  sendDesignModEmail:             (p) => ['emailDispatch', { ...p, type: 'design_mod' }],
+  sendPreInstallEmail:            (p) => ['emailDispatch', { ...p, type: 'pre_install' }],
+  sendManualSalesContractEmail:   (p) => ['emailDispatch', { ...p, type: 'manual_sales_contract' }],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —

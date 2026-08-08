@@ -1,11 +1,12 @@
 // Transactional email dispatcher. One function for the base44 email-sender fleet:
-// each `type` gathers its entity data, renders a template (from settings or inline),
+// each `type` gathers its entity data, renders a template (settings or inline),
 // resolves recipients (+ divert), and enqueues a durable send_email job through the
 // comms pipeline (suppression, delivery tracking, retry). It does NOT call Resend
 // directly — sendMessage does, so a transient failure retries instead of double-sending.
 //
 // Auth: an internal secret (server/tests) OR an authenticated user (browser invoke).
-// Add a new sender = add a case here + a shim alias; no new deploy per sender.
+// Add a sender = add a case here + a shim alias; no new deploy per sender.
+// HTML uses single-quoted attributes throughout (deploy-safe, valid HTML).
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -43,10 +44,30 @@ function render(tpl: string, vars: Record<string, unknown>): string {
   return r;
 }
 
+function money(n: unknown): string {
+  return n != null && n !== '' ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—';
+}
+
 async function one(s: any, table: string, id: string | null) {
   if (!id) return null;
   const { data } = await s.from(table).select('*').eq('id', id).maybeSingle();
   return data;
+}
+
+// Shorten a URL via Short.io (Vault keys); fall back to the long URL until configured.
+async function shorten(url: string): Promise<string> {
+  const apiKey = await getSecret('SHORTIO_API_KEY');
+  const domain = await getSecret('SHORTIO_DOMAIN');
+  if (!apiKey || !domain) return url;
+  try {
+    const r = await fetch('https://api.short.io/links', {
+      method: 'POST',
+      headers: { authorization: apiKey, 'content-type': 'application/json' },
+      body: JSON.stringify({ allowDuplicates: false, originalURL: url, domain }),
+    });
+    if (r.ok) { const d = await r.json(); return d.shortURL || url; }
+  } catch (_) { /* fall through */ }
+  return url;
 }
 
 // Enqueue a send_email job, splitting a recipient list into to + bcc (hidden list).
@@ -86,8 +107,120 @@ async function handleType(s: any, type: string, p: any): Promise<Record<string, 
       const n = await enqueueEmail(s, recipients, `New Sale Closed - ${vars.customer_name}`, body, { customer_id: sale.customer });
       return { queued: true, type, recipients: n };
     }
+
+    case 'funds_received': {
+      // Internal notification: payment cleared, ok to proceed. Recipients = finance list.
+      const project = await one(s, 'project', p.projectId);
+      if (!project) return { error: 'Project not found' };
+      const { data: ss } = await s.from('sms_settings').select('finance_report_emails').limit(1);
+      const recipients: string[] = Array.isArray(ss?.[0]?.finance_report_emails) ? ss[0].finance_report_emails : [];
+      if (!recipients.length) return { skipped: 'no finance recipients configured' };
+      const customer = await one(s, 'customer', project.customer);
+      const sale = await one(s, 'sale', project.sale);
+      const customerName = customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown';
+      const invoiceNumber = sale?.invoice_number || '—';
+      const address = customer?.address_line1 ? `${customer.address_line1}${customer.city ? ', ' + customer.city : ''}` : '—';
+      const installDate = project.installation_date
+        ? new Date(project.installation_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : '—';
+      const projectUrl = `${APP_URL}/ProjectDetail?id=${project.id}`;
+      const html =
+        `<div style='font-family:-apple-system,Segoe UI,sans-serif;max-width:600px;margin:0 auto;color:#1e293b;'>` +
+        `<h2 style='color:#059669;'>✅ Funds Received</h2>` +
+        `<p>Payment has been received for the following project. It is now clear to proceed in order processing.</p>` +
+        `<p><strong>Customer:</strong> ${customerName}<br/><strong>Invoice #:</strong> ${invoiceNumber}<br/>` +
+        `<strong>Address:</strong> ${address}<br/><strong>Install Date:</strong> ${installDate}<br/>` +
+        `<strong>Sale Amount:</strong> ${money(sale?.sale_amount)}</p>` +
+        `<p><a href='${projectUrl}' style='background:#10b981;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;'>View Project</a></p></div>`;
+      const n = await enqueueEmail(s, recipients, `✅ Funds Received — ${customerName} (Invoice #${invoiceNumber})`, html, { customer_id: project.customer });
+      return { queued: true, type, recipients: n };
+    }
+
+    case 'project_claim_completed': {
+      // Internal notification: a claim was completed. Recipients on the claim record.
+      const claim = await one(s, 'project_claim', p.claimId);
+      if (!claim) return { error: 'Claim not found' };
+      const recipients: string[] = Array.isArray(claim.email_recipients) ? claim.email_recipients : [];
+      if (!recipients.length) return { skipped: 'no recipients' };
+      const customerName = claim.customer_name || 'Customer';
+      const claimType = claim.claim_type || 'Claim';
+      const lastName = customerName.split(' ').slice(-1)[0] || customerName;
+      const jobNumber = claim.job_number || '';
+      const subjectPrefix = jobNumber ? `${jobNumber} - ${lastName}` : lastName;
+      const referenceNumber = p.referenceNumber || claim.reference_number || '';
+      const eta = p.eta || claim.eta || '';
+      const completedBy = claim.completed_by || 'System';
+      const completedOn = claim.completed_on
+        ? new Date(claim.completed_on).toLocaleDateString('en-US', { timeZone: 'America/Phoenix' })
+        : new Date().toLocaleDateString('en-US', { timeZone: 'America/Phoenix' });
+      const html =
+        `<p>The <strong>${claimType}</strong> for <strong>${customerName}</strong> has been marked as <strong style='color:#16a34a;'>COMPLETED</strong>.</p>` +
+        (referenceNumber ? `<p><strong>Reference #:</strong> ${referenceNumber}</p>` : '') +
+        (eta ? `<p><strong>ETA:</strong> ${eta}</p>` : '') +
+        `<p><strong>Completed By:</strong> ${completedBy}</p><p><strong>Completed On:</strong> ${completedOn}</p>` +
+        (jobNumber ? `<p><strong>Job #:</strong> ${jobNumber}</p>` : '') +
+        (claim.notes ? `<p><strong>Original Notes:</strong> ${claim.notes}</p>` : '') +
+        `<p style='color:#888;font-size:12px;'>— Floor Daddy Team</p>`;
+      const n = await enqueueEmail(s, recipients, `✅ ${claimType} COMPLETED — ${subjectPrefix}`, html, {});
+      return { queued: true, type, recipients: n };
+    }
+
+    case 'design_mod': {
+      // Customer e-sign request. Stamp the record, then email the sign link.
+      const mod = await one(s, 'design_mod', p.designModId);
+      if (!mod) return { error: 'Design mod not found' };
+      const shortUrl = await shorten(`${APP_URL}/DesignModView?id=${mod.id}`);
+      await s.from('design_mod').update({ status: 'sent', short_url: shortUrl, email_sent_at: new Date().toISOString() }).eq('id', mod.id);
+      if (!mod.customer_email) return { updated: true, queued: false, skipped: 'no customer email', short_url: shortUrl };
+      const customerName = `${mod.customer_first_name || ''} ${mod.customer_last_name || ''}`.trim();
+      const html =
+        `<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'>` +
+        `<h2 style='color:#2563eb;'>Design Modification Request</h2>` +
+        `<p>Hi ${mod.customer_first_name},</p>` +
+        `<p>We have prepared a design modification for your project. Please review and sign off using the link below:</p>` +
+        `<p><a href='${shortUrl}' style='background:#2563eb;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;'>Review &amp; Sign Design Modification</a></p>` +
+        (mod.products_or_changes ? `<p><strong>Changes:</strong> ${mod.products_or_changes}</p>` : '') +
+        (mod.value_added_costs ? `<p><strong>Value Added Costs:</strong> ${money(mod.value_added_costs)}</p>` : '') +
+        `<p>If the button does not work, copy and paste this link: ${shortUrl}</p><p>Thank you,<br/>Floor Daddy Team</p></div>`;
+      await enqueueEmail(s, [mod.customer_email], `Design Modification for ${customerName} - Please Review & Sign`, html, { customer_id: mod.customer_id });
+      return { queued: true, type, recipients: 1, short_url: shortUrl };
+    }
+
+    case 'pre_install': {
+      const cl = await one(s, 'standalone_pre_install_checklist', p.checklistId);
+      if (!cl) return { error: 'Checklist not found' };
+      const shortUrl = await shorten(`${APP_URL}/PreInstallChecklistView?id=${cl.id}`);
+      await s.from('standalone_pre_install_checklist').update({ status: 'sent', short_url: shortUrl, email_sent_at: new Date().toISOString() }).eq('id', cl.id);
+      if (!cl.customer_email) return { updated: true, queued: false, skipped: 'no customer email', short_url: shortUrl };
+      const html =
+        `<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'>` +
+        `<h2 style='color:#2563eb;'>Pre-Installation Checklist</h2>` +
+        `<p>Hi ${cl.customer_first_name},</p>` +
+        `<p>Please review and sign your Pre-Installation Checklist before your installation begins.</p>` +
+        `<p><a href='${shortUrl}' style='background:#2563eb;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;'>Review &amp; Sign Pre-Install Checklist</a></p>` +
+        (cl.product_info ? `<p><strong>Product:</strong> ${cl.product_info}</p>` : '') +
+        `<p>If the button does not work, copy and paste this link: ${shortUrl}</p><p>Thank you,<br/>Floor Daddy Team</p></div>`;
+      await enqueueEmail(s, [cl.customer_email], `Pre-Installation Checklist - Please Review & Sign`, html, {});
+      return { queued: true, type, recipients: 1, short_url: shortUrl };
+    }
+
+    case 'manual_sales_contract': {
+      const c = await one(s, 'manual_sales_contract', p.contractId);
+      if (!c) return { error: 'Contract not found' };
+      const shortUrl = await shorten(`${APP_URL}/ManualSalesContractView?id=${c.id}`);
+      await s.from('manual_sales_contract').update({ status: 'sent', short_url: shortUrl, email_sent_at: new Date().toISOString() }).eq('id', c.id);
+      if (!c.customer_email) return { updated: true, queued: false, skipped: 'no customer email', short_url: shortUrl };
+      const html =
+        `<p>Hi ${c.customer_first_name},</p>` +
+        `<p>Thank you for your commitment to Floor Daddy! Please click the link below to review and sign your sales contract.</p>` +
+        `<p><a href='${shortUrl}' style='background:#4F46E5;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;'>Review &amp; Sign Contract</a></p>` +
+        `<p>Or copy this link: ${shortUrl}</p><p>Thank you,<br/>Floor Daddy Team</p>`;
+      await enqueueEmail(s, [c.customer_email], 'Your Sales Contract - Please Sign', html, {});
+      return { queued: true, type, recipients: 1, short_url: shortUrl };
+    }
+
     default:
-      return { error: `Unknown email type "${type}"` };
+      return { error: `Unknown email type ${type}` };
   }
 }
 
