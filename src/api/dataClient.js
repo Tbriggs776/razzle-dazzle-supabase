@@ -306,6 +306,8 @@ const EDGE_ALIASES = {
   sendPreInstallEmail:            (p) => ['emailDispatch', { ...p, type: 'pre_install' }],
   sendManualSalesContractEmail:   (p) => ['emailDispatch', { ...p, type: 'manual_sales_contract' }],
   sendReceiptEmail:               (p) => ['pdfEmail', { ...p, type: 'receipt' }],
+  sendInspectionReportEmail:      (p) => ['pdfEmail', { ...p, type: 'inspection' }],
+  sendProjectClaimEmail:          (p) => ['pdfEmail', { ...p, type: 'claim' }],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —
