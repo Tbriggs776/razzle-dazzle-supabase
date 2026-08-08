@@ -299,6 +299,9 @@ const DEPLOYED_FUNCTIONS = new Set([
   'analyzeRecording',
   'rfmsQuery',
   'googleMaps',
+  'syncCalendarEvent',
+  'googleSheets',
+  'ghl',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -379,6 +382,14 @@ const EDGE_ALIASES = {
   getStreetView:                  (p) => ['googleMaps', { ...p, type: 'street_view' }],
   journeyGeocode:                 (p) => ['googleMaps', { ...p, type: 'geocode' }],
   getZipsInPolygon:               (p) => ['googleMaps', { ...p, type: 'zips_in_polygon' }],
+  // Google Sheets marketing dashboards (service-account read). syncCalendarEvent is invoked by
+  // name (in DEPLOYED_FUNCTIONS) from its 9 call sites.
+  getAdSpend:                     (p) => ['googleSheets', { ...p, type: 'ad_spend' }],
+  getMarketingBudget:             (p) => ['googleSheets', { ...p, type: 'marketing_budget' }],
+
+  // ── GHL (GoHighLevel v2) lead-count dashboard.
+  getGHLLeadCount:                () => ['ghl', { type: 'lead_count' }],
+  syncGHLContacts:                () => ['ghl', { type: 'sync_contacts' }],
 };
 
 // base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —
