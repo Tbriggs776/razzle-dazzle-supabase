@@ -275,8 +275,28 @@ const DEPLOYED_FUNCTIONS = new Set([
   'logAppointmentAction',
 ]);
 
+// base44 functions reimplemented as Postgres RPCs (pure DB reads / aggregates) —
+// invoked here via supabase.rpc instead of an Edge Function. Each entry maps the
+// base44 payload to the RPC's args; the RPC returns the same response envelope
+// the page already expects, so call sites don't change.
+const RPC_FUNCTIONS = {
+  getAppointmentsByDC: (p) => ['get_appointments_by_dc', { p_start_date: p.startDate, p_end_date: p.endDate }],
+  getSalesByDC:        (p) => ['get_sales_by_dc', { p_start_date: p.startDate, p_end_date: p.endDate }],
+  getOnHoldCache:      () => ['get_on_hold_cache', {}],
+};
+
 const functions = {
   async invoke(name, payload = {}) {
+    const rpc = RPC_FUNCTIONS[name];
+    if (rpc) {
+      const [fn, args] = rpc(payload || {});
+      const { data, error } = await supabase.rpc(fn, args);
+      if (error) {
+        console.warn(`[shim] rpc('${fn}') failed`, error?.message || error);
+        return { data: null, error };
+      }
+      return { data, error: null };
+    }
     if (!DEPLOYED_FUNCTIONS.has(name)) {
       return { data: null, error: null, stub: true };
     }
