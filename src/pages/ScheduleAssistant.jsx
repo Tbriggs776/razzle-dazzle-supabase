@@ -42,10 +42,10 @@ const getColorStyles = (hexColor) => {
 };
 
 const STATUS_COLORS = {
-  'Lead': 'bg-slate-100 text-slate-700 border-slate-200',
+  'Lead': 'bg-secondary text-foreground border-border',
   'Awaiting Assignment': 'bg-amber-100 text-amber-700 border-amber-200',
   'Scheduled': 'bg-blue-100 text-blue-700 border-blue-200',
-  'Rescheduled': 'bg-purple-100 text-purple-700 border-purple-200',
+  'Rescheduled': 'bg-primary/10 text-primary border-primary/20',
   'Completed': 'bg-green-100 text-green-700 border-green-200',
   'Sold': 'bg-emerald-100 text-emerald-700 border-emerald-200',
   'Cancelled': 'bg-red-100 text-red-700 border-red-200'
@@ -322,17 +322,17 @@ export default function ScheduleAssistant() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-[1800px] mx-auto px-6 py-6">
+    <div className="min-h-screen bg-background">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Schedule Assistant</h1>
-              <p className="text-slate-500 mt-1">Drag and drop to assign appointments</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Schedule Assistant</h1>
+              <p className="text-muted-foreground mt-1">Drag and drop to assign appointments</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <Tabs value={viewMode} onValueChange={setViewMode}>
               <TabsList>
                 <TabsTrigger value="day">Day</TabsTrigger>
@@ -367,7 +367,7 @@ export default function ScheduleAssistant() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-48"
+                className="w-full sm:w-48"
               />
             </div>
             <Button
@@ -378,8 +378,8 @@ export default function ScheduleAssistant() {
               Today
             </Button>
             <div className="flex-1" />
-            <div className="text-sm text-slate-600">
-              {viewMode === 'day' 
+            <div className="text-sm text-muted-foreground">
+              {viewMode === 'day'
                 ? format(parseISO(selectedDate), 'EEEE, MMMM d, yyyy')
                 : `Week of ${format(startOfWeek(parseISO(selectedDate), { weekStartsOn: 0 }), 'MMMM d, yyyy')}`
               }
@@ -388,10 +388,10 @@ export default function ScheduleAssistant() {
         </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-6 py-8">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {(loadingConsultants || loadingAppointments) ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : viewMode === 'day' ? (
           <DayView 
@@ -430,7 +430,7 @@ export default function ScheduleAssistant() {
            <DialogHeader>
              <DialogTitle>
                {confirmDialog?.doubleBookWarning ? (
-                 <span className="flex items-center gap-2 text-amber-600">
+                 <span className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
                    <AlertCircle className="w-5 h-5" />
                    Double Booking Warning
                  </span>
@@ -449,57 +449,57 @@ export default function ScheduleAssistant() {
            {confirmDialog && (
              <div className="space-y-4 py-4">
                {confirmDialog.doubleBookWarning && (
-                 <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-                   <p className="text-sm font-semibold text-amber-900 mb-2">Existing Appointment:</p>
-                   <p className="text-sm text-amber-800">
+                 <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25">
+                   <p className="text-sm font-semibold text-amber-900 dark:text-amber-300 mb-2">Existing Appointment:</p>
+                   <p className="text-sm text-amber-800 dark:text-amber-300">
                      {confirmDialog.doubleBookWarning.conflictLead?.first_name} {confirmDialog.doubleBookWarning.conflictLead?.last_name}
                    </p>
-                   <p className="text-xs text-amber-700 mt-1">
+                   <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
                      Same time block on {format(parseISO(confirmDialog.appointment.appointment_date), 'MMM d')}
                    </p>
                  </div>
                )}
                {!confirmDialog.doubleBookWarning && (
                  <>
-                   <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                     <p className="font-semibold text-slate-800 mb-1">
+                   <div className="p-3 rounded-lg bg-secondary border border-border">
+                     <p className="font-semibold text-foreground mb-1">
                        {getLeadForAppointment(confirmDialog.appointment)?.first_name || 'Unknown'} {getLeadForAppointment(confirmDialog.appointment)?.last_name || 'Customer'}
                      </p>
-                     <p className="text-sm text-slate-600">
+                     <p className="text-sm text-muted-foreground">
                        {confirmDialog.appointment.location_address}
                      </p>
                    </div>
 
                    <div className="space-y-2">
                      <div className="flex items-center gap-2 text-sm flex-wrap">
-                       <span className="text-slate-500">From:</span>
-                       <span className="font-medium text-slate-800">
+                       <span className="text-muted-foreground">From:</span>
+                       <span className="font-medium text-foreground">
                          {typeof confirmDialog.from.consultant === 'string' 
                            ? confirmDialog.from.consultant 
                            : `${confirmDialog.from.consultant.first_name} ${confirmDialog.from.consultant.last_name}`}
                        </span>
-                       <span className="text-slate-400">•</span>
-                       <span className="font-medium text-slate-800">{confirmDialog.from.block}</span>
+                       <span className="text-muted-foreground">•</span>
+                       <span className="font-medium text-foreground">{confirmDialog.from.block}</span>
                        {confirmDialog.from.date !== confirmDialog.to.date && (
                          <>
-                           <span className="text-slate-400">•</span>
-                           <span className="font-medium text-slate-800">{format(parseISO(confirmDialog.from.date), 'MMM d')}</span>
+                           <span className="text-muted-foreground">•</span>
+                           <span className="font-medium text-foreground">{format(parseISO(confirmDialog.from.date), 'MMM d')}</span>
                          </>
                        )}
                      </div>
                      <div className="flex items-center gap-2 text-sm flex-wrap">
-                       <span className="text-slate-500">To:</span>
-                       <span className="font-medium text-indigo-600">
+                       <span className="text-muted-foreground">To:</span>
+                       <span className="font-medium text-primary">
                          {typeof confirmDialog.to.consultant === 'string' 
                            ? confirmDialog.to.consultant 
                            : `${confirmDialog.to.consultant.first_name} ${confirmDialog.to.consultant.last_name}`}
                        </span>
-                       <span className="text-slate-400">•</span>
-                       <span className="font-medium text-indigo-600">{confirmDialog.to.block}</span>
+                       <span className="text-muted-foreground">•</span>
+                       <span className="font-medium text-primary">{confirmDialog.to.block}</span>
                        {confirmDialog.from.date !== confirmDialog.to.date && (
                          <>
-                           <span className="text-slate-400">•</span>
-                           <span className="font-medium text-indigo-600">{format(parseISO(confirmDialog.to.date), 'MMM d')}</span>
+                           <span className="text-muted-foreground">•</span>
+                           <span className="font-medium text-primary">{format(parseISO(confirmDialog.to.date), 'MMM d')}</span>
                          </>
                        )}
                      </div>
@@ -507,7 +507,7 @@ export default function ScheduleAssistant() {
                  </>
                )}
 
-               <div className="space-y-3 pt-4 border-t border-slate-200">
+               <div className="space-y-3 pt-4 border-t border-border">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="notify-customer" className="text-sm">Send customer SMS</Label>
                   <Switch
@@ -547,7 +547,7 @@ export default function ScheduleAssistant() {
             <Button
               onClick={handleConfirm}
               disabled={updateAppointmentMutation.isPending}
-              className={confirmDialog?.doubleBookWarning ? "bg-amber-600 hover:bg-amber-700" : "bg-indigo-600 hover:bg-indigo-700"}
+              className={confirmDialog?.doubleBookWarning ? "bg-amber-600 hover:bg-amber-700" : "bg-primary text-primary-foreground hover:opacity-90"}
             >
               {updateAppointmentMutation.isPending ? (
                 <>
@@ -616,19 +616,19 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
-        <div className="grid grid-cols-[250px_repeat(4,minmax(200px,1fr))] border-b border-slate-200 bg-slate-50">
-          <div className="p-4 font-semibold text-slate-700 sticky left-0 bg-slate-50 z-20">Consultant</div>
+      <div className="bg-white rounded-xl border border-border overflow-x-auto">
+        <div className="grid grid-cols-[250px_repeat(4,minmax(200px,1fr))] border-b border-border bg-muted">
+          <div className="p-4 font-semibold text-foreground sticky left-0 bg-muted z-20">Consultant</div>
           {TIME_BLOCKS.map(block => {
             const blockAppts = appointments.filter(a => a.appointment_block === block.id);
             return (
             <div 
               key={block.id} 
-              className="p-4 text-center font-semibold text-slate-700 border-l border-slate-200"
+              className="p-4 text-center font-semibold text-foreground border-l border-border"
               style={{ backgroundColor: timeBlockColors[block.id].header }}
             >
               {block.label}
-              <div className="text-xs text-slate-500 mt-1">{blockAppts.length} appointment{blockAppts.length !== 1 ? 's' : ''}</div>
+              <div className="text-xs text-muted-foreground mt-1">{blockAppts.length} appointment{blockAppts.length !== 1 ? 's' : ''}</div>
             </div>
             );
           })}
@@ -639,7 +639,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
             <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
               <AlertCircle className="w-5 h-5 text-amber-600" />
             </div>
-            <span className="font-semibold text-slate-800">Unassigned</span>
+            <span className="font-semibold text-foreground">Unassigned</span>
           </div>
           {TIME_BLOCKS.map(block => (
             <Droppable key={`unassigned|${block.id}`} droppableId={`unassigned|${block.id}`}>
@@ -648,7 +648,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={cn(
-                    "p-2 border-l border-slate-200 min-h-[80px]",
+                    "p-2 border-l border-border min-h-[80px]",
                     snapshot.isDraggingOver && "bg-amber-100"
                   )}
                 >
@@ -683,8 +683,8 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                               </div>
 
                               {consultants.map(consultant => (
-                              <div key={consultant.id} className="grid grid-cols-[250px_repeat(4,minmax(200px,1fr))] border-b border-slate-200 hover:bg-slate-50">
-                              <div className="p-4 flex items-center gap-3 sticky left-0 bg-white hover:bg-slate-50 z-10">
+                              <div key={consultant.id} className="grid grid-cols-[250px_repeat(4,minmax(200px,1fr))] border-b border-border hover:bg-muted">
+                              <div className="p-4 flex items-center gap-3 sticky left-0 bg-white hover:bg-muted z-10">
                               {consultant.profile_photo ? (
                               <img
                               src={consultant.profile_photo}
@@ -692,11 +692,11 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                               className="w-10 h-10 rounded-full object-cover"
                               />
                               ) : (
-                              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                              <User className="w-5 h-5 text-indigo-600" />
+                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                              <User className="w-5 h-5 text-primary" />
                               </div>
                               )}
-                              <span className="font-medium text-slate-800">
+                              <span className="font-medium text-foreground">
                               {consultant.first_name} {consultant.last_name}
                               </span>
                               </div>
@@ -810,22 +810,22 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="bg-white rounded-xl border border-slate-200 overflow-x-auto">
-        <div className="grid grid-cols-[80px_200px_repeat(7,minmax(150px,1fr))] border-b border-slate-200 bg-slate-50 sticky top-0 z-30">
-          <div className="p-3 font-semibold text-slate-700 text-xs sticky left-0 bg-slate-50 z-20">Time</div>
-          <div className="p-3 font-semibold text-slate-700 border-l border-slate-200 sticky left-[80px] bg-slate-50 z-20">Consultant</div>
+      <div className="bg-white rounded-xl border border-border overflow-x-auto">
+        <div className="grid grid-cols-[80px_200px_repeat(7,minmax(150px,1fr))] border-b border-border bg-muted sticky top-0 z-30">
+          <div className="p-3 font-semibold text-foreground text-xs sticky left-0 bg-muted z-20">Time</div>
+          <div className="p-3 font-semibold text-foreground border-l border-border sticky left-[80px] bg-muted z-20">Consultant</div>
           {weekDates.map(date => {
             const dayAppts = appointments.filter(a => a.appointment_date === date);
             return (
-            <div key={date} className="p-3 text-center border-l border-slate-200">
-              <div className="font-semibold text-slate-700">{format(parseISO(date), 'EEE')}</div>
+            <div key={date} className="p-3 text-center border-l border-border">
+              <div className="font-semibold text-foreground">{format(parseISO(date), 'EEE')}</div>
               <div className={cn(
                 "text-sm",
-                isSameDay(parseISO(date), new Date()) ? "text-indigo-600 font-semibold" : "text-slate-500"
+                isSameDay(parseISO(date), new Date()) ? "text-primary font-semibold" : "text-muted-foreground"
               )}>
                 {format(parseISO(date), 'MMM d')}
               </div>
-              <div className="text-xs text-slate-400 mt-1">{dayAppts.length} appointment{dayAppts.length !== 1 ? 's' : ''}</div>
+              <div className="text-xs text-muted-foreground mt-1">{dayAppts.length} appointment{dayAppts.length !== 1 ? 's' : ''}</div>
             </div>
             );
           })}
@@ -847,7 +847,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                    borderRightWidth: '1px'
                  }}
                >
-                 <span className="font-semibold text-xs text-slate-700 writing-mode-vertical transform -rotate-0">
+                 <span className="font-semibold text-xs text-foreground writing-mode-vertical transform -rotate-0">
                    {timeBlock.label}
                  </span>
                </div>
@@ -863,9 +863,9 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                    className="w-8 h-8 rounded-full flex items-center justify-center"
                    style={{ backgroundColor: blockColor.header }}
                  >
-                   <AlertCircle className="w-4 h-4 text-slate-700" />
+                   <AlertCircle className="w-4 h-4 text-foreground" />
                 </div>
-                <span className="font-semibold text-sm text-slate-800">Unassigned</span>
+                <span className="font-semibold text-sm text-foreground">Unassigned</span>
               </div>
               {weekDates.map(date => {
                const organized = organizeAppointmentsByDate(date);
@@ -875,7 +875,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                      <div
                        ref={provided.innerRef}
                        {...provided.droppableProps}
-                       className="p-1 min-h-[60px] border-l border-slate-200"
+                       className="p-1 min-h-[60px] border-l border-border"
                        style={{
                          backgroundColor: snapshot.isDraggingOver ? blockColor.hover : blockColor.bg
                        }}
@@ -912,9 +912,9 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                                     </div>
 
                                     {consultants.map(consultant => (
-                                    <div key={`${consultant.id}-${timeBlock.id}`} className="grid grid-cols-[80px_200px_repeat(7,minmax(150px,1fr))] border-b border-slate-200 hover:bg-slate-50">
-                                    <div className="bg-slate-50 sticky left-0 z-10" />
-                                    <div className="p-3 flex items-center gap-2 border-l border-slate-200 sticky left-[80px] bg-white hover:bg-slate-50 z-10">
+                                    <div key={`${consultant.id}-${timeBlock.id}`} className="grid grid-cols-[80px_200px_repeat(7,minmax(150px,1fr))] border-b border-border hover:bg-muted">
+                                    <div className="bg-muted sticky left-0 z-10" />
+                                    <div className="p-3 flex items-center gap-2 border-l border-border sticky left-[80px] bg-white hover:bg-muted z-10">
                                     {consultant.profile_photo ? (
                                     <img
                                     src={consultant.profile_photo}
@@ -922,11 +922,11 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                                     className="w-8 h-8 rounded-full object-cover"
                                     />
                                     ) : (
-                                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <User className="w-4 h-4 text-indigo-600" />
+                                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <User className="w-4 h-4 text-primary" />
                                     </div>
                                     )}
-                                    <span className="font-medium text-sm text-slate-800 truncate">
+                                    <span className="font-medium text-sm text-foreground truncate">
                                     {consultant.first_name} {consultant.last_name}
                                     </span>
                                     </div>
@@ -939,7 +939,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                                     <div
                                     ref={provided.innerRef}
                                     {...provided.droppableProps}
-                                    className="p-1 min-h-[60px] border-l border-slate-200"
+                                    className="p-1 min-h-[60px] border-l border-border"
                                     style={{
                                     backgroundColor: snapshot.isDraggingOver ? blockColor.hover : blockColor.bg
                                     }}
@@ -1070,24 +1070,24 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
     <>
       <div className="space-y-1 relative" style={cardStyle}>
         <p className={cn(
-          "font-semibold text-slate-800 truncate",
+          "font-semibold text-foreground truncate",
           compact ? "text-xs" : "text-sm"
         )}>
           {lead.first_name} {lead.last_name}
         </p>
-        <div className={cn("text-slate-500 flex items-center gap-1", compact ? "text-[10px]" : "text-xs")}>
+        <div className={cn("text-muted-foreground flex items-center gap-1", compact ? "text-[10px]" : "text-xs")}>
           {appointmentDate && <span>{appointmentDate}</span>}
           {timeBlockLabel && <span>•</span>}
           {timeBlockLabel && <span>{timeBlockLabel}</span>}
         </div>
         {!compact && appointment.location_address && (
-          <p className="text-xs text-slate-500 flex items-center gap-1 truncate">
+          <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
             <MapPin className="w-3 h-3 flex-shrink-0" />
             <span className="truncate">{appointment.location_address.split(',')[0]}</span>
           </p>
         )}
         {checklist && (
-          <div className={cn("space-y-0.5 text-slate-600", compact ? "text-[10px]" : "text-xs")}>
+          <div className={cn("space-y-0.5 text-muted-foreground", compact ? "text-[10px]" : "text-xs")}>
             {checklist.city && (
               <p className="truncate">📍 {checklist.city}{checklist.postal_code ? `, ${checklist.postal_code}` : ''}</p>
             )}
@@ -1103,7 +1103,7 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
           </div>
         )}
         {!checklist && checklistV2 && (
-          <div className={cn("space-y-0.5 text-slate-600", compact ? "text-[10px]" : "text-xs")}>
+          <div className={cn("space-y-0.5 text-muted-foreground", compact ? "text-[10px]" : "text-xs")}>
             {checklistV2.city && (
               <p className="truncate">📍 {checklistV2.city}{checklistV2.postal_code ? `, ${checklistV2.postal_code}` : ''}</p>
             )}
@@ -1141,7 +1141,7 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
             <button
               onClick={(e) => { e.stopPropagation(); e.preventDefault(); setShowNotesModal(true); }}
               onMouseDown={(e) => e.stopPropagation()}
-              className="text-[10px] text-indigo-500 hover:text-indigo-700 underline flex-shrink-0"
+              className="text-[10px] text-primary hover:text-primary underline flex-shrink-0"
             >
               Notes ({appointment.notes.length})
             </button>
@@ -1150,9 +1150,9 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
             to={createPageUrl('AppointmentDetail') + `?id=${appointment.id}`}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
-            className="w-5 h-5 rounded-full bg-indigo-100 hover:bg-indigo-200 flex items-center justify-center transition-colors flex-shrink-0 ml-auto"
+            className="w-5 h-5 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors flex-shrink-0 ml-auto"
           >
-            <ArrowRight className="w-2.5 h-2.5 text-indigo-600" />
+            <ArrowRight className="w-2.5 h-2.5 text-primary" />
           </Link>
         </div>
       </div>
@@ -1165,15 +1165,15 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
           </DialogHeader>
           <div className="space-y-3 max-h-96 overflow-y-auto py-2">
             {[...(appointment.notes || [])].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, idx) => (
-              <div key={idx} className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+              <div key={idx} className="p-3 rounded-lg bg-secondary border border-border">
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-xs font-medium text-purple-600">{note.context || 'Note'}</span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs font-medium text-primary">{note.context || 'Note'}</span>
+                  <span className="text-xs text-muted-foreground">
                     {new Date(note.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}
                   </span>
                 </div>
-                <p className="text-sm text-slate-700 whitespace-pre-wrap">{note.content}</p>
-                <p className="text-xs text-slate-400 mt-1">{note.user_name}</p>
+                <p className="text-sm text-foreground whitespace-pre-wrap">{note.content}</p>
+                <p className="text-xs text-muted-foreground mt-1">{note.user_name}</p>
               </div>
             ))}
           </div>
@@ -1183,7 +1183,7 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
       <Dialog open={!!doubleBookWarning} onOpenChange={() => setDoubleBookWarning(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-amber-600">
+            <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
               <AlertCircle className="w-5 h-5" />
               Double Booking Warning
             </DialogTitle>
@@ -1194,16 +1194,16 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
 
           {doubleBookWarning && (
             <div className="space-y-4 py-4">
-              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-                <p className="text-sm font-semibold text-amber-900 mb-2">Existing Appointment:</p>
-                <p className="text-sm text-amber-800">
+              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25">
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-300 mb-2">Existing Appointment:</p>
+                <p className="text-sm text-amber-800 dark:text-amber-300">
                   {doubleBookWarning.conflictLead?.first_name} {doubleBookWarning.conflictLead?.last_name}
                 </p>
-                <p className="text-xs text-amber-700 mt-1">
+                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
                   Same time block on {format(parseISO(appointment.appointment_date), 'MMM d')}
                 </p>
               </div>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Do you want to proceed with this double booking?
               </p>
             </div>

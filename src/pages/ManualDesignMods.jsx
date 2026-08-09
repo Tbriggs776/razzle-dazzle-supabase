@@ -391,7 +391,7 @@ export default function ManualDesignMods() {
                           {!mod.email_sent_at && <span>• Created {format(new Date(mod.created_date), 'MMM d, yyyy h:mm a')}</span>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                         {mod.status === 'signed' ? (
                           <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
@@ -442,7 +442,7 @@ export default function ManualDesignMods() {
                           {!mod.email_sent_at && <span>• Created {format(new Date(mod.created_date), 'MMM d, yyyy h:mm a')}</span>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                         {mod.status === 'signed' ? (
                           <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
@@ -537,7 +537,7 @@ export default function ManualDesignMods() {
                             {appt.appointment_date && <span>Appt: {appt.appointment_date}</span>}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                           <a
                             href={appt.pre_install_checklist_signature_url}
                             target="_blank"
@@ -589,7 +589,7 @@ export default function ManualDesignMods() {
                           {!record.email_sent_at && <span>• Created {format(new Date(record.created_date), 'MMM d, yyyy h:mm a')}</span>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                         {record.status === 'signed' ? (
                           <a href={`/PreInstallChecklistView?id=${record.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
@@ -739,7 +739,7 @@ export default function ManualDesignMods() {
                           {contract.email_sent_at && contract.status !== 'signed' && <span>• Sent {format(new Date(contract.email_sent_at), 'MMM d, yyyy h:mm a')}</span>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                         {contract.status === 'signed' ? (
                           <a href={`/ManualSalesContractView?id=${contract.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed

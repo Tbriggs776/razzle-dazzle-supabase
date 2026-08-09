@@ -48,20 +48,20 @@ import TagSelector from '@/components/tags/TagSelector';
 import ResultStatusDialog from '@/components/appointments/ResultStatusDialog';
 
 const statusColors = {
-  'Lead': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200',
-  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'In Route': 'bg-cyan-100 text-cyan-800 border-cyan-200',
-  'On Site': 'bg-green-100 text-green-800 border-green-200',
-  'Cancelled': 'bg-red-100 text-red-800 border-red-200',
-  'Completed': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Sold': 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  'Lost': 'bg-red-100 text-red-800 border-red-200',
-  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200',
-  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200',
-  'Follow-Up': 'bg-red-100 text-red-800 border-red-200'
+  'Lead': 'bg-secondary text-secondary-foreground border-border',
+  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
+  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'In Route': 'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/25',
+  'On Site': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
+  'Cancelled': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'Completed': 'bg-secondary text-secondary-foreground border-border',
+  'Sold': 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25',
+  'Lost': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/25',
+  'Follow-Up': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25'
 };
 
 const COMPLETED_STATUSES = ['Sold', 'Lost', 'Pitch and Miss', 'One-Leg', 'Completed'];
@@ -769,18 +769,18 @@ export default function AppointmentDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!appointment) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">Appointment not found</h2>
-          <Link to={createPageUrl('Appointments')} className="text-indigo-600 hover:underline">
+          <h2 className="text-xl font-semibold text-foreground mb-2">Appointment not found</h2>
+          <Link to={createPageUrl('Appointments')} className="text-primary hover:underline">
             Back to appointments
           </Link>
         </div>
@@ -791,13 +791,13 @@ export default function AppointmentDetail() {
   const leadName = lead ? `${lead.first_name} ${lead.last_name}` : 'Loading...';
 
   return (
-    <div className="bg-slate-50">
+    <div className="bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link
             to={backInfo.url}
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             {backInfo.label}
@@ -808,18 +808,18 @@ export default function AppointmentDetail() {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex flex-col md:flex-row md:items-start gap-6">
-              <div className="w-20 h-20 flex-shrink-0 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-200">
+              <div className="w-20 h-20 flex-shrink-0 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg ring-4 ring-brand-gold/25">
                 <CalendarIcon className="w-10 h-10" />
               </div>
 
               <div className="flex-1 min-w-0">
-                <h1 className="text-3xl font-bold text-slate-800 tracking-tight">{leadName}</h1>
+                <h1 className="text-3xl font-bold text-foreground tracking-tight">{leadName}</h1>
                 {/* Tags */}
                 <div className="mt-2 mb-1">
                   <TagSelector
                     selectedTagIds={appointment.tags || []}
                     onChange={(tags) => updateMutation.mutate({ tags })}
-                    className="w-64"
+                    className="w-full sm:w-64"
                   />
                 </div>
                 <div className="flex items-center gap-2 mt-3 flex-wrap">
@@ -827,13 +827,13 @@ export default function AppointmentDetail() {
                     {appointment.status}
                   </Badge>
                   {(appointment.status === 'Scheduled' || appointment.status === 'Awaiting Assignment') && (
-                    <Badge variant="secondary" className={cn('border', appointment.assigned_dc ? 'bg-green-100 text-green-800 border-green-200' : 'bg-amber-100 text-amber-800 border-amber-200')}>
+                    <Badge variant="secondary" className={cn('border', appointment.assigned_dc ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25' : 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25')}>
                       {appointment.assigned_dc ? 'Assigned' : 'Unassigned'}
                     </Badge>
                   )}
                   {appointment.status === 'Sold' && sale && (
                     <Link to={createPageUrl('SaleDetail') + `?id=${sale.id}`}>
-                      <Badge variant="secondary" className="border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer">
+                      <Badge variant="secondary" className="border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25 dark:hover:bg-emerald-500/25 cursor-pointer">
                         View Sale Record →
                       </Badge>
                     </Link>
@@ -842,36 +842,36 @@ export default function AppointmentDetail() {
                     <Badge 
                       variant="secondary" 
                       className={cn('border font-mono text-xs', 
-                        appointment.google_calendar_event_id 
-                          ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                          : 'bg-slate-100 text-slate-500 border-slate-200'
+                        appointment.google_calendar_event_id
+                          ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25'
+                          : 'bg-secondary text-muted-foreground border-border'
                       )}
                     >
                       GCal: {appointment.google_calendar_event_id || 'None'}
                     </Badge>
                   )}
                   {appointment.confirmation_email_sent_at && (
-                    <Badge variant="secondary" className="border bg-teal-50 text-teal-700 border-teal-200 text-xs">
+                    <Badge variant="secondary" className="border bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/15 dark:text-teal-300 dark:border-teal-500/25 text-xs">
                       ✉ Confirmation Sent
                     </Badge>
                   )}
                   {appointment.reminder_email_sent_at && (
-                    <Badge variant="secondary" className="border bg-sky-50 text-sky-700 border-sky-200 text-xs">
+                    <Badge variant="secondary" className="border bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/25 text-xs">
                       ✉ Reminder Sent
                     </Badge>
                   )}
                   {appointment.day1_followup_email_sent_at && (
-                    <Badge variant="secondary" className="border bg-violet-50 text-violet-700 border-violet-200 text-xs">
+                    <Badge variant="secondary" className="border bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-500/15 dark:text-violet-300 dark:border-violet-500/25 text-xs">
                       ✉ Day 1 Sent
                     </Badge>
                   )}
                   {appointment.day2_followup_email_sent_at && (
-                    <Badge variant="secondary" className="border bg-purple-50 text-purple-700 border-purple-200 text-xs">
+                    <Badge variant="secondary" className="border bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25 text-xs">
                       ✉ Day 2 Sent
                     </Badge>
                   )}
                   {appointment.day3_followup_email_sent_at && (
-                    <Badge variant="secondary" className="border bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 text-xs">
+                    <Badge variant="secondary" className="border bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 dark:bg-fuchsia-500/15 dark:text-fuchsia-300 dark:border-fuchsia-500/25 text-xs">
                       ✉ Day 3 Sent
                     </Badge>
                   )}
@@ -884,7 +884,7 @@ export default function AppointmentDetail() {
                 <Button
                   variant="outline"
                   disabled
-                  className="h-11 px-5 border-blue-200 text-blue-600 bg-blue-50"
+                  className="h-11 px-5 border-brand-blue/30 text-brand-blue bg-brand-blue/12"
                 >
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Syncing with RFMS Measure Mobile...
@@ -893,7 +893,7 @@ export default function AppointmentDetail() {
                 <Button
                   variant="outline"
                   disabled
-                  className="h-11 px-5 border-green-200 text-green-600 bg-green-50"
+                  className="h-11 px-5 border-green-200 dark:border-green-500/30 text-green-600 dark:text-green-300 bg-green-50 dark:bg-green-500/15"
                 >
                   <Check className="w-4 h-4 mr-2" />
                   Synced with RFMS Measure Mobile
@@ -904,7 +904,7 @@ export default function AppointmentDetail() {
                     variant="outline"
                     onClick={syncToRFMS}
                     disabled={syncingRFMS}
-                    className="h-11 px-5 border-red-200 text-red-600 hover:bg-red-50"
+                    className="h-11 px-5 border-destructive/40 text-destructive hover:bg-destructive/10"
                   >
                     {syncingRFMS ? (
                       <>
@@ -919,7 +919,7 @@ export default function AppointmentDetail() {
                     )}
                   </Button>
                   {(rfmsSyncError || appointment.rfms_sync_error) && (
-                    <p className="text-xs text-red-600 max-w-xs">
+                    <p className="text-xs text-destructive max-w-xs">
                       {rfmsSyncError || appointment.rfms_sync_error}
                     </p>
                   )}
@@ -929,7 +929,7 @@ export default function AppointmentDetail() {
                   variant="outline"
                   onClick={syncToRFMS}
                   disabled={syncingRFMS}
-                  className="h-11 px-5 border-blue-200 text-blue-600 hover:bg-blue-50"
+                  className="h-11 px-5 border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
                 >
                   {syncingRFMS ? (
                     <>
@@ -947,7 +947,7 @@ export default function AppointmentDetail() {
               <a href={appointment.consultant_short_url || `${window.location.origin}/ConsultantAppointmentView?id=${appointmentId}`} target="_blank" rel="noopener noreferrer">
                 <Button
                   variant="outline"
-                  className="h-11 px-5 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                  className="h-11 px-5 border-primary/30 text-primary hover:bg-primary/10"
                 >
                   <User className="w-4 h-4 mr-2" />
                   Consultant View
@@ -957,7 +957,7 @@ export default function AppointmentDetail() {
                 <Link to={createPageUrl('ConsultantAppointmentView') + `?id=${appointmentId}`}>
                   <Button
                     variant="outline"
-                    className="h-11 px-5 border-purple-200 text-purple-600 hover:bg-purple-50"
+                    className="h-11 px-5 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-500/10"
                   >
                     <User className="w-4 h-4 mr-2" />
                     Preview Consultant View
@@ -967,7 +967,7 @@ export default function AppointmentDetail() {
               <Link to={createPageUrl('LeadAppointmentView') + `?id=${appointmentId}`} target="_blank">
                 <Button
                   variant="outline"
-                  className="h-11 px-5 border-green-200 text-green-600 hover:bg-green-50"
+                  className="h-11 px-5 border-green-200 dark:border-green-500/30 text-green-600 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-500/10"
                 >
                   <LinkIcon className="w-4 h-4 mr-2" />
                   View as Lead
@@ -984,7 +984,7 @@ export default function AppointmentDetail() {
                       });
                       setShowRescheduleDialog(true);
                     }}
-                    className="h-11 px-5 border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+                    className="h-11 px-5 border-yellow-200 dark:border-yellow-500/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-500/10"
                   >
                     Reschedule
                   </Button>
@@ -995,7 +995,7 @@ export default function AppointmentDetail() {
                       setCancelReasonOther('');
                       setShowCancelDialog(true);
                     }}
-                    className="h-11 px-5 border-red-200 text-red-600 hover:bg-red-50"
+                    className="h-11 px-5 border-destructive/40 text-destructive hover:bg-destructive/10"
                   >
                     Cancel
                   </Button>
@@ -1004,7 +1004,7 @@ export default function AppointmentDetail() {
               <Button
                 variant="outline"
                 onClick={() => setShowDeleteDialog(true)}
-                className="h-11 px-5 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                className="h-11 px-5 border-destructive/40 text-destructive hover:bg-destructive/10 hover:border-destructive/60"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
@@ -1012,7 +1012,7 @@ export default function AppointmentDetail() {
               <Button
                 variant="outline"
                 onClick={() => setShowResultDialog(true)}
-                className="h-11 px-5 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                className="h-11 px-5 border-primary/30 text-primary hover:bg-primary/10"
               >
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Mark Result
@@ -1020,7 +1020,7 @@ export default function AppointmentDetail() {
               <Button
                 variant="outline"
                 onClick={() => setShowAdminActionsDialog(true)}
-                className="h-11 px-5 border-purple-200 text-purple-600 hover:bg-purple-50"
+                className="h-11 px-5 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-500/10"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Admin Actions
@@ -1031,18 +1031,18 @@ export default function AppointmentDetail() {
       </div>
 
       {/* Sticky Action Bar */}
-      <div className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+      <div className="sticky top-0 z-30 bg-card border-b border-border shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Badge variant="secondary" className={cn('border', statusColors[appointment.status])}>
               {appointment.status}
             </Badge>
-            <span className="text-sm text-slate-600">{leadName}</span>
+            <span className="text-sm text-muted-foreground">{leadName}</span>
           </div>
           <div className="flex items-center gap-3">
             {appointment.status === 'Lead' && (
               <Link to={createPageUrl('ChecklistDetail') + `?id=${appointmentId}`}>
-                <Button className="h-10 px-5 bg-indigo-600 hover:bg-indigo-700">
+                <Button className="h-10 px-5 bg-primary text-primary-foreground hover:opacity-90">
                   Convert to Appointment
                 </Button>
               </Link>
@@ -1050,7 +1050,7 @@ export default function AppointmentDetail() {
             <Button
               variant="outline"
               onClick={() => setShowEditDialog(true)}
-              className="h-10 px-5 border-slate-200 hover:bg-slate-50"
+              className="h-10 px-5 border-border hover:bg-secondary"
             >
               <Pencil className="w-4 h-4 mr-2" />
               Save Changes
@@ -1062,7 +1062,7 @@ export default function AppointmentDetail() {
       {/* 1978 Warning Banner */}
       {is1978OrBefore && (
         <div className="bg-red-600 text-white px-6 py-4">
-          <div className="max-w-4xl mx-auto flex items-center gap-4">
+          <div className="max-w-7xl mx-auto flex items-center gap-4">
             <span className="text-3xl">🛑</span>
             <div>
               <p className="font-bold text-lg">STOP — Home Built On or Before 1978</p>
@@ -1073,10 +1073,10 @@ export default function AppointmentDetail() {
       )}
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AppointmentProgressTracker appointment={appointment} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <SalePhotosSection sale={sale} lead={lead} />
           <AppointmentDetailsCard appointment={appointment} updateMutation={updateMutation} />
           <LeadInfoCard lead={lead} leadName={leadName} />
@@ -1086,29 +1086,29 @@ export default function AppointmentDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Project Budget & Source
             </h2>
             <div className="space-y-4">
-              <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-emerald-600" />
+              <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Amount</p>
-                  <p className="text-slate-800 font-medium">{checklist?.project_budget || 'Unknown'}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Amount</p>
+                  <p className="text-foreground font-medium">{checklist?.project_budget || 'Unknown'}</p>
                 </div>
               </div>
               {checklist?.heard_about_us && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <Activity className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Marketing Source</p>
-                    <p className="text-slate-800 font-medium">{checklist.heard_about_us === 'Other' && checklist.heard_about_us_other ? checklist.heard_about_us_other : checklist.heard_about_us}</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">Marketing Source</p>
+                    <p className="text-foreground font-medium">{checklist.heard_about_us === 'Other' && checklist.heard_about_us_other ? checklist.heard_about_us_other : checklist.heard_about_us}</p>
                   </div>
                 </div>
               )}
@@ -1120,10 +1120,10 @@ export default function AppointmentDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                 Assigned Team
               </h2>
               <div className="flex gap-2">
@@ -1138,7 +1138,7 @@ export default function AppointmentDetail() {
                        setShowAssignDialog(true);
                        setDoubleBookWarning(null);
                      }}
-                     className="text-xs bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100"
+                     className="text-xs bg-primary/10 text-primary border-primary/30 hover:bg-primary/15"
                    >
                      <Users className="w-3 h-3 mr-1" />
                      Assign Team
@@ -1160,29 +1160,29 @@ export default function AppointmentDetail() {
             </div>
             <div className="space-y-4">
               {csr && (
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50">
-                  <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-green-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50 dark:bg-green-500/10">
+                  <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-green-600 dark:text-green-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-green-600 mb-0.5">Customer Service Rep</p>
-                    <p className="text-slate-800">{csr.first_name} {csr.last_name}</p>
+                    <p className="text-xs text-green-600 dark:text-green-300 mb-0.5">Customer Service Rep</p>
+                    <p className="text-foreground">{csr.first_name} {csr.last_name}</p>
                   </div>
                 </div>
               )}
               {dc && (
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-blue-50">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-brand-blue/12">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div>
-                    <p className="text-xs text-blue-600 mb-0.5">Design Consultant</p>
-                    <p className="text-slate-800">{dc.first_name} {dc.last_name}</p>
+                    <p className="text-xs text-brand-blue mb-0.5">Design Consultant</p>
+                    <p className="text-foreground">{dc.first_name} {dc.last_name}</p>
                   </div>
                 </div>
               )}
               {!csr && !dc && (
-                <p className="text-slate-400 text-center py-4 text-sm">No team members assigned</p>
+                <p className="text-muted-foreground text-center py-4 text-sm">No team members assigned</p>
               )}
             </div>
           </motion.div>
@@ -1192,27 +1192,27 @@ export default function AppointmentDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Location
             </h2>
             {appointment.location_address ? (
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-3">
-                  <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-orange-600" />
+                  <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-500/15 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-300" />
                   </div>
                   <div>
-                    <p className="text-slate-800">{appointment.location_address}</p>
+                    <p className="text-foreground">{appointment.location_address}</p>
                   </div>
                 </div>
                 {streetViewLoading ? (
-                  <div className="flex items-center justify-center h-64 bg-slate-50 rounded-xl">
-                    <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+                  <div className="flex items-center justify-center h-64 bg-secondary rounded-xl">
+                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
                   </div>
                 ) : streetView?.streetViewUrl ? (
-                  <div className="rounded-xl overflow-hidden border border-slate-200">
+                  <div className="rounded-xl overflow-hidden border border-border">
                     <img
                       src={streetView.streetViewUrl}
                       alt="Property Street View"
@@ -1222,7 +1222,7 @@ export default function AppointmentDetail() {
                 ) : null}
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-6">No location specified</p>
+              <p className="text-muted-foreground text-center py-6">No location specified</p>
             )}
           </motion.div>
 
@@ -1231,16 +1231,16 @@ export default function AppointmentDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2 space-y-6"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3 space-y-6"
           >
             {/* Lead View Link */}
             <div>
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Lead View Link
               </h2>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <div className="flex-1 p-3 bg-slate-50 rounded-lg border border-slate-200 min-w-0">
-                  <p className="text-sm text-slate-600 break-all">
+                <div className="flex-1 p-3 bg-secondary rounded-lg border border-border min-w-0">
+                  <p className="text-sm text-muted-foreground break-all">
                     {appointment.lead_short_url || leadViewUrl}
                   </p>
                 </div>
@@ -1248,7 +1248,7 @@ export default function AppointmentDetail() {
                   onClick={copyLeadLinkToClipboard}
                   variant="outline"
                   disabled={generatingLeadShortUrl}
-                  className="h-12 px-5 border-green-200 hover:bg-green-50 flex-shrink-0"
+                  className="h-12 px-5 border-green-200 hover:bg-green-50 dark:border-green-500/30 dark:hover:bg-green-500/10 flex-shrink-0"
                 >
                   {generatingLeadShortUrl ? (
                     <>
@@ -1257,7 +1257,7 @@ export default function AppointmentDetail() {
                     </>
                   ) : leadLinkCopied ? (
                     <>
-                      <Check className="w-4 h-4 mr-2 text-green-600" />
+                      <Check className="w-4 h-4 mr-2 text-green-600 dark:text-green-300" />
                       Copied!
                     </>
                   ) : (
@@ -1268,7 +1268,7 @@ export default function AppointmentDetail() {
                   )}
                 </Button>
               </div>
-              <p className="text-xs text-slate-500 mt-3">
+              <p className="text-xs text-muted-foreground mt-3">
                 {appointment.lead_short_url ? (
                   <>Shortened link ready to share with customer</>
                 ) : (
@@ -1279,12 +1279,12 @@ export default function AppointmentDetail() {
 
             {/* Consultant View Link */}
             <div>
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Consultant View Link
               </h2>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <div className="flex-1 p-3 bg-slate-50 rounded-lg border border-slate-200 min-w-0">
-                  <p className="text-sm text-slate-600 break-all">
+                <div className="flex-1 p-3 bg-secondary rounded-lg border border-border min-w-0">
+                  <p className="text-sm text-muted-foreground break-all">
                     {appointment.consultant_short_url || consultantViewUrl}
                   </p>
                 </div>
@@ -1292,7 +1292,7 @@ export default function AppointmentDetail() {
                   onClick={copyConsultantLinkToClipboard}
                   variant="outline"
                   disabled={generatingConsultantShortUrl}
-                  className="h-12 px-5 border-indigo-200 hover:bg-indigo-50 flex-shrink-0"
+                  className="h-12 px-5 border-primary/30 hover:bg-primary/10 flex-shrink-0"
                 >
                   {generatingConsultantShortUrl ? (
                     <>
@@ -1301,7 +1301,7 @@ export default function AppointmentDetail() {
                     </>
                   ) : consultantLinkCopied ? (
                     <>
-                      <Check className="w-4 h-4 mr-2 text-green-600" />
+                      <Check className="w-4 h-4 mr-2 text-green-600 dark:text-green-300" />
                       Copied!
                     </>
                   ) : (
@@ -1312,7 +1312,7 @@ export default function AppointmentDetail() {
                   )}
                 </Button>
               </div>
-              <p className="text-xs text-slate-500 mt-3">
+              <p className="text-xs text-muted-foreground mt-3">
                 {appointment.consultant_short_url ? (
                   <>Shortened link ready to share with consultant</>
                 ) : (
@@ -1327,33 +1327,33 @@ export default function AppointmentDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Tasks
             </h2>
             
             {openTasks.length === 0 && completedTasks.length === 0 ? (
-              <p className="text-slate-400 text-center py-6">No tasks for this appointment</p>
+              <p className="text-muted-foreground text-center py-6">No tasks for this appointment</p>
             ) : (
               <>
                 {/* Open Tasks */}
                 {openTasks.length > 0 && (
                   <div className="mb-6">
-                    <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-3">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                       Open ({openTasks.length})
                     </h3>
                     <div className="space-y-2">
                       {openTasks.map((task) => (
-                        <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200">
-                          <Circle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25">
+                          <Circle className="w-4 h-4 text-amber-600 dark:text-amber-300 mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
                               <div>
-                                <p className="text-sm font-medium text-slate-800">{task.type === 'follow_up' ? 'Follow-Up' : task.type}</p>
-                                {task.notes && <p className="text-xs text-slate-600 mt-1">{task.notes}</p>}
+                                <p className="text-sm font-medium text-foreground">{task.type === 'follow_up' ? 'Follow-Up' : task.type}</p>
+                                {task.notes && <p className="text-xs text-muted-foreground mt-1">{task.notes}</p>}
                               </div>
-                              <span className="text-xs text-slate-500 whitespace-nowrap">
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
                                 Due: {format(parseISO(task.due_date), 'MMM d')}
                               </span>
                             </div>
@@ -1367,20 +1367,20 @@ export default function AppointmentDetail() {
                 {/* Completed Tasks */}
                 {completedTasks.length > 0 && (
                   <div>
-                    <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-3">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                       Completed ({completedTasks.length})
                     </h3>
                     <div className="space-y-2">
                       {completedTasks.map((task) => (
-                        <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
-                          <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25">
+                          <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-300 mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
                               <div>
-                                <p className="text-sm font-medium text-slate-800 line-through">{task.type === 'follow_up' ? 'Follow-Up' : task.type}</p>
-                                {task.notes && <p className="text-xs text-slate-600 mt-1">{task.notes}</p>}
+                                <p className="text-sm font-medium text-foreground line-through">{task.type === 'follow_up' ? 'Follow-Up' : task.type}</p>
+                                {task.notes && <p className="text-xs text-muted-foreground mt-1">{task.notes}</p>}
                               </div>
-                              <span className="text-xs text-slate-500 whitespace-nowrap">
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
                                 {format(parseISO(task.due_date), 'MMM d')}
                               </span>
                             </div>
@@ -1401,17 +1401,17 @@ export default function AppointmentDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Record Information
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-50">
-                <CalendarIcon className="w-5 h-5 text-slate-400" />
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
+                <CalendarIcon className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Created</p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-xs text-muted-foreground mb-0.5">Created</p>
+                  <p className="text-sm text-foreground">
                     {appointment.created_date && new Date(appointment.created_date + (appointment.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', { 
                       month: 'short', 
                       day: 'numeric', 
@@ -1423,11 +1423,11 @@ export default function AppointmentDetail() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-50">
-                <CalendarIcon className="w-5 h-5 text-slate-400" />
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
+                <CalendarIcon className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Last Updated</p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-xs text-muted-foreground mb-0.5">Last Updated</p>
+                  <p className="text-sm text-foreground">
                     {appointment.updated_date && new Date(appointment.updated_date + (appointment.updated_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', { 
                       month: 'short', 
                       day: 'numeric', 
@@ -1439,11 +1439,11 @@ export default function AppointmentDetail() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-50">
-                <Mail className="w-5 h-5 text-slate-400" />
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
+                <Mail className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Created By</p>
-                  <p className="text-sm text-slate-700 truncate">{appointment.created_by}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Created By</p>
+                  <p className="text-sm text-foreground truncate">{appointment.created_by}</p>
                 </div>
               </div>
             </div>
@@ -1472,20 +1472,20 @@ export default function AppointmentDetail() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.85 }}
-                className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+                className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
               >
-                <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+                <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                   Duration on Site
                 </h2>
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-indigo-600" />
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
+                  <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-slate-800">
+                    <p className="text-2xl font-bold text-foreground">
                       {hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`}
                     </p>
-                    <p className="text-sm text-slate-500">Time spent with customer</p>
+                    <p className="text-sm text-muted-foreground">Time spent with customer</p>
                   </div>
                 </div>
               </motion.div>
@@ -1497,28 +1497,28 @@ export default function AppointmentDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
           >
             <div className="flex items-center gap-3 mb-4">
-              <Activity className="w-5 h-5 text-indigo-600" />
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+              <Activity className="w-5 h-5 text-primary" />
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                 Activity Log
               </h2>
             </div>
             {logs && logs.length > 0 ? (
               <div className="space-y-3">
                 {logs.map((log) => (
-                  <div key={log.id} className="flex gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div key={log.id} className="flex gap-4 p-4 rounded-xl bg-secondary hover:bg-secondary transition-colors">
                     <div className="flex-1">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="font-medium text-slate-800">{log.action}</p>
+                          <p className="font-medium text-foreground">{log.action}</p>
                           {log.details && (
-                            <p className="text-sm text-slate-600 mt-1">{log.details}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{log.details}</p>
                           )}
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-muted-foreground">
                             {log.created_date && new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', {
                               month: 'short',
                               day: 'numeric',
@@ -1527,7 +1527,7 @@ export default function AppointmentDetail() {
                               hour12: true
                             })}
                           </p>
-                          <p className="text-xs text-slate-400 mt-0.5">{log.user_name || log.user_email}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{log.user_name || log.user_email}</p>
                         </div>
                       </div>
                     </div>
@@ -1535,7 +1535,7 @@ export default function AppointmentDetail() {
                 ))}
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-6">No activity recorded yet</p>
+              <p className="text-muted-foreground text-center py-6">No activity recorded yet</p>
             )}
           </motion.div>
         </div>
@@ -1554,7 +1554,7 @@ export default function AppointmentDetail() {
           }}
         >
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-slate-800">Edit Appointment</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-foreground">Edit Appointment</DialogTitle>
           </DialogHeader>
           <AppointmentForm
             appointment={appointment}
@@ -1569,29 +1569,29 @@ export default function AppointmentDetail() {
       <Dialog open={showRescheduleDialog} onOpenChange={setShowRescheduleDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-800">Reschedule Appointment</DialogTitle>
-            <DialogDescription className="text-slate-500 mt-2">
+            <DialogTitle className="text-xl font-bold text-foreground">Reschedule Appointment</DialogTitle>
+            <DialogDescription className="text-muted-foreground mt-2">
               Select a new date and time for this appointment
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="reschedule_date" className="text-slate-700">New Date *</Label>
+              <Label htmlFor="reschedule_date" className="text-foreground">New Date *</Label>
               <Input
                 id="reschedule_date"
                 type="date"
                 value={rescheduleData.appointment_date}
                 onChange={(e) => setRescheduleData({ ...rescheduleData, appointment_date: e.target.value })}
-                className="h-12 border-slate-200"
+                className="h-12 border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="reschedule_block" className="text-slate-700">Time Block *</Label>
+              <Label htmlFor="reschedule_block" className="text-foreground">Time Block *</Label>
               <Select 
                 value={rescheduleData.appointment_block} 
                 onValueChange={(value) => setRescheduleData({ ...rescheduleData, appointment_block: value })}
               >
-                <SelectTrigger className="h-12 border-slate-200">
+                <SelectTrigger className="h-12 border-border">
                   <SelectValue placeholder="Select time block" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1607,7 +1607,7 @@ export default function AppointmentDetail() {
             <Button
               variant="outline"
               onClick={() => setShowRescheduleDialog(false)}
-              className="border-slate-200"
+              className="border-border"
             >
               Cancel
             </Button>
@@ -1635,7 +1635,7 @@ export default function AppointmentDetail() {
           <DialogHeader>
             <DialogTitle className={cn(
               "text-xl font-bold",
-              doubleBookWarning ? "flex items-center gap-2 text-amber-600" : "text-slate-800"
+              doubleBookWarning ? "flex items-center gap-2 text-amber-600 dark:text-amber-300" : "text-foreground"
             )}>
               {doubleBookWarning ? (
                 <>
@@ -1646,7 +1646,7 @@ export default function AppointmentDetail() {
                 'Assign Team Members'
               )}
             </DialogTitle>
-            <DialogDescription className="text-slate-500 mt-2">
+            <DialogDescription className="text-muted-foreground mt-2">
               {doubleBookWarning 
                 ? 'This consultant already has an appointment at this time' 
                 : 'Select team members to assign to this appointment'
@@ -1655,28 +1655,28 @@ export default function AppointmentDetail() {
           </DialogHeader>
           {doubleBookWarning ? (
             <div className="space-y-4 py-4">
-              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-                <p className="text-sm font-semibold text-amber-900 mb-2">Existing Appointment:</p>
-                <p className="text-sm text-amber-800">
+              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25">
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-2">Existing Appointment:</p>
+                <p className="text-sm text-amber-800 dark:text-amber-300">
                   {doubleBookWarning.conflictLead?.first_name} {doubleBookWarning.conflictLead?.last_name}
                 </p>
-                <p className="text-xs text-amber-700 mt-1">
+                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
                   Same time block on {format(parseISO(appointment.appointment_date), 'MMM d')}
                 </p>
               </div>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Do you want to proceed with this double booking?
               </p>
             </div>
           ) : (
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="assign_csr" className="text-slate-700">Customer Service Rep</Label>
+                <Label htmlFor="assign_csr" className="text-foreground">Customer Service Rep</Label>
                 <Select 
                   value={assignData.assigned_csr} 
                   onValueChange={(value) => setAssignData({ ...assignData, assigned_csr: value === 'none' ? '' : value })}
                 >
-                  <SelectTrigger className="h-12 border-slate-200">
+                  <SelectTrigger className="h-12 border-border">
                     <SelectValue placeholder="Select CSR" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1690,7 +1690,7 @@ export default function AppointmentDetail() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="assign_dc" className="text-slate-700">Design Consultant</Label>
+                <Label htmlFor="assign_dc" className="text-foreground">Design Consultant</Label>
                 <Select 
                   value={assignData.assigned_dc} 
                   onValueChange={(value) => {
@@ -1720,7 +1720,7 @@ export default function AppointmentDetail() {
                     setDoubleBookWarning(null);
                   }}
                 >
-                  <SelectTrigger className="h-12 border-slate-200">
+                  <SelectTrigger className="h-12 border-border">
                     <SelectValue placeholder="Select DC" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1742,7 +1742,7 @@ export default function AppointmentDetail() {
                 setShowAssignDialog(false);
                 setDoubleBookWarning(null);
               }}
-              className="border-slate-200"
+              className="border-border"
             >
               Cancel
             </Button>
@@ -1768,7 +1768,7 @@ export default function AppointmentDetail() {
                 }
               }}
               disabled={updateMutation.isPending}
-              className={doubleBookWarning ? "bg-amber-600 hover:bg-amber-700" : "bg-indigo-600 hover:bg-indigo-700"}
+              className={doubleBookWarning ? "bg-amber-600 hover:bg-amber-700" : "bg-primary text-primary-foreground hover:opacity-90"}
             >
               {updateMutation.isPending ? (
                 <>
@@ -1789,8 +1789,8 @@ export default function AppointmentDetail() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-800">Delete Appointment</DialogTitle>
-            <DialogDescription className="text-slate-500 mt-2">
+            <DialogTitle className="text-xl font-bold text-foreground">Delete Appointment</DialogTitle>
+            <DialogDescription className="text-muted-foreground mt-2">
               Are you sure you want to delete this appointment with <span className="font-semibold">{leadName}</span>? 
               This action cannot be undone.
             </DialogDescription>
@@ -1799,7 +1799,7 @@ export default function AppointmentDetail() {
             <Button
               variant="outline"
               onClick={() => setShowDeleteDialog(false)}
-              className="border-slate-200"
+              className="border-border"
             >
               Cancel
             </Button>
@@ -1807,7 +1807,7 @@ export default function AppointmentDetail() {
               variant="destructive"
               onClick={() => deleteMutation.mutate()}
               disabled={deleteMutation.isPending}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:opacity-90"
             >
               {deleteMutation.isPending ? (
                 <>
@@ -1826,17 +1826,17 @@ export default function AppointmentDetail() {
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-800">Cancel Appointment</DialogTitle>
-            <DialogDescription className="text-slate-500 mt-2">
+            <DialogTitle className="text-xl font-bold text-foreground">Cancel Appointment</DialogTitle>
+            <DialogDescription className="text-muted-foreground mt-2">
               Are you sure you want to cancel this appointment with <span className="font-semibold">{leadName}</span>?
               Please provide a reason for the cancellation.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="cancel_reason" className="text-slate-700">Cancellation Reason *</Label>
+              <Label htmlFor="cancel_reason" className="text-foreground">Cancellation Reason *</Label>
               <Select value={cancelReasonSelect} onValueChange={(value) => setCancelReasonSelect(value)}>
-                <SelectTrigger className="h-12 border-slate-200">
+                <SelectTrigger className="h-12 border-border">
                   <SelectValue placeholder="Select a reason..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -1848,13 +1848,13 @@ export default function AppointmentDetail() {
             </div>
             {cancelReasonSelect === 'Other' && (
               <div className="space-y-2">
-                <Label htmlFor="cancel_reason_other" className="text-slate-700">Please specify</Label>
+                <Label htmlFor="cancel_reason_other" className="text-foreground">Please specify</Label>
                 <Textarea
                   id="cancel_reason_other"
                   value={cancelReasonOther}
                   onChange={(e) => setCancelReasonOther(e.target.value)}
                   placeholder="Enter the reason for cancelling this appointment..."
-                  className="min-h-24 border-slate-200 focus:border-red-500 focus:ring-red-500"
+                  className="min-h-24 border-border focus:border-destructive focus:ring-destructive"
                 />
               </div>
             )}
@@ -1863,7 +1863,7 @@ export default function AppointmentDetail() {
             <Button
               variant="outline"
               onClick={() => setShowCancelDialog(false)}
-              className="border-slate-200"
+              className="border-border"
             >
               Keep Appointment
             </Button>
@@ -1871,7 +1871,7 @@ export default function AppointmentDetail() {
               variant="destructive"
               onClick={confirmCancel}
               disabled={updateMutation.isPending || !cancelReasonSelect || (cancelReasonSelect === 'Other' && !cancelReasonOther.trim())}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:opacity-90"
             >
               {updateMutation.isPending ? (
                 <>
@@ -1890,11 +1890,11 @@ export default function AppointmentDetail() {
       <Dialog open={showAdminActionsDialog} onOpenChange={setShowAdminActionsDialog}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <Settings className="w-5 h-5 text-purple-600" />
+            <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2">
+              <Settings className="w-5 h-5 text-purple-600 dark:text-purple-300" />
               Admin Actions
             </DialogTitle>
-            <DialogDescription className="text-slate-500 mt-2">
+            <DialogDescription className="text-muted-foreground mt-2">
               Manually trigger sync and notification actions for this appointment
             </DialogDescription>
           </DialogHeader>
@@ -1913,12 +1913,12 @@ export default function AppointmentDetail() {
                   return response.data;
                 })}
                 disabled={!!runningAction}
-                className="h-20 flex-col border-blue-200 hover:bg-blue-50"
+                className="h-20 flex-col border-brand-blue/30 hover:bg-brand-blue/12"
               >
                 {runningAction === 'Google Calendar Sync' ? (
                   <Loader2 className="w-5 h-5 mb-2 animate-spin" />
                 ) : (
-                  <CalendarIcon className="w-5 h-5 mb-2 text-blue-600" />
+                  <CalendarIcon className="w-5 h-5 mb-2 text-brand-blue" />
                 )}
                 <span className="text-sm">Sync Google Calendar</span>
               </Button>
@@ -1933,12 +1933,12 @@ export default function AppointmentDetail() {
                   return response.data;
                 })}
                 disabled={!!runningAction}
-                className="h-20 flex-col border-green-200 hover:bg-green-50"
+                className="h-20 flex-col border-green-200 hover:bg-green-50 dark:border-green-500/30 dark:hover:bg-green-500/10"
               >
                 {runningAction === 'Send Customer SMS' ? (
                   <Loader2 className="w-5 h-5 mb-2 animate-spin" />
                 ) : (
-                  <Mail className="w-5 h-5 mb-2 text-green-600" />
+                  <Mail className="w-5 h-5 mb-2 text-green-600 dark:text-green-300" />
                 )}
                 <span className="text-sm">Send Customer SMS</span>
               </Button>
@@ -1953,12 +1953,12 @@ export default function AppointmentDetail() {
                   return response.data;
                 })}
                 disabled={!!runningAction || !appointment.assigned_dc}
-                className="h-20 flex-col border-indigo-200 hover:bg-indigo-50"
+                className="h-20 flex-col border-primary/30 hover:bg-primary/10"
               >
                 {runningAction === 'Send Consultant SMS' ? (
                   <Loader2 className="w-5 h-5 mb-2 animate-spin" />
                 ) : (
-                  <Users className="w-5 h-5 mb-2 text-indigo-600" />
+                  <Users className="w-5 h-5 mb-2 text-primary" />
                 )}
                 <span className="text-sm">Send Consultant SMS</span>
               </Button>
@@ -1972,12 +1972,12 @@ export default function AppointmentDetail() {
                   return response.data;
                 })}
                 disabled={!!runningAction}
-                className="h-20 flex-col border-purple-200 hover:bg-purple-50"
+                className="h-20 flex-col border-purple-200 hover:bg-purple-50 dark:border-purple-500/30 dark:hover:bg-purple-500/10"
               >
                 {runningAction === 'Sync to RFMS' ? (
                   <Loader2 className="w-5 h-5 mb-2 animate-spin" />
                 ) : (
-                  <LinkIcon className="w-5 h-5 mb-2 text-purple-600" />
+                  <LinkIcon className="w-5 h-5 mb-2 text-purple-600 dark:text-purple-300" />
                 )}
                 <span className="text-sm">Sync to RFMS</span>
               </Button>
@@ -1993,12 +1993,12 @@ export default function AppointmentDetail() {
                   return response.data;
                 })}
                 disabled={!!runningAction}
-                className="h-20 flex-col border-orange-200 hover:bg-orange-50"
+                className="h-20 flex-col border-orange-200 hover:bg-orange-50 dark:border-orange-500/30 dark:hover:bg-orange-500/10"
               >
                 {runningAction === 'Send Confirmation Email' ? (
                   <Loader2 className="w-5 h-5 mb-2 animate-spin" />
                 ) : (
-                  <Mail className="w-5 h-5 mb-2 text-orange-600" />
+                  <Mail className="w-5 h-5 mb-2 text-orange-600 dark:text-orange-300" />
                 )}
                 <span className="text-sm">Send Confirmation Email</span>
               </Button>
@@ -2029,7 +2029,7 @@ export default function AppointmentDetail() {
                 setActionResults([]);
                 setRunningAction(null);
               }}
-              className="border-slate-200"
+              className="border-border"
             >
               Close
             </Button>

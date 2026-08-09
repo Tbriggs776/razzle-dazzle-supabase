@@ -119,7 +119,7 @@ export default function DesignModView() {
   if (mod.status === 'signed') {
     const signedDate = mod.signed_at ? new Date(mod.signed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A';
     return (
-      <div className="min-h-screen bg-background py-10 px-4">
+      <div className="min-h-screen bg-background py-10 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <CheckCircle2 className="w-5 h-5 text-green-500" />
@@ -203,7 +203,7 @@ export default function DesignModView() {
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-background py-10 px-4">
+    <div className="min-h-screen bg-background py-10 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
         <div className="text-center mb-8">
           <p className="font-semibold text-foreground">ROC352055</p>
@@ -300,7 +300,7 @@ export default function DesignModView() {
         <Button
           onClick={() => submitMutation.mutate()}
           disabled={submitMutation.isPending || !customerPrintedName.trim()}
-          className="w-full mt-6 h-12 bg-blue-600 hover:bg-blue-700 text-base font-bold tracking-wide"
+          className="w-full mt-6 h-12 bg-primary text-primary-foreground hover:opacity-90 text-base font-bold tracking-wide"
         >
           {submitMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
           SUBMIT

@@ -471,56 +471,56 @@ export default function CommunicationHub() {
           {selectedConversation ? (
             <>
               {/* Thread Header */}
-              <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+              <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 flex-shrink-0">
                 {/* Back button — mobile only */}
                 <button
-                  className="md:hidden flex-shrink-0 p-1 rounded-lg hover:bg-slate-100"
+                  className="md:hidden flex-shrink-0 p-1 rounded-lg hover:bg-secondary"
                   onClick={() => setShowMobileThread(false)}
                 >
-                  <ArrowLeft className="w-5 h-5 text-slate-600" />
+                  <ArrowLeft className="w-5 h-5 text-muted-foreground" />
                 </button>
 
-                <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-indigo-700 font-bold text-sm">
+                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary font-bold text-sm">
                     {selectedConversation.contact_name?.charAt(0)?.toUpperCase() || '?'}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-slate-800 truncate">{selectedConversation.contact_name}</p>
+                    <p className="font-semibold text-foreground truncate">{selectedConversation.contact_name}</p>
                     {selectedConversation.is_internal && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-semibold flex-shrink-0">TEAM</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300 font-semibold flex-shrink-0">TEAM</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                     {selectedConversation.contact_phone && (
                       <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{selectedConversation.contact_phone}</span>
                     )}
                     {selectedConversation.lead_id && (
-                      <a href={`/LeadDetail?id=${selectedConversation.lead_id}`} className="text-indigo-600 hover:underline">Lead →</a>
+                      <a href={`/LeadDetail?id=${selectedConversation.lead_id}`} className="text-primary hover:underline">Lead →</a>
                     )}
                     {selectedConversation.customer_id && (
-                      <a href={`/CustomerDetail?id=${selectedConversation.customer_id}`} className="text-indigo-600 hover:underline">Customer →</a>
+                      <a href={`/CustomerDetail?id=${selectedConversation.customer_id}`} className="text-primary hover:underline">Customer →</a>
                     )}
                   </div>
                 </div>
 
                 {/* Info button — mobile only, shows related records panel */}
                 <button
-                  className="md:hidden flex-shrink-0 p-2 rounded-lg hover:bg-slate-100"
+                  className="md:hidden flex-shrink-0 p-2 rounded-lg hover:bg-secondary"
                   onClick={() => setShowRelatedPanel(v => !v)}
                 >
-                  <Info className="w-5 h-5 text-slate-500" />
+                  <Info className="w-5 h-5 text-muted-foreground" />
                 </button>
               </div>
 
               {/* Mobile Related Records overlay */}
               {showRelatedPanel && (
-                <div className="md:hidden absolute inset-0 z-50 bg-white overflow-y-auto p-4" style={{top: 0}}>
+                <div className="md:hidden absolute inset-0 z-50 bg-card overflow-y-auto p-4" style={{top: 0}}>
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-semibold text-slate-800">Related Records</h2>
-                    <button onClick={() => setShowRelatedPanel(false)} className="p-1 rounded-lg hover:bg-slate-100">
-                      <X className="w-5 h-5 text-slate-500" />
+                    <h2 className="font-semibold text-foreground">Related Records</h2>
+                    <button onClick={() => setShowRelatedPanel(false)} className="p-1 rounded-lg hover:bg-secondary">
+                      <X className="w-5 h-5 text-muted-foreground" />
                     </button>
                   </div>
                   <RelatedRecordsPanel />
@@ -536,15 +536,15 @@ export default function CommunicationHub() {
                         <div className={cn(
                           'max-w-[80%] md:max-w-sm rounded-2xl px-4 py-2.5 space-y-1',
                           msg.direction === 'outbound'
-                            ? 'bg-indigo-600 text-white rounded-br-sm'
-                            : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm'
+                            ? 'bg-primary text-primary-foreground rounded-br-sm'
+                            : 'bg-card border border-border text-foreground rounded-bl-sm'
                         )}>
                           {msg.body && msg.body.trim().startsWith('<') ? (
                             <div className="text-sm leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: msg.body }} />
                           ) : (
                             <p className="text-sm leading-relaxed">{msg.body}</p>
                           )}
-                          <div className={cn('flex items-center justify-between gap-4 text-[10px]', msg.direction === 'outbound' ? 'text-indigo-200' : 'text-slate-400')}>
+                          <div className={cn('flex items-center justify-between gap-4 text-[10px]', msg.direction === 'outbound' ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
                             <span>
                               {msg.created_date && format(
                                 new Date(msg.created_date + (msg.created_date.includes('Z') ? '' : 'Z')),
@@ -553,9 +553,9 @@ export default function CommunicationHub() {
                             </span>
                             <div className="flex items-center gap-1">
                               {msg.sent_by && <span>{msg.sent_by}</span>}
-                              <span className={cn('px-1.5 py-0.5 rounded', msg.direction === 'outbound' ? 'bg-indigo-500' : 'bg-slate-100 text-slate-500')}>{msg.type}</span>
+                              <span className={cn('px-1.5 py-0.5 rounded', msg.direction === 'outbound' ? 'bg-primary-foreground/20' : 'bg-secondary text-muted-foreground')}>{msg.type}</span>
                               {msg.status && (
-                                <span className={cn('px-1.5 py-0.5 rounded', msg.direction === 'outbound' ? 'bg-indigo-500' : 'bg-slate-100 text-slate-500')}>{msg.status}</span>
+                                <span className={cn('px-1.5 py-0.5 rounded', msg.direction === 'outbound' ? 'bg-primary-foreground/20' : 'bg-secondary text-muted-foreground')}>{msg.status}</span>
                               )}
                             </div>
                           </div>
@@ -567,14 +567,14 @@ export default function CommunicationHub() {
 
                   {/* Reply Box */}
                   {selectedConversation.contact_phone && (
-                    <div className="bg-white border-t border-slate-200 p-3 flex-shrink-0">
+                    <div className="bg-card border-t border-border p-3 flex-shrink-0">
                       <div className="flex items-end gap-2">
                         <textarea
                           value={replyText}
                           onChange={e => setReplyText(e.target.value)}
                           placeholder="Type a reply SMS..."
                           rows={2}
-                          className="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className="flex-1 border border-border bg-background text-foreground rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                           onKeyDown={e => {
                             if (e.key === 'Enter' && !e.shiftKey) {
                               e.preventDefault();
@@ -585,24 +585,24 @@ export default function CommunicationHub() {
                         <Button
                           onClick={handleSend}
                           disabled={sending || !replyText.trim()}
-                          className="bg-indigo-600 hover:bg-indigo-700 h-11 px-4 flex-shrink-0"
+                          className="bg-primary text-primary-foreground hover:opacity-90 h-11 px-4 flex-shrink-0"
                         >
                           {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                         </Button>
                       </div>
-                      <p className="text-xs text-slate-400 mt-1.5 hidden md:block">Press Enter to send · Shift+Enter for new line</p>
+                      <p className="text-xs text-muted-foreground mt-1.5 hidden md:block">Press Enter to send · Shift+Enter for new line</p>
                     </div>
                   )}
                 </div>
 
                 {/* Right Panel — desktop only */}
-                <div className="hidden md:block w-72 flex-shrink-0 bg-white border-l border-slate-200 overflow-y-auto p-4">
+                <div className="hidden md:block w-72 flex-shrink-0 bg-card border-l border-border overflow-y-auto p-4">
                   <RelatedRecordsPanel />
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-slate-400">
+            <div className="flex-1 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
                 <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
                 <p>Select a conversation to view messages</p>

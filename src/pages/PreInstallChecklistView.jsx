@@ -137,7 +137,7 @@ export default function PreInstallChecklistView() {
     const signedDate = checklist.signed_at ? format(new Date(checklist.signed_at), 'MMMM d, yyyy') : format(new Date(), 'MMMM d, yyyy');
     const initials = `${checklist.customer_first_name?.[0] || ''}${checklist.customer_last_name?.[0] || ''}`.toUpperCase();
     return (
-      <div className="min-h-screen bg-background py-10 px-4">
+      <div className="min-h-screen bg-background py-10 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
           <div className="flex items-center gap-3 mb-6 p-4 bg-green-50 border border-green-200 rounded-xl dark:bg-green-500/10 dark:border-green-500/25">
             <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
@@ -217,7 +217,7 @@ export default function PreInstallChecklistView() {
   const initials = `${checklist.customer_first_name?.[0] || ''}${checklist.customer_last_name?.[0] || ''}`.toUpperCase();
 
   return (
-    <div className="min-h-screen bg-background py-10 px-4">
+    <div className="min-h-screen bg-background py-10 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
         <div className="text-center mb-6">
           <p className="font-semibold text-foreground">ROC352055</p>
@@ -261,21 +261,21 @@ export default function PreInstallChecklistView() {
           </p>
 
           <div className="space-y-1">
-            <Label>Customer Printed Name <span className="text-red-500">*</span></Label>
+            <Label>Customer Printed Name <span className="text-destructive">*</span></Label>
             <Input
               value={customerPrintedName}
               onChange={e => setCustomerPrintedName(e.target.value)}
               placeholder="Type your full name"
-              className={submitAttempted && !customerPrintedName.trim() ? 'border-red-400' : ''}
+              className={submitAttempted && !customerPrintedName.trim() ? 'border-destructive' : ''}
             />
             {submitAttempted && !customerPrintedName.trim() && (
-              <p className="text-xs text-red-500">Printed name is required.</p>
+              <p className="text-xs text-destructive">Printed name is required.</p>
             )}
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <Label>Customer Signature <span className="text-red-500">*</span></Label>
+              <Label>Customer Signature <span className="text-destructive">*</span></Label>
               <Button type="button" variant="ghost" size="sm" onClick={clearSignature} className="text-muted-foreground h-7">
                 <Eraser className="w-3 h-3 mr-1" /> Clear
               </Button>
@@ -285,7 +285,7 @@ export default function PreInstallChecklistView() {
               width={580}
               height={140}
               className={`w-full border-2 border-dashed rounded-lg bg-white touch-none cursor-crosshair ${
-                submitAttempted && !hasSigned ? 'border-red-400' : 'border-border'
+                submitAttempted && !hasSigned ? 'border-destructive' : 'border-border'
               }`}
               onMouseDown={startDraw}
               onMouseMove={draw}
@@ -296,7 +296,7 @@ export default function PreInstallChecklistView() {
               onTouchEnd={endDraw}
             />
             {submitAttempted && !hasSigned ? (
-              <p className="text-xs text-red-500">Signature is required.</p>
+              <p className="text-xs text-destructive">Signature is required.</p>
             ) : (
               <p className="text-xs text-muted-foreground">Sign above using your mouse, trackpad, or finger</p>
             )}

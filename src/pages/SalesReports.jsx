@@ -481,10 +481,10 @@ export default function SalesReports() {
 
   const PeriodBadge = ({ current, previous, isCurrency = false, isPct = false }) => {
     const change = calcChange(current, previous);
-    if (change === null) return <p className="text-xs text-slate-400 mt-1">No prior data</p>;
+    if (change === null) return <p className="text-xs text-muted-foreground mt-1">No prior data</p>;
     const isUp = change >= 0;
     const Icon = Math.abs(change) < 0.5 ? ArrowRight : isUp ? ArrowUpRight : ArrowDownRight;
-    const color = isUp ? 'text-emerald-600' : 'text-red-500';
+    const color = isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400';
     const prevFormatted = isCurrency
       ? `$${previous.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
       : isPct
@@ -493,7 +493,7 @@ export default function SalesReports() {
     return (
       <div className={`flex items-center gap-1 mt-1 ${color}`}>
         <Icon className="w-3.5 h-3.5" />
-        <span className="text-xs font-semibold">{Math.abs(change).toFixed(1)}% <span className="font-normal text-slate-400">({prevFormatted})</span></span>
+        <span className="text-xs font-semibold">{Math.abs(change).toFixed(1)}% <span className="font-normal text-muted-foreground">({prevFormatted})</span></span>
       </div>
     );
   };
@@ -551,37 +551,37 @@ export default function SalesReports() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {appointmentsLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Target className="w-4 h-4 text-indigo-600" />
+                    <Target className="w-4 h-4 text-primary" />
                     Avg Closing %
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-slate-800">
+                  <div className="text-2xl font-bold text-foreground">
                     {currentClosingPct.toFixed(1)}%
                   </div>
                   <PeriodBadge current={currentClosingPct} previous={prevClosingPct} isPct={true} />
-                  <p className="text-xs text-slate-400 mt-2">{totalClosedSales} sales / {totalAppointments} appointments</p>
+                  <p className="text-xs text-muted-foreground mt-2">{totalClosedSales} sales / {totalAppointments} appointments</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-green-600" />
+                    <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
                     Avg Order Value
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-slate-800">
+                  <div className="text-2xl font-bold text-foreground">
                     ${currentAOV.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   <PeriodBadge current={currentAOV} previous={prevAOV} isCurrency={true} />
@@ -591,34 +591,34 @@ export default function SalesReports() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-emerald-600" />
+                    <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     Total Sales
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-slate-800">
+                  <div className="text-2xl font-bold text-foreground">
                     ${currentTotalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   <PeriodBadge current={currentTotalSales} previous={prevTotalSales} isCurrency={true} />
-                  <p className="text-xs text-slate-400 mt-2">{filteredSales.length} sales</p>
+                  <p className="text-xs text-muted-foreground mt-2">{filteredSales.length} sales</p>
                 </CardContent>
               </Card>
 
-              <Card className="cursor-pointer hover:border-purple-300 transition-colors" onClick={() => setShowFollowUpWinsModal(true)}>
+              <Card className="cursor-pointer hover:border-purple-300 dark:hover:border-purple-500/40 transition-colors" onClick={() => setShowFollowUpWinsModal(true)}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-purple-600" />
+                    <TrendingUp className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                     Follow-Up Wins
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-slate-800">
+                  <div className="text-2xl font-bold text-foreground">
                     {followUpWins.count}
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     ${followUpWins.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} from follow-ups
                   </p>
-                  <p className="text-xs text-purple-500 mt-1 underline">Click to view details</p>
+                  <p className="text-xs text-purple-500 dark:text-purple-400 mt-1 underline">Click to view details</p>
                 </CardContent>
               </Card>
             </div>
@@ -651,7 +651,7 @@ export default function SalesReports() {
                   </LineChart>
                 </ResponsiveContainer>
                 {dailyMetrics.length === 0 && (
-                  <p className="text-sm text-slate-500 text-center py-8">No data available for this date range</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">No data available for this date range</p>
                 )}
               </CardContent>
             </Card>
@@ -684,7 +684,7 @@ export default function SalesReports() {
                   </LineChart>
                 </ResponsiveContainer>
                 {dailyMetrics.length === 0 && (
-                  <p className="text-sm text-slate-500 text-center py-8">No data available for this date range</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">No data available for this date range</p>
                 )}
               </CardContent>
             </Card>
@@ -724,7 +724,7 @@ export default function SalesReports() {
                   </BarChart>
                 </ResponsiveContainer>
                 {dailyMetrics.length === 0 && (
-                  <p className="text-sm text-slate-500 text-center py-8">No data available for this date range</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">No data available for this date range</p>
                 )}
               </CardContent>
             </Card>
@@ -760,7 +760,7 @@ export default function SalesReports() {
                   </BarChart>
                 </ResponsiveContainer>
                 {salesByLeadSource.length === 0 && (
-                  <p className="text-sm text-slate-500 text-center py-8">No sales data available for this date range</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">No sales data available for this date range</p>
                 )}
               </CardContent>
             </Card>
@@ -790,7 +790,7 @@ export default function SalesReports() {
                   </BarChart>
                 </ResponsiveContainer>
                 {salesByLeadSource.length === 0 && (
-                  <p className="text-sm text-slate-500 text-center py-8">No sales data available for this date range</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">No sales data available for this date range</p>
                 )}
               </CardContent>
             </Card>
@@ -841,7 +841,7 @@ export default function SalesReports() {
                 });
 
               const SortIcon = ({ col }) => {
-                if (tableSort.col !== col) return <span className="ml-1 text-slate-300">↕</span>;
+                if (tableSort.col !== col) return <span className="ml-1 text-muted-foreground">↕</span>;
                 return <span className="ml-1">{tableSort.dir === 'asc' ? '↑' : '↓'}</span>;
               };
 
@@ -854,7 +854,7 @@ export default function SalesReports() {
                   value={tableFilters[filterKey] || ''}
                   onChange={e => setTableFilters(prev => ({ ...prev, [filterKey]: e.target.value || undefined }))}
                   onClick={e => e.stopPropagation()}
-                  className="mt-1 block w-full text-xs border border-slate-200 rounded px-1.5 py-1 bg-white text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  className="mt-1 block w-full text-xs border border-border rounded px-1.5 py-1 bg-card text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                 >
                   <option value="">All</option>
                   {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -896,7 +896,7 @@ export default function SalesReports() {
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <Button variant="outline" size="sm" onClick={copyTable} className="gap-1.5">
-                          {copiedTable ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                          {copiedTable ? <Check className="w-4 h-4 text-green-600 dark:text-green-400" /> : <Copy className="w-4 h-4" />}
                           {copiedTable ? 'Copied!' : 'Copy'}
                         </Button>
                         <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5">
@@ -910,10 +910,10 @@ export default function SalesReports() {
                         placeholder="Search by customer, lead source, consultant, invoice..."
                         value={leadSourceTableSearch}
                         onChange={e => setLeadSourceTableSearch(e.target.value)}
-                        className="flex-1 h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                        className="flex-1 h-9 px-3 text-sm border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
                       />
                       {Object.keys(tableFilters).length > 0 && (
-                        <button onClick={() => setTableFilters({})} className="text-xs text-red-500 hover:text-red-700 whitespace-nowrap px-2 py-1 border border-red-200 rounded">Clear Filters</button>
+                        <button onClick={() => setTableFilters({})} className="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 whitespace-nowrap px-2 py-1 border border-red-200 dark:border-red-500/25 rounded">Clear Filters</button>
                       )}
                     </div>
                   </CardHeader>
@@ -921,10 +921,10 @@ export default function SalesReports() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
+                          <tr className="border-b border-border bg-muted text-xs text-muted-foreground uppercase tracking-wider">
                             {[['saleDate','Sale Date',false],['customerName','Customer',false],['leadSource','Lead Source',false],['saleAmount','Sale Amount',true],['consultantName','Consultant',false],['phone','Phone',false],['address','Address',false],['invoiceNumber','Invoice #',false]].map(([col, label, right]) => (
                               <th key={col} className={`px-4 py-3 font-medium ${right ? 'text-right' : 'text-left'} cursor-pointer select-none`}>
-                                <div onClick={() => handleSort(col)} className="flex items-center gap-0.5 hover:text-slate-700">
+                                <div onClick={() => handleSort(col)} className="flex items-center gap-0.5 hover:text-foreground">
                                   {label}<SortIcon col={col} />
                                 </div>
                                 {col === 'leadSource' && <FilterDropdown filterKey="leadSource" options={uniqueLeadSources} />}
@@ -934,28 +934,28 @@ export default function SalesReports() {
                             <th className="px-4 py-3"></th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-border">
                           {tableRows.length === 0 && (
-                            <tr><td colSpan={9} className="text-center text-slate-400 py-8">No sales found</td></tr>
+                            <tr><td colSpan={9} className="text-center text-muted-foreground py-8">No sales found</td></tr>
                           )}
                           {tableRows.map(({ apt, sale, customerName, leadSource, saleDate, saleAmount, consultantName, phone, address, invoiceNumber }) => (
-                            <tr key={apt.id} className="hover:bg-slate-50 transition-colors">
-                              <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{saleDate}</td>
-                              <td className="px-4 py-3 font-medium text-slate-800 whitespace-nowrap">{customerName}</td>
+                            <tr key={apt.id} className="hover:bg-muted transition-colors">
+                              <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{saleDate}</td>
+                              <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">{customerName}</td>
                               <td className="px-4 py-3">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25">
                                   {leadSource}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-right font-semibold text-green-600 whitespace-nowrap">
+                              <td className="px-4 py-3 text-right font-semibold text-green-600 dark:text-green-400 whitespace-nowrap">
                                 ${saleAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                               </td>
-                              <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{consultantName}</td>
-                              <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{phone}</td>
-                              <td className="px-4 py-3 text-slate-500 max-w-[200px] truncate">{address}</td>
-                              <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{invoiceNumber}</td>
+                              <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{consultantName}</td>
+                              <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{phone}</td>
+                              <td className="px-4 py-3 text-muted-foreground max-w-[200px] truncate">{address}</td>
+                              <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{invoiceNumber}</td>
                               <td className="px-4 py-3">
-                                <Link to={createPageUrl('SaleDetail') + '?id=' + sale?.id} className="text-slate-400 hover:text-indigo-600">
+                                <Link to={createPageUrl('SaleDetail') + '?id=' + sale?.id} className="text-muted-foreground hover:text-primary">
                                   <ExternalLink className="w-4 h-4" />
                                 </Link>
                               </td>
@@ -995,7 +995,7 @@ export default function SalesReports() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-sm text-slate-500 text-center py-8">No pending appointments — all past appointments have been resulted. 🎉</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">No pending appointments — all past appointments have been resulted. 🎉</p>
                 )}
               </CardContent>
             </Card>
@@ -1025,7 +1025,7 @@ export default function SalesReports() {
                   </BarChart>
                 </ResponsiveContainer>
                 {lostSalesData.length === 0 && (
-                  <p className="text-sm text-slate-500 text-center py-8">No lost sales in this date range</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">No lost sales in this date range</p>
                 )}
               </CardContent>
             </Card>
@@ -1055,7 +1055,7 @@ export default function SalesReports() {
                   </BarChart>
                 </ResponsiveContainer>
                 {lostSalesBySentiment.length === 0 && (
-                  <p className="text-sm text-slate-500 text-center py-8">No analyzed lost sales in this date range. Use the "Analyze" button to categorize reasons.</p>
+                  <p className="text-sm text-muted-foreground text-center py-8">No analyzed lost sales in this date range. Use the "Analyze" button to categorize reasons.</p>
                 )}
               </CardContent>
             </Card>
@@ -1081,34 +1081,34 @@ export default function SalesReports() {
                   const totalFUWins = consultantPerformance.reduce((s, c) => s + (c.followUpClosedCount || 0), 0);
                   const totalFUValue = consultantPerformance.reduce((s, c) => s + (c.followUpClosedValue || 0), 0);
                   return (
-                    <div className="mb-4 p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
-                      <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-3">All Consultants — {format(dateFilter.start, 'MMM d')} to {format(dateFilter.end, 'MMM d, yyyy')}</p>
+                    <div className="mb-4 p-4 bg-primary/10 border border-primary/20 rounded-xl">
+                      <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">All Consultants — {format(dateFilter.start, 'MMM d')} to {format(dateFilter.end, 'MMM d, yyyy')}</p>
                       <div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-center">
                         <div>
-                          <p className="text-lg font-bold text-green-700">${totalRev.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
-                          <p className="text-xs text-slate-500">total revenue</p>
+                          <p className="text-lg font-bold text-green-700 dark:text-green-400">${totalRev.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-xs text-muted-foreground">total revenue</p>
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-emerald-700">${avgAOV.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
-                          <p className="text-xs text-slate-500">avg order value</p>
+                          <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400">${avgAOV.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-xs text-muted-foreground">avg order value</p>
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-indigo-700">{avgConv}%</p>
-                          <p className="text-xs text-slate-500">{totalSalesCount}/{totalAppts} conversion</p>
+                          <p className="text-lg font-bold text-primary">{avgConv}%</p>
+                          <p className="text-xs text-muted-foreground">{totalSalesCount}/{totalAppts} conversion</p>
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-blue-700">{avgGPPct.toFixed(1)}%</p>
-                          <p className="text-xs text-slate-500">avg gp%</p>
-                          <p className="text-sm font-semibold text-blue-600">${totalGP.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-lg font-bold text-blue-700 dark:text-blue-400">{avgGPPct.toFixed(1)}%</p>
+                          <p className="text-xs text-muted-foreground">avg gp%</p>
+                          <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">${totalGP.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-purple-700">{totalFUWins}</p>
-                          <p className="text-xs text-slate-500">follow-up wins</p>
-                          <p className="text-xs text-purple-500">${totalFUValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-lg font-bold text-purple-700 dark:text-purple-400">{totalFUWins}</p>
+                          <p className="text-xs text-muted-foreground">follow-up wins</p>
+                          <p className="text-xs text-purple-500 dark:text-purple-400">${totalFUValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-slate-700">{totalSalesCount}</p>
-                          <p className="text-xs text-slate-500">total sales</p>
+                          <p className="text-lg font-bold text-foreground">{totalSalesCount}</p>
+                          <p className="text-xs text-muted-foreground">total sales</p>
                         </div>
                       </div>
                     </div>
@@ -1123,47 +1123,47 @@ export default function SalesReports() {
                         setSelectedConsultant(consultant);
                         setShowConsultantModal(true);
                       }}
-                      className="w-full flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors group cursor-pointer"
+                      className="w-full flex items-center justify-between p-4 bg-secondary hover:bg-muted rounded-lg border border-border transition-colors group cursor-pointer"
                     >
                       <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-slate-800 group-hover:text-indigo-600 transition-colors">{consultant.name}</p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{consultant.name}</p>
+                        <p className="text-xs text-muted-foreground">
                           {consultant.appointments} appointments • {consultant.sales} sales
                         </p>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-lg font-bold text-green-600">
+                          <p className="text-lg font-bold text-green-600 dark:text-green-400">
                             ${consultant.totalSalesValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
-                          <p className="text-xs text-slate-500">total sales</p>
+                          <p className="text-xs text-muted-foreground">total sales</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-emerald-600">
+                          <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                             ${consultant.aov.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
-                          <p className="text-xs text-slate-500">avg order value</p>
+                          <p className="text-xs text-muted-foreground">avg order value</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-indigo-600">{consultant.conversionRate}%</p>
-                          <p className="text-xs text-slate-500">conversion rate</p>
+                          <p className="text-lg font-bold text-primary">{consultant.conversionRate}%</p>
+                          <p className="text-xs text-muted-foreground">conversion rate</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-blue-600">{(consultant.avgGP || 0).toFixed(1)}%</p>
-                          <p className="text-xs text-slate-500">avg gp%</p>
-                          <p className="text-sm font-semibold text-blue-600">${(consultant.totalGPDollars || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{(consultant.avgGP || 0).toFixed(1)}%</p>
+                          <p className="text-xs text-muted-foreground">avg gp%</p>
+                          <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">${(consultant.totalGPDollars || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-purple-600">{consultant.followUpClosedCount} <span className="text-xs text-slate-400">/ {consultant.totalFollowUpAppointments}</span></p>
-                          <p className="text-xs text-slate-500">follow-up wins</p>
-                          <p className="text-xs text-purple-400">${(consultant.followUpClosedValue || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-lg font-bold text-purple-600 dark:text-purple-400">{consultant.followUpClosedCount} <span className="text-xs text-muted-foreground">/ {consultant.totalFollowUpAppointments}</span></p>
+                          <p className="text-xs text-muted-foreground">follow-up wins</p>
+                          <p className="text-xs text-purple-400 dark:text-purple-300">${(consultant.followUpClosedValue || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                         </div>
-                        <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                        <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                         </div>
                         </button>
                         ))}
                   {consultantPerformance.length === 0 && (
-                    <p className="text-sm text-slate-500 text-center py-8">No data available for this date range</p>
+                    <p className="text-sm text-muted-foreground text-center py-8">No data available for this date range</p>
                   )}
                 </div>
                 </div>
@@ -1188,24 +1188,24 @@ export default function SalesReports() {
                   <Link
                     key={apt.id}
                     to={createPageUrl('AppointmentDetail') + '?id=' + apt.id}
-                    className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors group"
+                    className="flex items-center justify-between p-4 bg-secondary hover:bg-muted rounded-lg border border-border transition-colors group"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-800">
+                      <p className="text-sm font-medium text-foreground">
                         {checklist?.customer_first_name || apt.location_address || 'Unknown'} {checklist?.customer_last_name || ''}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {apt.appointment_date && format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')}
                         {apt.appointment_block && ` • ${apt.appointment_block}`}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                        apt.status === 'In Route' ? 'bg-blue-100 text-blue-700' :
-                        apt.status === 'On Site' ? 'bg-orange-100 text-orange-700' :
-                        'bg-yellow-100 text-yellow-700'
+                        apt.status === 'In Route' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300' :
+                        apt.status === 'On Site' ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300' :
+                        'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300'
                       }`}>{apt.status}</span>
-                      <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                      <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                     </div>
                   </Link>
                 );
@@ -1234,17 +1234,17 @@ export default function SalesReports() {
                   <Link
                     key={apt.id}
                     to={createPageUrl('AppointmentDetail') + '?id=' + apt.id}
-                    className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors group"
+                    className="flex items-center justify-between p-4 bg-secondary hover:bg-muted rounded-lg border border-border transition-colors group"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-800">
+                      <p className="text-sm font-medium text-foreground">
                         {checklist?.customer_first_name} {checklist?.customer_last_name}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {apt.appointment_date && format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')} • ${getEffectiveSaleAmount(sales.find(s => s.appointment === apt.id)).toLocaleString()}
                       </p>
                     </div>
-                    <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                    <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                   </Link>
                 );
               })}
@@ -1272,18 +1272,18 @@ export default function SalesReports() {
                   <Link
                     key={apt.id}
                     to={createPageUrl('AppointmentDetail') + '?id=' + apt.id}
-                    className="flex flex-col gap-2 p-4 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors group"
+                    className="flex flex-col gap-2 p-4 bg-secondary hover:bg-muted rounded-lg border border-border transition-colors group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-foreground">
                           {checklist?.customer_first_name} {checklist?.customer_last_name}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           {apt.appointment_date && format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')} • Status: {apt.status}
                         </p>
                         {apt.analyzed_not_sold_reason && (
-                          <p className="text-xs font-medium text-indigo-600 mt-1">
+                          <p className="text-xs font-medium text-primary mt-1">
                             Reason: {apt.analyzed_not_sold_reason}
                           </p>
                         )}
@@ -1307,15 +1307,15 @@ export default function SalesReports() {
                             )}
                           </Button>
                         )}
-                        <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                        <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                       </div>
                     </div>
                     {lastNote && (
-                      <div className="pt-2 border-t border-slate-200">
-                        <p className="text-xs text-slate-500 mb-1">
+                      <div className="pt-2 border-t border-border">
+                        <p className="text-xs text-muted-foreground mb-1">
                           Last Note ({lastNote.user_name} - {format(new Date(lastNote.timestamp), 'MMM d, h:mm a')}):
                         </p>
-                        <p className="text-sm text-slate-700">{lastNote.content}</p>
+                        <p className="text-sm text-foreground">{lastNote.content}</p>
                       </div>
                     )}
                   </Link>
@@ -1345,25 +1345,25 @@ export default function SalesReports() {
                   <Link
                     key={apt.id}
                     to={createPageUrl('AppointmentDetail') + '?id=' + apt.id}
-                    className="flex flex-col gap-2 p-4 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors group"
+                    className="flex flex-col gap-2 p-4 bg-secondary hover:bg-muted rounded-lg border border-border transition-colors group"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-foreground">
                           {checklist?.customer_first_name} {checklist?.customer_last_name}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           {apt.appointment_date && format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')} • Status: {apt.status}
                         </p>
                       </div>
-                      <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                      <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                     </div>
                     {lastNote && (
-                      <div className="pt-2 border-t border-slate-200">
-                        <p className="text-xs text-slate-500 mb-1">
+                      <div className="pt-2 border-t border-border">
+                        <p className="text-xs text-muted-foreground mb-1">
                           Last Note ({lastNote.user_name} - {format(new Date(lastNote.timestamp), 'MMM d, h:mm a')}):
                         </p>
-                        <p className="text-sm text-slate-700">{lastNote.content}</p>
+                        <p className="text-sm text-foreground">{lastNote.content}</p>
                       </div>
                     )}
                   </Link>
@@ -1420,52 +1420,52 @@ export default function SalesReports() {
                 }
 
                 const priorStatusColors = {
-                  'one-leg': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                  'follow-up': 'bg-purple-100 text-purple-700 border-purple-200',
-                  'pitch and miss': 'bg-orange-100 text-orange-700 border-orange-200',
-                  'lost': 'bg-red-100 text-red-700 border-red-200',
-                  'credit decline': 'bg-rose-100 text-rose-700 border-rose-200',
+                  'one-leg': 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+                  'follow-up': 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
+                  'pitch and miss': 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+                  'lost': 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+                  'credit decline': 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/25',
                 };
                 const priorKey = priorStatus?.toLowerCase();
-                const priorColor = priorStatusColors[priorKey] || 'bg-slate-100 text-slate-600 border-slate-200';
+                const priorColor = priorStatusColors[priorKey] || 'bg-secondary text-muted-foreground border-border';
 
                 const notes = apt.notes || [];
 
                 return (
-                  <div key={apt.id} className="flex flex-col bg-purple-50 rounded-lg border border-purple-200 overflow-hidden">
+                  <div key={apt.id} className="flex flex-col bg-purple-50 dark:bg-purple-500/10 rounded-lg border border-purple-200 dark:border-purple-500/25 overflow-hidden">
                     <Link
                       to={createPageUrl('SaleDetail') + '?id=' + sale?.id}
-                      className="flex items-center justify-between p-4 hover:bg-purple-100 transition-colors group"
+                      className="flex items-center justify-between p-4 hover:bg-purple-100 dark:hover:bg-purple-500/20 transition-colors group"
                     >
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-foreground">
                           {checklist?.customer_first_name} {checklist?.customer_last_name}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           {sale?.sale_date && format(parseISO(sale.sale_date), 'MMM d, yyyy')}
                           {consultant && ` • ${consultant.first_name} ${consultant.last_name}`}
                         </p>
                         {priorStatus && (
                           <div className="flex items-center gap-1.5 mt-1.5">
                             <Badge variant="outline" className={`text-xs ${priorColor}`}>{priorStatus}</Badge>
-                            <span className="text-slate-400 text-xs">→</span>
-                            <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-200">Sold</Badge>
+                            <span className="text-muted-foreground text-xs">→</span>
+                            <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25">Sold</Badge>
                           </div>
                         )}
                       </div>
                       <div className="flex items-center gap-3">
-                        <p className="text-sm font-bold text-emerald-600">${getEffectiveSaleAmount(sale).toLocaleString()}</p>
-                        <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">${getEffectiveSaleAmount(sale).toLocaleString()}</p>
+                        <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                       </div>
                     </Link>
                     {notes.length > 0 && (
-                      <div className="border-t border-purple-200 px-4 py-2">
-                        <p className="text-xs font-semibold text-purple-600 mb-2">Notes ({notes.length})</p>
+                      <div className="border-t border-purple-200 dark:border-purple-500/25 px-4 py-2">
+                        <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-2">Notes ({notes.length})</p>
                         <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
                           {[...notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, i) => (
-                            <div key={i} className="bg-white rounded p-2 border border-purple-100">
-                              <p className="text-xs text-slate-700">{note.content}</p>
-                              <p className="text-xs text-slate-400 mt-0.5">
+                            <div key={i} className="bg-card rounded p-2 border border-purple-100 dark:border-purple-500/25">
+                              <p className="text-xs text-foreground">{note.content}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
                                 {note.user_name}{note.timestamp && ` — ${format(new Date(note.timestamp), 'MMM d, h:mm a')}`}
                               </p>
                             </div>
@@ -1477,7 +1477,7 @@ export default function SalesReports() {
                 );
               })}
             {followUpWins.count === 0 && (
-              <p className="text-sm text-slate-500 text-center py-8">No follow-up wins in this period</p>
+              <p className="text-sm text-muted-foreground text-center py-8">No follow-up wins in this period</p>
             )}
           </div>
         </DialogContent>
@@ -1509,52 +1509,52 @@ export default function SalesReports() {
               <>
                 <div className="grid grid-cols-5 gap-4 pb-4 border-b">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-indigo-600">{totalDeals}</p>
-                    <p className="text-xs text-slate-500">Total Appointments</p>
+                    <p className="text-2xl font-bold text-primary">{totalDeals}</p>
+                    <p className="text-xs text-muted-foreground">Total Appointments</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-600">{closedSales.length}</p>
-                    <p className="text-xs text-slate-500">Total Sales</p>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{closedSales.length}</p>
+                    <p className="text-xs text-muted-foreground">Total Sales</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                       ${selectedConsultant.totalSalesValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    <p className="text-xs text-slate-500">Total Revenue</p>
+                    <p className="text-xs text-muted-foreground">Total Revenue</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-emerald-600">
+                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                       ${selectedConsultant.aov.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
-                    <p className="text-xs text-slate-500">Avg Order Value</p>
+                    <p className="text-xs text-muted-foreground">Avg Order Value</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-600">{conversionRate}%</p>
-                    <p className="text-xs text-slate-500">{closedSales.length}/{totalDeals} Conversion</p>
+                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{conversionRate}%</p>
+                    <p className="text-xs text-muted-foreground">{closedSales.length}/{totalDeals} Conversion</p>
                   </div>
                 </div>
 
                 <Tabs defaultValue="closed">
                   <TabsList className="w-full">
                     <TabsTrigger value="closed" className="flex-1">
-                      Closed Deals <span className="ml-1.5 bg-emerald-100 text-emerald-700 text-xs font-bold px-1.5 py-0.5 rounded-full">{closedSales.length}</span>
+                      Closed Deals <span className="ml-1.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 text-xs font-bold px-1.5 py-0.5 rounded-full">{closedSales.length}</span>
                     </TabsTrigger>
                     <TabsTrigger value="followup" className="flex-1">
-                      Follow-Up Wins <span className="ml-1.5 bg-purple-100 text-purple-700 text-xs font-bold px-1.5 py-0.5 rounded-full">{(() => {
+                      Follow-Up Wins <span className="ml-1.5 bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300 text-xs font-bold px-1.5 py-0.5 rounded-full">{(() => {
                         const wins = closedSales.filter(sale => tasksInRange.some(task => task.appointment === sale.appointment && task.type === 'follow_up' && task.status === 'completed')).length;
                         const totalFollowUp = completedAppointmentsInRange.filter(a => (isUnassigned ? (!a.assigned_dc || !dcIds.has(a.assigned_dc)) : a.assigned_dc === consultant?.id) && a.status === 'Follow-Up').length;
                         return `${wins}/${totalFollowUp}`;
                       })()}</span>
                     </TabsTrigger>
                     <TabsTrigger value="notwon" className="flex-1">
-                      Not Won <span className="ml-1.5 bg-red-100 text-red-700 text-xs font-bold px-1.5 py-0.5 rounded-full">{notWonAppointments.length}</span>
+                      Not Won <span className="ml-1.5 bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300 text-xs font-bold px-1.5 py-0.5 rounded-full">{notWonAppointments.length}</span>
                     </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="closed">
                     <div className="space-y-3 mt-3">
                       {closedSales.length === 0 && (
-                        <p className="text-sm text-slate-500 text-center py-6">No closed deals in this period</p>
+                        <p className="text-sm text-muted-foreground text-center py-6">No closed deals in this period</p>
                       )}
                       {closedSales
                         .sort((a, b) => new Date(b.sale_date) - new Date(a.sale_date))
@@ -1573,27 +1573,27 @@ export default function SalesReports() {
                             <Link
                               key={sale.id}
                               to={createPageUrl('SaleDetail') + '?id=' + sale.id}
-                              className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors group"
+                              className="flex items-center justify-between p-4 bg-secondary hover:bg-muted rounded-lg border border-border transition-colors group"
                             >
                               <div className="flex-1">
-                                <p className="text-sm font-medium text-slate-800">
+                                <p className="text-sm font-medium text-foreground">
                                   {checklist?.customer_first_name} {checklist?.customer_last_name}
                                 </p>
-                                <p className="text-xs text-slate-500">
+                                <p className="text-xs text-muted-foreground">
                                   {sale.sale_date && format(parseISO(sale.sale_date), 'MMM d, yyyy')} • {leadSource}
                                 </p>
                               </div>
                               <div className="flex items-center gap-4">
                                 <div className="text-right">
-                                  <p className="text-sm font-bold text-emerald-600">
+                                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                                     ${getEffectiveSaleAmount(sale).toLocaleString()}
                                   </p>
-                                  <p className="text-xs text-slate-500">sale</p>
+                                  <p className="text-xs text-muted-foreground">sale</p>
                                 </div>
                                 {gpPercent !== null && (
                                   <div className="text-right">
-                                    <p className="text-sm font-bold text-blue-600">{gpPercent.toFixed(1)}%</p>
-                                    <p className="text-xs text-slate-500">${(() => {
+                                    <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{gpPercent.toFixed(1)}%</p>
+                                    <p className="text-xs text-muted-foreground">${(() => {
                                       if (sale.rfms_order_data?.result?.lines) {
                                         const totalCost = sale.rfms_order_data.result.lines.reduce((s, item) => s + (item.unitCost * item.quantity), 0);
                                         const orderTotal = sale.rfms_order_data.result.lines.reduce((s, item) => s + (item.total || 0), 0);
@@ -1603,7 +1603,7 @@ export default function SalesReports() {
                                     })()}</p>
                                   </div>
                                 )}
-                                <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                                <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                               </div>
                               </Link>
                               );
@@ -1620,7 +1620,7 @@ export default function SalesReports() {
                         return (
                           <>
                             {followUpClosedSales.length === 0 && (
-                              <p className="text-sm text-slate-500 text-center py-6">No follow-up wins in this period</p>
+                              <p className="text-sm text-muted-foreground text-center py-6">No follow-up wins in this period</p>
                             )}
                             {followUpClosedSales
                               .sort((a, b) => new Date(b.sale_date) - new Date(a.sale_date))
@@ -1639,27 +1639,27 @@ export default function SalesReports() {
                                   <Link
                                     key={sale.id}
                                     to={createPageUrl('SaleDetail') + '?id=' + sale.id}
-                                    className="flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-lg border border-purple-200 transition-colors group"
+                                    className="flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 rounded-lg border border-purple-200 dark:border-purple-500/25 transition-colors group"
                                   >
                                     <div className="flex-1">
-                                      <p className="text-sm font-medium text-slate-800">
+                                      <p className="text-sm font-medium text-foreground">
                                         {checklist?.customer_first_name} {checklist?.customer_last_name}
                                       </p>
-                                      <p className="text-xs text-slate-500">
+                                      <p className="text-xs text-muted-foreground">
                                         {sale.sale_date && format(parseISO(sale.sale_date), 'MMM d, yyyy')} • {leadSource}
                                       </p>
                                     </div>
                                     <div className="flex items-center gap-4">
                                       <div className="text-right">
-                                        <p className="text-sm font-bold text-emerald-600">
+                                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                                           ${getEffectiveSaleAmount(sale).toLocaleString()}
                                         </p>
-                                        <p className="text-xs text-slate-500">sale</p>
+                                        <p className="text-xs text-muted-foreground">sale</p>
                                       </div>
                                       {gpPercent !== null && (
                                         <div className="text-right">
-                                          <p className="text-sm font-bold text-blue-600">{gpPercent.toFixed(1)}%</p>
-                                          <p className="text-xs text-slate-500">${(() => {
+                                          <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{gpPercent.toFixed(1)}%</p>
+                                          <p className="text-xs text-muted-foreground">${(() => {
                                             if (sale.rfms_order_data?.result?.lines) {
                                               const totalCost = sale.rfms_order_data.result.lines.reduce((s, item) => s + (item.unitCost * item.quantity), 0);
                                               const orderTotal = sale.rfms_order_data.result.lines.reduce((s, item) => s + (item.total || 0), 0);
@@ -1669,7 +1669,7 @@ export default function SalesReports() {
                                           })()}</p>
                                         </div>
                                       )}
-                                      <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                                      <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                                     </div>
                                     </Link>
                                     );
@@ -1683,7 +1683,7 @@ export default function SalesReports() {
                   <TabsContent value="notwon">
                     <div className="space-y-3 mt-3">
                       {notWonAppointments.length === 0 && (
-                        <p className="text-sm text-slate-500 text-center py-6">No non-won appointments in this period</p>
+                        <p className="text-sm text-muted-foreground text-center py-6">No non-won appointments in this period</p>
                       )}
                       {notWonAppointments
                         .sort((a, b) => new Date(b.appointment_date || b.created_date) - new Date(a.appointment_date || a.created_date))
@@ -1691,46 +1691,46 @@ export default function SalesReports() {
                           const checklist = allChecklists.find(c => c.appointment === apt.id);
                           const lastNote = apt.notes && apt.notes.length > 0 ? apt.notes[apt.notes.length - 1] : null;
                           const statusColors = {
-                            'Lost': 'bg-red-100 text-red-700',
-                            'Pitch and Miss': 'bg-orange-100 text-orange-700',
-                            'One-Leg': 'bg-yellow-100 text-yellow-700',
-                            'Credit Decline': 'bg-rose-100 text-rose-700',
-                            'Cancelled': 'bg-slate-100 text-slate-600',
-                            'Follow-Up': 'bg-purple-100 text-purple-700',
-                            'Completed': 'bg-blue-100 text-blue-700',
+                            'Lost': 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300',
+                            'Pitch and Miss': 'bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300',
+                            'One-Leg': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300',
+                            'Credit Decline': 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',
+                            'Cancelled': 'bg-secondary text-muted-foreground',
+                            'Follow-Up': 'bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300',
+                            'Completed': 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300',
                           };
                           return (
                             <Link
                               key={apt.id}
                               to={createPageUrl('AppointmentDetail') + '?id=' + apt.id}
-                              className="flex flex-col gap-2 p-4 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors group"
+                              className="flex flex-col gap-2 p-4 bg-secondary hover:bg-muted rounded-lg border border-border transition-colors group"
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex-1">
-                                  <p className="text-sm font-medium text-slate-800">
+                                  <p className="text-sm font-medium text-foreground">
                                     {checklist?.customer_first_name} {checklist?.customer_last_name || apt.location_address || 'Unknown'}
                                   </p>
-                                  <p className="text-xs text-slate-500">
+                                  <p className="text-xs text-muted-foreground">
                                     {apt.appointment_date && format(parseISO(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')}
                                     {apt.appointment_block && ` • ${apt.appointment_block}`}
                                   </p>
                                   {apt.analyzed_not_sold_reason && (
-                                    <p className="text-xs font-medium text-indigo-600 mt-0.5">Reason: {apt.analyzed_not_sold_reason}</p>
+                                    <p className="text-xs font-medium text-primary mt-0.5">Reason: {apt.analyzed_not_sold_reason}</p>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusColors[apt.status] || 'bg-slate-100 text-slate-600'}`}>
+                                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${statusColors[apt.status] || 'bg-secondary text-muted-foreground'}`}>
                                     {apt.status}
                                   </span>
-                                  <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                                  <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                                 </div>
                               </div>
                               {lastNote && (
-                                <div className="pt-2 border-t border-slate-200">
-                                  <p className="text-xs text-slate-500 mb-1">
+                                <div className="pt-2 border-t border-border">
+                                  <p className="text-xs text-muted-foreground mb-1">
                                     Last Note ({lastNote.user_name} — {format(new Date(lastNote.timestamp), 'MMM d, h:mm a')}):
                                   </p>
-                                  <p className="text-xs text-slate-700">{lastNote.content}</p>
+                                  <p className="text-xs text-foreground">{lastNote.content}</p>
                                 </div>
                               )}
                             </Link>

@@ -212,8 +212,8 @@ function JourneyInner() {
             className={cn(
               "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
               activeView === 'queue'
-                ? "bg-indigo-50 text-indigo-600"
-                : "text-slate-600 hover:bg-slate-50"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-secondary"
             )}
           >
             <Bell className="w-4 h-4" />
@@ -226,8 +226,8 @@ function JourneyInner() {
             className={cn(
               "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
               activeView === 'installer'
-                ? "bg-indigo-50 text-indigo-600"
-                : "text-slate-600 hover:bg-slate-50"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-secondary"
             )}
           >
             <HardHat className="w-4 h-4" />
@@ -239,13 +239,13 @@ function JourneyInner() {
           <>
           <button
             onClick={() => setNavigateExpanded(e => !e)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary transition-all"
           >
             <Navigation className="w-4 h-4" />
             <span className="flex-1 text-left">{t('navigate')}</span>
             {navigateExpanded
-              ? <ChevronDown className="w-4 h-4 text-slate-400" />
-              : <ChevronRight className="w-4 h-4 text-slate-400" />}
+              ? <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
           </button>
 
           {navigateExpanded && (
@@ -259,8 +259,8 @@ function JourneyInner() {
                     className={cn(
                       "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
                       activeView === v.id
-                        ? "bg-indigo-50 text-indigo-600"
-                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                     )}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -276,13 +276,13 @@ function JourneyInner() {
           {/* Manage parent */}
           <button
             onClick={() => setManageExpanded(e => !e)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all mt-1"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary transition-all mt-1"
           >
             <SettingsIcon className="w-4 h-4" />
             <span className="flex-1 text-left">{t('manage')}</span>
             {manageExpanded
-              ? <ChevronDown className="w-4 h-4 text-slate-400" />
-              : <ChevronRight className="w-4 h-4 text-slate-400" />}
+              ? <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
           </button>
 
           {manageExpanded && (
@@ -296,8 +296,8 @@ function JourneyInner() {
                     className={cn(
                       "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
                       activeView === v.id
-                        ? "bg-indigo-50 text-indigo-600"
-                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                     )}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -310,45 +310,45 @@ function JourneyInner() {
         </nav>
 
         {/* Footer */}
-        <div className="p-3 border-t border-slate-200 shrink-0 space-y-2">
+        <div className="p-3 border-t border-border shrink-0 space-y-2">
           <button
             onClick={() => setActiveView('settings')}
             className={cn(
               "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all",
               activeView === 'settings'
-                ? "bg-indigo-50 text-indigo-600"
-                : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground"
             )}
           >
             <SettingsIcon className="w-3.5 h-3.5" />
             {t('settings')}
           </button>
-          <div className="flex items-center gap-2 px-2 py-1.5 bg-slate-50 rounded-lg">
-            <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
-              <User className="w-3.5 h-3.5 text-indigo-600" />
+          <div className="flex items-center gap-2 px-2 py-1.5 bg-secondary rounded-lg">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <User className="w-3.5 h-3.5 text-primary" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-slate-700 truncate">{user?.full_name}</p>
-              <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
+              <p className="text-xs font-medium text-foreground truncate">{user?.full_name}</p>
+              <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
             </div>
           </div>
           <button
             onClick={() => base44.auth.logout()}
-            className="w-full flex items-center justify-center gap-2 text-xs text-red-500 hover:bg-red-50 py-1.5 rounded-lg transition-colors"
+            className="w-full flex items-center justify-center gap-2 text-xs text-destructive hover:bg-destructive/10 py-1.5 rounded-lg transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
             {t('logout')}
           </button>
           {/* Language toggle */}
           <div className="flex items-center gap-1.5 px-1 py-1">
-            <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <Globe className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             <button
               onClick={() => changeLanguage('en')}
               className={cn(
                 "flex-1 px-2 py-1 rounded text-[11px] font-medium transition-all",
                 language === 'en'
-                  ? "bg-indigo-50 text-indigo-600"
-                  : "text-slate-500 hover:bg-slate-50"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-secondary"
               )}
             >
               EN
@@ -358,14 +358,14 @@ function JourneyInner() {
               className={cn(
                 "flex-1 px-2 py-1 rounded text-[11px] font-medium transition-all",
                 language === 'es'
-                  ? "bg-indigo-50 text-indigo-600"
-                  : "text-slate-500 hover:bg-slate-50"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-secondary"
               )}
             >
               ES
             </button>
           </div>
-          <p className="text-[10px] text-slate-400 text-center">v1.7.7</p>
+          <p className="text-[10px] text-muted-foreground text-center">v1.7.7</p>
         </div>
       </aside>
 
@@ -384,13 +384,13 @@ function JourneyInner() {
         </div>
         {/* Drawing banner */}
         {drawingRegion && (
-          <div className="h-10 bg-indigo-50 border-b border-indigo-200 flex items-center px-4 gap-2 shrink-0">
+          <div className="h-10 bg-primary/10 border-b border-primary/20 flex items-center px-4 gap-2 shrink-0">
             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: drawingRegion.color || '#4F46E5' }} />
-            <span className="text-xs font-medium text-indigo-700">{t('drawing')}: {drawingRegion.region_name}</span>
-            <button onClick={() => setDrawingRegion(null)} className="text-indigo-400 hover:text-indigo-600 ml-1">
+            <span className="text-xs font-medium text-primary">{t('drawing')}: {drawingRegion.region_name}</span>
+            <button onClick={() => setDrawingRegion(null)} className="text-primary/70 hover:text-primary ml-1">
               <X className="w-3.5 h-3.5" />
             </button>
-            <span className="ml-auto text-xs text-indigo-500">{t('regionsOrders', { regions: regions.length, orders: journeyOrders.length })}</span>
+            <span className="ml-auto text-xs text-primary">{t('regionsOrders', { regions: regions.length, orders: journeyOrders.length })}</span>
           </div>
         )}
 
@@ -411,17 +411,17 @@ function JourneyInner() {
               <div className="absolute top-6 right-6 w-[min(18rem,90vw)] z-[1000] flex flex-col" style={{ maxHeight: 'calc(100% - 3rem)' }}>
                 <button
                   onClick={() => setRegionsOverlayOpen(o => !o)}
-                  className="self-end flex items-center gap-1.5 bg-white border border-slate-200 shadow-md rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors mb-1"
+                  className="self-end flex items-center gap-1.5 bg-card border border-border shadow-md rounded-lg px-3 py-1.5 text-xs font-medium text-foreground hover:bg-secondary transition-colors mb-1"
                 >
-                  <Layers className="w-3.5 h-3.5 text-indigo-500" />
+                  <Layers className="w-3.5 h-3.5 text-primary" />
                   {t('regionsButton')}
                   {!regionsOverlayOpen && (
-                    <span className="bg-indigo-100 text-indigo-600 rounded px-1 ml-0.5">{regions.length}</span>
+                    <span className="bg-primary/10 text-primary rounded px-1 ml-0.5">{regions.length}</span>
                   )}
                 </button>
 
                 {regionsOverlayOpen && (
-                  <div className="bg-white border border-slate-200 shadow-xl rounded-xl p-3 overflow-y-auto" style={{ maxHeight: 'calc(100% - 2.5rem)' }}>
+                  <div className="bg-card border border-border shadow-xl rounded-xl p-3 overflow-y-auto" style={{ maxHeight: 'calc(100% - 2.5rem)' }}>
                     <RegionSidebar {...regionSidebarProps} />
                   </div>
                 )}

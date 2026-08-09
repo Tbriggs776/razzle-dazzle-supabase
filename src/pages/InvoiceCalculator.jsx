@@ -99,17 +99,17 @@ export default function InvoiceCalculator() {
   }, [invoiceTotal, creditCardEnabled, selectedFinancing]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-              <Calculator className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
+              <Calculator className="w-7 h-7 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Invoice Calculator</h1>
-              <p className="text-slate-500 mt-1">Calculate customer billing with fees</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Invoice Calculator</h1>
+              <p className="text-muted-foreground mt-1">Calculate customer billing with fees</p>
             </div>
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function InvoiceCalculator() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-green-600" />
+                    <DollarSign className="w-5 h-5 text-primary" />
                     Invoice Total
                   </CardTitle>
                 </CardHeader>
@@ -159,15 +159,15 @@ export default function InvoiceCalculator() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-blue-600" />
+                    <CreditCard className="w-5 h-5 text-primary" />
                     Credit Card Fee
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200 bg-slate-50">
+                  <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary">
                     <div>
-                      <p className="font-medium text-slate-800">Enable Credit Card Fee</p>
-                      <p className="text-sm text-slate-500 mt-1">3.5% processing fee</p>
+                      <p className="font-medium text-foreground">Enable Credit Card Fee</p>
+                      <p className="text-sm text-muted-foreground mt-1">3.5% processing fee</p>
                     </div>
                     <Switch
                       checked={creditCardEnabled}
@@ -187,19 +187,19 @@ export default function InvoiceCalculator() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-indigo-600" />
+                    <TrendingUp className="w-5 h-5 text-primary" />
                     Financing Options
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Synchrony Header */}
-                  <div className="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-4">
-                    <h2 className="text-xl font-bold text-indigo-900">Synchrony</h2>
+                  <div className="bg-primary/10 border-2 border-primary/20 rounded-lg p-4">
+                    <h2 className="text-xl font-bold text-primary">Synchrony</h2>
                   </div>
 
                   {/* Deferred Interest */}
                   <div>
-                    <h3 className="font-semibold text-slate-800 mb-3">Deferred Interest Promotions</h3>
+                    <h3 className="font-semibold text-foreground mb-3">Deferred Interest Promotions</h3>
                     <div className="space-y-2">
                       {FINANCING_OPTIONS.synchrony.deferred.map((option, idx) => (
                         <button
@@ -208,20 +208,20 @@ export default function InvoiceCalculator() {
                           className={cn(
                             "w-full flex items-center justify-between p-3 rounded-lg border transition-all",
                             selectedFinancing?.name === option.name
-                              ? "bg-orange-50 border-orange-300 shadow-sm"
-                              : "bg-white border-slate-200 hover:border-orange-200 hover:bg-orange-50/50"
+                              ? "bg-primary/10 border-primary shadow-sm"
+                              : "bg-card border-border hover:border-primary/40 hover:bg-primary/5"
                           )}
                         >
                           <div className="text-left">
-                            <p className="font-medium text-slate-800">{option.name}</p>
-                            <p className="text-xs text-slate-500">{option.minPurchase}</p>
+                            <p className="font-medium text-foreground">{option.name}</p>
+                            <p className="text-xs text-muted-foreground">{option.minPurchase}</p>
                           </div>
                           <div className="text-right">
                             <span className={cn(
                               "text-sm font-semibold px-2 py-1 rounded",
                               selectedFinancing?.name === option.name
-                                ? "bg-orange-100 text-orange-800"
-                                : "bg-slate-100 text-slate-700"
+                                ? "bg-primary/15 text-primary"
+                                : "bg-secondary text-secondary-foreground"
                             )}>
                               {isAdmin ? Math.ceil(option.fee) : ''}%
                             </span>
@@ -233,7 +233,7 @@ export default function InvoiceCalculator() {
 
                   {/* Equal Payment - 0% APR */}
                   <div>
-                    <h3 className="font-semibold text-slate-800 mb-3">Equal Payment Promotions - 0.00% APR</h3>
+                    <h3 className="font-semibold text-foreground mb-3">Equal Payment Promotions - 0.00% APR</h3>
                     <div className="space-y-2">
                       {FINANCING_OPTIONS.synchrony.equalPayment.map((option, idx) => (
                         <button
@@ -242,16 +242,16 @@ export default function InvoiceCalculator() {
                           className={cn(
                             "w-full flex items-center justify-between p-3 rounded-lg border transition-all",
                             selectedFinancing?.name === option.name
-                              ? "bg-blue-50 border-blue-300 shadow-sm"
-                              : "bg-white border-slate-200 hover:border-blue-200 hover:bg-blue-50/50"
+                              ? "bg-primary/10 border-primary shadow-sm"
+                              : "bg-card border-border hover:border-primary/40 hover:bg-primary/5"
                           )}
                         >
-                          <p className="font-medium text-slate-800">{option.name}</p>
+                          <p className="font-medium text-foreground">{option.name}</p>
                           <span className={cn(
                            "text-sm font-semibold px-2 py-1 rounded",
                            selectedFinancing?.name === option.name
-                             ? "bg-blue-100 text-blue-800"
-                             : "bg-slate-100 text-slate-700"
+                             ? "bg-primary/15 text-primary"
+                             : "bg-secondary text-secondary-foreground"
                           )}>
                            {isAdmin ? Math.ceil(option.fee) : ''}%
                           </span>
@@ -262,7 +262,7 @@ export default function InvoiceCalculator() {
 
                   {/* Fixed Pay - 9.99% APR */}
                   <div>
-                    <h3 className="font-semibold text-slate-800 mb-3">Fixed Pay Promotions - 9.99% APR</h3>
+                    <h3 className="font-semibold text-foreground mb-3">Fixed Pay Promotions - 9.99% APR</h3>
                     <div className="space-y-2">
                       {FINANCING_OPTIONS.synchrony.fixedPay.map((option, idx) => (
                         <button
@@ -271,16 +271,16 @@ export default function InvoiceCalculator() {
                           className={cn(
                             "w-full flex items-center justify-between p-3 rounded-lg border transition-all",
                             selectedFinancing?.name === option.name
-                              ? "bg-purple-50 border-purple-300 shadow-sm"
-                              : "bg-white border-slate-200 hover:border-purple-200 hover:bg-purple-50/50"
+                              ? "bg-primary/10 border-primary shadow-sm"
+                              : "bg-card border-border hover:border-primary/40 hover:bg-primary/5"
                           )}
                         >
-                          <p className="font-medium text-slate-800">{option.name}</p>
+                          <p className="font-medium text-foreground">{option.name}</p>
                           <span className={cn(
                             "text-sm font-semibold px-2 py-1 rounded",
                             selectedFinancing?.name === option.name
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-slate-100 text-slate-700"
+                              ? "bg-primary/15 text-primary"
+                              : "bg-secondary text-secondary-foreground"
                           )}>
                             {isAdmin ? Math.ceil(option.fee) : ''}%
                           </span>
@@ -301,19 +301,19 @@ export default function InvoiceCalculator() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-indigo-600" />
+                    <TrendingUp className="w-5 h-5 text-primary" />
                     Financing Options
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* MOMNT Header */}
-                  <div className="bg-teal-50 border-2 border-teal-200 rounded-lg p-4">
-                    <h2 className="text-xl font-bold text-teal-900">MOMNT</h2>
+                  <div className="bg-brand-blue/10 border-2 border-brand-blue/20 rounded-lg p-4">
+                    <h2 className="text-xl font-bold text-brand-blue">MOMNT</h2>
                   </div>
 
                   {/* MOMNT Options */}
                   <div>
-                    <h3 className="font-semibold text-slate-800 mb-3">Merchant Fee Options</h3>
+                    <h3 className="font-semibold text-foreground mb-3">Merchant Fee Options</h3>
                     <div className="space-y-2">
                       {FINANCING_OPTIONS.momnt.map((option, idx) => (
                         <button
@@ -322,16 +322,16 @@ export default function InvoiceCalculator() {
                           className={cn(
                             "w-full flex items-center justify-between p-3 rounded-lg border transition-all",
                             selectedFinancing?.name === option.name
-                              ? "bg-teal-50 border-teal-300 shadow-sm"
-                              : "bg-white border-slate-200 hover:border-teal-200 hover:bg-teal-50/50"
+                              ? "bg-brand-blue/10 border-brand-blue shadow-sm"
+                              : "bg-card border-border hover:border-brand-blue/40 hover:bg-brand-blue/5"
                           )}
                         >
-                          <p className="font-medium text-slate-800">{option.name}</p>
+                          <p className="font-medium text-foreground">{option.name}</p>
                           <span className={cn(
                             "text-sm font-semibold px-2 py-1 rounded",
                             selectedFinancing?.name === option.name
-                              ? "bg-teal-100 text-teal-800"
-                              : "bg-slate-100 text-slate-700"
+                              ? "bg-brand-blue/15 text-brand-blue"
+                              : "bg-secondary text-secondary-foreground"
                           )}>
                             {isAdmin ? Math.ceil(option.fee) : ''}%
                           </span>
@@ -352,25 +352,25 @@ export default function InvoiceCalculator() {
               transition={{ delay: 0.3 }}
               className="sticky top-6"
             >
-              <Card className="border-2 border-green-200 bg-gradient-to-br from-white to-green-50/30">
+              <Card className="border-2 border-primary/30 bg-gradient-to-br from-card to-primary/5">
                 <CardHeader>
-                  <CardTitle className="text-green-800">Billing Summary</CardTitle>
+                  <CardTitle className="text-primary">Billing Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {calculations ? (
                     <>
                       <div className="space-y-3">
                         <div className="flex justify-between text-sm">
-                          <span className="text-slate-600">Invoice Total:</span>
-                          <span className="font-semibold text-slate-800">
+                          <span className="text-muted-foreground">Invoice Total:</span>
+                          <span className="font-semibold text-foreground">
                             ${calculations.invoiceTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </span>
                         </div>
                         
                         {creditCardEnabled && (
                           <div className="flex justify-between text-sm">
-                            <span className="text-slate-600">CC Fee (3.5%):</span>
-                            <span className="font-semibold text-blue-700">
+                            <span className="text-muted-foreground">CC Fee (3.5%):</span>
+                            <span className="font-semibold text-foreground">
                               +${calculations.ccFee.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                           </div>
@@ -378,30 +378,30 @@ export default function InvoiceCalculator() {
                         
                         {selectedFinancing && (
                           <div className="flex justify-between text-sm">
-                            <span className="text-slate-600">
+                            <span className="text-muted-foreground">
                               {selectedFinancing.vendor} - {selectedFinancing.name}:
                             </span>
-                            <span className="font-semibold text-indigo-700">
+                            <span className="font-semibold text-foreground">
                               +${calculations.financingFee.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                           </div>
                         )}
                       </div>
 
-                      <div className="pt-3 border-t-2 border-green-300">
+                      <div className="pt-3 border-t-2 border-primary/30">
                         <div className="flex justify-between items-center">
-                          <span className="text-lg font-semibold text-slate-800">Total to Bill:</span>
-                          <span className="text-2xl font-bold text-green-700">
+                          <span className="text-lg font-semibold text-foreground">Total to Bill:</span>
+                          <span className="text-2xl font-bold text-primary">
                             ${calculations.totalBill.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </span>
                         </div>
                       </div>
 
                       {(creditCardEnabled || selectedFinancing) && (
-                        <div className="pt-3 border-t border-slate-200">
-                          <div className="text-xs text-slate-500 space-y-1">
+                        <div className="pt-3 border-t border-border">
+                          <div className="text-xs text-muted-foreground space-y-1">
                             <p>Additional Fees:</p>
-                            <p className="font-medium text-slate-700">
+                            <p className="font-medium text-foreground">
                               ${(calculations.ccFee + calculations.financingFee).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                           </div>
@@ -409,7 +409,7 @@ export default function InvoiceCalculator() {
                       )}
                     </>
                   ) : (
-                    <div className="text-center py-8 text-slate-400">
+                    <div className="text-center py-8 text-muted-foreground">
                       <Calculator className="w-12 h-12 mx-auto mb-3 opacity-50" />
                       <p className="text-sm">Enter an invoice amount to see calculations</p>
                     </div>

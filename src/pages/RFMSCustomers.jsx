@@ -201,24 +201,24 @@ export default function RFMSCustomers() {
   const totalBalance = rfmsOrders.reduce((sum, o) => sum + (o.balanceDue || 0), 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white shadow-lg">
+          <div className="flex items-center gap-4 mb-2 flex-wrap">
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg">
               <Users className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">RFMS Development</h1>
-              <p className="text-slate-500 mt-1">Query RFMS API data</p>
+              <h1 className="text-3xl font-bold text-foreground">RFMS Development</h1>
+              <p className="text-muted-foreground mt-1">Query RFMS API data</p>
             </div>
-            <Badge className="bg-amber-100 text-amber-700 border-amber-200 ml-2">Admin Only</Badge>
+            <Badge className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25 ml-2">Admin Only</Badge>
           </div>
         </motion.div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList>
+          <TabsList className="flex-nowrap overflow-x-auto max-w-full justify-start">
             <TabsTrigger value="customers"><Users className="w-4 h-4 mr-2" />RFMS Customers</TabsTrigger>
             <TabsTrigger value="orders"><ShoppingCart className="w-4 h-4 mr-2" />RFMS Orders</TabsTrigger>
             <TabsTrigger value="discrepancy"><GitMerge className="w-4 h-4 mr-2" />Contract vs RFMS</TabsTrigger>
@@ -228,50 +228,50 @@ export default function RFMSCustomers() {
         {/* ── CUSTOMERS TAB ── */}
         {activeTab === 'customers' && (
           <>
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
-              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Search Parameters</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="bg-card rounded-2xl border border-border p-6 mb-6">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Search Parameters</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">Order Date From</label>
-                  <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white" />
+                  <label className="text-xs font-medium text-muted-foreground">Order Date From</label>
+                  <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-card text-foreground" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">Order Date To</label>
-                  <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white" />
+                  <label className="text-xs font-medium text-muted-foreground">Order Date To</label>
+                  <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-card text-foreground" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">Search Text</label>
+                  <label className="text-xs font-medium text-muted-foreground">Search Text</label>
                   <Input value={searchText} onChange={e => setSearchText(e.target.value)} placeholder="e.g. Smith" className="text-sm" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">Salesperson Name</label>
+                  <label className="text-xs font-medium text-muted-foreground">Salesperson Name</label>
                   <Input value={salespersonName} onChange={e => setSalespersonName(e.target.value)} placeholder="e.g. Daniel Porter" className="text-sm" />
                 </div>
               </div>
               <div className="mt-5 flex justify-end">
-                <Button onClick={handleSearch} disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+                <Button onClick={handleSearch} disabled={loading} className="bg-primary text-primary-foreground hover:opacity-90 gap-2">
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   Search RFMS
                 </Button>
               </div>
             </div>
-            {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-red-700 text-sm">{error}</div>}
+            {error && <div className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-500/15 dark:border-red-500/25 dark:text-red-300 rounded-xl p-4 mb-6 text-sm">{error}</div>}
             {results !== null && (
               <>
-                <div className="bg-white rounded-2xl border border-slate-200">
-                  <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-                    <p className="font-semibold text-slate-700 flex-1">Results <span className="text-slate-400 font-normal text-sm">({orders.length} orders)</span></p>
+                <div className="bg-card rounded-2xl border border-border">
+                  <div className="px-6 py-4 border-b border-border flex items-center gap-3 flex-wrap">
+                    <p className="font-semibold text-foreground flex-1">Results <span className="text-muted-foreground font-normal text-sm">({orders.length} orders)</span></p>
                     <Button variant="outline" size="sm" onClick={() => exportCSV(orders)} className="gap-1"><Download className="w-3.5 h-3.5" /> Export CSV</Button>
                     <Button variant="outline" size="sm" onClick={handleSearch} disabled={loading}><RefreshCw className="w-3.5 h-3.5 mr-1" /> Refresh</Button>
                   </div>
                   {orders.length === 0 ? (
-                    <div className="text-center py-12 text-slate-400"><Users className="w-10 h-10 mx-auto mb-3 opacity-30" /><p>No orders found</p></div>
+                    <div className="text-center py-12 text-muted-foreground"><Users className="w-10 h-10 mx-auto mb-3 opacity-30" /><p>No orders found</p></div>
                   ) : (
                     <OrdersTable orders={orders} />
                   )}
                 </div>
                 <details className="mt-4">
-                  <summary className="text-xs text-slate-400 cursor-pointer hover:text-slate-600">View raw JSON response</summary>
+                  <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">View raw JSON response</summary>
                   <pre className="mt-2 bg-slate-900 text-slate-100 rounded-xl p-4 text-xs overflow-auto max-h-96">{JSON.stringify(results, null, 2)}</pre>
                 </details>
               </>
@@ -285,8 +285,8 @@ export default function RFMSCustomers() {
         {/* ── ORDERS TAB ── */}
         {activeTab === 'orders' && (
           <>
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
-              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Date Range</h2>
+            <div className="bg-card rounded-2xl border border-border p-6 mb-6">
+              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Date Range</h2>
 
               {/* Presets */}
               <div className="flex gap-2 flex-wrap mb-4">
@@ -296,7 +296,7 @@ export default function RFMSCustomers() {
                     size="sm"
                     variant={ordersPreset === p.label ? 'default' : 'outline'}
                     onClick={() => handleOrdersPreset(p.label)}
-                    className={ordersPreset === p.label ? 'bg-indigo-600 hover:bg-indigo-700' : ''}
+                    className={ordersPreset === p.label ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
                   >
                     {p.label}
                   </Button>
@@ -305,7 +305,7 @@ export default function RFMSCustomers() {
                   size="sm"
                   variant={ordersPreset === 'custom' ? 'default' : 'outline'}
                   onClick={() => setOrdersPreset('custom')}
-                  className={ordersPreset === 'custom' ? 'bg-indigo-600 hover:bg-indigo-700' : ''}
+                  className={ordersPreset === 'custom' ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
                 >
                   Custom
                 </Button>
@@ -314,50 +314,50 @@ export default function RFMSCustomers() {
               {/* Date inputs */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">From</label>
-                  <input type="date" value={ordersDateFrom} onChange={e => { setOrdersDateFrom(e.target.value); setOrdersPreset('custom'); }} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white" />
+                  <label className="text-xs font-medium text-muted-foreground">From</label>
+                  <input type="date" value={ordersDateFrom} onChange={e => { setOrdersDateFrom(e.target.value); setOrdersPreset('custom'); }} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-card text-foreground" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-slate-600">To</label>
-                  <input type="date" value={ordersDateTo} onChange={e => { setOrdersDateTo(e.target.value); setOrdersPreset('custom'); }} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white" />
+                  <label className="text-xs font-medium text-muted-foreground">To</label>
+                  <input type="date" value={ordersDateTo} onChange={e => { setOrdersDateTo(e.target.value); setOrdersPreset('custom'); }} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-card text-foreground" />
                 </div>
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={handleOrdersSearch} disabled={ordersLoading} className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+                <Button onClick={handleOrdersSearch} disabled={ordersLoading} className="bg-primary text-primary-foreground hover:opacity-90 gap-2">
                   {ordersLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   Fetch Orders
                 </Button>
               </div>
             </div>
 
-            {ordersError && <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-red-700 text-sm">{ordersError}</div>}
+            {ordersError && <div className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-500/15 dark:border-red-500/25 dark:text-red-300 rounded-xl p-4 mb-6 text-sm">{ordersError}</div>}
 
             {ordersResults !== null && (
               <>
                 {/* Summary stats */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                   {[
-                    { label: 'Total Orders', value: rfmsOrders.length, color: 'text-slate-800' },
-                    { label: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, color: 'text-indigo-700' },
-                    { label: 'Total Paid', value: `$${totalPaid.toLocaleString()}`, color: 'text-emerald-700' },
-                    { label: 'Balance Due', value: `$${totalBalance.toLocaleString()}`, color: totalBalance > 0 ? 'text-red-600' : 'text-slate-400' },
+                    { label: 'Total Orders', value: rfmsOrders.length, color: 'text-foreground' },
+                    { label: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, color: 'text-primary' },
+                    { label: 'Total Paid', value: `$${totalPaid.toLocaleString()}`, color: 'text-emerald-700 dark:text-emerald-400' },
+                    { label: 'Balance Due', value: `$${totalBalance.toLocaleString()}`, color: totalBalance > 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground' },
                   ].map(s => (
-                    <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-4">
-                      <p className="text-xs text-slate-500 mb-1">{s.label}</p>
+                    <div key={s.label} className="bg-card rounded-xl border border-border p-4">
+                      <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
                       <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200">
-                  <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3 flex-wrap">
-                    <p className="font-semibold text-slate-700 flex-1">Orders <span className="text-slate-400 font-normal text-sm">({rfmsOrders.length})</span></p>
-                    <Button variant="outline" size="sm" onClick={() => loadCachedResults(rfmsOrders)} disabled={loadingCached} className="gap-1 border-slate-300 text-slate-600 hover:bg-slate-50">
+                <div className="bg-card rounded-2xl border border-border">
+                  <div className="px-6 py-4 border-b border-border flex items-center gap-3 flex-wrap">
+                    <p className="font-semibold text-foreground flex-1">Orders <span className="text-muted-foreground font-normal text-sm">({rfmsOrders.length})</span></p>
+                    <Button variant="outline" size="sm" onClick={() => loadCachedResults(rfmsOrders)} disabled={loadingCached} className="gap-1 border-border text-muted-foreground hover:bg-secondary">
                       {loadingCached ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '💾'}
                       {loadingCached ? 'Loading...' : 'Load Saved'}
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleCheckOnHold} disabled={checkingOnHold} className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50">
+                    <Button variant="outline" size="sm" onClick={handleCheckOnHold} disabled={checkingOnHold} className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/10">
                       {checkingOnHold ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '📦'}
                       {checkingOnHold
                         ? `Checking... ${onHoldProgress.checked}/${onHoldProgress.total}`
@@ -366,7 +366,7 @@ export default function RFMSCustomers() {
                           : 'Check On Order'}
                     </Button>
                     {Object.keys(onHoldMap).length > 0 && (
-                      <Button variant="outline" size="sm" onClick={() => exportCSV(rfmsOrders.filter(o => onHoldMap[o.documentNumber]?.hasOnHold === true))} className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50">
+                      <Button variant="outline" size="sm" onClick={() => exportCSV(rfmsOrders.filter(o => onHoldMap[o.documentNumber]?.hasOnHold === true))} className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/10">
                         <Download className="w-3.5 h-3.5" /> Export On Order
                       </Button>
                     )}
@@ -374,14 +374,14 @@ export default function RFMSCustomers() {
                     <Button variant="outline" size="sm" onClick={handleOrdersSearch} disabled={ordersLoading}><RefreshCw className="w-3.5 h-3.5 mr-1" /> Refresh</Button>
                   </div>
                   {rfmsOrders.length === 0 ? (
-                    <div className="text-center py-12 text-slate-400"><ShoppingCart className="w-10 h-10 mx-auto mb-3 opacity-30" /><p>No orders found for this date range</p></div>
+                    <div className="text-center py-12 text-muted-foreground"><ShoppingCart className="w-10 h-10 mx-auto mb-3 opacity-30" /><p>No orders found for this date range</p></div>
                   ) : (
                     <OrdersTable orders={rfmsOrders} onHoldMap={onHoldMap} />
                   )}
                 </div>
 
                 <details className="mt-4">
-                  <summary className="text-xs text-slate-400 cursor-pointer hover:text-slate-600">View raw JSON response</summary>
+                  <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">View raw JSON response</summary>
                   <pre className="mt-2 bg-slate-900 text-slate-100 rounded-xl p-4 text-xs overflow-auto max-h-96">{JSON.stringify(ordersResults, null, 2)}</pre>
                 </details>
               </>
@@ -399,46 +399,46 @@ function OrdersTable({ orders, onHoldMap = {} }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-slate-50 border-b border-slate-100">
+          <tr className="bg-secondary border-b border-border">
             {['Doc #', 'Order Date', 'First Name', 'Last Name', 'Phone', 'Email', 'Address', 'City', 'State', 'Zip', 'Salesperson', 'Total', 'Paid', 'Balance', ...(hasOnHoldData ? ['On Order'] : [])].map(h => (
-              <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
+              <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-border">
           {orders.map((order, i) => {
             const c = order.customer || {};
             const { first, last } = parseCustomerName(c.lastName, c.firstName);
             const onHoldInfo = onHoldMap[order.documentNumber];
             const isOnHold = onHoldInfo?.hasOnHold === true;
             return (
-              <tr key={i} className={`hover:bg-slate-50 transition-colors ${isOnHold ? 'bg-amber-50' : ''}`}>
-                <td className="px-4 py-3 text-slate-700 whitespace-nowrap font-mono text-xs">{order.documentNumber || '—'}</td>
-                <td className="px-4 py-3 text-slate-700 whitespace-nowrap">{order.orderDate || '—'}</td>
-                <td className="px-4 py-3 text-slate-700 whitespace-nowrap">{first || '—'}</td>
-                <td className="px-4 py-3 text-slate-700 whitespace-nowrap">{last || '—'}</td>
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{formatPhone(c.phone1) || '—'}</td>
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap max-w-[180px] truncate">{c.email || '—'}</td>
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap max-w-[200px] truncate">{c.address1 || '—'}</td>
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{c.city || '—'}</td>
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{c.state || '—'}</td>
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{c.postalCode || '—'}</td>
-                <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{order.salesperson1 || '—'}</td>
-                <td className="px-4 py-3 text-slate-700 whitespace-nowrap font-medium">${(order.grandTotal || 0).toLocaleString()}</td>
-                <td className="px-4 py-3 text-emerald-600 whitespace-nowrap">${(order.paid || 0).toLocaleString()}</td>
+              <tr key={i} className={`hover:bg-secondary transition-colors ${isOnHold ? 'bg-amber-50 dark:bg-amber-500/10' : ''}`}>
+                <td className="px-4 py-3 text-foreground whitespace-nowrap font-mono text-xs">{order.documentNumber || '—'}</td>
+                <td className="px-4 py-3 text-foreground whitespace-nowrap">{order.orderDate || '—'}</td>
+                <td className="px-4 py-3 text-foreground whitespace-nowrap">{first || '—'}</td>
+                <td className="px-4 py-3 text-foreground whitespace-nowrap">{last || '—'}</td>
+                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{formatPhone(c.phone1) || '—'}</td>
+                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap max-w-[180px] truncate">{c.email || '—'}</td>
+                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap max-w-[200px] truncate">{c.address1 || '—'}</td>
+                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{c.city || '—'}</td>
+                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{c.state || '—'}</td>
+                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{c.postalCode || '—'}</td>
+                <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{order.salesperson1 || '—'}</td>
+                <td className="px-4 py-3 text-foreground whitespace-nowrap font-medium">${(order.grandTotal || 0).toLocaleString()}</td>
+                <td className="px-4 py-3 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">${(order.paid || 0).toLocaleString()}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={order.balanceDue > 0 ? 'text-red-600 font-medium' : 'text-slate-400'}>
+                  <span className={order.balanceDue > 0 ? 'text-red-600 dark:text-red-400 font-medium' : 'text-muted-foreground'}>
                     ${(order.balanceDue || 0).toLocaleString()}
                   </span>
                 </td>
                 {hasOnHoldData && (
                   <td className="px-4 py-3 whitespace-nowrap">
                     {isOnHold ? (
-                      <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-0.5 rounded-full border border-amber-300">
+                      <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-0.5 rounded-full border border-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25">
                         📦 On Order
                       </span>
                     ) : (
-                      <span className="text-slate-300 text-xs">—</span>
+                      <span className="text-muted-foreground text-xs">—</span>
                     )}
                   </td>
                 )}

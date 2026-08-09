@@ -26,13 +26,13 @@ const getSaleGPPct = (sale, catalogCostMap) => {
 
 // Matrix columns: count of each appointment status per design consultant
 const MATRIX_COLUMNS = [
-  { key: 'total', label: 'Total Appts', color: 'text-slate-800' },
+  { key: 'total', label: 'Total Appts', color: 'text-foreground' },
   { key: 'Sold', label: 'Sold', color: 'text-green-600' },
   { key: 'One-Leg', label: 'One-Leg', color: 'text-yellow-600' },
   { key: 'Pitch and Miss', label: 'Pitch & Miss', color: 'text-orange-600' },
   { key: 'Lost', label: 'Lost', color: 'text-red-600' },
   { key: 'Credit Decline', label: 'Credit Decline', color: 'text-rose-600' },
-  { key: 'Cancelled', label: 'Cancelled', color: 'text-slate-500' },
+  { key: 'Cancelled', label: 'Cancelled', color: 'text-muted-foreground' },
   { key: 'Rescheduled', label: 'Rescheduled', color: 'text-cyan-600' },
 ];
 
@@ -203,10 +203,10 @@ export default function DCPerformanceMatrix() {
   const loading = aptLoading || tmLoading;
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">DC Performance Matrix</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-bold text-foreground">DC Performance Matrix</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Appointment outcomes by design consultant — grouped by appointment date.
         </p>
       </div>
@@ -216,7 +216,7 @@ export default function DCPerformanceMatrix() {
         <CardContent className="pt-6">
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Date Range</Label>
+              <Label className="text-xs text-muted-foreground">Date Range</Label>
               <Select value={dateRange} onValueChange={setDateRange}>
                 <SelectTrigger className="w-48">
                   <SelectValue />
@@ -234,7 +234,7 @@ export default function DCPerformanceMatrix() {
             {dateRange === 'custom' && (
               <>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-slate-500">Start Date</Label>
+                  <Label className="text-xs text-muted-foreground">Start Date</Label>
                   <Input
                     type="date"
                     value={customStartDate}
@@ -243,7 +243,7 @@ export default function DCPerformanceMatrix() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-slate-500">End Date</Label>
+                  <Label className="text-xs text-muted-foreground">End Date</Label>
                   <Input
                     type="date"
                     value={customEndDate}
@@ -253,7 +253,7 @@ export default function DCPerformanceMatrix() {
                 </div>
               </>
             )}
-            <div className="ml-auto text-sm text-slate-500">
+            <div className="ml-auto text-sm text-muted-foreground">
               {dateFilter.startStr} → {dateFilter.endStr}
             </div>
           </div>
@@ -262,11 +262,11 @@ export default function DCPerformanceMatrix() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : matrixRows.length === 0 ? (
         <Card>
-          <CardContent className="py-20 text-center text-slate-400">
+          <CardContent className="py-20 text-center text-muted-foreground">
             No appointments found in this date range.
           </CardContent>
         </Card>
@@ -282,8 +282,8 @@ export default function DCPerformanceMatrix() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="text-left font-semibold text-slate-600 px-3 py-2 sticky left-0 bg-slate-50 z-10 min-w-[140px]">
+                  <tr className="border-b border-border bg-muted">
+                    <th className="text-left font-semibold text-muted-foreground px-3 py-2 sticky left-0 bg-muted z-10 min-w-[140px]">
                       Design Consultant
                     </th>
                     {MATRIX_COLUMNS.map(col => (
@@ -294,24 +294,24 @@ export default function DCPerformanceMatrix() {
                         {col.label}
                       </th>
                     ))}
-                    <th className="text-center font-semibold text-emerald-700 px-3 py-2 whitespace-nowrap">
+                    <th className="text-center font-semibold text-emerald-700 dark:text-emerald-400 px-3 py-2 whitespace-nowrap">
                       Total Sales Value
                     </th>
-                    <th className="text-center font-semibold text-emerald-700 px-3 py-2 whitespace-nowrap">
+                    <th className="text-center font-semibold text-emerald-700 dark:text-emerald-400 px-3 py-2 whitespace-nowrap">
                       Avg Order Value
                     </th>
-                    <th className="text-center font-semibold text-blue-700 px-3 py-2 whitespace-nowrap">
+                    <th className="text-center font-semibold text-blue-700 dark:text-blue-400 px-3 py-2 whitespace-nowrap">
                       Avg GP%
                     </th>
-                    <th className="text-center font-semibold text-slate-700 px-3 py-2 whitespace-nowrap">
+                    <th className="text-center font-semibold text-foreground px-3 py-2 whitespace-nowrap">
                       Close Rate
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {matrixRows.map(row => (
-                    <tr key={row.dcId} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="font-medium text-slate-700 px-3 py-2 sticky left-0 bg-white z-10">
+                    <tr key={row.dcId} className="border-b border-border hover:bg-secondary">
+                      <td className="font-medium text-foreground px-3 py-2 sticky left-0 bg-card z-10">
                         {row.name}
                       </td>
                       {MATRIX_COLUMNS.map(col => (
@@ -322,23 +322,23 @@ export default function DCPerformanceMatrix() {
                           {row.counts[col.key] || 0}
                         </td>
                       ))}
-                      <td className="text-center px-3 py-2 font-semibold text-emerald-700 whitespace-nowrap">
+                      <td className="text-center px-3 py-2 font-semibold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
                         {formatCurrency(row.totalRevenue)}
                       </td>
-                      <td className="text-center px-3 py-2 font-semibold text-emerald-700 whitespace-nowrap">
+                      <td className="text-center px-3 py-2 font-semibold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
                         {formatCurrency(row.aov)}
                       </td>
-                      <td className="text-center px-3 py-2 font-semibold text-blue-700 whitespace-nowrap">
+                      <td className="text-center px-3 py-2 font-semibold text-blue-700 dark:text-blue-400 whitespace-nowrap">
                         {row.gpCount > 0 ? `${row.avgGP.toFixed(1)}%` : '—'}
                       </td>
-                      <td className="text-center px-3 py-2 font-semibold text-slate-700">
+                      <td className="text-center px-3 py-2 font-semibold text-foreground">
                         {row.closeRate}%
                       </td>
                     </tr>
                   ))}
                   {/* Totals row */}
-                  <tr className="border-t-2 border-slate-300 bg-slate-50 font-bold">
-                    <td className="text-slate-800 px-3 py-2 sticky left-0 bg-slate-50 z-10">
+                  <tr className="border-t-2 border-border bg-muted font-bold">
+                    <td className="text-foreground px-3 py-2 sticky left-0 bg-muted z-10">
                       TOTAL
                     </td>
                     {MATRIX_COLUMNS.map(col => (
@@ -349,16 +349,16 @@ export default function DCPerformanceMatrix() {
                         {totals[col.key] || 0}
                       </td>
                     ))}
-                    <td className="text-center px-3 py-2 text-emerald-700 whitespace-nowrap">
+                    <td className="text-center px-3 py-2 text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
                       {formatCurrency(totals.totalRevenue)}
                     </td>
-                    <td className="text-center px-3 py-2 text-emerald-700 whitespace-nowrap">
+                    <td className="text-center px-3 py-2 text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
                       {formatCurrency(totals.aov)}
                     </td>
-                    <td className="text-center px-3 py-2 text-blue-700 whitespace-nowrap">
+                    <td className="text-center px-3 py-2 text-blue-700 dark:text-blue-400 whitespace-nowrap">
                       {totals.avgGP > 0 ? `${totals.avgGP.toFixed(1)}%` : '—'}
                     </td>
-                    <td className="text-center px-3 py-2 text-slate-700">
+                    <td className="text-center px-3 py-2 text-foreground">
                       {(() => {
                         const closedDeals = totals['Sold'] || 0;
                         const lostOutcomes = (totals['Lost'] || 0) + (totals['Pitch and Miss'] || 0) + (totals['One-Leg'] || 0) + (totals['Credit Decline'] || 0);

@@ -540,123 +540,123 @@ export default function MarketingPerformance() {
         ) : (
           <>
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Total Ad Spend</span>
-                  <DollarSign className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Total Ad Spend</span>
+                  <DollarSign className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-3xl font-black text-slate-900">{fmtMoney(summary.totalSpend)}</p>
-                <p className="text-xs text-slate-400 mt-1">{summary.daysWithData} days with data</p>
+                <p className="text-3xl font-black text-foreground">{fmtMoney(summary.totalSpend)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{summary.daysWithData} days with data</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Total GHL Leads</span>
-                  <Users className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Total GHL Leads</span>
+                  <Users className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-3xl font-black text-slate-900">{summary.totalLeads}</p>
-                <p className="text-xs text-slate-400 mt-1">{dateRange.start.toLocaleDateString()} – {dateRange.end.toLocaleDateString()}</p>
+                <p className="text-3xl font-black text-foreground">{summary.totalLeads}</p>
+                <p className="text-xs text-muted-foreground mt-1">{dateRange.start.toLocaleDateString()} – {dateRange.end.toLocaleDateString()}</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Avg Cost Per Lead</span>
-                  <Target className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Avg Cost Per Lead</span>
+                  <Target className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-3xl font-black text-indigo-600">{fmtMoney2(summary.avgCPL)}</p>
-                <p className="text-xs text-slate-400 mt-1">across {summary.daysWithData} days</p>
+                <p className="text-3xl font-black text-primary">{fmtMoney2(summary.avgCPL)}</p>
+                <p className="text-xs text-muted-foreground mt-1">across {summary.daysWithData} days</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Leads Per Day</span>
-                  <TrendingUp className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Leads Per Day</span>
+                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-3xl font-black text-slate-900">
+                <p className="text-3xl font-black text-foreground">
                   {summary.daysWithData > 0 ? (summary.totalLeads / summary.daysWithData).toFixed(1) : '0'}
                 </p>
-                <p className="text-xs text-slate-400 mt-1">average daily leads</p>
+                <p className="text-xs text-muted-foreground mt-1">average daily leads</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Appts Booked</span>
-                  <CalendarDays className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Appts Booked</span>
+                  <CalendarDays className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-3xl font-black text-slate-900">{summary.totalAppointments}</p>
-                <p className="text-xs text-slate-400 mt-1">{dateRange.start.toLocaleDateString()} – {dateRange.end.toLocaleDateString()}</p>
+                <p className="text-3xl font-black text-foreground">{summary.totalAppointments}</p>
+                <p className="text-xs text-muted-foreground mt-1">{dateRange.start.toLocaleDateString()} – {dateRange.end.toLocaleDateString()}</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Cancelled Appts</span>
-                  <CalendarDays className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Cancelled Appts</span>
+                  <CalendarDays className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-3xl font-black text-red-500">{summary.totalCancelledAppts}</p>
-                <p className="text-xs text-slate-400 mt-1">{summary.totalAppointments + summary.totalCancelledAppts > 0 ? ((summary.totalCancelledAppts / (summary.totalAppointments + summary.totalCancelledAppts)) * 100).toFixed(1) : 0}% cancel rate</p>
+                <p className="text-xs text-muted-foreground mt-1">{summary.totalAppointments + summary.totalCancelledAppts > 0 ? ((summary.totalCancelledAppts / (summary.totalAppointments + summary.totalCancelledAppts)) * 100).toFixed(1) : 0}% cancel rate</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Avg Cost / Appt Booked</span>
-                  <Target className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Avg Cost / Appt Booked</span>
+                  <Target className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-3xl font-black text-cyan-600">{fmtMoney2(summary.avgCPA)}</p>
-                <p className="text-xs text-slate-400 mt-1">across {summary.daysWithData} days</p>
+                <p className="text-xs text-muted-foreground mt-1">across {summary.daysWithData} days</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Sales Closed</span>
-                  <ShoppingBag className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Sales Closed</span>
+                  <ShoppingBag className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-3xl font-black text-slate-900">{summary.totalSales}</p>
-                <p className="text-xs text-slate-400 mt-1">{dateRange.start.toLocaleDateString()} – {dateRange.end.toLocaleDateString()}</p>
+                <p className="text-3xl font-black text-foreground">{summary.totalSales}</p>
+                <p className="text-xs text-muted-foreground mt-1">{dateRange.start.toLocaleDateString()} – {dateRange.end.toLocaleDateString()}</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Total Sale Revenue</span>
-                  <DollarSign className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Total Sale Revenue</span>
+                  <DollarSign className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-3xl font-black text-emerald-600">{fmtMoney(summary.totalSalesRevenue)}</p>
-                <p className="text-xs text-slate-400 mt-1">{summary.totalSales} sales · {fmtMoney2(summary.avgCPS)} cost/sale</p>
+                <p className="text-xs text-muted-foreground mt-1">{summary.totalSales} sales · {fmtMoney2(summary.avgCPS)} cost/sale</p>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
+              <div className="bg-card rounded-xl border border-border p-5">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wide text-slate-400">Avg Cost / Sale</span>
-                  <Target className="w-4 h-4 text-slate-300" />
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Avg Cost / Sale</span>
+                  <Target className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-3xl font-black text-amber-600">{fmtMoney2(summary.avgCPS)}</p>
-                <p className="text-xs text-slate-400 mt-1">across {summary.daysWithData} days</p>
+                <p className="text-xs text-muted-foreground mt-1">across {summary.daysWithData} days</p>
               </div>
             </div>
 
             {/* Leads per day with trend */}
-            <div className="bg-white rounded-xl border border-slate-200 p-5">
+            <div className="bg-card rounded-xl border border-border p-5">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-700">Leads Per Day (GHL)</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Daily lead volume with 7-day moving average trend line</p>
+                  <h3 className="text-sm font-bold text-foreground">Leads Per Day (GHL)</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Daily lead volume with 7-day moving average trend line</p>
                 </div>
                 <div className="flex items-center gap-4 text-xs">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">7-day avg:</span>
-                    <span className="font-bold text-indigo-600">{leadsTrend.movingAvg}</span>
+                    <span className="text-muted-foreground">7-day avg:</span>
+                    <span className="font-bold text-primary">{leadsTrend.movingAvg}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">1st half avg:</span>
-                    <span className="font-medium text-slate-600">{leadsTrend.avgFirstHalf}</span>
+                    <span className="text-muted-foreground">1st half avg:</span>
+                    <span className="font-medium text-muted-foreground">{leadsTrend.avgFirstHalf}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-400">2nd half avg:</span>
-                    <span className="font-medium text-slate-600">{leadsTrend.avgSecondHalf}</span>
+                    <span className="text-muted-foreground">2nd half avg:</span>
+                    <span className="font-medium text-muted-foreground">{leadsTrend.avgSecondHalf}</span>
                   </div>
                   <div className={`flex items-center gap-1 px-2 py-1 rounded-full font-bold ${
-                    leadsTrend.trendDir === 'up' ? 'bg-emerald-50 text-emerald-600' :
-                    leadsTrend.trendDir === 'down' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'
+                    leadsTrend.trendDir === 'up' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' :
+                    leadsTrend.trendDir === 'down' ? 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' : 'bg-secondary text-muted-foreground'
                   }`}>
                     {leadsTrend.trendDir === 'up' && <TrendingUp className="w-3.5 h-3.5" />}
                     {leadsTrend.trendDir === 'down' && <TrendingDown className="w-3.5 h-3.5" />}
@@ -686,8 +686,8 @@ export default function MarketingPerformance() {
             </div>
 
             {/* Spend vs Leads chart */}
-            <div className="bg-white rounded-xl border border-slate-200 p-5">
-              <h3 className="text-sm font-bold text-slate-700 mb-4">Daily Ad Spend vs. Leads, Appointments & Sales</h3>
+            <div className="bg-card rounded-xl border border-border p-5">
+              <h3 className="text-sm font-bold text-foreground mb-4">Daily Ad Spend vs. Leads, Appointments & Sales</h3>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={dailyData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -712,8 +712,8 @@ export default function MarketingPerformance() {
             </div>
 
             {/* Cost Per Lead trend */}
-            <div className="bg-white rounded-xl border border-slate-200 p-5">
-              <h3 className="text-sm font-bold text-slate-700 mb-4">Cost Per Lead, Appointment & Sale Trend</h3>
+            <div className="bg-card rounded-xl border border-border p-5">
+              <h3 className="text-sm font-bold text-foreground mb-4">Cost Per Lead, Appointment & Sale Trend</h3>
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={dailyData.filter(d => d.leads > 0 || d.appointments > 0 || d.sales > 0)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -730,18 +730,18 @@ export default function MarketingPerformance() {
 
             {/* Platform breakdown */}
             {platformEntries.length > 0 && (
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h3 className="text-sm font-bold text-slate-700 mb-4">Spend by Platform</h3>
+              <div className="bg-card rounded-xl border border-border p-5">
+                <h3 className="text-sm font-bold text-foreground mb-4">Spend by Platform</h3>
                 <div className="space-y-3">
                   {platformEntries.map(([platform, amount], i) => {
                     const pct = summary.totalSpend > 0 ? (amount / summary.totalSpend) * 100 : 0;
                     return (
                       <div key={platform}>
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-slate-700">{platform}</span>
-                          <span className="text-sm font-bold text-slate-800">{fmtMoney2(amount)} <span className="text-xs text-slate-400 font-normal">({pct.toFixed(1)}%)</span></span>
+                          <span className="text-sm font-medium text-foreground">{platform}</span>
+                          <span className="text-sm font-bold text-foreground">{fmtMoney2(amount)} <span className="text-xs text-muted-foreground font-normal">({pct.toFixed(1)}%)</span></span>
                         </div>
-                        <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
                           <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: COLORS[i % COLORS.length] }} />
                         </div>
                       </div>
@@ -753,15 +753,15 @@ export default function MarketingPerformance() {
 
             {/* Monthly summary table */}
             {visibleMonthlyData.length > 0 && (
-              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                <div className="p-5 border-b border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-700">Monthly Summary</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Aggregated across all loaded data</p>
+              <div className="bg-card rounded-xl border border-border overflow-hidden">
+                <div className="p-5 border-b border-border">
+                  <h3 className="text-sm font-bold text-foreground">Monthly Summary</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Aggregated across all loaded data</p>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
+                      <tr className="border-b border-border bg-muted text-xs text-muted-foreground uppercase tracking-wider">
                         <th className="px-4 py-3 text-left font-medium">Month</th>
                         {monthlyPlatformNames.map(p => (
                           <th key={p} className="px-4 py-3 text-right font-medium">{p}</th>
@@ -778,24 +778,24 @@ export default function MarketingPerformance() {
                         <th className="px-4 py-3 text-right font-medium">MER</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-border">
                       {[...visibleMonthlyData].reverse().map(m => {
                         const cpl = m.leads > 0 ? m.totalSpend / m.leads : 0;
                         const cpa = m.appointments > 0 ? m.totalSpend / m.appointments : 0;
                         const cps = m.sales > 0 ? m.totalSpend / m.sales : 0;
                         return (
-                          <tr key={m.key} className="hover:bg-slate-50">
-                            <td className="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap">{m.label}</td>
+                          <tr key={m.key} className="hover:bg-secondary">
+                            <td className="px-4 py-3 font-semibold text-foreground whitespace-nowrap">{m.label}</td>
                             {monthlyPlatformNames.map(p => (
-                              <td key={p} className="px-4 py-3 text-right text-slate-600">
+                              <td key={p} className="px-4 py-3 text-right text-muted-foreground">
                                 {m.platformSpend[p] ? `$${m.platformSpend[p].toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '—'}
                               </td>
                             ))}
-                            <td className="px-4 py-3 text-right font-semibold text-slate-800">{m.totalSpend > 0 ? `$${m.totalSpend.toLocaleString()}` : '—'}</td>
-                            <td className="px-4 py-3 text-right text-slate-600">{m.leads}</td>
-                            <td className="px-4 py-3 text-right text-slate-600">{m.appointments}</td>
+                            <td className="px-4 py-3 text-right font-semibold text-foreground">{m.totalSpend > 0 ? `$${m.totalSpend.toLocaleString()}` : '—'}</td>
+                            <td className="px-4 py-3 text-right text-muted-foreground">{m.leads}</td>
+                            <td className="px-4 py-3 text-right text-muted-foreground">{m.appointments}</td>
                             <td className="px-4 py-3 text-right text-red-500">{m.cancelled}</td>
-                            <td className="px-4 py-3 text-right text-slate-600">{m.sales}</td>
+                            <td className="px-4 py-3 text-right text-muted-foreground">{m.sales}</td>
                             <td className="px-4 py-3 text-right font-bold" style={{ color: '#16803c' }}>{m.salesRevenue > 0 ? `$${m.salesRevenue.toLocaleString()}` : '—'}</td>
                             <td className="px-4 py-3 text-right font-bold" style={{ color: '#5d3fd3' }}>{m.leads > 0 ? `$${cpl.toFixed(2)}` : '—'}</td>
                             <td className="px-4 py-3 text-right font-bold" style={{ color: '#087e8b' }}>{m.appointments > 0 ? `$${cpa.toFixed(2)}` : '—'}</td>
@@ -811,14 +811,14 @@ export default function MarketingPerformance() {
             )}
 
             {/* Daily detail table */}
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-              <div className="p-5 border-b border-slate-100">
-                <h3 className="text-sm font-bold text-slate-700">Daily Breakdown</h3>
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <div className="p-5 border-b border-border">
+                <h3 className="text-sm font-bold text-foreground">Daily Breakdown</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
+                    <tr className="border-b border-border bg-muted text-xs text-muted-foreground uppercase tracking-wider">
                       <th className="px-4 py-3 text-left font-medium">Date</th>
                       {dailyTablePlatforms.map(platform => (
                         <th key={platform} className="px-4 py-3 text-right font-medium">{platform}</th>
@@ -835,22 +835,22 @@ export default function MarketingPerformance() {
                       <th className="px-4 py-3 text-right font-medium">MER</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border">
                     {[...dailyData].reverse().map(d => (
-                      <tr key={d.dateStr} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{d.date} <span className="text-slate-400">({new Date(d.dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' })})</span></td>
+                      <tr key={d.dateStr} className="hover:bg-secondary">
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{d.date} <span className="text-muted-foreground">({new Date(d.dateStr + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' })})</span></td>
                         {dailyTablePlatforms.map(platform => (
-                          <td key={platform} className="px-4 py-3 text-right text-slate-600">
+                          <td key={platform} className="px-4 py-3 text-right text-muted-foreground">
                             {d.platforms[platform] ? `$${d.platforms[platform].toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}` : '—'}
                           </td>
                         ))}
-                        <td className="px-4 py-3 text-right font-semibold text-slate-800">{d.spend > 0 ? `$${d.spend.toLocaleString()}` : '—'}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{d.leads}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{d.appointments}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-foreground">{d.spend > 0 ? `$${d.spend.toLocaleString()}` : '—'}</td>
+                        <td className="px-4 py-3 text-right text-muted-foreground">{d.leads}</td>
+                        <td className="px-4 py-3 text-right text-muted-foreground">{d.appointments}</td>
                         <td className="px-4 py-3 text-right text-red-500">{d.cancelledAppts}</td>
-                        <td className="px-4 py-3 text-right text-slate-600">{d.sales}</td>
+                        <td className="px-4 py-3 text-right text-muted-foreground">{d.sales}</td>
                         <td className="px-4 py-3 text-right font-semibold text-emerald-600">{d.salesRevenue > 0 ? `$${d.salesRevenue.toLocaleString()}` : '—'}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-indigo-600">{d.leads > 0 ? `$${d.cpl.toFixed(2)}` : '—'}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-primary">{d.leads > 0 ? `$${d.cpl.toFixed(2)}` : '—'}</td>
                         <td className="px-4 py-3 text-right font-semibold text-cyan-600">{d.appointments > 0 ? `$${d.cpa.toFixed(2)}` : '—'}</td>
                         <td className="px-4 py-3 text-right font-semibold text-amber-600">{d.sales > 0 ? `$${d.cps.toFixed(2)}` : '—'}</td>
                         <td className="px-4 py-3 text-right font-semibold text-purple-600">{d.spend > 0 ? (d.salesRevenue / d.spend).toFixed(2) : '—'}</td>

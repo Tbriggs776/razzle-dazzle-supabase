@@ -110,7 +110,7 @@ export default function ManualSalesContractView() {
     }
 
     return (
-      <div className="min-h-screen bg-background py-10 px-4">
+      <div className="min-h-screen bg-background py-10 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <CheckCircle2 className="w-5 h-5 text-green-500" />
@@ -145,7 +145,7 @@ export default function ManualSalesContractView() {
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-background py-10 px-4">
+    <div className="min-h-screen bg-background py-10 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
         <ContractBody contract={contract} />
 

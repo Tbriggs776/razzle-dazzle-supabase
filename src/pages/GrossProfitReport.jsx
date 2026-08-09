@@ -154,7 +154,7 @@ export default function GrossProfitReport() {
   };
 
   const SortIcon = ({ col }) => {
-    if (sortCol !== col) return <span className="ml-1 text-slate-300">↕</span>;
+    if (sortCol !== col) return <span className="ml-1 text-muted-foreground">↕</span>;
     return <span className="ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
@@ -230,18 +230,18 @@ export default function GrossProfitReport() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Gross Profit Report</h1>
-              <p className="text-slate-500 mt-1">Job-level GP% from RFMS data • Threshold: <span className="font-semibold text-red-600">{GP_THRESHOLD}%</span></p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Gross Profit Report</h1>
+              <p className="text-muted-foreground mt-1">Job-level GP% from RFMS data • Threshold: <span className="font-semibold text-red-600 dark:text-red-400">{GP_THRESHOLD}%</span></p>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-44">
+                <SelectTrigger className="w-full sm:w-44">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -256,9 +256,9 @@ export default function GrossProfitReport() {
               </Select>
               {dateRange === 'custom' && (
                 <div className="flex items-center gap-2">
-                  <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} className="h-10 px-3 border border-slate-200 rounded-md text-sm" />
-                  <span className="text-slate-400">to</span>
-                  <input type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} className="h-10 px-3 border border-slate-200 rounded-md text-sm" />
+                  <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} className="h-10 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <span className="text-muted-foreground">to</span>
+                  <input type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} className="h-10 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
               )}
             </div>
@@ -266,10 +266,10 @@ export default function GrossProfitReport() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {salesLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : (
           <>
@@ -277,51 +277,51 @@ export default function GrossProfitReport() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <TrendingUp className="w-4 h-4 text-blue-500" /> Avg GP%
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <TrendingUp className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Avg GP%
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className={`text-3xl font-bold ${avgGP < GP_THRESHOLD ? 'text-red-600' : 'text-blue-600'}`}>{avgGP.toFixed(1)}%</p>
-                  <p className="text-xs text-slate-400 mt-1">{withGP.length} jobs with RFMS data</p>
+                  <p className={`text-3xl font-bold ${avgGP < GP_THRESHOLD ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>{avgGP.toFixed(1)}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">{withGP.length} jobs with RFMS data</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <DollarSign className="w-4 h-4 text-emerald-500" /> Total GP $
+                  <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <DollarSign className="w-4 h-4 text-emerald-500 dark:text-emerald-400" /> Total GP $
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-emerald-600">${totalGPDollars.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
-                  <p className="text-xs text-slate-400 mt-1">from RFMS-synced jobs</p>
+                  <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">${totalGPDollars.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                  <p className="text-xs text-muted-foreground mt-1">from RFMS-synced jobs</p>
                 </CardContent>
               </Card>
 
-              <Card className="border-red-200 bg-red-50">
+              <Card className="border-red-200 bg-red-50 dark:border-red-500/25 dark:bg-red-500/10">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-red-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <CardTitle className="text-xs font-medium text-red-500 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
                     <AlertTriangle className="w-4 h-4" /> Below {GP_THRESHOLD}%
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-red-600">{belowCount}</p>
-                  <p className="text-xs text-red-400 mt-1">
+                  <p className="text-3xl font-bold text-red-600 dark:text-red-400">{belowCount}</p>
+                  <p className="text-xs text-red-400 dark:text-red-300 mt-1">
                     {withGP.length > 0 ? ((belowCount / withGP.length) * 100).toFixed(0) : 0}% of jobs with RFMS data
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="border-green-200 bg-green-50">
+              <Card className="border-green-200 bg-green-50 dark:border-green-500/25 dark:bg-green-500/10">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-medium text-green-600 uppercase tracking-wider">
+                  <CardTitle className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wider">
                     Above Threshold
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-3xl font-bold text-green-600">{aboveCount}</p>
-                  <p className="text-xs text-green-500 mt-1">
+                  <p className="text-3xl font-bold text-green-600 dark:text-green-400">{aboveCount}</p>
+                  <p className="text-xs text-green-500 dark:text-green-400 mt-1">
                     {withGP.length > 0 ? ((aboveCount / withGP.length) * 100).toFixed(0) : 0}% of jobs with RFMS data
                   </p>
                 </CardContent>
@@ -414,7 +414,7 @@ export default function GrossProfitReport() {
                       variant={filterBelow ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setFilterBelow(v => !v)}
-                      className={filterBelow ? 'bg-red-600 hover:bg-red-700 border-red-600' : 'border-red-300 text-red-600 hover:bg-red-50'}
+                      className={filterBelow ? 'bg-red-600 hover:bg-red-700 border-red-600' : 'border-red-300 dark:border-red-500/40 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10'}
                     >
                       <AlertTriangle className="w-3.5 h-3.5 mr-1" />
                       {filterBelow ? 'Showing Flagged' : `Show Flagged (${belowCount})`}
@@ -429,14 +429,14 @@ export default function GrossProfitReport() {
                   placeholder="Search customer, consultant, invoice..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="mt-2 w-full h-9 px-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                  className="mt-2 w-full h-9 px-3 text-sm border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
                 />
               </CardHeader>
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
+                      <tr className="border-b border-border bg-muted text-xs text-muted-foreground uppercase tracking-wider">
                         {[
                           ['saleDateRaw', 'Sale Date'],
                           ['customerName', 'Customer'],
@@ -451,7 +451,7 @@ export default function GrossProfitReport() {
                           <th
                             key={col}
                             onClick={() => handleSort(col)}
-                            className="px-4 py-3 font-medium text-left cursor-pointer select-none hover:text-slate-700 whitespace-nowrap"
+                            className="px-4 py-3 font-medium text-left cursor-pointer select-none hover:text-foreground whitespace-nowrap"
                           >
                             {label}<SortIcon col={col} />
                           </th>
@@ -459,58 +459,58 @@ export default function GrossProfitReport() {
                         <th className="px-4 py-3"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-border">
                       {filtered.length === 0 && (
-                        <tr><td colSpan={10} className="text-center text-slate-400 py-10">No jobs found</td></tr>
+                        <tr><td colSpan={10} className="text-center text-muted-foreground py-10">No jobs found</td></tr>
                       )}
                       {filtered.map(({ sale, gp, gpPct, gpDollars, orderTotal, totalCost, consultantName, customerName, saleDate, saleAmount, invoiceNumber, belowThreshold }) => (
                         <tr
                           key={sale.id}
-                          className={`transition-colors ${belowThreshold ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-slate-50'}`}
+                          className={`transition-colors ${belowThreshold ? 'bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20' : 'hover:bg-muted'}`}
                         >
-                          <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{saleDate}</td>
-                          <td className="px-4 py-3 font-medium text-slate-800 whitespace-nowrap">
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{saleDate}</td>
+                          <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               {belowThreshold && (
-                                <AlertTriangle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+                                <AlertTriangle className="w-3.5 h-3.5 text-red-500 dark:text-red-400 flex-shrink-0" />
                               )}
                               {customerName}
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{invoiceNumber || '—'}</td>
-                          <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{consultantName}</td>
-                          <td className="px-4 py-3 text-slate-700 whitespace-nowrap font-medium">
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{invoiceNumber || '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{consultantName}</td>
+                          <td className="px-4 py-3 text-foreground whitespace-nowrap font-medium">
                             {saleAmount ? `$${saleAmount.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '—'}
                           </td>
-                          <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                            {orderTotal !== null ? `$${orderTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : <span className="text-slate-300">N/A</span>}
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                            {orderTotal !== null ? `$${orderTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : <span className="text-muted-foreground">N/A</span>}
                           </td>
-                          <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                            {totalCost !== null ? `$${totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : <span className="text-slate-300">N/A</span>}
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                            {totalCost !== null ? `$${totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : <span className="text-muted-foreground">N/A</span>}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap font-semibold">
                             {gpDollars !== null ? (
-                              <span className={gpDollars < 0 ? 'text-red-600' : 'text-emerald-600'}>
+                              <span className={gpDollars < 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}>
                                 ${gpDollars.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                               </span>
-                            ) : <span className="text-slate-300">N/A</span>}
+                            ) : <span className="text-muted-foreground">N/A</span>}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             {gpPct !== null ? (
                               <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
                                 gpPct < GP_THRESHOLD
-                                  ? 'bg-red-100 text-red-700 border border-red-200'
-                                  : 'bg-green-100 text-green-700 border border-green-200'
+                                  ? 'bg-red-100 text-red-700 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25'
+                                  : 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
                               }`}>
                                 {belowThreshold && <AlertTriangle className="w-3 h-3" />}
                                 {gpPct.toFixed(1)}%
                               </span>
                             ) : (
-                              <span className="text-xs text-slate-300 px-2.5 py-1 rounded-full bg-slate-100">No data</span>
+                              <span className="text-xs text-muted-foreground px-2.5 py-1 rounded-full bg-secondary">No data</span>
                             )}
                           </td>
                           <td className="px-4 py-3">
-                            <Link to={createPageUrl('SaleDetail') + '?id=' + sale.id} className="text-slate-400 hover:text-indigo-600">
+                            <Link to={createPageUrl('SaleDetail') + '?id=' + sale.id} className="text-muted-foreground hover:text-primary">
                               <ExternalLink className="w-4 h-4" />
                             </Link>
                           </td>

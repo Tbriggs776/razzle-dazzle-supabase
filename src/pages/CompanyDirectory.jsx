@@ -21,14 +21,14 @@ const ROLES = [
 ];
 
 const roleColors = {
-  "Admin": "bg-red-100 text-red-700",
-  "Design Consultant": "bg-indigo-100 text-indigo-700",
-  "Customer Service Rep": "bg-blue-100 text-blue-700",
-  "Order Processor": "bg-orange-100 text-orange-700",
-  "Sales Manager": "bg-green-100 text-green-700",
-  "Finance Manager": "bg-emerald-100 text-emerald-700",
-  "Operations": "bg-purple-100 text-purple-700",
-  "Customer Experience Coordinator": "bg-pink-100 text-pink-700",
+  "Admin": "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300",
+  "Design Consultant": "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300",
+  "Customer Service Rep": "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
+  "Order Processor": "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
+  "Sales Manager": "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300",
+  "Finance Manager": "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+  "Operations": "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300",
+  "Customer Experience Coordinator": "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-300",
 };
 
 // Company Directory page
@@ -80,32 +80,32 @@ export default function CompanyDirectory() {
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }));
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <Users className="w-7 h-7 text-white" />
+              <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
+                <Users className="w-7 h-7 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Company Directory</h1>
-                <p className="text-slate-500 mt-1">{teamMembers.filter(m => m.is_active !== false).length} team members</p>
+                <h1 className="text-3xl font-bold text-foreground tracking-tight">Company Directory</h1>
+                <p className="text-muted-foreground mt-1">{teamMembers.filter(m => m.is_active !== false).length} team members</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="relative w-full sm:w-auto">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search by name, role..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="pl-9 w-64"
+                  className="pl-9 w-full sm:w-64"
                 />
               </div>
               {isAdmin && (
-                <Button onClick={() => setShowAddDialog(true)} className="bg-indigo-600 hover:bg-indigo-700">
+                <Button onClick={() => setShowAddDialog(true)} className="bg-primary text-primary-foreground hover:opacity-90">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Employee
                 </Button>
@@ -116,21 +116,21 @@ export default function CompanyDirectory() {
       </div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : (
           <div className="space-y-10">
             {Object.entries(grouped).map(([role, members]) => (
               <div key={role}>
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{role}</h2>
-                  <div className="flex-1 h-px bg-slate-200" />
-                  <span className="text-xs text-slate-400">{members.length}</span>
+                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">{role}</h2>
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground">{members.length}</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {members.map(member => (
                     <MemberCard key={member.id} member={member} roleColors={roleColors} />
                   ))}
@@ -140,10 +140,10 @@ export default function CompanyDirectory() {
             {unassigned.length > 0 && (
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Unassigned</h2>
-                  <div className="flex-1 h-px bg-slate-200" />
+                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Unassigned</h2>
+                  <div className="flex-1 h-px bg-border" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {unassigned.map(member => (
                     <MemberCard key={member.id} member={member} roleColors={roleColors} />
                   ))}
@@ -152,8 +152,8 @@ export default function CompanyDirectory() {
             )}
             {filtered.length === 0 && (
               <div className="text-center py-20">
-                <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500">No team members found</p>
+                <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">No team members found</p>
               </div>
             )}
           </div>
@@ -204,7 +204,7 @@ export default function CompanyDirectory() {
             <Button
               onClick={() => createMutation.mutate(form)}
               disabled={createMutation.isPending || !form.first_name || !form.last_name || !form.email}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-primary text-primary-foreground hover:opacity-90"
             >
               {createMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Adding...</> : 'Add Employee'}
             </Button>
@@ -217,38 +217,38 @@ export default function CompanyDirectory() {
 
 function MemberCard({ member, roleColors }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-xl border border-border p-5 hover:shadow-md transition-shadow">
       <div className="flex items-start gap-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
           {member.profile_photo ? (
             <img src={member.profile_photo} alt="" className="w-full h-full object-cover" />
           ) : (
-            <span className="text-lg font-bold text-indigo-600">
+            <span className="text-lg font-bold text-primary">
               {member.first_name?.[0]}{member.last_name?.[0]}
             </span>
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-slate-800 truncate">{member.first_name} {member.last_name}</p>
+          <p className="font-semibold text-foreground truncate">{member.first_name} {member.last_name}</p>
           {member.role && (
-            <Badge className={`mt-1 text-xs ${roleColors[member.role] || 'bg-slate-100 text-slate-600'}`}>
+            <Badge className={`mt-1 text-xs ${roleColors[member.role] || 'bg-secondary text-secondary-foreground'}`}>
               {member.role}
             </Badge>
           )}
         </div>
       </div>
       {member.bio && (
-        <p className="mt-3 text-xs text-slate-500 line-clamp-2">{member.bio}</p>
+        <p className="mt-3 text-xs text-muted-foreground line-clamp-2">{member.bio}</p>
       )}
       <div className="mt-4 space-y-2">
         {member.email && (
-          <a href={`mailto:${member.email}`} className="flex items-center gap-2 text-xs text-slate-500 hover:text-indigo-600 transition-colors truncate">
+          <a href={`mailto:${member.email}`} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors truncate">
             <Mail className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="truncate">{member.email}</span>
           </a>
         )}
         {member.phone && (
-          <a href={`tel:${member.phone}`} className="flex items-center gap-2 text-xs text-slate-500 hover:text-indigo-600 transition-colors">
+          <a href={`tel:${member.phone}`} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors">
             <Phone className="w-3.5 h-3.5 flex-shrink-0" />
             <span>{member.phone}</span>
           </a>

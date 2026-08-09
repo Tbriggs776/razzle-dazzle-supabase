@@ -513,7 +513,7 @@ export default function SaleDetail() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-card border-b border-border">
-        <div className="max-w-4xl mx-auto px-6 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link
             to={createPageUrl('Sales')}
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
@@ -603,7 +603,7 @@ export default function SaleDetail() {
               <Button
                 onClick={() => setShowCancelDialog(true)}
                 variant="outline"
-                className="h-11 px-5 border-orange-300 text-orange-600 hover:bg-orange-50"
+                className="h-11 px-5 border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10"
               >
                 <X className="w-4 h-4 mr-2" />
                 Cancel Sale
@@ -611,7 +611,7 @@ export default function SaleDetail() {
               <Button
                 onClick={() => setShowDeleteDialog(true)}
                 variant="outline"
-                className="h-11 px-5 border-red-300 text-red-600 hover:bg-red-50"
+                className="h-11 px-5 border-destructive/40 text-destructive hover:bg-destructive/10"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
@@ -621,7 +621,7 @@ export default function SaleDetail() {
                   onClick={handleSendSalesEmail}
                   disabled={sendingEmail}
                   variant="outline"
-                  className="h-11 px-5 border-purple-300 text-purple-600 hover:bg-purple-50"
+                  className="h-11 px-5 border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-500/30 dark:text-purple-300 dark:hover:bg-purple-500/10"
                 >
                   {sendingEmail ? (
                     <>
@@ -642,8 +642,8 @@ export default function SaleDetail() {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {/* Customer Information */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -902,7 +902,7 @@ export default function SaleDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
             >
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Final Product Selected Photos
@@ -951,7 +951,7 @@ export default function SaleDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55 }}
-              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
             >
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Sale Notes
@@ -970,7 +970,7 @@ export default function SaleDetail() {
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
            transition={{ delay: 0.6 }}
-           className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
+           className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
           >
            <div className="flex items-center justify-between mb-4">
              <div>
@@ -1025,7 +1025,7 @@ export default function SaleDetail() {
                 const { catalogTotalCost, grossProfit: catalogGrossProfit, grossProfitPercent: catalogGPPercent } = computeCatalogGP(lines, catalogCostMap);
                 return (
                   <div>
-                    <div className="border rounded-lg overflow-hidden">
+                    <div className="border border-border rounded-lg overflow-x-auto">
                       <Table>
                         <TableHeader>
                           <TableRow className="bg-muted">
@@ -1223,7 +1223,7 @@ export default function SaleDetail() {
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.65 }}
-             className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
+             className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
            >
              <div className="flex items-center justify-between mb-4">
                <div>
@@ -1243,7 +1243,7 @@ export default function SaleDetail() {
                       disabled={sendingGPAlert}
                       variant="outline"
                       size="sm"
-                      className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                      className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
                     >
                       {sendingGPAlert ? (
                         <>
@@ -1432,7 +1432,7 @@ export default function SaleDetail() {
             <Button
               onClick={() => deleteSaleMutation.mutate()}
               disabled={deleteSaleMutation.isPending}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:opacity-90"
             >
               {deleteSaleMutation.isPending ? (
                 <>
@@ -1490,8 +1490,8 @@ export default function SaleDetail() {
 
             {newContractFileUrl && (
               <>
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-800 flex items-center gap-2">
+                <div className="p-3 bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25 rounded-lg">
+                  <p className="text-sm text-green-800 dark:text-green-300 flex items-center gap-2">
                     <FileText className="w-4 h-4" />
                     New contract uploaded successfully
                   </p>
@@ -1539,7 +1539,7 @@ export default function SaleDetail() {
             <Button
               onClick={handleReplaceContract}
               disabled={!newContractFileUrl || updateSaleMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-brand-blue text-white hover:bg-brand-blue/90"
             >
               {updateSaleMutation.isPending ? (
                 <>

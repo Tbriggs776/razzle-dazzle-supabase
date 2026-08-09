@@ -216,12 +216,12 @@ export default function Logs() {
                         <p className="text-sm text-red-700 dark:text-red-300 mb-2">Error: {log.error_message}</p>
                       )}
                       {log.appointment_id && (
-                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-2">Appointment: {log.appointment_id}</p>
+                        <p className="text-xs text-muted-foreground mb-2">Appointment: {log.appointment_id}</p>
                       )}
                       {log.details && (
-                        <details className="text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
-                          <summary className="hover:text-slate-900 dark:hover:text-white">View Details</summary>
-                          <pre className="mt-2 p-2 bg-slate-50 dark:bg-slate-900/40 rounded overflow-auto max-h-32">
+                        <details className="text-xs text-muted-foreground cursor-pointer">
+                          <summary className="hover:text-foreground">View Details</summary>
+                          <pre className="mt-2 p-2 bg-muted rounded overflow-auto max-h-32">
                             {JSON.stringify(log.details, null, 2)}
                           </pre>
                         </details>
@@ -229,7 +229,7 @@ export default function Logs() {
                     </div>
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <p className="text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                    <p className="text-xs text-muted-foreground whitespace-nowrap">
                       {format(new Date(log.created_date), 'MMM d, yyyy h:mm a')}
                     </p>
                   </div>

@@ -530,7 +530,7 @@ export default function QuoteDetail() {
           <div className="bg-card rounded-2xl border border-border p-6 md:col-span-2">
             <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Quote Document</h2>
             {quote.quote_file_url ? (
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25">
+              <div className="flex flex-wrap items-center gap-4 p-4 rounded-xl bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25">
                 <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
                 <div className="flex-1">
                   <p className="font-medium text-green-800 dark:text-green-300">Quote PDF Uploaded</p>
@@ -629,7 +629,7 @@ export default function QuoteDetail() {
             </div>
 
             {!isConverted && (
-              <div className="flex gap-3 mt-5">
+              <div className="flex flex-wrap gap-3 mt-5">
                 <Button
                   variant="outline"
                   onClick={handleSaveDeposit}

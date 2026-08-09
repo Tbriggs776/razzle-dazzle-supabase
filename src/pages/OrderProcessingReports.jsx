@@ -161,18 +161,18 @@ export default function OrderProcessingReports() {
   }, [selectedDay, projectLogMap, projects, customers, sales]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Order Processing Reports</h1>
-              <p className="text-slate-500 mt-1">Materials ordered by day</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Order Processing Reports</h1>
+              <p className="text-muted-foreground mt-1">Materials ordered by day</p>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -188,9 +188,9 @@ export default function OrderProcessingReports() {
               </Select>
               {dateRange === 'custom' && (
                 <div className="flex items-center gap-2">
-                  <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} className="h-10 px-3 border border-slate-200 rounded-md text-sm" />
-                  <span className="text-slate-500">to</span>
-                  <input type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} className="h-10 px-3 border border-slate-200 rounded-md text-sm" />
+                  <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} className="h-10 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <span className="text-muted-foreground">to</span>
+                  <input type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} className="h-10 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
               )}
             </div>
@@ -198,39 +198,39 @@ export default function OrderProcessingReports() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {logsLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : (
           <>
             {/* Summary Card */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Jobs Ordered</CardTitle>
-                  <Package className="h-4 w-4 text-purple-500" />
+                  <Package className="h-4 w-4 text-primary" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-purple-700">{totalOrdered}</div>
-                  <p className="text-xs text-slate-500 mt-1">Materials ordered in selected period</p>
+                  <div className="text-3xl font-bold text-primary">{totalOrdered}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Materials ordered in selected period</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Daily Average</CardTitle>
-                  <Package className="h-4 w-4 text-slate-400" />
+                  <Package className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{perDayData.length > 0 ? (totalOrdered / perDayData.length).toFixed(1) : 0}</div>
-                  <p className="text-xs text-slate-500 mt-1">Jobs per day</p>
+                  <p className="text-xs text-muted-foreground mt-1">Jobs per day</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Peak Day</CardTitle>
-                  <Package className="h-4 w-4 text-slate-400" />
+                  <Package className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   {(() => {
@@ -238,7 +238,7 @@ export default function OrderProcessingReports() {
                     return (
                       <>
                         <div className="text-3xl font-bold">{peak.count}</div>
-                        <p className="text-xs text-slate-500 mt-1">{peak.count > 0 ? peak.display : 'No data'}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{peak.count > 0 ? peak.display : 'No data'}</p>
                       </>
                     );
                   })()}
@@ -290,7 +290,7 @@ export default function OrderProcessingReports() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-slate-400 text-center py-16">No materials ordered in selected date range</p>
+                  <p className="text-muted-foreground text-center py-16">No materials ordered in selected date range</p>
                 )}
               </CardContent>
             </Card>
@@ -306,15 +306,15 @@ export default function OrderProcessingReports() {
                   <div className="space-y-2">
                     {perUserData.map((u, i) => (
                       <div key={u.name} className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-slate-400 w-5">{i + 1}</span>
+                        <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}</span>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-slate-700">{u.name}</span>
-                            <span className="text-sm font-bold text-purple-700">{u.count} job{u.count !== 1 ? 's' : ''}</span>
+                            <span className="text-sm font-medium text-foreground">{u.name}</span>
+                            <span className="text-sm font-bold text-primary">{u.count} job{u.count !== 1 ? 's' : ''}</span>
                           </div>
-                          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-purple-500 rounded-full"
+                              className="h-full bg-primary rounded-full"
                               style={{ width: `${(u.count / perUserData[0].count) * 100}%` }}
                             />
                           </div>
@@ -338,12 +338,12 @@ export default function OrderProcessingReports() {
                       <button
                         key={d.date}
                         onClick={() => { setSelectedDay(d.date); setShowDayModal(true); }}
-                        className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-300 transition-colors text-left"
+                        className="w-full flex items-center justify-between px-4 py-2.5 rounded-lg bg-secondary hover:bg-primary/5 border border-border hover:border-primary/40 transition-colors text-left"
                       >
-                        <span className="text-sm font-medium text-slate-700">
+                        <span className="text-sm font-medium text-foreground">
                           {format(new Date(d.date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
                         </span>
-                        <span className="text-sm font-bold text-purple-700 bg-purple-100 px-3 py-0.5 rounded-full">
+                        <span className="text-sm font-bold text-primary bg-primary/10 px-3 py-0.5 rounded-full">
                           {d.count} job{d.count !== 1 ? 's' : ''}
                         </span>
                       </button>
@@ -366,23 +366,23 @@ export default function OrderProcessingReports() {
           </DialogHeader>
           <div className="space-y-3 mt-2">
             {selectedDayJobs.length === 0 ? (
-              <p className="text-slate-500 text-sm text-center py-4">No jobs found.</p>
+              <p className="text-muted-foreground text-sm text-center py-4">No jobs found.</p>
             ) : selectedDayJobs.map(({ time, log, project, customer, sale }, i) => (
-              <div key={i} className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div key={i} className="p-4 bg-primary/10 rounded-lg border border-primary/20">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-semibold text-foreground">
                       {customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown Customer'}
                     </p>
                     {sale?.invoice_number && (
-                      <p className="text-xs text-slate-500 mt-0.5">CG#: {sale.invoice_number}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">CG#: {sale.invoice_number}</p>
                     )}
                     {project?.installation_date && (
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         Install: {format(new Date(project.installation_date + 'T00:00:00'), 'MMM d, yyyy')}
                       </p>
                     )}
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Ordered at: {format(new Date(time.getTime() - AZ_OFFSET_MS), 'h:mm a')} AZ
                       {log.user_name ? ` by ${log.user_name}` : ''}
                     </p>
@@ -390,7 +390,7 @@ export default function OrderProcessingReports() {
                   {project && (
                     <Link
                       to={createPageUrl('ProjectDetail') + `?id=${project.id}`}
-                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700 whitespace-nowrap"
+                      className="text-xs font-medium text-primary hover:opacity-80 whitespace-nowrap"
                     >
                       View Project →
                     </Link>

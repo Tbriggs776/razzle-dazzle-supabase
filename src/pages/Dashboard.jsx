@@ -430,7 +430,7 @@ export default function Dashboard() {
                     interval={salesPerDayData.length > 30 ? Math.floor(salesPerDayData.length / 15) : 0} />
                   <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }} cursor={{ fill: '#f8fafc' }} />
-                  <Bar dataKey="sales" fill="#b91c1c" radius={[4, 4, 0, 0]} name="Sales" />
+                  <Bar dataKey="sales" fill="hsl(var(--brand-pink))" radius={[4, 4, 0, 0]} name="Sales" />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -463,7 +463,7 @@ export default function Dashboard() {
                     interval={apptPerDayData.length > 30 ? Math.floor(apptPerDayData.length / 15) : 0} />
                   <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }} cursor={{ fill: '#f8fafc' }} />
-                  <Bar dataKey="appointments" fill="#b91c1c" radius={[4, 4, 0, 0]} name="Appointments" />
+                  <Bar dataKey="appointments" fill="hsl(var(--brand-pink))" radius={[4, 4, 0, 0]} name="Appointments" />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -496,7 +496,7 @@ export default function Dashboard() {
                     interval={leadsPerDayData.length > 30 ? Math.floor(leadsPerDayData.length / 15) : 0} />
                   <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12 }} cursor={{ fill: '#f8fafc' }} />
-                  <Bar dataKey="leads" fill="#b91c1c" radius={[4, 4, 0, 0]} name="Leads" />
+                  <Bar dataKey="leads" fill="hsl(var(--brand-pink))" radius={[4, 4, 0, 0]} name="Leads" />
                 </BarChart>
               </ResponsiveContainer>
             )}

@@ -45,20 +45,20 @@ import CreateQuoteDialog from '@/components/appointments/CreateQuoteDialog';
 import { toast } from 'sonner';
 
 const statusColors = {
-  'Lead': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200',
-  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'In Route': 'bg-cyan-100 text-cyan-800 border-cyan-200',
-  'On Site': 'bg-green-100 text-green-800 border-green-200',
-  'Cancelled': 'bg-red-100 text-red-800 border-red-200',
-  'Completed': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Sold': 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  'Lost': 'bg-red-100 text-red-800 border-red-200',
-  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200',
-  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200',
-  'Follow-Up': 'bg-red-100 text-red-800 border-red-200'
+  'Lead': 'bg-secondary text-secondary-foreground border-border',
+  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
+  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'In Route': 'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/25',
+  'On Site': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
+  'Cancelled': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'Completed': 'bg-secondary text-secondary-foreground border-border',
+  'Sold': 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25',
+  'Lost': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/25',
+  'Follow-Up': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25'
 };
 
 export default function ConsultantAppointmentView() {
@@ -723,17 +723,17 @@ export default function ConsultantAppointmentView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!appointment) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">Appointment not found</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Appointment not found</h2>
         </div>
       </div>
     );
@@ -742,44 +742,44 @@ export default function ConsultantAppointmentView() {
   const leadName = lead ? `${lead.first_name} ${lead.last_name}` : 'Loading...';
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Unique Product Color Banner */}
       {(checklist?.unique_product_color) && (
-        <div className="flex items-center gap-4 px-6 py-4 bg-orange-50 border-b-2 border-orange-400">
+        <div className="flex items-center gap-4 px-4 sm:px-6 py-4 bg-orange-50 border-b-2 border-orange-400 dark:bg-orange-500/10 dark:border-orange-500/40">
           <span className="text-3xl flex-shrink-0">⚠️</span>
           <div>
-            <p className="text-orange-700 font-bold text-lg leading-tight">Unique Product Color — Reference Notes</p>
-            <p className="text-orange-600 text-sm font-medium">Customer has a specific/unique color in mind. Review the checklist notes before presenting options.</p>
+            <p className="text-orange-700 dark:text-orange-300 font-bold text-lg leading-tight">Unique Product Color — Reference Notes</p>
+            <p className="text-orange-600 dark:text-orange-400 text-sm font-medium">Customer has a specific/unique color in mind. Review the checklist notes before presenting options.</p>
           </div>
         </div>
       )}
       {/* 1978 Asbestos Banner - top of page */}
       {(checklist?.home_built_era === 'On or before 1978' || checklistV2?.home_built_era === 'On or before 1978') && (
-        <div className="flex items-center gap-4 px-6 py-4 bg-red-50 border-b-2 border-red-400">
+        <div className="flex items-center gap-4 px-4 sm:px-6 py-4 bg-red-50 border-b-2 border-red-400 dark:bg-red-500/10 dark:border-red-500/40">
           <span className="text-3xl flex-shrink-0">🛑</span>
           <div>
-            <p className="text-red-700 font-bold text-lg leading-tight">STOP — Home Built On or Before 1978</p>
-            <p className="text-red-600 text-sm font-medium">Lead paint & asbestos risk — follow proper protocol and EPA RRP procedures before any demo or installation.</p>
+            <p className="text-red-700 dark:text-red-300 font-bold text-lg leading-tight">STOP — Home Built On or Before 1978</p>
+            <p className="text-red-600 dark:text-red-400 text-sm font-medium">Lead paint & asbestos risk — follow proper protocol and EPA RRP procedures before any demo or installation.</p>
           </div>
         </div>
       )}
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col gap-6"
           >
             <div className="flex flex-col md:flex-row md:items-start gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-200">
+              <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg">
                 <CalendarIcon className="w-10 h-10" />
               </div>
 
               <div className="flex-1">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight">{leadName}</h1>
+                    <h1 className="text-3xl font-bold text-foreground tracking-tight">{leadName}</h1>
                     <div className="flex items-center gap-2 mt-3">
                       <Badge variant="secondary" className={cn('border text-lg px-4 py-1', statusColors[appointment.status])}>
                         {appointment.status}
@@ -787,7 +787,7 @@ export default function ConsultantAppointmentView() {
                     </div>
                   </div>
                   <a href="/MyAppointments">
-                    <Button variant="outline" size="sm" className="border-indigo-200 text-indigo-600 hover:bg-indigo-50">
+                    <Button variant="outline" size="sm" className="border-primary/30 text-primary hover:bg-primary/10">
                       <List className="w-4 h-4 mr-2" />
                       View All
                     </Button>
@@ -843,7 +843,7 @@ export default function ConsultantAppointmentView() {
                    }
                  }}
                  disabled={sendingOnMyWay || !appointment.assigned_dc}
-                 className="w-full bg-blue-600 hover:bg-blue-700 h-12"
+                 className="w-full bg-primary text-primary-foreground hover:opacity-90 h-12"
                >
                  {sendingOnMyWay ? (
                    <>
@@ -859,29 +859,29 @@ export default function ConsultantAppointmentView() {
                </Button>
 
                {/* Skip to Result */}
-               <div className="border border-slate-200 rounded-xl overflow-hidden">
+               <div className="border border-border rounded-xl overflow-hidden">
                  <button
                    onClick={() => setShowSkipToResult(prev => !prev)}
-                   className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-500 hover:bg-slate-50 transition-colors"
+                   className="w-full flex items-center justify-between px-4 py-3 text-sm text-muted-foreground hover:bg-secondary transition-colors"
                  >
                    <span>Skip to Result (no customer notification)</span>
                    {showSkipToResult ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                  </button>
                  {showSkipToResult && (
-                   <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 border-t border-slate-200">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-secondary border-t border-border">
                      <Button onClick={() => handleStatusSelect('Sold')} disabled={!appointment.assigned_dc} className="bg-emerald-600 hover:bg-emerald-700 h-11">
                        <Trophy className="w-4 h-4 mr-2" />Sold
                      </Button>
-                     <Button onClick={() => handleStatusSelect('Lost')} disabled={!appointment.assigned_dc} variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 h-11">
+                     <Button onClick={() => handleStatusSelect('Lost')} disabled={!appointment.assigned_dc} variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-11">
                        <X className="w-4 h-4 mr-2" />Lost
                      </Button>
-                     <Button onClick={() => handleStatusSelect('Pitch and Miss')} disabled={!appointment.assigned_dc} variant="outline" className="border-orange-200 text-orange-600 hover:bg-orange-50 h-11">
+                     <Button onClick={() => handleStatusSelect('Pitch and Miss')} disabled={!appointment.assigned_dc} variant="outline" className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-400 dark:hover:bg-orange-500/10 h-11">
                        Pitch and Miss
                      </Button>
-                     <Button onClick={() => handleStatusSelect('One-Leg')} disabled={!appointment.assigned_dc} variant="outline" className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 h-11">
+                     <Button onClick={() => handleStatusSelect('One-Leg')} disabled={!appointment.assigned_dc} variant="outline" className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-500/30 dark:text-yellow-400 dark:hover:bg-yellow-500/10 h-11">
                        One-Leg
                      </Button>
-                     <Button onClick={() => handleStatusSelect('Credit Decline')} disabled={!appointment.assigned_dc} variant="outline" className="border-rose-200 text-rose-600 hover:bg-rose-50 h-11 col-span-2">
+                     <Button onClick={() => handleStatusSelect('Credit Decline')} disabled={!appointment.assigned_dc} variant="outline" className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10 h-11 col-span-2">
                        Credit Decline
                      </Button>
                    </div>
@@ -894,18 +894,18 @@ export default function ConsultantAppointmentView() {
                 <div className={cn(
                   "w-full border rounded-xl p-4 text-center transition-all duration-300",
                   appointment.status === 'On Site' 
-                    ? "bg-green-50 border-green-200" 
-                    : "bg-cyan-50 border-cyan-200"
+                    ? "bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/25"
+                    : "bg-cyan-50 border-cyan-200 dark:bg-cyan-500/10 dark:border-cyan-500/25"
                 )}>
                   <p className={cn(
                     "font-medium",
-                    appointment.status === 'On Site' ? "text-green-800" : "text-cyan-800"
+                    appointment.status === 'On Site' ? "text-green-800 dark:text-green-300" : "text-cyan-800 dark:text-cyan-300"
                   )}>
                     {appointment.status === 'On Site' ? 'On Site with Customer' : 'En Route to Customer'}
                   </p>
                   <p className={cn(
                     "text-sm mt-1",
-                    appointment.status === 'On Site' ? "text-green-600" : "text-cyan-600"
+                    appointment.status === 'On Site' ? "text-green-600 dark:text-green-400" : "text-cyan-600 dark:text-cyan-400"
                   )}>
                     {appointment.status === 'On Site' 
                       ? `Arrived at ${new Date(appointment.consultant_arrived_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`
@@ -997,7 +997,7 @@ export default function ConsultantAppointmentView() {
                  }}
                  disabled={testingSMS}
                  variant="outline"
-                 className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                 className="border-primary/30 text-primary hover:bg-primary/10"
                >
                  {testingSMS ? (
                    <>
@@ -1012,7 +1012,7 @@ export default function ConsultantAppointmentView() {
 
             {/* Pitch and Miss Status Actions */}
              {appointment.status === 'Pitch and Miss' && (
-               <div className="grid grid-cols-2 gap-3">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button
                   onClick={() => handleStatusSelect('Sold')}
                   disabled={!appointment.assigned_dc}
@@ -1025,7 +1025,7 @@ export default function ConsultantAppointmentView() {
                   onClick={() => handleStatusSelect('Lost')}
                   disabled={!appointment.assigned_dc}
                   variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50 h-12"
+                  className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-12"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Mark as Lost
@@ -1035,7 +1035,7 @@ export default function ConsultantAppointmentView() {
 
             {/* One-Leg Status Actions */}
              {appointment.status === 'One-Leg' && (
-               <div className="grid grid-cols-2 gap-3">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button
                   onClick={() => handleStatusSelect('Sold')}
                   disabled={!appointment.assigned_dc}
@@ -1048,7 +1048,7 @@ export default function ConsultantAppointmentView() {
                   onClick={() => handleStatusSelect('Lost')}
                   disabled={!appointment.assigned_dc}
                   variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50 h-12"
+                  className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-12"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Mark as Lost
@@ -1057,7 +1057,7 @@ export default function ConsultantAppointmentView() {
                   onClick={() => handleStatusSelect('Pitch and Miss')}
                   disabled={!appointment.assigned_dc}
                   variant="outline"
-                  className="border-orange-200 text-orange-600 hover:bg-orange-50 h-12 col-span-2"
+                  className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-400 dark:hover:bg-orange-500/10 h-12 col-span-2"
                 >
                   Pitch and Miss
                 </Button>
@@ -1066,7 +1066,7 @@ export default function ConsultantAppointmentView() {
 
             {/* Follow-Up Status Actions */}
              {appointment.status === 'Follow-Up' && (
-               <div className="grid grid-cols-2 gap-3">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button
                   onClick={() => handleStatusSelect('Sold')}
                   disabled={!appointment.assigned_dc}
@@ -1079,7 +1079,7 @@ export default function ConsultantAppointmentView() {
                   onClick={() => handleStatusSelect('Lost')}
                   disabled={!appointment.assigned_dc}
                   variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50 h-12"
+                  className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-12"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Mark as Lost
@@ -1089,7 +1089,7 @@ export default function ConsultantAppointmentView() {
 
             {/* Status Action Buttons */}
              {!['Sold', 'Lost', 'Pitch and Miss', 'One-Leg', 'Completed', 'Cancelled', 'Credit Decline', 'Follow-Up'].includes(appointment.status) && (appointment.status === 'On Site' || appointment.status === 'In Progress') && (
-             <div className="grid grid-cols-2 gap-3">
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                <Button
                  onClick={() => handleStatusSelect('Sold')}
                  disabled={!appointment.assigned_dc}
@@ -1102,7 +1102,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('Lost')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-red-200 text-red-600 hover:bg-red-50 h-12"
+                 className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-12"
                >
                  Mark as Lost
                </Button>
@@ -1111,7 +1111,7 @@ export default function ConsultantAppointmentView() {
                    onClick={() => setShowQuoteDialog(true)}
                    disabled={!appointment.assigned_dc}
                    variant="outline"
-                   className="border-violet-200 text-violet-700 hover:bg-violet-50 h-12 col-span-2"
+                   className="border-primary/30 text-primary hover:bg-primary/10 h-12 col-span-2"
                  >
                    <FileText className="w-4 h-4 mr-2" />
                    Create Quote
@@ -1121,7 +1121,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('Pitch and Miss')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-orange-200 text-orange-600 hover:bg-orange-50 h-12"
+                 className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-400 dark:hover:bg-orange-500/10 h-12"
                >
                  Pitch and Miss
                </Button>
@@ -1129,7 +1129,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('One-Leg')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 h-12"
+                 className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-500/30 dark:text-yellow-400 dark:hover:bg-yellow-500/10 h-12"
                >
                  One-Leg
                </Button>
@@ -1137,7 +1137,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('Credit Decline')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-rose-200 text-rose-600 hover:bg-rose-50 h-12"
+                 className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10 h-12"
                >
                  Credit Decline
                </Button>
@@ -1145,7 +1145,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('Rescheduled')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 h-12 col-span-2"
+                 className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-500/30 dark:text-yellow-400 dark:hover:bg-yellow-500/10 h-12 col-span-2"
                  >
                  Needs Rescheduled
                </Button>
@@ -1156,27 +1156,27 @@ export default function ConsultantAppointmentView() {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Appointment Details */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Appointment Details
             </h2>
             <div className="space-y-4">
               {appointment.appointment_date && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <CalendarIcon className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                    <CalendarIcon className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Date</p>
-                    <p className="text-slate-800">
+                    <p className="text-xs text-muted-foreground mb-0.5">Date</p>
+                    <p className="text-foreground">
                       {format(new Date(appointment.appointment_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
                     </p>
                   </div>
@@ -1184,13 +1184,13 @@ export default function ConsultantAppointmentView() {
               )}
 
               {appointment.appointment_block && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-purple-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-brand-pink/12 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-brand-pink" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Time Block</p>
-                    <p className="text-slate-800">{appointment.appointment_block}</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">Time Block</p>
+                    <p className="text-foreground">{appointment.appointment_block}</p>
                   </div>
                 </div>
               )}
@@ -1202,32 +1202,32 @@ export default function ConsultantAppointmentView() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Customer Information
             </h2>
             {lead ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                    <User className="w-5 h-5 text-indigo-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs text-slate-400 mb-0.5">Name</p>
-                    <p className="text-slate-800">{leadName}</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">Name</p>
+                    <p className="text-foreground">{leadName}</p>
                   </div>
                 </div>
                 <a
                   href={`mailto:${lead.email}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-brand-gold" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Email</p>
-                    <p className="text-slate-800 group-hover:text-green-600 transition-colors">
+                    <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                    <p className="text-foreground group-hover:text-brand-gold transition-colors">
                       {lead.email}
                     </p>
                   </div>
@@ -1235,14 +1235,14 @@ export default function ConsultantAppointmentView() {
                 {lead.phone && (
                   <a
                     href={`tel:${lead.phone}`}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                      <Mail className="w-5 h-5 text-blue-600" />
+                    <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-brand-blue" />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-400 mb-0.5">Phone</p>
-                      <p className="text-slate-800 group-hover:text-blue-600 transition-colors">
+                      <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                      <p className="text-foreground group-hover:text-brand-blue transition-colors">
                         {lead.phone}
                       </p>
                     </div>
@@ -1250,7 +1250,7 @@ export default function ConsultantAppointmentView() {
                 )}
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-4">Loading customer information...</p>
+              <p className="text-muted-foreground text-center py-4">Loading customer information...</p>
             )}
           </motion.div>
 
@@ -1259,27 +1259,27 @@ export default function ConsultantAppointmentView() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Location
             </h2>
             {appointment.location_address ? (
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-3">
-                  <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-orange-600" />
+                  <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-brand-gold" />
                   </div>
                   <div>
-                    <p className="text-slate-800">{appointment.location_address}</p>
+                    <p className="text-foreground">{appointment.location_address}</p>
                   </div>
                 </div>
                 {streetViewLoading ? (
-                  <div className="flex items-center justify-center h-64 bg-slate-50 rounded-xl">
-                    <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+                  <div className="flex items-center justify-center h-64 bg-secondary rounded-xl">
+                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
                   </div>
                 ) : streetView?.streetViewUrl ? (
-                  <div className="rounded-xl overflow-hidden border border-slate-200">
+                  <div className="rounded-xl overflow-hidden border border-border">
                     <img
                       src={streetView.streetViewUrl}
                       alt="Property Street View"
@@ -1289,7 +1289,7 @@ export default function ConsultantAppointmentView() {
                 ) : null}
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-6">No location specified</p>
+              <p className="text-muted-foreground text-center py-6">No location specified</p>
             )}
           </motion.div>
 
@@ -1299,21 +1299,21 @@ export default function ConsultantAppointmentView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Notes
               </h2>
               <div className="space-y-3">
                 {appointment.notes.map((note, index) => (
-                  <div key={index} className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+                  <div key={index} className="p-4 rounded-lg bg-secondary border border-border">
                     <div className="flex items-start justify-between gap-4 mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-purple-600">{note.context || 'Note'}</span>
-                        <span className="text-xs text-slate-400">•</span>
-                        <span className="text-xs text-slate-500">{note.user_name}</span>
+                        <span className="text-xs font-medium text-primary">{note.context || 'Note'}</span>
+                        <span className="text-xs text-muted-foreground">•</span>
+                        <span className="text-xs text-muted-foreground">{note.user_name}</span>
                       </div>
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-muted-foreground">
                         {new Date(note.timestamp).toLocaleString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -1324,7 +1324,7 @@ export default function ConsultantAppointmentView() {
                         })}
                       </span>
                     </div>
-                    <p className="text-slate-700 whitespace-pre-wrap">{note.content}</p>
+                    <p className="text-foreground whitespace-pre-wrap">{note.content}</p>
                   </div>
                 ))}
               </div>
@@ -1337,35 +1337,35 @@ export default function ConsultantAppointmentView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Sale Documentation Photos
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {sale.folder_photo_url && (
                   <div>
-                    <p className="text-sm font-medium text-slate-700 mb-2">RAZZLE DAZZLE Folder</p>
+                    <p className="text-sm font-medium text-foreground mb-2">RAZZLE DAZZLE Folder</p>
                     <img 
                       src={sale.folder_photo_url} 
                       alt="RAZZLE DAZZLE Folder" 
-                      className="w-full h-64 object-cover rounded-lg border border-slate-200"
+                      className="w-full h-64 object-cover rounded-lg border border-border"
                     />
                   </div>
                 )}
                 {sale.yard_sign_photo_url && (
                   <div>
-                    <p className="text-sm font-medium text-slate-700 mb-2">Yard Sign</p>
+                    <p className="text-sm font-medium text-foreground mb-2">Yard Sign</p>
                     <img 
                       src={sale.yard_sign_photo_url} 
                       alt="Yard Sign" 
-                      className="w-full h-64 object-cover rounded-lg border border-slate-200"
+                      className="w-full h-64 object-cover rounded-lg border border-border"
                     />
                   </div>
                 )}
                 {sale.yard_sign_opted_out && !sale.yard_sign_photo_url && (
-                  <div className="flex items-center justify-center h-64 rounded-lg border border-slate-200 bg-slate-50">
-                    <p className="text-sm text-slate-500">Customer opted out of yard sign</p>
+                  <div className="flex items-center justify-center h-64 rounded-lg border border-border bg-secondary">
+                    <p className="text-sm text-muted-foreground">Customer opted out of yard sign</p>
                   </div>
                 )}
               </div>
@@ -1374,11 +1374,11 @@ export default function ConsultantAppointmentView() {
 
           {/* 1978 Banner - always visible when checklist has this value */}
           {(checklist?.home_built_era === 'On or before 1978' || checklistV2?.home_built_era === 'On or before 1978') && (
-            <div className="flex items-center gap-4 p-5 bg-red-50 border-2 border-red-500 rounded-xl md:col-span-2">
+            <div className="flex items-center gap-4 p-5 bg-red-50 border-2 border-red-500 rounded-xl md:col-span-2 dark:bg-red-500/10 dark:border-red-500/40">
               <span className="text-4xl flex-shrink-0">🛑</span>
               <div>
-                <p className="text-red-700 font-bold text-xl">STOP — Home Built On or Before 1978</p>
-                <p className="text-red-600 font-medium">Lead paint & asbestos risk — follow proper protocol and EPA RRP procedures before any demo or installation.</p>
+                <p className="text-red-700 dark:text-red-300 font-bold text-xl">STOP — Home Built On or Before 1978</p>
+                <p className="text-red-600 dark:text-red-400 font-medium">Lead paint & asbestos risk — follow proper protocol and EPA RRP procedures before any demo or installation.</p>
               </div>
             </div>
           )}
@@ -1391,21 +1391,21 @@ export default function ConsultantAppointmentView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
             >
               <Button
                 onClick={() => setShowChecklist(!showChecklist)}
                 variant="outline"
-                className="w-full h-14 text-left justify-between border-indigo-200 hover:bg-indigo-50"
+                className="w-full h-14 text-left justify-between border-primary/30 hover:bg-primary/10"
               >
                 <div className="flex items-center gap-3">
-                  <ClipboardCheck className="w-5 h-5 text-indigo-600" />
-                  <span className="font-semibold text-slate-800">Appointment Setting Checklist</span>
+                  <ClipboardCheck className="w-5 h-5 text-primary" />
+                  <span className="font-semibold text-foreground">Appointment Setting Checklist</span>
                 </div>
                 {showChecklist ? (
-                  <ChevronUp className="w-5 h-5 text-slate-400" />
+                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-slate-400" />
+                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
                 )}
               </Button>
 
@@ -1419,21 +1419,21 @@ export default function ConsultantAppointmentView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
             >
               <Button
                 onClick={() => setShowChecklist(!showChecklist)}
                 variant="outline"
-                className="w-full h-14 text-left justify-between border-indigo-200 hover:bg-indigo-50"
+                className="w-full h-14 text-left justify-between border-primary/30 hover:bg-primary/10"
               >
                 <div className="flex items-center gap-3">
-                  <ClipboardCheck className="w-5 h-5 text-indigo-600" />
-                  <span className="font-semibold text-slate-800">Appointment Setting Checklist</span>
+                  <ClipboardCheck className="w-5 h-5 text-primary" />
+                  <span className="font-semibold text-foreground">Appointment Setting Checklist</span>
                 </div>
                 {showChecklist ? (
-                  <ChevronUp className="w-5 h-5 text-slate-400" />
+                  <ChevronUp className="w-5 h-5 text-muted-foreground" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-slate-400" />
+                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
                 )}
               </Button>
 
@@ -1463,14 +1463,14 @@ export default function ConsultantAppointmentView() {
           <div className="space-y-4 py-4">
             {/* Pre-Install Checklist Section */}
             {selectedStatus === 'Sold' && !preInstallData && (
-              <div className="space-y-3 p-4 rounded-xl border border-amber-200 bg-amber-50">
-                <p className="text-sm font-semibold text-amber-900">Pre-Installation Checklist</p>
-                <p className="text-xs text-amber-700">Have the customer sign in person, or send to their email.</p>
+              <div className="space-y-3 p-4 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-500/25 dark:bg-amber-500/10">
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Pre-Installation Checklist</p>
+                <p className="text-xs text-amber-700 dark:text-amber-300">Have the customer sign in person, or send to their email.</p>
                 <Button
                   type="button"
                   onClick={() => { setShowStatusDialog(false); setShowPreInstallChecklist(true); }}
                   variant="outline"
-                  className="w-full border-amber-300 text-amber-800 hover:bg-amber-100"
+                  className="w-full border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/15"
                 >
                   <Pen className="w-4 h-4 mr-2" />Sign In Person
                 </Button>
@@ -1480,24 +1480,24 @@ export default function ConsultantAppointmentView() {
                     type="email"
                     value={standaloneEmail || lead?.email || ''}
                     onChange={(e) => setStandaloneEmail(e.target.value)}
-                    className="bg-white"
+                    className="bg-card"
                   />
                   <Textarea
                     placeholder="Product name / style / color"
                     value={standaloneProductInfo}
                     onChange={(e) => setStandaloneProductInfo(e.target.value)}
                     rows={2}
-                    className="bg-white"
+                    className="bg-card"
                   />
                   {standaloneSent ? (
-                    <p className="text-sm text-green-700 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />Checklist email sent!</p>
+                    <p className="text-sm text-green-700 dark:text-green-400 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />Checklist email sent!</p>
                   ) : (
                     <Button
                       type="button"
                       onClick={handleSendStandaloneChecklist}
                       disabled={sendingStandaloneChecklist || !standaloneProductInfo || !(standaloneEmail || lead?.email) || standaloneSent}
                       variant="outline"
-                      className="w-full border-blue-300 text-blue-700 hover:bg-blue-100"
+                      className="w-full border-primary/30 text-primary hover:bg-primary/10"
                     >
                       {sendingStandaloneChecklist ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</> : <><Send className="w-4 h-4 mr-2" />Send by Email</>}
                     </Button>
@@ -1508,11 +1508,11 @@ export default function ConsultantAppointmentView() {
 
             {/* Pre-install checklist completed indicator */}
             {selectedStatus === 'Sold' && preInstallData && (
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200">
-                <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25">
+                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-green-800">Pre-Installation Checklist Signed ✓</p>
-                  <p className="text-xs text-green-600">Product: {preInstallData.productInfo}</p>
+                  <p className="text-sm font-semibold text-green-800 dark:text-green-300">Pre-Installation Checklist Signed ✓</p>
+                  <p className="text-xs text-green-600 dark:text-green-400">Product: {preInstallData.productInfo}</p>
                 </div>
               </div>
             )}
@@ -1548,7 +1548,7 @@ export default function ConsultantAppointmentView() {
                     )}
                   </Button>
                   {contractFileUrl && (
-                    <p className="text-sm text-green-600 flex items-center gap-2">
+                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4" />
                       Contract uploaded successfully
                     </p>
@@ -1558,7 +1558,7 @@ export default function ConsultantAppointmentView() {
                 <div className="space-y-2">
                   <Label htmlFor="amount">Sale Amount (optional)</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                     <Input
                       id="amount"
                       type="number"
@@ -1571,15 +1571,15 @@ export default function ConsultantAppointmentView() {
                     />
                     {extractingAmount && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
                       </div>
                     )}
                   </div>
                   {extractingAmount && (
-                    <p className="text-xs text-indigo-600">Extracting amount from PDF...</p>
+                    <p className="text-xs text-primary">Extracting amount from PDF...</p>
                   )}
                   {saleAmount && !extractingAmount && (
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-muted-foreground">
                       Amount: ${parseFloat(saleAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   )}
@@ -1603,7 +1603,7 @@ export default function ConsultantAppointmentView() {
               <div className="space-y-2">
                 <Label htmlFor="not-sold-amount">Deal Size *</Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                   <Input
                     id="not-sold-amount"
                     type="number"
@@ -1614,13 +1614,13 @@ export default function ConsultantAppointmentView() {
                     className="pl-7"
                   />
                 </div>
-                <p className="text-xs text-slate-500">Enter the estimated deal size for this appointment</p>
+                <p className="text-xs text-muted-foreground">Enter the estimated deal size for this appointment</p>
               </div>
             )}
 
             {/* Follow-Up checkbox for non-sold outcomes */}
             {['Lost', 'Pitch and Miss', 'One-Leg', 'Credit Decline'].includes(selectedStatus) && (
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 border border-purple-200">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-primary/10 border border-primary/20">
                 <Checkbox
                   id="follow-up-checkbox"
                   checked={followUpChecked}
@@ -1628,10 +1628,10 @@ export default function ConsultantAppointmentView() {
                   className="mt-0.5"
                 />
                 <div>
-                  <label htmlFor="follow-up-checkbox" className="text-sm font-medium text-purple-900 cursor-pointer">
+                  <label htmlFor="follow-up-checkbox" className="text-sm font-medium text-foreground cursor-pointer">
                     Schedule a Follow-Up
                   </label>
-                  <p className="text-xs text-purple-700 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     Creates a follow-up task for the DC due in 7 days
                   </p>
                 </div>
@@ -1645,13 +1645,13 @@ export default function ConsultantAppointmentView() {
                   <Label>RAZZLE DAZZLE Folder Photo *</Label>
                 {uploadingFolderPhoto ? (
                   <div className="flex items-center justify-center h-20 border border-dashed rounded-lg">
-                    <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
-                    <span className="ml-2 text-sm text-slate-600">Uploading...</span>
+                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    <span className="ml-2 text-sm text-muted-foreground">Uploading...</span>
                   </div>
                 ) : folderPhotoUrl ? (
                   <div>
-                    <img src={folderPhotoUrl} alt="Folder" className="w-full h-48 object-cover rounded-lg border border-slate-200" />
-                    <p className="text-sm text-green-600 flex items-center gap-2 mt-2">
+                    <img src={folderPhotoUrl} alt="Folder" className="w-full h-48 object-cover rounded-lg border border-border" />
+                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
                       <CheckCircle2 className="w-4 h-4" />
                       Folder photo uploaded
                     </p>
@@ -1681,13 +1681,13 @@ export default function ConsultantAppointmentView() {
                   <>
                     {uploadingYardSignPhoto ? (
                       <div className="flex items-center justify-center h-20 border border-dashed rounded-lg">
-                        <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
-                        <span className="ml-2 text-sm text-slate-600">Uploading...</span>
+                        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                        <span className="ml-2 text-sm text-muted-foreground">Uploading...</span>
                       </div>
                     ) : yardSignPhotoUrl ? (
                       <div>
-                        <img src={yardSignPhotoUrl} alt="Yard Sign" className="w-full h-48 object-cover rounded-lg border border-slate-200" />
-                        <p className="text-sm text-green-600 flex items-center gap-2 mt-2">
+                        <img src={yardSignPhotoUrl} alt="Yard Sign" className="w-full h-48 object-cover rounded-lg border border-border" />
+                        <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
                           <CheckCircle2 className="w-4 h-4" />
                           Yard sign photo uploaded
                         </p>
@@ -1731,28 +1731,28 @@ export default function ConsultantAppointmentView() {
               {/* Final Product Selected Photos */}
               <div className="space-y-2">
                 <Label>Final Product Selected Photos (optional)</Label>
-                <p className="text-xs text-slate-500">Take photos of each product the customer selected. Add as many as needed.</p>
+                <p className="text-xs text-muted-foreground">Take photos of each product the customer selected. Add as many as needed.</p>
                 {productPhotos.length > 0 && (
                   <div className="grid grid-cols-2 gap-2">
                     {productPhotos.map((url, idx) => (
                       <div key={idx} className="relative">
-                        <img src={url} alt={`Product ${idx + 1}`} className="w-full h-32 object-cover rounded-lg border border-slate-200" />
+                        <img src={url} alt={`Product ${idx + 1}`} className="w-full h-32 object-cover rounded-lg border border-border" />
                         <button
                           type="button"
                           onClick={() => setProductPhotos(prev => prev.filter((_, i) => i !== idx))}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                          className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs hover:opacity-90"
                         >
                           ×
                         </button>
-                        <p className="text-xs text-center text-slate-500 mt-1">Product {idx + 1}</p>
+                        <p className="text-xs text-center text-muted-foreground mt-1">Product {idx + 1}</p>
                       </div>
                     ))}
                   </div>
                 )}
                 {uploadingProductPhoto ? (
                   <div className="flex items-center justify-center h-20 border border-dashed rounded-lg">
-                    <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
-                    <span className="ml-2 text-sm text-slate-600">Uploading...</span>
+                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    <span className="ml-2 text-sm text-muted-foreground">Uploading...</span>
                   </div>
                 ) : (
                   <CameraCapture
@@ -1766,13 +1766,13 @@ export default function ConsultantAppointmentView() {
                 <Label>Driver's License Photo *</Label>
                 {uploadingDriverLicensePhoto ? (
                   <div className="flex items-center justify-center h-20 border border-dashed rounded-lg">
-                    <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
-                    <span className="ml-2 text-sm text-slate-600">Uploading...</span>
+                    <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                    <span className="ml-2 text-sm text-muted-foreground">Uploading...</span>
                   </div>
                 ) : driverLicensePhotoUrl ? (
                   <div>
-                    <img src={driverLicensePhotoUrl} alt="Driver's License" className="w-full h-48 object-cover rounded-lg border border-slate-200" />
-                    <p className="text-sm text-green-600 flex items-center gap-2 mt-2">
+                    <img src={driverLicensePhotoUrl} alt="Driver's License" className="w-full h-48 object-cover rounded-lg border border-border" />
+                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
                       <CheckCircle2 className="w-4 h-4" />
                       Driver's license photo uploaded
                     </p>
@@ -1845,11 +1845,11 @@ export default function ConsultantAppointmentView() {
               )}
 
               {depositPaymentMethod === 'Check' && !checkDepositCompleted && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
-                  <p className="text-sm font-medium text-blue-900">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3 dark:bg-blue-500/10 dark:border-blue-500/25">
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
                     Please deposit the check using the Chase Mobile App:
                   </p>
-                  <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                  <ol className="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-decimal list-inside">
                     <li>Open the Chase Mobile app</li>
                     <li>Select "Deposit" and "Remote Deposit"</li>
                     <li>Follow the prompts to photograph and deposit the check</li>
@@ -1857,7 +1857,7 @@ export default function ConsultantAppointmentView() {
                   <Button
                     type="button"
                     onClick={() => setCheckDepositCompleted(true)}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    className="w-full bg-primary text-primary-foreground hover:opacity-90"
                   >
                     <Check className="w-4 h-4 mr-2" />
                     I've Completed the Deposit
@@ -1866,8 +1866,8 @@ export default function ConsultantAppointmentView() {
               )}
 
               {depositPaymentMethod === 'Check' && checkDepositCompleted && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-800 flex items-center gap-2">
+                <div className="p-4 bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25 rounded-lg">
+                  <p className="text-sm text-green-800 dark:text-green-300 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4" />
                     Check deposit completed
                   </p>
@@ -1879,7 +1879,7 @@ export default function ConsultantAppointmentView() {
                   <div className="space-y-2">
                     <Label htmlFor="deposit-amount">Deposit Amount *</Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                       <Input
                         id="deposit-amount"
                         type="number"
@@ -1891,7 +1891,7 @@ export default function ConsultantAppointmentView() {
                       />
                     </div>
                     {depositAmount && (
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-muted-foreground">
                         Deposit: ${parseFloat(depositAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     )}

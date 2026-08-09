@@ -60,12 +60,12 @@ const calculateBusinessDays = (startDate, installationDateStatus, holdClearedDat
 };
 
 const statusColors = {
-  'Accepted': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Materials Ordered': 'bg-purple-100 text-purple-800 border-purple-200',
-  'Scheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'In Progress': 'bg-orange-100 text-orange-800 border-orange-200',
-  'Quality Checks': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-  'Completed': 'bg-green-100 text-green-800 border-green-200'
+  'Accepted': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  'Materials Ordered': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
+  'Scheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'In Progress': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+  'Quality Checks': 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/25',
+  'Completed': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
 };
 
 export default function Projects() {
@@ -302,31 +302,31 @@ export default function Projects() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Projects</h1>
-              <p className="text-slate-500 mt-1">Track installation projects from start to completion</p>
+              <h1 className="text-3xl font-bold text-foreground">Projects</h1>
+              <p className="text-muted-foreground mt-1">Track installation projects from start to completion</p>
             </div>
-            <div className="flex items-center gap-2 self-start md:self-auto">
-              <div className="flex border border-slate-200 rounded-lg overflow-hidden">
+            <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+              <div className="flex border border-border rounded-lg overflow-hidden">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={cn('px-3 py-2 text-sm flex items-center gap-1.5 transition-colors', viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50')}
+                  className={cn('px-3 py-2 text-sm flex items-center gap-1.5 transition-colors', viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-secondary')}
                 >
                   <List className="w-4 h-4" /> List
                 </button>
                 <button
                   onClick={() => setViewMode('calendar')}
-                  className={cn('px-3 py-2 text-sm flex items-center gap-1.5 transition-colors', viewMode === 'calendar' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50')}
+                  className={cn('px-3 py-2 text-sm flex items-center gap-1.5 transition-colors', viewMode === 'calendar' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-secondary')}
                 >
                   <CalendarIcon className="w-4 h-4" /> Calendar
                 </button>
               </div>
-            <Button onClick={() => setShowNewProject(true)} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={() => setShowNewProject(true)} className="bg-primary text-primary-foreground hover:opacity-90">
               <Plus className="w-4 h-4 mr-2" />New Project
             </Button>
             </div>
@@ -334,19 +334,19 @@ export default function Projects() {
 
           {/* Search */}
           <div className="relative mt-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               placeholder="Search by customer name or invoice number..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-11 h-12 bg-white border-slate-200"
+              className="pl-11 h-12 bg-card border-border"
             />
           </div>
 
           {/* Tag Filters */}
           {allTags.length > 0 && (
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide flex items-center gap-1">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
                 <Tag className="w-3.5 h-3.5" /> Filter by Tag
               </span>
               {allTags.map(tag => (
@@ -359,7 +359,7 @@ export default function Projects() {
                       );
                     }}
                   />
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-foreground">
                     {tag.color && <span className="inline-block w-2 h-2 rounded-full mr-1" style={{ backgroundColor: tag.color }} />}
                     {tag.emoji && <span className="mr-0.5">{tag.emoji}</span>}
                     {tag.name}
@@ -369,7 +369,7 @@ export default function Projects() {
               {selectedTagIds.length > 0 && (
                 <button
                   onClick={() => setSelectedTagIds([])}
-                  className="text-xs text-slate-400 hover:text-slate-600 underline"
+                  className="text-xs text-muted-foreground hover:text-foreground underline"
                 >
                   Clear
                 </button>
@@ -383,42 +383,42 @@ export default function Projects() {
               <Button
                 variant={statusFilter === 'all' ? 'default' : 'outline'}
                 onClick={() => setStatusFilter('all')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'all' ? 'bg-indigo-600 hover:bg-indigo-700' : '')}
+                className={cn("h-10 whitespace-nowrap", statusFilter === 'all' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
               >
                 All ({statusCounts.all})
               </Button>
               <Button
                 variant={statusFilter === 'materials_to_order' || statusFilter === 'materials_to_order_3plus' || statusFilter === 'materials_to_order_under3' ? 'default' : 'outline'}
                 onClick={() => setStatusFilter('materials_to_order')}
-                className={cn("h-10 whitespace-nowrap", (statusFilter === 'materials_to_order' || statusFilter === 'materials_to_order_3plus' || statusFilter === 'materials_to_order_under3') ? 'bg-indigo-600 hover:bg-indigo-700' : '')}
+                className={cn("h-10 whitespace-nowrap", (statusFilter === 'materials_to_order' || statusFilter === 'materials_to_order_3plus' || statusFilter === 'materials_to_order_under3') ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
               >
                 📦 All Materials to Order ({statusCounts.materials_to_order})
               </Button>
               <Button
                 variant={statusFilter === 'needs_attention' ? 'default' : 'outline'}
                 onClick={() => setStatusFilter('needs_attention')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'needs_attention' ? 'bg-indigo-600 hover:bg-indigo-700' : '')}
+                className={cn("h-10 whitespace-nowrap", statusFilter === 'needs_attention' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
               >
                 ⚠️ Needs Attention ({needsAttentionProjects.length})
               </Button>
               <Button
                 variant={statusFilter === 'needs_welcome_call' ? 'default' : 'outline'}
                 onClick={() => setStatusFilter('needs_welcome_call')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'needs_welcome_call' ? 'bg-indigo-600 hover:bg-indigo-700' : '')}
+                className={cn("h-10 whitespace-nowrap", statusFilter === 'needs_welcome_call' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
               >
                 📞 Needs Welcome Call ({statusCounts.needs_welcome_call})
               </Button>
               <Button
                 variant={statusFilter === 'needs_check_in' ? 'default' : 'outline'}
                 onClick={() => setStatusFilter('needs_check_in')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'needs_check_in' ? 'bg-indigo-600 hover:bg-indigo-700' : '')}
+                className={cn("h-10 whitespace-nowrap", statusFilter === 'needs_check_in' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
               >
                 ✅ Needs Check-In ({statusCounts.needs_check_in})
               </Button>
               <Button
                 variant={statusFilter === 'glue_down' ? 'default' : 'outline'}
                 onClick={() => setStatusFilter('glue_down')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'glue_down' ? 'bg-amber-600 hover:bg-amber-700' : 'border-amber-300 text-amber-700 hover:bg-amber-50')}
+                className={cn("h-10 whitespace-nowrap", statusFilter === 'glue_down' ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/10')}
               >
                 🔧 Glue Down ({statusCounts.glue_down})
               </Button>
@@ -427,7 +427,7 @@ export default function Projects() {
                   key={status}
                   variant={statusFilter === status ? 'default' : 'outline'}
                   onClick={() => setStatusFilter(status)}
-                  className={cn("h-10 whitespace-nowrap", statusFilter === status ? 'bg-indigo-600 hover:bg-indigo-700' : '')}
+                  className={cn("h-10 whitespace-nowrap", statusFilter === status ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
                 >
                   {status} ({statusCounts[status]})
                 </Button>
@@ -440,7 +440,7 @@ export default function Projects() {
                   variant={statusFilter === 'materials_to_order_3plus' ? 'default' : 'outline'}
                   onClick={() => setStatusFilter('materials_to_order_3plus')}
                   size="sm"
-                  className={cn("h-8 whitespace-nowrap", statusFilter === 'materials_to_order_3plus' ? 'bg-indigo-600 hover:bg-indigo-700' : '')}
+                  className={cn("h-8 whitespace-nowrap", statusFilter === 'materials_to_order_3plus' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
                 >
                   3+ Business Days ({statusCounts.materials_to_order_3plus})
                 </Button>
@@ -448,7 +448,7 @@ export default function Projects() {
                   variant={statusFilter === 'materials_to_order_under3' ? 'default' : 'outline'}
                   onClick={() => setStatusFilter('materials_to_order_under3')}
                   size="sm"
-                  className={cn("h-8 whitespace-nowrap", statusFilter === 'materials_to_order_under3' ? 'bg-indigo-600 hover:bg-indigo-700' : '')}
+                  className={cn("h-8 whitespace-nowrap", statusFilter === 'materials_to_order_under3' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
                 >
                   Under 3 Business Days ({statusCounts.materials_to_order_under3})
                 </Button>
@@ -521,24 +521,24 @@ export default function Projects() {
         if (pastDueLines.length === 0 && materialsOrderedYesterday === 0) return null;
 
         return (
-          <div className="max-w-7xl mx-auto px-6 pt-6">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 dark:bg-amber-500/10 dark:border-amber-500/25">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex flex-col gap-0.5">
-                  <p className="text-sm font-semibold text-amber-800">⚠️ {pastDueLines.length} Jobs — 3+ Business Days Past Due</p>
+                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">⚠️ {pastDueLines.length} Jobs — 3+ Business Days Past Due</p>
                   <button
                     onClick={() => setOrderedView(v => v === 'today' ? null : 'today')}
-                    className="text-xs text-amber-700 hover:text-amber-900 text-left transition-colors"
+                    className="text-xs text-amber-700 hover:text-amber-900 text-left transition-colors dark:text-amber-300 dark:hover:text-amber-200"
                   >
                     📦 Jobs Ordered Material Today: <strong>{materialsOrderedToday}</strong>
-                    <span className="ml-1 text-amber-500">{orderedView === 'today' ? '▲' : '▼'}</span>
+                    <span className="ml-1 text-amber-500 dark:text-amber-400">{orderedView === 'today' ? '▲' : '▼'}</span>
                   </button>
                   <button
                     onClick={() => setOrderedView(v => v === 'yesterday' ? null : 'yesterday')}
-                    className="text-xs text-amber-700 hover:text-amber-900 text-left transition-colors"
+                    className="text-xs text-amber-700 hover:text-amber-900 text-left transition-colors dark:text-amber-300 dark:hover:text-amber-200"
                   >
                     📦 Jobs Ordered Material Yesterday: <strong>{materialsOrderedYesterday}</strong>
-                    <span className="ml-1 text-amber-500">{orderedView === 'yesterday' ? '▲' : '▼'}</span>
+                    <span className="ml-1 text-amber-500 dark:text-amber-400">{orderedView === 'yesterday' ? '▲' : '▼'}</span>
                   </button>
                 </div>
                 <button
@@ -548,7 +548,7 @@ export default function Projects() {
                     setPastDueCopied(true);
                     setTimeout(() => setPastDueCopied(false), 2000);
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 transition-colors font-medium"
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 transition-colors font-medium dark:bg-amber-500/15 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/25"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   {pastDueCopied ? 'Copied!' : 'Copy All'}
@@ -556,11 +556,11 @@ export default function Projects() {
               </div>
               {orderedView && (
                 <div className="mb-3 space-y-1">
-                  <p className="text-xs font-semibold text-amber-800 mb-1">
+                  <p className="text-xs font-semibold text-amber-800 mb-1 dark:text-amber-300">
                     {orderedView === 'today' ? '📦 Ordered Material Today' : '📦 Ordered Material Yesterday'}
                   </p>
                   {(orderedView === 'today' ? materialsOrderedTodayProjects : materialsOrderedYesterdayProjects).length === 0 ? (
-                    <p className="text-xs text-amber-600 italic">No jobs found.</p>
+                    <p className="text-xs text-amber-600 italic dark:text-amber-400">No jobs found.</p>
                   ) : (
                     (orderedView === 'today' ? materialsOrderedTodayProjects : materialsOrderedYesterdayProjects).map((p, i) => {
                       const c = customers.find(cu => cu.id === p.customer);
@@ -570,7 +570,7 @@ export default function Projects() {
                       const installDate = p.installation_date ? format(new Date(p.installation_date + 'T00:00:00'), 'MM/dd/yyyy') : 'No Install Date';
                       const createdDate = p.created_date ? format(new Date(p.created_date.includes('Z') ? p.created_date : p.created_date + 'Z'), 'MM/dd/yyyy') : 'N/A';
                       return (
-                        <p key={i} className="text-xs font-mono text-slate-700 bg-white border border-amber-200 rounded px-3 py-1.5">
+                        <p key={i} className="text-xs font-mono text-foreground bg-card border border-amber-200 rounded px-3 py-1.5 dark:border-amber-500/25">
                           Job: {jobName} | CG#: {cgNumber} | Created: {createdDate} | Install: {installDate}
                         </p>
                       );
@@ -580,7 +580,7 @@ export default function Projects() {
               )}
               <div className="space-y-1">
                 {pastDueLines.map((line, i) => (
-                  <p key={i} className="text-xs font-mono text-slate-700 bg-white border border-amber-100 rounded px-3 py-1.5">{line}</p>
+                  <p key={i} className="text-xs font-mono text-foreground bg-card border border-amber-100 rounded px-3 py-1.5 dark:border-amber-500/20">{line}</p>
                 ))}
               </div>
             </div>
@@ -589,7 +589,7 @@ export default function Projects() {
       })()}
 
       {/* Projects List / Calendar */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className={viewMode === 'calendar' ? '' : 'hidden'}>
           <ProjectsCalendarView
             projects={filteredProjects}
@@ -601,13 +601,13 @@ export default function Projects() {
         {viewMode === 'list' && (
           isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
-            <ClipboardCheck className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-800">No projects found</h3>
-            <p className="text-slate-500 mt-1">
+          <div className="text-center py-12 bg-card rounded-2xl border border-border">
+            <ClipboardCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground">No projects found</h3>
+            <p className="text-muted-foreground mt-1">
               {searchQuery || statusFilter !== 'all'
                 ? 'Try adjusting your filters'
                 : 'Projects will appear here when sales are converted to projects'}
@@ -617,10 +617,10 @@ export default function Projects() {
           <div className="grid gap-4">
             {statusFilter === 'materials_to_order' && materialsNext3Days.length > 0 && (
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 bg-red-100 border border-red-300 text-red-800 text-xs font-bold px-3 py-1 rounded-full">
+                <div className="flex-shrink-0 bg-red-100 border border-red-300 text-red-800 text-xs font-bold px-3 py-1 rounded-full dark:bg-red-500/15 dark:border-red-500/30 dark:text-red-300">
                   🔥 Next 3 Days ({materialsNext3Days.length})
                 </div>
-                <div className="flex-1 h-px bg-red-200" />
+                <div className="flex-1 h-px bg-red-200 dark:bg-red-500/25" />
               </div>
             )}
             {filteredProjects.map((project, index) => {
@@ -633,12 +633,12 @@ export default function Projects() {
 
               const getLatestCustomerExperience = () => {
                 const actions = [
-                  { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-                  { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', color: 'bg-green-100 text-green-800 border-green-200' },
-                  { date: project.check_in_attempted_date, label: 'Check-In Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-                  { date: project.check_in_completed_date, label: 'Check-In Completed', color: 'bg-green-100 text-green-800 border-green-200' },
-                  { date: project.final_call_attempted_date, label: 'Final Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-                  { date: project.final_call_completed_date, label: 'Final Call Completed', color: 'bg-green-100 text-green-800 border-green-200' }
+                  { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25' },
+                  { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', color: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25' },
+                  { date: project.check_in_attempted_date, label: 'Check-In Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25' },
+                  { date: project.check_in_completed_date, label: 'Check-In Completed', color: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25' },
+                  { date: project.final_call_attempted_date, label: 'Final Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25' },
+                  { date: project.final_call_completed_date, label: 'Final Call Completed', color: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25' }
                 ].filter(a => a.date);
                 if (actions.length === 0) return null;
                 return actions.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
@@ -665,53 +665,53 @@ export default function Projects() {
                 <React.Fragment key={project.id}>
                 {isFirst3DaysItem && (
                   <div className="flex items-center gap-3 mt-2">
-                    <div className="flex-shrink-0 bg-slate-100 border border-slate-300 text-slate-600 text-xs font-bold px-3 py-1 rounded-full">
+                    <div className="flex-shrink-0 bg-secondary border border-border text-muted-foreground text-xs font-bold px-3 py-1 rounded-full">
                       📅 Later ({materialsAfter3Days.length})
                     </div>
-                    <div className="flex-1 h-px bg-slate-200" />
+                    <div className="flex-1 h-px bg-border" />
                   </div>
                 )}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-white rounded-xl border border-slate-100 hover:shadow-lg hover:border-indigo-200 transition-all"
+                  className="bg-card rounded-xl border border-border hover:shadow-lg hover:border-primary/30 transition-all"
                 >
                   <Link to={createPageUrl('ProjectDetail') + `?id=${project.id}`} className="block p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-slate-800">{customerName}</h3>
+                        <h3 className="text-lg font-semibold text-foreground">{customerName}</h3>
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                           <Badge variant="secondary" className={cn('border', statusColors[project.status])}>
                             {project.status}
                           </Badge>
                           {isGlueDown && (
-                            <Badge className="border bg-amber-100 text-amber-800 border-amber-300 font-semibold">
+                            <Badge className="border bg-amber-100 text-amber-800 border-amber-300 font-semibold dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30">
                               🔧 Glue Down
                             </Badge>
                           )}
                           {isPreConstruction1978 && (
-                            <Badge className="border bg-red-100 text-red-800 border-red-300 font-semibold">
+                            <Badge className="border bg-red-100 text-red-800 border-red-300 font-semibold dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/30">
                               ⚠️ Pre-1978 Home
                             </Badge>
                           )}
                           {isPastDue && (
-                            <Badge className="border bg-red-100 text-red-800 border-red-200 font-semibold">
+                            <Badge className="border bg-red-100 text-red-800 border-red-200 font-semibold dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
                               Past Due
                             </Badge>
                           )}
                           {welcomeCallPastDue && (
-                            <Badge className="border bg-orange-100 text-orange-800 border-orange-200 font-semibold">
+                            <Badge className="border bg-orange-100 text-orange-800 border-orange-200 font-semibold dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25">
                               ⚠️ Welcome Call Past Due
                             </Badge>
                           )}
                           {project.welcome_call_attempted_date && !project.welcome_call_completed_date && (
-                            <Badge className="border bg-blue-100 text-blue-800 border-blue-200">
+                            <Badge className="border bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25">
                               📞 Welcome Call Attempted - Needs Completion
                             </Badge>
                           )}
                           {project.installation_date_status && (
-                            <Badge className="border bg-red-100 text-red-800 border-red-200">
+                            <Badge className="border bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
                               {project.installation_date_status}
                             </Badge>
                           )}
@@ -733,22 +733,22 @@ export default function Projects() {
                     </div>
 
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Clock className="w-4 h-4 text-slate-400" />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
                         <span>Created: {format(new Date(project.created_date + (project.created_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy h:mm a')}</span>
-                        <Badge className="ml-2 bg-slate-100 text-slate-700 border-slate-200">
+                        <Badge className="ml-2 bg-secondary text-secondary-foreground border-border">
                           {businessDays} business {businessDays === 1 ? 'day' : 'days'} since cleared
                         </Badge>
                       </div>
                       {project.installation_date && (
-                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                          <CalendarIcon className="w-4 h-4 text-slate-400" />
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <CalendarIcon className="w-4 h-4 text-muted-foreground" />
                           <span>Install: {format(new Date(project.installation_date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                         </div>
                       )}
                       {(project.scheduled_start_date || project.scheduled_end_date) && (
-                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                          <CalendarIcon className="w-4 h-4 text-slate-400" />
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <CalendarIcon className="w-4 h-4 text-muted-foreground" />
                           {project.scheduled_start_date && (
                             <span>{format(new Date(project.scheduled_start_date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                           )}
@@ -759,37 +759,37 @@ export default function Projects() {
                         </div>
                       )}
                       {sale?.location_address && (
-                        <div className="flex items-start gap-2 text-sm text-slate-600">
-                          <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                           <span className="line-clamp-1">{sale.location_address}</span>
                         </div>
                       )}
                       {sale?.invoice_number && (
-                        <div className="text-sm text-slate-600">
-                          <span className="text-slate-500">Invoice: </span>
-                          <span className="font-medium">#{sale.invoice_number}</span>
+                        <div className="text-sm text-muted-foreground">
+                          <span className="text-muted-foreground">Invoice: </span>
+                          <span className="font-medium text-foreground">#{sale.invoice_number}</span>
                         </div>
                       )}
-                      
+
                     </div>
 
                     {project.notes && project.notes.length > 0 && (
-                      <div className="border-t border-slate-200 pt-3 mt-3">
-                        <p className="text-xs font-semibold text-slate-600 mb-2">Project Notes</p>
+                      <div className="border-t border-border pt-3 mt-3">
+                        <p className="text-xs font-semibold text-muted-foreground mb-2">Project Notes</p>
                         <div className="max-h-48 overflow-y-auto space-y-2 pr-2 overscroll-contain overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
                           {[...project.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, idx) => {
                             const originalIndex = project.notes.findIndex(n => n === note || (n.timestamp === note.timestamp && n.user_email === note.user_email));
                             return (
-                              <div key={idx} className="bg-slate-50 rounded-lg p-2.5 border border-slate-200 break-words" onClick={e => e.preventDefault()}>
+                              <div key={idx} className="bg-secondary rounded-lg p-2.5 border border-border break-words" onClick={e => e.preventDefault()}>
                                 <div className="flex items-start justify-between gap-2 mb-1">
-                                  <p className="text-xs font-semibold text-slate-700">{note.user_name}</p>
+                                  <p className="text-xs font-semibold text-foreground">{note.user_name}</p>
                                   {note.timestamp && (
-                                    <p className="text-[10px] text-slate-400 flex-shrink-0">
+                                    <p className="text-[10px] text-muted-foreground flex-shrink-0">
                                       {format(new Date(note.timestamp), 'MMM d, yyyy h:mm a')}
                                     </p>
                                   )}
                                 </div>
-                                <p className="text-xs text-slate-600 leading-relaxed">{note.content}</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">{note.content}</p>
                                 <div onClick={e => { e.preventDefault(); e.stopPropagation(); }}>
                                   <NoteReactions
                                     note={note}
@@ -865,7 +865,7 @@ export default function Projects() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewProject(false)}>Cancel</Button>
-            <Button onClick={handleCreateProject} disabled={creatingProject || !newProjectForm.first_name || !newProjectForm.last_name} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleCreateProject} disabled={creatingProject || !newProjectForm.first_name || !newProjectForm.last_name} className="bg-primary text-primary-foreground hover:opacity-90">
               {creatingProject ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : 'Create Project'}
             </Button>
           </DialogFooter>

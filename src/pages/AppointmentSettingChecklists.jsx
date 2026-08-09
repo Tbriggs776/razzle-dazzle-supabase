@@ -251,10 +251,10 @@ export default function AppointmentSettingChecklists() {
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : filteredChecklists.length === 0 ? (
           <motion.div
@@ -262,13 +262,13 @@ export default function AppointmentSettingChecklists() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center mb-6">
-              <ClipboardCheck className="w-10 h-10 text-slate-400" />
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-secondary flex items-center justify-center mb-6">
+              <ClipboardCheck className="w-10 h-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               {searchQuery ? 'No checklists found' : 'No checklists yet'}
             </h3>
-            <p className="text-slate-500 mb-6">
+            <p className="text-muted-foreground mb-6">
               {searchQuery
                 ? 'Try adjusting your search'
                 : 'Start by creating a new checklist to collect customer information'}
@@ -276,7 +276,7 @@ export default function AppointmentSettingChecklists() {
             {!searchQuery && (
               <Button
                 onClick={() => setShowCreateDialog(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="bg-primary text-primary-foreground hover:opacity-90"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Checklist
@@ -284,7 +284,7 @@ export default function AppointmentSettingChecklists() {
             )}
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence>
               {filteredChecklists.map((checklist, index) => {
                 const status = getCompletionStatus(checklist);
@@ -302,37 +302,37 @@ export default function AppointmentSettingChecklists() {
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                   >
                     <div className={cn(
-                      "group bg-white rounded-2xl border p-6 transition-all duration-300",
-                      checklist.checklist_status === 'not_finished' && 'border-amber-200 bg-amber-50/30',
-                      checklist.checklist_status === 'not_qualified' && 'border-red-200 bg-red-50/30',
-                      (!checklist.checklist_status || checklist.checklist_status === 'active') && 'border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50'
+                      "group bg-card rounded-2xl border p-6 transition-all duration-300",
+                      checklist.checklist_status === 'not_finished' && 'border-amber-200 bg-amber-50/30 dark:border-amber-500/25 dark:bg-amber-500/10',
+                      checklist.checklist_status === 'not_qualified' && 'border-red-200 bg-red-50/30 dark:border-red-500/25 dark:bg-red-500/10',
+                      (!checklist.checklist_status || checklist.checklist_status === 'active') && 'border-border hover:border-primary/40 hover:shadow-lg'
                     )}>
                       <div className="flex items-start justify-between gap-4 mb-4">
                         <Link
                           to={createPageUrl(checklist._version === 'v2' ? 'ChecklistV2Detail' : 'ChecklistDetail') + `?id=${checklist.id}`}
                           className="flex-1 min-w-0"
                         >
-                          <h3 className="text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
+                          <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                             {customerName}
                           </h3>
                           {checklist.customer_phone && (
-                            <p className="text-sm text-slate-500 mt-1">{checklist.customer_phone}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{checklist.customer_phone}</p>
                           )}
                           {csr && (
-                            <p className="text-xs text-indigo-600 mt-1">Booked by: {csr.first_name} {csr.last_name}</p>
+                            <p className="text-xs text-primary mt-1">Booked by: {csr.first_name} {csr.last_name}</p>
                           )}
                           {checklist.checklist_status === 'not_finished' && (
-                            <Badge className="mt-2 bg-amber-100 text-amber-800 border-amber-200 border">
+                            <Badge className="mt-2 bg-amber-100 text-amber-800 border-amber-200 border dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25">
                               <AlertTriangle className="w-3 h-3 mr-1" /> Not Finished
                             </Badge>
                           )}
                           {checklist.checklist_status === 'not_qualified' && (
-                            <Badge className="mt-2 bg-red-100 text-red-800 border-red-200 border">
+                            <Badge className="mt-2 bg-red-100 text-red-800 border-red-200 border dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
                               <XCircle className="w-3 h-3 mr-1" /> Not Qualified
                             </Badge>
                           )}
                           {checklist.checklist_status_reason && (checklist.checklist_status === 'not_finished' || checklist.checklist_status === 'not_qualified') && (
-                            <p className="text-xs text-slate-500 mt-1 italic">"{checklist.checklist_status_reason}"</p>
+                            <p className="text-xs text-muted-foreground mt-1 italic">"{checklist.checklist_status_reason}"</p>
                           )}
                         </Link>
                         <div className="flex items-center gap-2 flex-shrink-0">
@@ -341,9 +341,9 @@ export default function AppointmentSettingChecklists() {
                               <DropdownMenuTrigger asChild>
                                 <button
                                   onClick={(e) => e.preventDefault()}
-                                  className="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors"
+                                  className="w-8 h-8 rounded-lg hover:bg-secondary flex items-center justify-center transition-colors"
                                 >
-                                  <MoreVertical className="w-4 h-4 text-slate-500" />
+                                  <MoreVertical className="w-4 h-4 text-muted-foreground" />
                                 </button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
@@ -363,7 +363,7 @@ export default function AppointmentSettingChecklists() {
                                   <>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={() => updateStatusMutation.mutate({ id: checklist.id, checklist_status: 'active', checklist_status_reason: '' })}>
-                                      <RotateCcw className="w-4 h-4 mr-2 text-slate-500" />
+                                      <RotateCcw className="w-4 h-4 mr-2 text-muted-foreground" />
                                       Mark as Active
                                     </DropdownMenuItem>
                                   </>
@@ -371,8 +371,8 @@ export default function AppointmentSettingChecklists() {
                               </DropdownMenuContent>
                             </DropdownMenu>
                           )}
-                          <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                            <ClipboardCheck className="w-5 h-5 text-indigo-600" />
+                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <ClipboardCheck className="w-5 h-5 text-primary" />
                           </div>
                         </div>
                       </div>
@@ -380,20 +380,20 @@ export default function AppointmentSettingChecklists() {
                       {/* Progress */}
                       <Link to={createPageUrl(checklist._version === 'v2' ? 'ChecklistV2Detail' : 'ChecklistDetail') + `?id=${checklist.id}`}>
                         <div className="space-y-2 mb-4">
-                          <div className="flex items-center justify-between text-xs text-slate-600">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>Progress</span>
                             <span className="font-medium">{status.percentage}%</span>
                           </div>
-                          <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-2 bg-muted rounded-full overflow-hidden">
                             <div
                               className={cn(
                                 "h-full transition-all duration-500",
-                                status.percentage === 100 ? "bg-green-500" : "bg-indigo-600"
+                                status.percentage === 100 ? "bg-green-500" : "bg-primary"
                               )}
                               style={{ width: `${status.percentage}%` }}
                             />
                           </div>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-muted-foreground">
                             {status.completed} of {status.total} sections
                           </p>
                         </div>
@@ -404,8 +404,8 @@ export default function AppointmentSettingChecklists() {
                             variant="secondary" 
                             className={cn(
                               'border',
-                              checklist.appointmentData.status === 'Lead' && 'bg-slate-100 text-slate-700 border-slate-200',
-                              checklist.appointmentData.status === 'Scheduled' && 'bg-blue-100 text-blue-800 border-blue-200'
+                              checklist.appointmentData.status === 'Lead' && 'bg-secondary text-secondary-foreground border-border',
+                              checklist.appointmentData.status === 'Scheduled' && 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25'
                             )}
                           >
                             {checklist.appointmentData.status}
@@ -414,8 +414,8 @@ export default function AppointmentSettingChecklists() {
 
                         {/* Show appointment date if scheduled */}
                         {checklist.appointmentData?.appointment_date && (
-                          <div className="flex items-center gap-2 text-sm text-slate-600 mt-3">
-                            <Calendar className="w-4 h-4 text-slate-400" />
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
+                            <Calendar className="w-4 h-4 text-muted-foreground" />
                             <span>{new Date(checklist.appointmentData.appointment_date).toLocaleDateString()}</span>
                           </div>
                         )}
@@ -423,7 +423,7 @@ export default function AppointmentSettingChecklists() {
                         <div className="flex items-center justify-between gap-4 mt-3">
                           {/* Created date */}
                           {checklist.created_date && (
-                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Clock className="w-3.5 h-3.5" />
                               <span>
                                 {new Date(checklist.created_date + (checklist.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', {
@@ -440,7 +440,7 @@ export default function AppointmentSettingChecklists() {
                           
                           {/* Time to schedule */}
                           {timeToSchedule && (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25">
                               ⚡ {timeToSchedule}
                             </Badge>
                           )}
@@ -456,7 +456,7 @@ export default function AppointmentSettingChecklists() {
 
         {/* Results count */}
         {!isLoading && filteredChecklists.length > 0 && (
-          <p className="text-center text-sm text-slate-400 mt-8">
+          <p className="text-center text-sm text-muted-foreground mt-8">
             Showing {filteredChecklists.length} of {checklists.length} checklists
           </p>
         )}
@@ -471,13 +471,13 @@ export default function AppointmentSettingChecklists() {
             </DialogTitle>
           </DialogHeader>
           <div className="py-4 space-y-4">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               {statusDialog?.newStatus === 'not_finished'
                 ? 'The call ended before the checklist was completed.'
                 : 'This lead does not meet the criteria for an appointment.'}
             </p>
             <div>
-              <Label className="text-slate-700 mb-2 block">Reason <span className="text-slate-400 font-normal">(optional)</span></Label>
+              <Label className="text-foreground mb-2 block">Reason <span className="text-muted-foreground font-normal">(optional)</span></Label>
               <Textarea
                 placeholder="e.g. Customer hung up, below minimum budget, etc."
                 value={statusReason}
@@ -512,7 +512,7 @@ export default function AppointmentSettingChecklists() {
       }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-slate-800">Create New Checklist</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-foreground">Create New Checklist</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <Tabs value={createNewLead ? "new" : "existing"} onValueChange={(v) => setCreateNewLead(v === "new")} className="w-full">
@@ -523,9 +523,9 @@ export default function AppointmentSettingChecklists() {
               
               <TabsContent value="existing" className="space-y-4">
                 <div>
-                  <Label htmlFor="lead" className="text-slate-700 mb-2 block">Select Lead *</Label>
+                  <Label htmlFor="lead" className="text-foreground mb-2 block">Select Lead *</Label>
                   <Select value={selectedLead} onValueChange={setSelectedLead}>
-                    <SelectTrigger className="h-12 border-slate-200">
+                    <SelectTrigger className="h-12 border-border">
                       <SelectValue placeholder="Choose a lead" />
                     </SelectTrigger>
                     <SelectContent>
@@ -542,58 +542,58 @@ export default function AppointmentSettingChecklists() {
               <TabsContent value="new" className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="first_name" className="text-slate-700 mb-2 block">First Name *</Label>
+                    <Label htmlFor="first_name" className="text-foreground mb-2 block">First Name *</Label>
                     <Input
                       id="first_name"
                       value={newLeadData.first_name}
                       onChange={(e) => setNewLeadData({ ...newLeadData, first_name: e.target.value })}
-                      className="h-12 border-slate-200"
+                      className="h-12 border-border"
                       placeholder="John"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="last_name" className="text-slate-700 mb-2 block">Last Name *</Label>
+                    <Label htmlFor="last_name" className="text-foreground mb-2 block">Last Name *</Label>
                     <Input
                       id="last_name"
                       value={newLeadData.last_name}
                       onChange={(e) => setNewLeadData({ ...newLeadData, last_name: e.target.value })}
-                      className="h-12 border-slate-200"
+                      className="h-12 border-border"
                       placeholder="Doe"
                     />
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="email" className="text-slate-700 mb-2 block">Email *</Label>
+                  <Label htmlFor="email" className="text-foreground mb-2 block">Email *</Label>
                   <Input
                     id="email"
                     type="email"
                     value={newLeadData.email}
                     onChange={(e) => setNewLeadData({ ...newLeadData, email: e.target.value })}
-                    className="h-12 border-slate-200"
+                    className="h-12 border-border"
                     placeholder="john@example.com"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="phone" className="text-slate-700 mb-2 block">Phone *</Label>
+                  <Label htmlFor="phone" className="text-foreground mb-2 block">Phone *</Label>
                   <PhoneInput
                     id="phone"
                     value={newLeadData.phone}
                     onChange={(e) => setNewLeadData({ ...newLeadData, phone: e.target.value })}
-                    className="h-12 border-slate-200"
+                    className="h-12 border-border"
                   />
                 </div>
               </TabsContent>
             </Tabs>
             
-            <div className="mt-6 pt-4 border-t border-slate-100">
-              <Label className="text-slate-700 mb-2 block">Tags <span className="text-slate-400 font-normal">(optional)</span></Label>
+            <div className="mt-6 pt-4 border-t border-border">
+              <Label className="text-foreground mb-2 block">Tags <span className="text-muted-foreground font-normal">(optional)</span></Label>
               <TagSelector
                 selectedTagIds={selectedTags}
                 onChange={setSelectedTags}
               />
             </div>
 
-            <div className="flex gap-3 justify-end mt-6 pt-6 border-t border-slate-100">
+            <div className="flex gap-3 justify-end mt-6 pt-6 border-t border-border">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -608,7 +608,7 @@ export default function AppointmentSettingChecklists() {
               <Button
                 onClick={() => createMutation.mutate()}
                 disabled={createMutation.isPending || !isFormValid}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-primary text-primary-foreground hover:opacity-90"
               >
                 {createMutation.isPending ? (
                   <>

@@ -1134,8 +1134,8 @@ export default function Appointments() {
               return appointment?.status === 'Lead';
             }).length === 0 && (
               <div className="text-center py-8">
-                <ClipboardCheck className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500">No available checklists</p>
+                <ClipboardCheck className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground">No available checklists</p>
                 <Link to={createPageUrl('AppointmentSettingChecklists')}>
                   <Button className="mt-4" variant="outline">
                     Create New Checklist

@@ -56,13 +56,13 @@ import TagSelector from '@/components/tags/TagSelector';
 import PhotoLightbox from '@/components/PhotoLightbox';
 
 const statusColors = {
-'Cancelled': 'bg-red-100 text-red-800 border-red-200',
-'Accepted': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Materials Ordered': 'bg-purple-100 text-purple-800 border-purple-200',
-  'Scheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'In Progress': 'bg-orange-100 text-orange-800 border-orange-200',
-  'Quality Checks': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-  'Completed': 'bg-green-100 text-green-800 border-green-200'
+  'Cancelled': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'Accepted': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  'Materials Ordered': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
+  'Scheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'In Progress': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+  'Quality Checks': 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/25',
+  'Completed': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
 };
 
 const statusSteps = [
@@ -73,6 +73,27 @@ const statusSteps = [
   'Quality Checks',
   'Completed'
 ];
+
+// Static class lookups — Tailwind purges dynamically interpolated class names
+// (e.g. `border-${color}-200`), so map each color to full literal strings instead.
+const CX_ACTION_COLORS = {
+  blue: 'border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-500/30 dark:text-blue-300 dark:hover:bg-blue-500/10',
+  green: 'border-green-200 text-green-600 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10',
+  indigo: 'border-indigo-200 text-indigo-600 hover:bg-indigo-50 dark:border-indigo-500/30 dark:text-indigo-300 dark:hover:bg-indigo-500/10',
+  emerald: 'border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/10'
+};
+const CX_ACTION_ACTIVE = {
+  blue: 'bg-blue-50 dark:bg-blue-500/10',
+  green: 'bg-green-50 dark:bg-green-500/10',
+  indigo: 'bg-indigo-50 dark:bg-indigo-500/10',
+  emerald: 'bg-emerald-50 dark:bg-emerald-500/10'
+};
+const CX_BADGE_COLORS = {
+  blue: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  green: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
+  indigo: 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/25',
+  emerald: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25'
+};
 
 export default function ProjectDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -566,18 +587,18 @@ export default function ProjectDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">Project not found</h2>
-          <Link to={createPageUrl('Projects')} className="text-indigo-600 hover:underline">
+          <h2 className="text-xl font-semibold text-foreground mb-2">Project not found</h2>
+          <Link to={createPageUrl('Projects')} className="text-primary hover:underline">
             Back to projects
           </Link>
         </div>
@@ -599,14 +620,14 @@ export default function ProjectDetail() {
   // Get latest customer experience action
   const getLatestCustomerExperience = () => {
     const actions = [
-      { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-      { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', color: 'bg-green-100 text-green-800 border-green-200' },
-      { date: project.check_in_attempted_date, label: 'Check-In Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-      { date: project.check_in_completed_date, label: 'Check-In Completed', color: 'bg-green-100 text-green-800 border-green-200' },
-      { date: project.pre_install_call_attempted_date, label: 'Pre-Install Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-      { date: project.pre_install_call_completed_date, label: 'Pre-Install Call Completed', color: 'bg-green-100 text-green-800 border-green-200' },
-      { date: project.qa_in_progress_date, label: 'QA In Progress', color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
-      { date: project.qa_completed_date, label: 'QA Completed', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' }
+      { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', color: CX_BADGE_COLORS.blue },
+      { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', color: CX_BADGE_COLORS.green },
+      { date: project.check_in_attempted_date, label: 'Check-In Attempted', color: CX_BADGE_COLORS.blue },
+      { date: project.check_in_completed_date, label: 'Check-In Completed', color: CX_BADGE_COLORS.green },
+      { date: project.pre_install_call_attempted_date, label: 'Pre-Install Call Attempted', color: CX_BADGE_COLORS.blue },
+      { date: project.pre_install_call_completed_date, label: 'Pre-Install Call Completed', color: CX_BADGE_COLORS.green },
+      { date: project.qa_in_progress_date, label: 'QA In Progress', color: CX_BADGE_COLORS.indigo },
+      { date: project.qa_completed_date, label: 'QA Completed', color: CX_BADGE_COLORS.emerald }
     ].filter(a => a.date);
     
     if (actions.length === 0) return null;
@@ -617,13 +638,13 @@ export default function ProjectDetail() {
   const latestCustomerExperience = getLatestCustomerExperience();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link
             to={createPageUrl('Projects')}
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Projects
@@ -635,17 +656,17 @@ export default function ProjectDetail() {
             className="flex flex-col gap-6"
           >
             <div className="flex flex-col md:flex-row md:items-start gap-6">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-200">
+            <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg ring-4 ring-brand-gold/25">
               <FileText className="w-10 h-10" />
             </div>
 
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">{customerName}</h1>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">{customerName}</h1>
               <div className="mt-2 mb-1">
                 <TagSelector
                   selectedTagIds={project.tags || []}
                   onChange={(tags) => updateProjectMutation.mutate({ tags })}
-                  className="w-64"
+                  className="w-full sm:w-64"
                 />
               </div>
               <div className="flex items-center gap-2 mt-3 flex-wrap">
@@ -653,7 +674,7 @@ export default function ProjectDetail() {
                   {project.status}
                 </Badge>
                 {project.installation_date_status && (
-                  <Badge className="border text-lg px-4 py-1 bg-red-100 text-red-800 border-red-200">
+                  <Badge className="border text-lg px-4 py-1 bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
                     {project.installation_date_status}
                   </Badge>
                 )}
@@ -667,14 +688,14 @@ export default function ProjectDetail() {
                 const lines = sale.rfms_order_data?.result?.lines || sale.rfms_order_data?.order?.result?.lines;
                 const isGlueDown = lines?.some(l => [l.styleName, l.supplierName, l.colorName, l.description].some(v => v?.toLowerCase().includes('glue')));
                 return isGlueDown ? (
-                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100 border border-amber-300 rounded-lg text-amber-800 font-semibold text-sm">
+                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100 border border-amber-300 dark:bg-amber-500/15 dark:border-amber-500/30 rounded-lg text-amber-800 dark:text-amber-300 font-semibold text-sm">
                     🔧 Glue Down Project
                   </div>
                 ) : null;
               })()}
               {project.created_by && (
-                <p className="text-xs text-slate-400 mt-2">
-                  Created by <span className="font-medium text-slate-500">{project.created_by}</span>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Created by <span className="font-medium text-muted-foreground">{project.created_by}</span>
                   {project.created_date && (
                     <> on {format(new Date(project.created_date), 'MMM d, yyyy')} at {format(new Date(project.created_date), 'h:mm a')}</>
                   )}
@@ -682,12 +703,12 @@ export default function ProjectDetail() {
               )}
             </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 {project.project_tracker_url && (
                   <Button
                     onClick={() => window.open(project.project_tracker_url, '_blank')}
                     variant="outline"
-                    className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                    className="border-purple-200 text-purple-600 hover:bg-purple-50 dark:border-purple-500/30 dark:text-purple-300 dark:hover:bg-purple-500/10"
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Customer View
@@ -696,7 +717,7 @@ export default function ProjectDetail() {
                 <Button
                   onClick={handleEditClick}
                   variant="outline"
-                  className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                  className="border-primary/30 text-primary hover:bg-primary/10"
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Project
@@ -705,7 +726,7 @@ export default function ProjectDetail() {
                   <Button
                     onClick={() => setShowCancelDialog(true)}
                     variant="outline"
-                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    className="border-destructive/40 text-destructive hover:bg-destructive/10"
                   >
                     <X className="w-4 h-4 mr-2" />
                     Cancel Project
@@ -740,7 +761,7 @@ export default function ProjectDetail() {
                       queryClient.invalidateQueries({ queryKey: ['projectLogs', projectId] });
                     }}
                     variant="outline"
-                    className="border-green-200 text-green-600 hover:bg-green-50"
+                    className="border-green-200 text-green-600 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
                   >
                     <CheckCircle2 className="w-4 h-4 mr-2" />
                     Restore Project
@@ -749,7 +770,7 @@ export default function ProjectDetail() {
                 <Button
                   onClick={() => setShowDeleteDialog(true)}
                   variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50"
+                  className="border-destructive/40 text-destructive hover:bg-destructive/10"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
@@ -758,29 +779,29 @@ export default function ProjectDetail() {
             </div>
 
             {project.status === 'Cancelled' && (
-              <div className="bg-red-50 border border-red-300 rounded-xl px-5 py-4 flex items-center gap-3">
+              <div className="bg-red-50 border border-red-300 dark:bg-red-500/10 dark:border-red-500/25 rounded-xl px-5 py-4 flex items-center gap-3">
                 <span className="text-2xl">🚫</span>
                 <div className="flex-1">
-                  <p className="font-bold text-red-800 text-sm uppercase tracking-wide">Project Cancelled</p>
+                  <p className="font-bold text-red-800 dark:text-red-300 text-sm uppercase tracking-wide">Project Cancelled</p>
                   {project.cancelled_date && (
-                    <p className="text-red-700 text-sm mt-0.5">
+                    <p className="text-red-700 dark:text-red-300 text-sm mt-0.5">
                       {project.cancelled_by && <span>By {project.cancelled_by} · </span>}
                       {format(new Date(project.cancelled_date), 'MMM d, yyyy h:mm a')}
                     </p>
                   )}
                   {project.cancelled_reason && (
-                    <p className="text-red-600 text-sm mt-0.5">Reason: {project.cancelled_reason}</p>
+                    <p className="text-red-600 dark:text-red-300 text-sm mt-0.5">Reason: {project.cancelled_reason}</p>
                   )}
                 </div>
               </div>
             )}
 
             {isPreConstruction1978 && (
-              <div className="bg-red-50 border border-red-300 rounded-xl px-5 py-4 flex items-center gap-3">
+              <div className="bg-red-50 border border-red-300 dark:bg-red-500/10 dark:border-red-500/25 rounded-xl px-5 py-4 flex items-center gap-3">
                 <span className="text-2xl">⚠️</span>
                 <div>
-                  <p className="font-bold text-red-800 text-sm uppercase tracking-wide">Pre-1978 Home — Lead Paint & Asbestos Notice Required</p>
-                  <p className="text-red-700 text-sm mt-0.5">This home was built on or before 1978. Ensure all required lead paint disclosures, asbestos precautions, and EPA RRP protocols are followed.</p>
+                  <p className="font-bold text-red-800 dark:text-red-300 text-sm uppercase tracking-wide">Pre-1978 Home — Lead Paint & Asbestos Notice Required</p>
+                  <p className="text-red-700 dark:text-red-300 text-sm mt-0.5">This home was built on or before 1978. Ensure all required lead paint disclosures, asbestos precautions, and EPA RRP protocols are followed.</p>
                 </div>
               </div>
             )}
@@ -791,24 +812,24 @@ export default function ProjectDetail() {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {/* Sale Documentation Photos */}
           {sale && (sale.folder_photo_url || sale.yard_sign_photo_url || sale.driver_license_photo_url) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Sale Documentation Photos
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {sale.folder_photo_url && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-slate-700">RAZZLE DAZZLE Folder</p>
+                      <p className="text-sm font-medium text-foreground">RAZZLE DAZZLE Folder</p>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -826,7 +847,7 @@ export default function ProjectDetail() {
                     <img 
                       src={sale.folder_photo_url} 
                       alt="RAZZLE DAZZLE Folder" 
-                      className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+                      className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => window.open(sale.folder_photo_url, '_blank')}
                     />
                   </div>
@@ -834,7 +855,7 @@ export default function ProjectDetail() {
                 {sale.yard_sign_photo_url && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-slate-700">Yard Sign</p>
+                      <p className="text-sm font-medium text-foreground">Yard Sign</p>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -852,7 +873,7 @@ export default function ProjectDetail() {
                     <img 
                       src={sale.yard_sign_photo_url} 
                       alt="Yard Sign" 
-                      className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+                      className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => window.open(sale.yard_sign_photo_url, '_blank')}
                     />
                   </div>
@@ -860,7 +881,7 @@ export default function ProjectDetail() {
                 {sale.driver_license_photo_url && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-slate-700">Driver's License</p>
+                      <p className="text-sm font-medium text-foreground">Driver's License</p>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -894,14 +915,14 @@ export default function ProjectDetail() {
                     <img 
                       src={sale.driver_license_photo_url} 
                       alt="Driver's License" 
-                      className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+                      className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
                       onClick={() => window.open(sale.driver_license_photo_url, '_blank')}
                     />
                   </div>
                 )}
                 {sale.yard_sign_opted_out && !sale.yard_sign_photo_url && (
-                  <div className="flex items-center justify-center h-64 rounded-lg border border-slate-200 bg-slate-50">
-                    <p className="text-sm text-slate-500">Customer opted out of yard sign</p>
+                  <div className="flex items-center justify-center h-64 rounded-lg border border-border bg-secondary">
+                    <p className="text-sm text-muted-foreground">Customer opted out of yard sign</p>
                   </div>
                 )}
               </div>
@@ -913,37 +934,37 @@ export default function ProjectDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Customer Information
             </h2>
             {customer ? (
               <div className="space-y-4">
                 <Link
                   to={createPageUrl('CustomerDetail') + `?id=${customer.id}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                    <User className="w-5 h-5 text-indigo-600" />
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs text-slate-400 mb-0.5">Name</p>
-                    <p className="text-slate-800 group-hover:text-indigo-600 transition-colors">
+                    <p className="text-xs text-muted-foreground mb-0.5">Name</p>
+                    <p className="text-foreground group-hover:text-primary transition-colors">
                       {customerName}
                     </p>
                   </div>
                 </Link>
                 <a
                   href={`mailto:${customer.email}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-500/15 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-green-600 dark:text-green-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Email</p>
-                    <p className="text-slate-800 group-hover:text-green-600 transition-colors">
+                    <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                    <p className="text-foreground group-hover:text-green-600 transition-colors">
                       {customer.email}
                     </p>
                   </div>
@@ -951,14 +972,14 @@ export default function ProjectDetail() {
                 {customer.phone && (
                   <a
                     href={`tel:${customer.phone}`}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-blue-600" />
+                    <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                      <Phone className="w-5 h-5 text-brand-blue" />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-400 mb-0.5">Phone</p>
-                      <p className="text-slate-800 group-hover:text-blue-600 transition-colors">
+                      <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                      <p className="text-foreground group-hover:text-brand-blue transition-colors">
                         {customer.phone}
                       </p>
                     </div>
@@ -966,7 +987,7 @@ export default function ProjectDetail() {
                 )}
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-4">Loading customer information...</p>
+              <p className="text-muted-foreground text-center py-4">Loading customer information...</p>
             )}
           </motion.div>
 
@@ -975,43 +996,43 @@ export default function ProjectDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Related Sale
             </h2>
             {sale ? (
               <div className="space-y-4">
                 <Link
                   to={createPageUrl('SaleDetail') + `?id=${sale.id}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Sale Amount</p>
-                    <p className="text-slate-800 group-hover:text-emerald-600 transition-colors text-lg font-semibold">
+                    <p className="text-xs text-muted-foreground mb-0.5">Sale Amount</p>
+                    <p className="text-foreground group-hover:text-emerald-600 transition-colors text-lg font-semibold">
                       {sale.sale_amount ? `$${sale.sale_amount.toLocaleString()}` : 'N/A'}
                     </p>
                     {sale.invoice_number && (
-                      <p className="text-xs text-slate-500 mt-1">Invoice #{sale.invoice_number}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Invoice #{sale.invoice_number}</p>
                     )}
                   </div>
                 </Link>
                 {project.installation_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-yellow-50 border border-yellow-100">
-                    <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-                      <CalendarIcon className="w-5 h-5 text-yellow-600" />
+                  <div className="flex items-center gap-4 p-3 rounded-xl bg-yellow-50 border border-yellow-100 dark:bg-yellow-500/10 dark:border-yellow-500/20">
+                    <div className="w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
+                      <CalendarIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-300" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-yellow-600 mb-0.5">Installation Date</p>
+                      <p className="text-xs text-yellow-600 dark:text-yellow-300 mb-0.5">Installation Date</p>
                       <div className="flex items-center gap-2">
-                        <p className="text-slate-800 font-semibold">
+                        <p className="text-foreground font-semibold">
                           {format(new Date(project.installation_date + 'T00:00:00'), 'MMMM d, yyyy')}
                         </p>
                         {project.installation_date_status && (
-                          <span className="text-xs font-semibold text-red-600 bg-red-100 px-2 py-1 rounded capitalize">
+                          <span className="text-xs font-semibold text-red-600 bg-red-100 dark:text-red-300 dark:bg-red-500/15 px-2 py-1 rounded capitalize">
                             {project.installation_date_status}
                           </span>
                         )}
@@ -1035,7 +1056,7 @@ export default function ProjectDetail() {
                     }
                   }}
                   variant="outline"
-                  className="w-full border-green-200 text-green-700 hover:bg-green-50"
+                  className="w-full border-green-200 text-green-700 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
                 >
                   {downloadingChecklistPDF ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
                   Download Pre-Install Checklist
@@ -1044,7 +1065,7 @@ export default function ProjectDetail() {
                   <Button
                     onClick={() => window.open(sale.contract_file_url, '_blank')}
                     variant="outline"
-                    className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                    className="w-full border-primary/30 text-primary hover:bg-primary/10"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download Contract
@@ -1054,7 +1075,7 @@ export default function ProjectDetail() {
 
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-4">Loading sale information...</p>
+              <p className="text-muted-foreground text-center py-4">Loading sale information...</p>
             )}
           </motion.div>
 
@@ -1064,9 +1085,9 @@ export default function ProjectDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className="bg-card rounded-2xl border border-border p-6"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Order Processor Tools
               </h2>
               <div className="space-y-3">
@@ -1074,7 +1095,7 @@ export default function ProjectDetail() {
                   <Button
                     onClick={handleSetInstallationClick}
                     variant="outline"
-                    className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
+                    className="w-full border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
                   >
                     <CalendarIcon className="w-4 h-4 mr-2" />
                     Set Installation Date
@@ -1084,7 +1105,7 @@ export default function ProjectDetail() {
                   <Button
                     onClick={handleRescheduleClick}
                     variant="outline"
-                    className="w-full border-yellow-200 text-yellow-600 hover:bg-yellow-50"
+                    className="w-full border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-500/30 dark:text-yellow-300 dark:hover:bg-yellow-500/10"
                   >
                     <Clock className="w-4 h-4 mr-2" />
                     Reschedule Installation
@@ -1094,7 +1115,7 @@ export default function ProjectDetail() {
                   <Button
                     onClick={() => window.open(sale.contract_file_url, '_blank')}
                     variant="outline"
-                    className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                    className="w-full border-primary/30 text-primary hover:bg-primary/10"
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Download Contract
@@ -1117,8 +1138,8 @@ export default function ProjectDetail() {
 
                 {/* Installation Status Buttons */}
                 {project.installation_date && (
-                  <div className="pt-3 border-t border-slate-200 space-y-2">
-                    <p className="text-xs font-medium text-slate-500 uppercase">Installation Status</p>
+                  <div className="pt-3 border-t border-border space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase">Installation Status</p>
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         onClick={() => {
@@ -1128,7 +1149,7 @@ export default function ProjectDetail() {
                         disabled={updateProjectMutation.isPending}
                         variant="outline"
                         size="sm"
-                        className="border-orange-200 text-orange-600 hover:bg-orange-50"
+                        className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10"
                       >
                         {updatingStatus === 'pending payment' && updateProjectMutation.isPending ? (
                           <>
@@ -1152,7 +1173,7 @@ export default function ProjectDetail() {
                         disabled={updateProjectMutation.isPending}
                         variant="outline"
                         size="sm"
-                        className="border-orange-200 text-orange-600 hover:bg-orange-50"
+                        className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10"
                       >
                         {updatingStatus === 'pending contract' && updateProjectMutation.isPending ? (
                           <>
@@ -1176,7 +1197,7 @@ export default function ProjectDetail() {
                         disabled={updateProjectMutation.isPending}
                         variant="outline"
                         size="sm"
-                        className="border-orange-200 text-orange-600 hover:bg-orange-50"
+                        className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10"
                       >
                         {updatingStatus === 'on hold' && updateProjectMutation.isPending ? (
                           <>
@@ -1200,7 +1221,7 @@ export default function ProjectDetail() {
                         disabled={updateProjectMutation.isPending}
                         variant="outline"
                         size="sm"
-                        className="border-red-200 text-red-600 hover:bg-red-50"
+                        className="border-destructive/40 text-destructive hover:bg-destructive/10"
                       >
                         {updatingStatus === 'pending cancellation' && updateProjectMutation.isPending ? (
                           <>
@@ -1225,7 +1246,7 @@ export default function ProjectDetail() {
                         disabled={updateProjectMutation.isPending}
                         variant="outline"
                         size="sm"
-                        className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                        className="border-border text-muted-foreground hover:bg-secondary"
                       >
                         {updatingStatus === 'clear' && updateProjectMutation.isPending ? (
                           <>
@@ -1244,8 +1265,8 @@ export default function ProjectDetail() {
                     </div>
 
                     {/* Project Status Buttons */}
-                    <div className="pt-3 border-t border-slate-100 space-y-2">
-                      <p className="text-xs font-medium text-slate-500 uppercase">Project Status</p>
+                    <div className="pt-3 border-t border-border space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground uppercase">Project Status</p>
                       <Button
                         onClick={() => {
                           setUpdatingStatus('in_progress');
@@ -1301,9 +1322,9 @@ export default function ProjectDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className="bg-card rounded-2xl border border-border p-6"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Project Status
               </h2>
               <div className="space-y-2">
@@ -1358,9 +1379,9 @@ export default function ProjectDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.21 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">Customer Experience</h2>
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Customer Experience</h2>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 {[
@@ -1373,7 +1394,7 @@ export default function ProjectDetail() {
                   { id: 'qa_in_progress', label: 'QA In Progress', dateField: 'qa_in_progress_date', color: 'indigo' },
                   { id: 'qa_completed', label: 'QA Completed', dateField: 'qa_completed_date', color: 'emerald' }
                 ].map(action => (
-                  <Button key={action.id} onClick={() => handleCustomerExperienceAction(action.id)} variant="outline" size="sm" className={cn(`border-${action.color}-200 text-${action.color}-600 hover:bg-${action.color}-50`, project[action.dateField] && `bg-${action.color}-50`)}>
+                  <Button key={action.id} onClick={() => handleCustomerExperienceAction(action.id)} variant="outline" size="sm" className={cn(CX_ACTION_COLORS[action.color], project[action.dateField] && CX_ACTION_ACTIVE[action.color])}>
                     {project[action.dateField] && <CheckCircle2 className="w-3 h-3 mr-1" />}
                     {action.label}
                   </Button>
@@ -1387,16 +1408,16 @@ export default function ProjectDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.23 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                 Assigned Team
               </h2>
               <Button
                 onClick={handleAssignClick}
                 size="sm"
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-primary text-primary-foreground hover:opacity-90"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
                 Assign Team
@@ -1405,13 +1426,13 @@ export default function ProjectDetail() {
 
             <div className="space-y-3">
               {projectManager && (
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
-                  <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
-                    <User className="w-6 h-6 text-indigo-600" />
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
+                  <div className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center">
+                    <User className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm text-indigo-600 font-medium">Project Manager</p>
-                    <p className="text-slate-800 font-semibold">
+                    <p className="text-sm text-primary font-medium">Project Manager</p>
+                    <p className="text-foreground font-semibold">
                       {projectManager.first_name} {projectManager.last_name}
                     </p>
                   </div>
@@ -1419,13 +1440,13 @@ export default function ProjectDetail() {
               )}
 
               {installationManager && (
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-blue-50 border border-blue-100">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                    <User className="w-6 h-6 text-blue-600" />
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-brand-blue/10 border border-brand-blue/20">
+                  <div className="w-12 h-12 rounded-full bg-brand-blue/15 flex items-center justify-center">
+                    <User className="w-6 h-6 text-brand-blue" />
                   </div>
                   <div>
-                    <p className="text-sm text-blue-600 font-medium">Installation Manager</p>
-                    <p className="text-slate-800 font-semibold">
+                    <p className="text-sm text-brand-blue font-medium">Installation Manager</p>
+                    <p className="text-foreground font-semibold">
                       {installationManager.first_name} {installationManager.last_name}
                     </p>
                   </div>
@@ -1433,7 +1454,7 @@ export default function ProjectDetail() {
               )}
 
               {!projectManager && !installationManager && (
-                <p className="text-slate-400 text-center py-6">No team members assigned yet</p>
+                <p className="text-muted-foreground text-center py-6">No team members assigned yet</p>
               )}
             </div>
           </motion.div>
@@ -1443,20 +1464,20 @@ export default function ProjectDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Customer Tracker
             </h2>
             {project.project_tracker_url ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50">
-                  <LinkIcon className="w-5 h-5 text-slate-400" />
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary">
+                  <LinkIcon className="w-5 h-5 text-muted-foreground" />
                   <input
                     type="text"
                     value={project.project_tracker_url}
                     readOnly
-                    className="flex-1 bg-transparent text-sm text-slate-600 outline-none"
+                    className="flex-1 bg-transparent text-sm text-muted-foreground outline-none"
                   />
                   <Button
                     size="sm"
@@ -1471,7 +1492,7 @@ export default function ProjectDetail() {
                     href={project.project_tracker_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-indigo-600 hover:underline"
+                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
                   >
                     <ExternalLink className="w-4 h-4" />
                     View Customer Tracker
@@ -1483,7 +1504,7 @@ export default function ProjectDetail() {
                         disabled={sendingSMS}
                         variant="outline"
                         size="sm"
-                        className="border-green-200 text-green-600 hover:bg-green-50"
+                        className="border-green-200 text-green-600 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
                       >
                         {sendingSMS ? (
                           <>
@@ -1498,9 +1519,9 @@ export default function ProjectDetail() {
                         )}
                       </Button>
                       {smsPreview && (
-                        <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                          <p className="text-xs text-slate-500 mb-1">Preview:</p>
-                          <p className="text-sm text-slate-700">{smsPreview}</p>
+                        <div className="p-3 rounded-lg bg-secondary border border-border">
+                          <p className="text-xs text-muted-foreground mb-1">Preview:</p>
+                          <p className="text-sm text-foreground">{smsPreview}</p>
                         </div>
                       )}
                     </>
@@ -1509,7 +1530,7 @@ export default function ProjectDetail() {
               </div>
             ) : (
               <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+                <Loader2 className="w-5 h-5 text-primary animate-spin" />
               </div>
             )}
           </motion.div>
@@ -1524,21 +1545,21 @@ export default function ProjectDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Project Location
               </h2>
-              <div className="flex items-start gap-4 p-3 rounded-xl bg-slate-50 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-orange-600" />
+              <div className="flex items-start gap-4 p-3 rounded-xl bg-secondary mb-4">
+                <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-500/15 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-300" />
                 </div>
                 <div>
-                  <p className="text-slate-800 font-medium">{sale.location_address}</p>
+                  <p className="text-foreground font-medium">{sale.location_address}</p>
                 </div>
               </div>
               {appointment?.street_view_url && (
-                <div className="rounded-xl overflow-hidden border border-slate-200">
+                <div className="rounded-xl overflow-hidden border border-border">
                   <img
                     src={appointment.street_view_url}
                     alt="Street view"
@@ -1555,33 +1576,33 @@ export default function ProjectDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className="bg-card rounded-2xl border border-border p-6"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Scheduled Dates
               </h2>
               <div className="space-y-4">
                 {project.scheduled_start_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-blue-50">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <CalendarIcon className="w-5 h-5 text-blue-600" />
+                  <div className="flex items-center gap-4 p-3 rounded-xl bg-brand-blue/12">
+                    <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
+                      <CalendarIcon className="w-5 h-5 text-brand-blue" />
                     </div>
                     <div>
-                      <p className="text-xs text-blue-600 mb-0.5">Start Date</p>
-                      <p className="text-slate-800">
+                      <p className="text-xs text-brand-blue mb-0.5">Start Date</p>
+                      <p className="text-foreground">
                         {format(new Date(project.scheduled_start_date + 'T00:00:00'), 'MMMM d, yyyy')}
                       </p>
                     </div>
                   </div>
                 )}
                 {project.scheduled_end_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-purple-50">
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                      <CalendarIcon className="w-5 h-5 text-purple-600" />
+                  <div className="flex items-center gap-4 p-3 rounded-xl bg-purple-50 dark:bg-purple-500/10">
+                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
+                      <CalendarIcon className="w-5 h-5 text-purple-600 dark:text-purple-300" />
                     </div>
                     <div>
-                      <p className="text-xs text-purple-600 mb-0.5">End Date</p>
-                      <p className="text-slate-800">
+                      <p className="text-xs text-purple-600 dark:text-purple-300 mb-0.5">End Date</p>
+                      <p className="text-foreground">
                         {format(new Date(project.scheduled_end_date + 'T00:00:00'), 'MMMM d, yyyy')}
                       </p>
                     </div>
@@ -1597,33 +1618,33 @@ export default function ProjectDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className="bg-card rounded-2xl border border-border p-6"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Actual Dates
               </h2>
               <div className="space-y-4">
                 {project.actual_start_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50">
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                      <CalendarIcon className="w-5 h-5 text-green-600" />
+                  <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50 dark:bg-green-500/10">
+                    <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
+                      <CalendarIcon className="w-5 h-5 text-green-600 dark:text-green-300" />
                     </div>
                     <div>
-                      <p className="text-xs text-green-600 mb-0.5">Actual Start</p>
-                      <p className="text-slate-800">
+                      <p className="text-xs text-green-600 dark:text-green-300 mb-0.5">Actual Start</p>
+                      <p className="text-foreground">
                         {format(new Date(project.actual_start_date + 'T00:00:00'), 'MMMM d, yyyy')}
                       </p>
                     </div>
                   </div>
                 )}
                 {project.actual_completion_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-emerald-50">
-                    <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <div className="flex items-center gap-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
+                    <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
                     </div>
                     <div>
-                      <p className="text-xs text-emerald-600 mb-0.5">Completed</p>
-                      <p className="text-slate-800">
+                      <p className="text-xs text-emerald-600 dark:text-emerald-300 mb-0.5">Completed</p>
+                      <p className="text-foreground">
                         {format(new Date(project.actual_completion_date + 'T00:00:00'), 'MMMM d, yyyy')}
                       </p>
                     </div>
@@ -1638,12 +1659,12 @@ export default function ProjectDetail() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-green-50 border border-green-200 rounded-2xl p-6 md:col-span-2"
+              className="bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25 rounded-2xl p-6 md:col-span-2 xl:col-span-3"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  <h2 className="text-sm font-semibold text-green-800 uppercase tracking-wider">Pre-Installation Checklist — Signed</h2>
+                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-300" />
+                  <h2 className="text-sm font-semibold text-green-800 dark:text-green-300 uppercase tracking-wider">Pre-Installation Checklist — Signed</h2>
                 </div>
                 <Button
                   size="sm"
@@ -1662,7 +1683,7 @@ export default function ProjectDetail() {
                       setDownloadingChecklistPDF(false);
                     }
                   }}
-                  className="border-green-300 text-green-700 hover:bg-green-100"
+                  className="border-green-300 text-green-700 hover:bg-green-100 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/15"
                 >
                   {downloadingChecklistPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
                   Download PDF
@@ -1670,12 +1691,12 @@ export default function ProjectDetail() {
               </div>
               <div className="space-y-3">
                 {project.pre_install_product_info && (
-                  <p className="text-sm text-green-800"><span className="font-semibold">Product Confirmed:</span> {project.pre_install_product_info}</p>
+                  <p className="text-sm text-green-800 dark:text-green-300"><span className="font-semibold">Product Confirmed:</span> {project.pre_install_product_info}</p>
                 )}
                 {project.pre_install_checklist_signature_url && (
                   <div>
-                    <p className="text-xs text-green-700 font-medium mb-2">Customer Signature:</p>
-                    <img src={project.pre_install_checklist_signature_url} alt="Customer signature" className="h-20 border border-green-200 rounded-lg bg-white p-2" />
+                    <p className="text-xs text-green-700 dark:text-green-300 font-medium mb-2">Customer Signature:</p>
+                    <img src={project.pre_install_checklist_signature_url} alt="Customer signature" className="h-20 border border-green-200 dark:border-green-500/25 rounded-lg bg-white p-2" />
                   </div>
                 )}
               </div>
@@ -1688,28 +1709,28 @@ export default function ProjectDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Project Details Notes
               </h2>
               <div className="space-y-4">
                 {project.project_notes && (
                   <div>
-                    <p className="text-sm font-medium text-slate-700 mb-2">Project Notes</p>
-                    <p className="text-slate-600 whitespace-pre-wrap">{project.project_notes}</p>
+                    <p className="text-sm font-medium text-foreground mb-2">Project Notes</p>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{project.project_notes}</p>
                   </div>
                 )}
                 {project.materials_notes && (
                   <div>
-                    <p className="text-sm font-medium text-slate-700 mb-2">Materials Notes</p>
-                    <p className="text-slate-600 whitespace-pre-wrap">{project.materials_notes}</p>
+                    <p className="text-sm font-medium text-foreground mb-2">Materials Notes</p>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{project.materials_notes}</p>
                   </div>
                 )}
                 {project.quality_check_notes && (
                   <div>
-                    <p className="text-sm font-medium text-slate-700 mb-2">Quality Check Notes</p>
-                    <p className="text-slate-600 whitespace-pre-wrap">{project.quality_check_notes}</p>
+                    <p className="text-sm font-medium text-foreground mb-2">Quality Check Notes</p>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{project.quality_check_notes}</p>
                   </div>
                 )}
               </div>
@@ -1721,14 +1742,14 @@ export default function ProjectDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.54 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Project Images
             </h2>
             <div className="space-y-4">
               {/* Upload Button */}
-              <label className="flex items-center justify-center w-full p-4 border-2 border-dashed border-slate-300 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
+              <label className="flex items-center justify-center w-full p-4 border-2 border-dashed border-border rounded-lg hover:border-primary/40 hover:bg-primary/10 transition-colors cursor-pointer">
                 <input
                   type="file"
                   accept="image/*"
@@ -1739,24 +1760,24 @@ export default function ProjectDetail() {
                 />
                 {uploadingImage ? (
                   <>
-                    <Loader2 className="w-5 h-5 text-indigo-600 animate-spin mr-2" />
-                    <span className="text-sm text-slate-600">Uploading...</span>
+                    <Loader2 className="w-5 h-5 text-primary animate-spin mr-2" />
+                    <span className="text-sm text-muted-foreground">Uploading...</span>
                   </>
                 ) : (
                   <>
-                    <Upload className="w-5 h-5 text-slate-400 mr-2" />
-                    <span className="text-sm text-slate-600">Click to upload images (select multiple)</span>
+                    <Upload className="w-5 h-5 text-muted-foreground mr-2" />
+                    <span className="text-sm text-muted-foreground">Click to upload images (select multiple)</span>
                   </>
                 )}
               </label>
 
               {/* Images Grid */}
               {project.images && project.images.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2 border-t border-slate-200">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2 border-t border-border">
                   {[...project.images].reverse().map((image, index) => {
                     const realIndex = project.images.length - 1 - index;
                     return (
-                    <div key={image.url} className="rounded-lg border border-slate-200 hover:border-indigo-300 transition-colors overflow-hidden">
+                    <div key={image.url} className="rounded-lg border border-border hover:border-primary/40 transition-colors overflow-hidden">
                       <div className="relative group">
                         <button
                           onClick={() => setLightboxIndex(realIndex)}
@@ -1773,7 +1794,7 @@ export default function ProjectDetail() {
                             size="sm"
                             variant="ghost"
                             onClick={() => window.open(image.url, '_blank')}
-                            className="bg-white hover:bg-slate-100"
+                            className="bg-card hover:bg-secondary"
                           >
                             <ExternalLink className="w-4 h-4" />
                           </Button>
@@ -1781,7 +1802,7 @@ export default function ProjectDetail() {
                             size="sm"
                             variant="ghost"
                             onClick={() => handleDeleteImage(realIndex)}
-                            className="bg-red-600 hover:bg-red-700 text-white"
+                            className="bg-destructive text-destructive-foreground hover:opacity-90"
                           >
                             <X className="w-4 h-4" />
                           </Button>
@@ -1808,7 +1829,7 @@ export default function ProjectDetail() {
                   })}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500 text-center py-8">No images yet</p>
+                <p className="text-sm text-muted-foreground text-center py-8">No images yet</p>
               )}
             </div>
           </motion.div>
@@ -1818,13 +1839,13 @@ export default function ProjectDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.56 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Project Files
             </h2>
             <div className="space-y-4">
-              <label className="flex items-center justify-center w-full p-4 border-2 border-dashed border-slate-300 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
+              <label className="flex items-center justify-center w-full p-4 border-2 border-dashed border-border rounded-lg hover:border-primary/40 hover:bg-primary/10 transition-colors cursor-pointer">
                 <input
                   type="file"
                   multiple
@@ -1834,31 +1855,31 @@ export default function ProjectDetail() {
                 />
                 {uploadingFile ? (
                   <>
-                    <Loader2 className="w-5 h-5 text-indigo-600 animate-spin mr-2" />
-                    <span className="text-sm text-slate-600">Uploading...</span>
+                    <Loader2 className="w-5 h-5 text-primary animate-spin mr-2" />
+                    <span className="text-sm text-muted-foreground">Uploading...</span>
                   </>
                 ) : (
                   <>
-                    <Paperclip className="w-5 h-5 text-slate-400 mr-2" />
-                    <span className="text-sm text-slate-600">Click to upload files (select multiple)</span>
+                    <Paperclip className="w-5 h-5 text-muted-foreground mr-2" />
+                    <span className="text-sm text-muted-foreground">Click to upload files (select multiple)</span>
                   </>
                 )}
               </label>
 
               {project.files && project.files.length > 0 ? (
-                <div className="space-y-2 pt-2 border-t border-slate-200">
+                <div className="space-y-2 pt-2 border-t border-border">
                   {[...project.files].reverse().map((file, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors group">
-                      <Paperclip className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-secondary hover:bg-secondary transition-colors group">
+                      <Paperclip className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-700 truncate">{file.name}</p>
-                        <p className="text-xs text-slate-400">{file.user_name} · {new Date(file.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</p>
+                        <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
+                        <p className="text-xs text-muted-foreground">{file.user_name} · {new Date(file.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</p>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <Button size="sm" variant="ghost" onClick={() => window.open(file.url, '_blank')} className="h-8 px-2">
                           <Download className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteFile(project.files.length - 1 - index)} className="h-8 px-2 text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button size="sm" variant="ghost" onClick={() => handleDeleteFile(project.files.length - 1 - index)} className="h-8 px-2 text-destructive hover:opacity-80 opacity-0 group-hover:opacity-100 transition-opacity">
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1866,7 +1887,7 @@ export default function ProjectDetail() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-slate-500 text-center py-8">No files uploaded yet</p>
+                <p className="text-sm text-muted-foreground text-center py-8">No files uploaded yet</p>
               )}
             </div>
           </motion.div>
@@ -1914,27 +1935,27 @@ export default function ProjectDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
             >
               <div className="flex items-center gap-3 mb-4">
-                <Activity className="w-5 h-5 text-indigo-600" />
-                <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+                <Activity className="w-5 h-5 text-primary" />
+                <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                   Activity Log
                 </h2>
               </div>
               <div className="space-y-3">
                 {projectLogs.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).map((log) => (
-                  <div key={log.id} className="flex gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div key={log.id} className="flex gap-4 p-4 rounded-xl bg-secondary hover:bg-secondary transition-colors">
                     <div className="flex-1">
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="font-medium text-slate-800">{log.action}</p>
+                          <p className="font-medium text-foreground">{log.action}</p>
                           {log.details && (
-                            <p className="text-sm text-slate-600 mt-1">{log.details}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{log.details}</p>
                           )}
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-muted-foreground">
                             {new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', {
                               month: 'short',
                               day: 'numeric',
@@ -1943,7 +1964,7 @@ export default function ProjectDetail() {
                               hour12: true
                             })}
                           </p>
-                          <p className="text-xs text-slate-400 mt-0.5">{log.user_name || log.user_email}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{log.user_name || log.user_email}</p>
                         </div>
                       </div>
                     </div>
@@ -1959,8 +1980,8 @@ export default function ProjectDetail() {
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-red-700">Cancel Project</DialogTitle>
-            <DialogDescription className="text-slate-500 mt-2">
+            <DialogTitle className="text-xl font-bold text-destructive">Cancel Project</DialogTitle>
+            <DialogDescription className="text-muted-foreground mt-2">
               This will mark the project as Cancelled. You can restore it at any time.
             </DialogDescription>
           </DialogHeader>
