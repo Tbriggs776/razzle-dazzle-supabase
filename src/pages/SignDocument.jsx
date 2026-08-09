@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/dataClient';
-import { Loader2, ShieldCheck, Check, FileText, PenLine } from 'lucide-react';
+import { Loader2, ShieldCheck, Check, FileText, PenLine, Lock } from 'lucide-react';
 
 // Public (anonymous) e-signature page. The `token` in the URL is the capability —
 // all reads/writes go through the token-scoped `esign` Edge Function; the browser
 // never touches the tables directly. Flow: load -> (optional SMS code) -> review +
 // consent -> draw signature + type name -> submit -> sealed PDF emailed.
+// Customer-facing: Floor Daddy brand, mobile-first, themed via the app tokens.
 async function esign(action, payload) {
   const { data, error } = await base44.functions.invoke('esign', { action, ...payload });
   if (error) throw new Error(error.message || 'Request failed');
@@ -16,6 +17,7 @@ async function esign(action, payload) {
 function SignaturePad({ onChange }) {
   const canvasRef = useRef(null);
   const drawing = useRef(false);
+  const [hasInk, setHasInk] = useState(false);
 
   const point = (e) => {
     const c = canvasRef.current;
@@ -26,25 +28,28 @@ function SignaturePad({ onChange }) {
   const move = (e) => {
     if (!drawing.current) return; e.preventDefault();
     const ctx = canvasRef.current.getContext('2d'); const { x, y } = point(e);
-    ctx.lineTo(x, y); ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke();
+    ctx.lineTo(x, y); ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+    if (!hasInk) setHasInk(true);
     onChange(canvasRef.current.toDataURL('image/png'));
   };
   const end = () => { drawing.current = false; };
-  const clear = () => { const c = canvasRef.current; c.getContext('2d').clearRect(0, 0, c.width, c.height); onChange(null); };
+  const clear = () => { const c = canvasRef.current; c.getContext('2d').clearRect(0, 0, c.width, c.height); setHasInk(false); onChange(null); };
 
   return (
     <div>
-      <div className="relative rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 overflow-hidden">
+      <div className="relative rounded-xl border-2 border-dashed border-border bg-muted/60 overflow-hidden">
         <canvas
           ref={canvasRef} width={640} height={200}
           onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerLeave={end}
-          className="w-full touch-none block" style={{ height: 200 }}
+          className="w-full touch-none block cursor-crosshair" style={{ height: 200 }}
         />
-        <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-3 text-slate-300 text-xs uppercase tracking-widest">
-          <PenLine className="w-4 h-4 mr-1.5" /> sign here
-        </div>
+        {!hasInk && (
+          <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-4 text-muted-foreground/60 text-[11px] uppercase tracking-[0.2em]">
+            <PenLine className="w-4 h-4 mr-1.5" /> sign here
+          </div>
+        )}
       </div>
-      <button type="button" onClick={clear} className="mt-2 text-sm text-slate-500 hover:text-slate-700 underline">Clear signature</button>
+      <button type="button" onClick={clear} className="mt-2 text-sm text-muted-foreground hover:text-foreground underline underline-offset-2">Clear signature</button>
     </div>
   );
 }
@@ -81,88 +86,101 @@ export default function SignDocument() {
   };
 
   const shell = (inner) => (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-2xl mx-auto px-6 py-5">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">RAZZLE DAZZLE</h1>
-          <p className="text-[9px] font-sans tracking-wider text-slate-400 uppercase mt-0.5">BY FLOOR DADDY</p>
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border bg-card/80 backdrop-blur">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <div>
+            <div className="text-lg font-extrabold tracking-tight text-primary">Floor Daddy</div>
+            <div className="text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase mt-0.5">Secure document signing</div>
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Lock className="w-3.5 h-3.5" /> Encrypted
+          </div>
         </div>
-      </div>
-      <div className="max-w-2xl mx-auto px-6 py-8">{inner}</div>
+      </header>
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">{inner}</main>
     </div>
   );
-  const card = "bg-white rounded-2xl border border-slate-100 p-6";
+  const card = "bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6";
 
-  if (state.loading) return shell(<div className="flex justify-center py-16"><Loader2 className="w-8 h-8 text-indigo-600 animate-spin" /></div>);
-  if (state.error) return shell(<div className={card + " text-center"}><h2 className="text-lg font-semibold text-slate-800">Unable to load</h2><p className="text-slate-500 mt-1">{state.error}</p></div>);
+  if (state.loading) return shell(<div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>);
+  if (state.error) return shell(<div className={card + " text-center"}><h2 className="text-lg font-semibold">Unable to load</h2><p className="text-muted-foreground mt-1">{state.error}</p></div>);
 
   if (d.status === 'signed') return shell(
-    <div className={card + " text-center"}>
-      <div className="w-14 h-14 mx-auto rounded-2xl bg-green-100 flex items-center justify-center mb-4"><Check className="w-7 h-7 text-green-600" /></div>
-      <h2 className="text-xl font-bold text-slate-800">Signed — thank you!</h2>
-      <p className="text-slate-500 mt-2">A signed copy has been emailed to you for your records.</p>
-      {d.sealed_pdf_url && <a href={d.sealed_pdf_url} target="_blank" rel="noreferrer" className="inline-block mt-5 bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm">Download signed PDF</a>}
+    <div className={card + " text-center py-10"}>
+      <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center mb-5"><Check className="w-8 h-8 text-emerald-600 dark:text-emerald-400" /></div>
+      <h2 className="text-2xl font-bold tracking-tight">Signed — thank you!</h2>
+      <p className="text-muted-foreground mt-2 max-w-sm mx-auto">A signed copy has been emailed to you for your records.</p>
+      {d.sealed_pdf_url && <a href={d.sealed_pdf_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 mt-6 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition"><FileText className="w-4 h-4" /> Download signed PDF</a>}
     </div>
   );
-  if (d.status === 'expired') return shell(<div className={card + " text-center"}><h2 className="text-lg font-semibold text-slate-800">This link has expired</h2><p className="text-slate-500 mt-1">Please contact us for a new signing link.</p></div>);
+  if (d.status === 'expired') return shell(<div className={card + " text-center"}><h2 className="text-lg font-semibold">This link has expired</h2><p className="text-muted-foreground mt-1">Please contact us for a new signing link.</p></div>);
+
+  const ready = !needsOtp && consent && signature && printedName.trim().length >= 2;
 
   return shell(
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5 pb-24 sm:pb-0">
       {/* Document */}
-      <div className={card}>
-        <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2"><FileText className="w-4 h-4" /> {d.label}</h2>
-        <dl className="divide-y divide-slate-100">
+      <section className={card}>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-4 flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> {d.label}</h2>
+        <dl className="divide-y divide-border">
           {Object.entries(d.document || {}).filter(([, v]) => v != null && v !== '').map(([k, v]) => (
-            <div key={k} className="py-2.5 flex justify-between gap-6 text-sm">
-              <dt className="text-slate-500">{k}</dt><dd className="text-slate-800 font-medium text-right">{String(v)}</dd>
+            <div key={k} className="py-2.5 flex flex-col sm:flex-row sm:justify-between sm:gap-6 gap-0.5 text-sm">
+              <dt className="text-muted-foreground">{k}</dt>
+              <dd className="font-medium sm:text-right break-words">{String(v)}</dd>
             </div>
           ))}
         </dl>
-      </div>
+      </section>
 
       {/* SMS identity verification */}
       {needsOtp && (
-        <div className={card}>
-          <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Verify your identity</h2>
+        <section className={card}>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-3 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-primary" /> Verify your identity</h2>
           {!otpSent ? (
             <>
-              <p className="text-sm text-slate-600 mb-3">For your security, we'll text a 6-digit code to {d.phone_mask || 'your phone'} before you sign.</p>
-              <button onClick={sendCode} disabled={busy} className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50">{busy ? 'Sending…' : 'Text me a code'}</button>
+              <p className="text-sm text-muted-foreground mb-4">For your security, we'll text a 6-digit code to {d.phone_mask || 'your phone'} before you sign.</p>
+              <button onClick={sendCode} disabled={busy} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 hover:opacity-90 transition">{busy ? 'Sending…' : 'Text me a code'}</button>
             </>
           ) : (
             <div className="flex flex-wrap items-end gap-3">
-              <div><label className="block text-xs text-slate-500 mb-1">Enter code</label><input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" maxLength={6} className="w-32 border border-slate-300 rounded-lg px-3 py-2 tracking-widest text-lg" placeholder="000000" /></div>
-              <button onClick={verifyCode} disabled={busy || code.length < 6} className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50">{busy ? 'Verifying…' : 'Verify'}</button>
-              <button onClick={sendCode} disabled={busy} className="text-sm text-slate-500 underline">Resend</button>
+              <div><label className="block text-xs text-muted-foreground mb-1.5">Enter code</label><input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" maxLength={6} className="w-36 bg-background border border-input rounded-lg px-3 py-2.5 tracking-[0.3em] text-lg text-center focus:outline-none focus:ring-2 focus:ring-ring" placeholder="000000" /></div>
+              <button onClick={verifyCode} disabled={busy || code.length < 6} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-semibold text-sm disabled:opacity-50 hover:opacity-90 transition">{busy ? 'Verifying…' : 'Verify'}</button>
+              <button onClick={sendCode} disabled={busy} className="text-sm text-muted-foreground underline underline-offset-2">Resend</button>
             </div>
           )}
-        </div>
+        </section>
       )}
 
       {/* Consent + signature (locked until identity verified when required) */}
-      <div className={card + (needsOtp ? " opacity-50 pointer-events-none" : "")}>
-        <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">Consent &amp; Signature</h2>
+      <section className={card + (needsOtp ? " opacity-50 pointer-events-none select-none" : "")}>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-4">Consent &amp; Signature</h2>
         <label className="flex items-start gap-3 mb-5 cursor-pointer">
-          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-4 h-4" />
-          <span className="text-sm text-slate-600 leading-relaxed">{d.consent_text}</span>
+          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 w-5 h-5 rounded accent-[hsl(var(--primary))] shrink-0" />
+          <span className="text-sm text-muted-foreground leading-relaxed">{d.consent_text}</span>
         </label>
         <div className="mb-4">
-          <label className="block text-xs text-slate-500 mb-1">Type your full legal name</label>
-          <input value={printedName} onChange={(e) => setPrintedName(e.target.value)} className="w-full border border-slate-300 rounded-lg px-3 py-2" placeholder="Full name" />
+          <label className="block text-xs text-muted-foreground mb-1.5">Type your full legal name</label>
+          <input value={printedName} onChange={(e) => setPrintedName(e.target.value)} className="w-full bg-background border border-input rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-ring" placeholder="Full name" />
         </div>
         <SignaturePad onChange={setSignature} />
+      </section>
+
+      {err && <p className="text-sm text-destructive px-1">{err}</p>}
+
+      {/* Submit — sticky on mobile so it's always in thumb reach */}
+      <div className="fixed sm:static bottom-0 inset-x-0 sm:inset-auto bg-background/95 sm:bg-transparent backdrop-blur sm:backdrop-blur-0 border-t sm:border-0 border-border px-4 sm:px-0 py-3 sm:py-0">
+        <div className="max-w-2xl mx-auto">
+          <button
+            onClick={submit}
+            disabled={busy || !ready}
+            className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-bold text-base disabled:opacity-40 hover:opacity-90 transition"
+          >
+            {busy ? 'Submitting…' : 'Sign & Submit'}
+          </button>
+          <p className="text-center text-xs text-muted-foreground mt-2 flex items-center justify-center gap-1.5"><Lock className="w-3 h-3" /> Your IP address and signing time are recorded for verification.</p>
+        </div>
       </div>
-
-      {err && <p className="text-sm text-red-600">{err}</p>}
-
-      <button
-        onClick={submit}
-        disabled={busy || needsOtp || !consent || !signature || printedName.trim().length < 2}
-        className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 rounded-xl font-bold disabled:opacity-40"
-      >
-        {busy ? 'Submitting…' : 'Sign & Submit'}
-      </button>
-      <p className="text-center text-xs text-slate-400">Your IP address and the time of signing are recorded for verification.</p>
     </div>
   );
 }
