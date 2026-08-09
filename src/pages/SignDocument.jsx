@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/dataClient';
 import { Loader2, ShieldCheck, Check, FileText, PenLine, Lock } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 
 // Public (anonymous) e-signature page. The `token` in the URL is the capability —
 // all reads/writes go through the token-scoped `esign` Edge Function; the browser
@@ -90,8 +91,8 @@ export default function SignDocument() {
       <header className="border-b border-border bg-card/80 backdrop-blur">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div>
-            <div className="text-lg font-extrabold tracking-tight text-primary">Floor Daddy</div>
-            <div className="text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase mt-0.5">Secure document signing</div>
+            <BrandLogo imgClassName="h-7 sm:h-8" />
+            <div className="text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase mt-1.5">Secure document signing</div>
           </div>
           <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
             <Lock className="w-3.5 h-3.5" /> Encrypted

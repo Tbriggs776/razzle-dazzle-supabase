@@ -16,6 +16,7 @@ import {
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import BrandLogo from '@/components/BrandLogo';
 
 // Customer-facing appointment page. Floor Daddy brand (navy + razzle pink + gold),
 // themed via app tokens (dark-mode aware), mobile-first. Data comes from the
@@ -217,11 +218,9 @@ export default function LeadAppointmentView() {
             className="flex flex-col gap-6"
           >
             {/* Logo */}
-            <div className="text-center sm:text-left">
-              <h1 className="text-2xl font-extrabold tracking-tight">
-                <span className="text-foreground">Floor</span><span className="text-brand-gold">Daddy</span>
-              </h1>
-              <p className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-0.5">
+            <div className="flex flex-col items-center sm:items-start">
+              <BrandLogo imgClassName="h-10 sm:h-11" />
+              <p className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-1.5">
                 Sexy Flooring · Quality Install
               </p>
             </div>

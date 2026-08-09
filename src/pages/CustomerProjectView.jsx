@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import BrandLogo from '@/components/BrandLogo';
 
 // Customer-facing project tracker. Floor Daddy brand (navy + razzle pink + gold),
 // themed via app tokens (dark-mode aware), mobile-first: the progress tracker is a
@@ -112,11 +113,9 @@ export default function CustomerProjectView() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
-            <div className="mb-6">
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                <span className="text-foreground">Floor</span><span className="text-brand-gold">Daddy</span>
-              </h1>
-              <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-1">
+            <div className="mb-6 flex flex-col items-center">
+              <BrandLogo imgClassName="h-12 sm:h-14" />
+              <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-2">
                 Sexy Flooring · Quality Install
               </p>
             </div>
