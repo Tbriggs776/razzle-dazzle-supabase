@@ -45,93 +45,26 @@ export default function CustomerProjectView() {
     }
   }, [showCeoVideo]);
 
-  const { data: project, isLoading } = useQuery({
-    queryKey: ['project', projectId],
+  // Public page (renders outside the auth guard). Anon has no direct table access,
+  // so fetch a curated, read-only projection through the token-scoped RPC keyed by the
+  // project id — see migration 0023 / get_public_project. One round-trip returns the
+  // project + customer + sale + both managers + settings.
+  const { data, isLoading } = useQuery({
+    queryKey: ['publicProject', projectId],
     queryFn: async () => {
-      try {
-        const projects = await base44.entities.Project.filter({ id: projectId });
-        return projects[0];
-      } catch (error) {
-        console.error('Error fetching project:', error);
-        return null;
-      }
+      const { data } = await base44.functions.invoke('getPublicProject', { id: projectId });
+      return data || null;
     },
     enabled: !!projectId,
     retry: false
   });
 
-  const { data: customerProjectSettings } = useQuery({
-    queryKey: ['customerProjectSettings'],
-    queryFn: async () => {
-      try {
-        const allSettings = await base44.entities.CustomerProjectSettings.list();
-        return allSettings[0] || null;
-      } catch (error) {
-        console.error('Error fetching customer project settings:', error);
-        return null;
-      }
-    }
-  });
-
-  const { data: customer } = useQuery({
-    queryKey: ['customer', project?.customer],
-    queryFn: async () => {
-      try {
-        const customers = await base44.entities.Customer.filter({ id: project.customer });
-        return customers[0];
-      } catch (error) {
-        console.error('Error fetching customer:', error);
-        return null;
-      }
-    },
-    enabled: !!project?.customer,
-    retry: false
-  });
-
-  const { data: sale } = useQuery({
-    queryKey: ['sale', project?.sale],
-    queryFn: async () => {
-      try {
-        const sales = await base44.entities.Sale.filter({ id: project.sale });
-        return sales[0];
-      } catch (error) {
-        console.error('Error fetching sale:', error);
-        return null;
-      }
-    },
-    enabled: !!project?.sale,
-    retry: false
-  });
-
-  const { data: projectManager } = useQuery({
-    queryKey: ['projectManager', project?.project_manager],
-    queryFn: async () => {
-      try {
-        const members = await base44.entities.TeamMember.filter({ id: project.project_manager });
-        return members[0];
-      } catch (error) {
-        console.error('Error fetching project manager:', error);
-        return null;
-      }
-    },
-    enabled: !!project?.project_manager,
-    retry: false
-  });
-
-  const { data: installationManager } = useQuery({
-    queryKey: ['installationManager', project?.installation_manager],
-    queryFn: async () => {
-      try {
-        const members = await base44.entities.TeamMember.filter({ id: project.installation_manager });
-        return members[0];
-      } catch (error) {
-        console.error('Error fetching installation manager:', error);
-        return null;
-      }
-    },
-    enabled: !!project?.installation_manager,
-    retry: false
-  });
+  const project = data?.project;
+  const customer = data?.customer;
+  const sale = data?.sale;
+  const projectManager = data?.projectManager;
+  const installationManager = data?.installationManager;
+  const customerProjectSettings = data?.settings;
 
   if (isLoading) {
     return (

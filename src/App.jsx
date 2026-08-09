@@ -9,6 +9,8 @@ import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import SignDocumentPage from './pages/SignDocument';
+import LeadAppointmentViewPage from './pages/LeadAppointmentView';
+import CustomerProjectViewPage from './pages/CustomerProjectView';
 import Login from '@/components/Login';
 import IntegrationsPage from './pages/Integrations';
 import ClaimsDashboardPage from './pages/ClaimsDashboard';
@@ -54,12 +56,18 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated, authError } = useAuth();
   const location = useLocation();
 
-  // Truly-public routes: customers signing a document are NOT logged in, so these
-  // render before the auth gate (access is authorized by the token in the URL).
-  if (location.pathname.startsWith('/SignDocument')) {
+  // Truly-public routes: customers are NOT logged in, so these render BEFORE the auth
+  // gate. Access is authorized by the token/id in the URL, and each reads only a curated,
+  // anon-safe projection — SignDocument via its e-sign token; the appointment/project
+  // trackers via the get_public_appointment / get_public_project RPCs (RLS denies direct
+  // anon table reads). Rendered without the admin Layout so customers see a clean page.
+  const PUBLIC_PREFIXES = ['/SignDocument', '/LeadAppointmentView', '/CustomerProjectView'];
+  if (PUBLIC_PREFIXES.some((p) => location.pathname.startsWith(p))) {
     return (
       <Routes>
         <Route path="/SignDocument" element={<SignDocumentPage />} />
+        <Route path="/LeadAppointmentView" element={<LeadAppointmentViewPage />} />
+        <Route path="/CustomerProjectView" element={<CustomerProjectViewPage />} />
       </Routes>
     );
   }

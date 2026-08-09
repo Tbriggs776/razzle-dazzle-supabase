@@ -403,6 +403,7 @@ const RPC_FUNCTIONS = {
   // Public (anon) pages read a curated single-record projection by id — the only
   // anon-reachable surface for these tables (RLS denies direct anon reads).
   getPublicAppointment: (p) => ['get_public_appointment', { p_id: p.id }],
+  getPublicProject:     (p) => ['get_public_project', { p_id: p.id }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
   adminSetEsignType: (p) => ['admin_set_esign_type', {
