@@ -2,155 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
-
-/* :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-} */
-
-
-
 /* ── Floor Daddy identity ──────────────────────────────────────────────────────────────
-   Deep pine-teal primary (craft + trust), warm oak-amber accent (hardwood), warm-tinted
-   neutrals (paper/wood). Branded dark-teal sidebar in both themes. Semantic red/amber stay
-   separate from the accent. Tokens are HSL triplets consumed by tailwind.config's hsl(var()). */
+   Mirrors floordaddy.com: deep navy anchor (#1c244b), hot-pink "razzle dazzle" pop
+   (#e40770/#ff1478), gold starburst sparkle (#efba1f), bright-blue support (#0879e8), on
+   white. Type is Poppins (400–900), loaded in index.html. Tokens are HSL triplets consumed
+   by tailwind.config's hsl(var()). Semantic red stays distinct from the pink accent. */
 @layer base {
   :root {
-    --background: 40 33% 98%;
-    --foreground: 172 16% 13%;
-    --card: 40 40% 99.5%;
-    --card-foreground: 172 16% 13%;
+    --background: 216 33% 99%;
+    --foreground: 230 40% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 230 40% 16%;
     --popover: 0 0% 100%;
-    --popover-foreground: 172 16% 13%;
-    --primary: 172 56% 25%;
-    --primary-foreground: 40 40% 98%;
-    --secondary: 40 24% 94%;
-    --secondary-foreground: 172 34% 18%;
-    --muted: 40 22% 95%;
-    --muted-foreground: 172 8% 42%;
-    --accent: 34 68% 93%;
-    --accent-foreground: 26 62% 28%;
-    --destructive: 4 72% 50%;
-    --destructive-foreground: 40 40% 98%;
-    --border: 40 18% 88%;
-    --input: 40 18% 88%;
-    --ring: 172 56% 30%;
-    --chart-1: 172 56% 32%;
-    --chart-2: 34 82% 52%;
-    --chart-3: 18 52% 46%;
-    --chart-4: 158 32% 52%;
-    --chart-5: 44 72% 54%;
+    --popover-foreground: 230 40% 16%;
+    --primary: 230 46% 20%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 220 32% 94%;
+    --secondary-foreground: 230 40% 22%;
+    --muted: 220 28% 95%;
+    --muted-foreground: 222 12% 45%;
+    --accent: 330 100% 96%;
+    --accent-foreground: 331 80% 40%;
+    --destructive: 0 74% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 24% 90%;
+    --input: 220 24% 90%;
+    --ring: 331 88% 46%;
+    --chart-1: 230 46% 30%;
+    --chart-2: 331 88% 52%;
+    --chart-3: 45 87% 53%;
+    --chart-4: 210 88% 47%;
+    --chart-5: 200 96% 63%;
     --radius: 0.625rem;
-    --sidebar-background: 173 42% 12%;
-    --sidebar-foreground: 40 22% 86%;
-    --sidebar-primary: 34 80% 55%;
-    --sidebar-primary-foreground: 173 44% 10%;
-    --sidebar-accent: 173 30% 19%;
-    --sidebar-accent-foreground: 40 24% 92%;
-    --sidebar-border: 173 26% 19%;
-    --sidebar-ring: 34 80% 55%;
+
+    /* Brand utility tokens — deliberate pops, exposed as bg-brand-* / text-brand-* */
+    --brand-navy: 230 46% 20%;
+    --brand-pink: 331 88% 46%;
+    --brand-pink-bright: 335 100% 54%;
+    --brand-gold: 45 87% 53%;
+    --brand-gold-light: 48 89% 67%;
+    --brand-blue: 210 88% 47%;
+    --brand-sky: 200 96% 63%;
+
+    --sidebar-background: 230 44% 14%;
+    --sidebar-foreground: 220 30% 82%;
+    --sidebar-primary: 331 86% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 34% 20%;
+    --sidebar-accent-foreground: 210 30% 92%;
+    --sidebar-border: 230 30% 22%;
+    --sidebar-ring: 331 86% 56%;
   }
   .dark {
-    --background: 174 24% 7%;
-    --foreground: 40 20% 92%;
-    --card: 174 20% 10%;
-    --card-foreground: 40 20% 92%;
-    --popover: 174 22% 9%;
-    --popover-foreground: 40 20% 92%;
-    --primary: 168 52% 44%;
-    --primary-foreground: 174 44% 8%;
-    --secondary: 174 15% 16%;
-    --secondary-foreground: 40 20% 92%;
-    --muted: 174 12% 15%;
-    --muted-foreground: 40 10% 62%;
-    --accent: 174 16% 18%;
-    --accent-foreground: 34 70% 62%;
-    --destructive: 4 64% 46%;
-    --destructive-foreground: 40 24% 96%;
-    --border: 174 13% 17%;
-    --input: 174 13% 17%;
-    --ring: 168 52% 48%;
-    --chart-1: 168 52% 48%;
-    --chart-2: 34 80% 56%;
-    --chart-3: 18 58% 55%;
-    --chart-4: 158 36% 55%;
-    --chart-5: 44 74% 60%;
-    --sidebar-background: 174 30% 9%;
-    --sidebar-foreground: 40 20% 87%;
-    --sidebar-primary: 34 78% 56%;
-    --sidebar-primary-foreground: 174 44% 9%;
-    --sidebar-accent: 174 18% 15%;
-    --sidebar-accent-foreground: 40 22% 92%;
-    --sidebar-border: 174 15% 16%;
-    --sidebar-ring: 34 78% 56%;
+    --background: 230 38% 8%;
+    --foreground: 210 30% 92%;
+    --card: 230 32% 11%;
+    --card-foreground: 210 30% 92%;
+    --popover: 230 34% 10%;
+    --popover-foreground: 210 30% 92%;
+    --primary: 212 84% 60%;
+    --primary-foreground: 230 44% 12%;
+    --secondary: 230 24% 18%;
+    --secondary-foreground: 210 30% 92%;
+    --muted: 230 20% 16%;
+    --muted-foreground: 220 14% 62%;
+    --accent: 230 24% 20%;
+    --accent-foreground: 335 90% 70%;
+    --destructive: 0 66% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 230 20% 20%;
+    --input: 230 20% 20%;
+    --ring: 335 90% 60%;
+    --chart-1: 212 84% 60%;
+    --chart-2: 335 90% 62%;
+    --chart-3: 45 85% 58%;
+    --chart-4: 210 90% 60%;
+    --chart-5: 200 92% 66%;
+
+    --brand-navy: 212 60% 44%;
+    --brand-pink: 335 92% 62%;
+    --brand-pink-bright: 335 100% 68%;
+    --brand-gold: 45 85% 58%;
+    --brand-gold-light: 48 88% 70%;
+    --brand-blue: 210 90% 60%;
+    --brand-sky: 200 92% 66%;
+
+    --sidebar-background: 230 40% 9%;
+    --sidebar-foreground: 220 26% 80%;
+    --sidebar-primary: 335 88% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 230 28% 16%;
+    --sidebar-accent-foreground: 210 28% 90%;
+    --sidebar-border: 230 24% 18%;
+    --sidebar-ring: 335 88% 60%;
   }
 }
-
-
 
 @layer base {
   * {
@@ -158,5 +104,8 @@ button:focus-visible {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }

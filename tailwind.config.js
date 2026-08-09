@@ -4,12 +4,24 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['Poppins', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			brand: {
+  				navy: 'hsl(var(--brand-navy))',
+  				pink: 'hsl(var(--brand-pink))',
+  				'pink-bright': 'hsl(var(--brand-pink-bright))',
+  				gold: 'hsl(var(--brand-gold))',
+  				'gold-light': 'hsl(var(--brand-gold-light))',
+  				blue: 'hsl(var(--brand-blue))',
+  				sky: 'hsl(var(--brand-sky))'
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

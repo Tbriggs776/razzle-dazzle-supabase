@@ -28,7 +28,7 @@ function SignaturePad({ onChange }) {
   const move = (e) => {
     if (!drawing.current) return; e.preventDefault();
     const ctx = canvasRef.current.getContext('2d'); const { x, y } = point(e);
-    ctx.lineTo(x, y); ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+    ctx.lineTo(x, y); ctx.strokeStyle = '#1c244b'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
     if (!hasInk) setHasInk(true);
     onChange(canvasRef.current.toDataURL('image/png'));
   };
