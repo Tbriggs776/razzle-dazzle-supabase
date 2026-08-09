@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { 
+import {
   Loader2,
   User,
   Mail,
@@ -14,12 +14,15 @@ import {
   Video,
   X
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
+// Customer-facing project tracker. Floor Daddy brand (navy + razzle pink + gold),
+// themed via app tokens (dark-mode aware), mobile-first: the progress tracker is a
+// vertical timeline on phones and a horizontal bar on larger screens.
 const statusSteps = [
   'Accepted',
   'Install Scheduled',
@@ -33,7 +36,7 @@ export default function CustomerProjectView() {
   const urlParams = new URLSearchParams(window.location.search);
   const projectId = urlParams.get('id');
   const showCeoVideo = urlParams.get('showCeoVideo') === 'true';
-  
+
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   useEffect(() => {
@@ -132,97 +135,98 @@ export default function CustomerProjectView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center px-6">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">Project not found</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Project not found</h2>
+          <p className="text-muted-foreground">Please check your link, or contact us for a new one.</p>
         </div>
       </div>
     );
   }
 
   const customerName = customer ? `${customer.first_name} ${customer.last_name}` : 'Loading...';
-  
+
   // Map backend status to customer-facing status
   let displayStatus = project.status;
   if (project.status === 'Scheduled' || (project.status === 'Accepted' && project.installation_date)) {
     displayStatus = 'Install Scheduled';
   }
-  
+
   const currentStepIndex = statusSteps.indexOf(displayStatus);
   const showProgressTracker = customerProjectSettings?.show_progress_tracker !== false;
 
+  const card = "bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6";
+  const sectionLabel = "text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em]";
+  const scheduledDate = project.installation_date
+    ? format(new Date(project.installation_date + 'T00:00:00'), 'MMM d')
+    : null;
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-6 py-8">
+      <header className="bg-card border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center"
           >
             <div className="mb-6">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                RAZZLE DAZZLE
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                <span className="text-foreground">Floor</span><span className="text-brand-gold">Daddy</span>
               </h1>
-              <p className="text-[10px] font-sans tracking-wider text-slate-400 uppercase mt-1">
-                BY FLOOR DADDY
+              <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-1">
+                Sexy Flooring · Quality Install
               </p>
             </div>
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-200 mb-6">
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg ring-4 ring-brand-gold/25 mb-6">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <h2 className="text-3xl font-bold text-slate-800 tracking-tight mb-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-2">
               Project Tracker
             </h2>
-            <p className="text-slate-500">Track your project progress</p>
+            <p className="text-muted-foreground">Follow your project every step of the way.</p>
           </motion.div>
         </div>
-      </div>
+      </header>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="space-y-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="space-y-5 sm:space-y-6">
           {/* Contact Numbers */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl border-2 border-orange-200 p-8"
+            className="bg-accent rounded-2xl border border-brand-pink/20 p-5 sm:p-7"
           >
             <div className="space-y-4">
-              <a
-                href="tel:480-805-5740"
-                className="flex items-center gap-4 group cursor-pointer"
-              >
-                <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <span className="text-2xl">🔨</span>
+              <a href="tel:480-805-5740" className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center flex-shrink-0 text-2xl group-hover:scale-110 transition-transform">
+                  🔨
                 </div>
                 <div>
-                  <p className="text-xs text-orange-600 font-medium">Installation Questions</p>
-                  <p className="text-2xl font-bold text-orange-700 group-hover:text-orange-900">480-805-5740</p>
+                  <p className="text-xs font-semibold text-accent-foreground">Installation Questions</p>
+                  <p className="text-xl sm:text-2xl font-extrabold text-foreground group-hover:text-primary transition-colors">480-805-5740</p>
                 </div>
               </a>
-              
-              <div className="border-t border-orange-200" />
-              
-              <a
-                href="tel:480-764-2412"
-                className="flex items-center gap-4 group cursor-pointer"
-              >
-                <div className="w-12 h-12 rounded-xl bg-red-500 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+
+              <div className="border-t border-brand-pink/15" />
+
+              <a href="tel:480-764-2412" className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-xl bg-brand-pink flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                   <Phone className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs text-red-600 font-medium">Customer Care</p>
-                  <p className="text-2xl font-bold text-red-700 group-hover:text-red-900">480-764-2412</p>
+                  <p className="text-xs font-semibold text-accent-foreground">Customer Care</p>
+                  <p className="text-xl sm:text-2xl font-extrabold text-foreground group-hover:text-brand-pink transition-colors">480-764-2412</p>
                 </div>
               </a>
             </div>
@@ -234,54 +238,80 @@ export default function CustomerProjectView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className={card}
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider text-center mb-8">
-                Project Progress
-              </h2>
-              <div className="relative">
-                {/* Progress Line */}
-                <div className="absolute top-5 left-0 right-0 h-1 bg-slate-200">
-                  <div 
-                    className="h-full bg-indigo-600 transition-all duration-500"
-                    style={{ width: `${(currentStepIndex / (statusSteps.length - 1)) * 115}%` }}
+              <h2 className={cn(sectionLabel, "text-center mb-6 sm:mb-8")}>Project Progress</h2>
+
+              {/* Mobile: vertical timeline */}
+              <ol className="sm:hidden relative pl-8">
+                <span className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-border" aria-hidden="true" />
+                {statusSteps.map((step, index) => {
+                  const isDone = index < currentStepIndex;
+                  const isCurrent = index === currentStepIndex;
+                  const isScheduled = step === 'Install Scheduled';
+                  return (
+                    <li key={step} className="relative pb-6 last:pb-0">
+                      <span className={cn(
+                        "absolute -left-8 top-0 w-8 h-8 rounded-full flex items-center justify-center border-4 border-card",
+                        isCurrent ? "bg-brand-pink" : isDone ? "bg-primary" : "bg-muted"
+                      )}>
+                        {isDone || isCurrent
+                          ? <CheckCircle2 className="w-4 h-4 text-white" />
+                          : <Circle className="w-4 h-4 text-muted-foreground" />}
+                      </span>
+                      <p className={cn(
+                        "font-semibold leading-8",
+                        isCurrent ? "text-brand-pink" : isDone ? "text-foreground" : "text-muted-foreground"
+                      )}>
+                        {step}
+                      </p>
+                      {isScheduled && scheduledDate && (
+                        <p className="text-xs text-muted-foreground -mt-1">
+                          {scheduledDate}
+                          {project.installation_date_status && (
+                            <span className="text-destructive font-medium"> · {project.installation_date_status}</span>
+                          )}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+
+              {/* Desktop: horizontal bar */}
+              <div className="hidden sm:block relative">
+                <div className="absolute top-5 left-0 right-0 h-1 bg-border">
+                  <div
+                    className="h-full bg-primary transition-all duration-500"
+                    style={{ width: `${Math.max(0, currentStepIndex) / (statusSteps.length - 1) * 100}%` }}
                   />
                 </div>
-
-                {/* Steps */}
                 <div className="relative flex justify-between">
                   {statusSteps.map((step, index) => {
-                    const isCompleted = index < currentStepIndex;
+                    const isDone = index < currentStepIndex;
                     const isCurrent = index === currentStepIndex;
                     const isScheduled = step === 'Install Scheduled';
-                    
                     return (
                       <div key={step} className="flex flex-col items-center" style={{ width: `${100 / statusSteps.length}%` }}>
                         <div className={cn(
-                          "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-4 border-white",
-                          isCompleted || isCurrent ? "bg-indigo-600" : "bg-slate-200"
+                          "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-4 border-card",
+                          isCurrent ? "bg-brand-pink" : isDone ? "bg-primary" : "bg-muted"
                         )}>
-                          {isCompleted || isCurrent ? (
-                            <CheckCircle2 className="w-5 h-5 text-white" />
-                          ) : (
-                            <Circle className="w-5 h-5 text-slate-400" />
-                          )}
+                          {isDone || isCurrent
+                            ? <CheckCircle2 className="w-5 h-5 text-white" />
+                            : <Circle className="w-5 h-5 text-muted-foreground" />}
                         </div>
                         <p className={cn(
                           "mt-3 text-xs font-medium text-center px-1",
-                          isCurrent ? "text-indigo-600" : isCompleted ? "text-slate-700" : "text-slate-400"
+                          isCurrent ? "text-brand-pink" : isDone ? "text-foreground" : "text-muted-foreground"
                         )}>
                           {step}
                         </p>
-                        {isScheduled && project.installation_date && (
-                          <div className="mt-1">
-                            <p className="text-xs text-slate-500">
-                              {format(new Date(project.installation_date + 'T00:00:00'), 'MMM d')}
-                            </p>
+                        {isScheduled && scheduledDate && (
+                          <div className="mt-1 text-center">
+                            <p className="text-xs text-muted-foreground">{scheduledDate}</p>
                             {project.installation_date_status && (
-                              <p className="text-xs text-red-600 font-medium mt-0.5">
-                                {project.installation_date_status}
-                              </p>
+                              <p className="text-xs text-destructive font-medium mt-0.5">{project.installation_date_status}</p>
                             )}
                           </div>
                         )}
@@ -298,21 +328,17 @@ export default function CustomerProjectView() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className={card}
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
-              Customer Information
-            </h2>
+            <h2 className={cn(sectionLabel, "mb-4")}>Customer Information</h2>
             {customer && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-50">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                    <User className="w-5 h-5 text-indigo-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Name</p>
-                    <p className="text-slate-800">{customerName}</p>
-                  </div>
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <User className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">Name</p>
+                  <p className="text-foreground font-medium">{customerName}</p>
                 </div>
               </div>
             )}
@@ -324,18 +350,14 @@ export default function CustomerProjectView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className={card}
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
-                Project Location
-              </h2>
-              <div className="flex items-start gap-4 p-3 rounded-xl bg-slate-50">
-                <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-orange-600" />
+              <h2 className={cn(sectionLabel, "mb-4")}>Project Location</h2>
+              <div className="flex items-start gap-4 p-3 rounded-xl bg-secondary">
+                <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-5 h-5 text-brand-gold" />
                 </div>
-                <div>
-                  <p className="text-slate-800">{sale.location_address}</p>
-                </div>
+                <p className="text-foreground">{sale.location_address}</p>
               </div>
             </motion.div>
           )}
@@ -346,60 +368,48 @@ export default function CustomerProjectView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className={card}
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
-                Your Project Manager
-              </h2>
+              <h2 className={cn(sectionLabel, "mb-4")}>Your Project Manager</h2>
               <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-secondary">
                   {projectManager.profile_photo ? (
                     <img
                       src={projectManager.profile_photo}
                       alt={`${projectManager.first_name} ${projectManager.last_name}`}
-                      className="w-16 h-16 rounded-xl object-cover border-2 border-white shadow-md"
+                      className="w-16 h-16 rounded-xl object-cover border-2 border-card shadow-md"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-xl border-2 border-white shadow-md">
+                    <div className="w-16 h-16 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-xl border-2 border-card shadow-md">
                       {projectManager.first_name?.[0]}{projectManager.last_name?.[0]}
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="font-semibold text-slate-800 text-lg">
+                    <p className="font-semibold text-foreground text-lg">
                       {projectManager.first_name} {projectManager.last_name}
                     </p>
-                    <p className="text-xs text-indigo-600 font-medium mt-0.5">Project Manager</p>
+                    <p className="text-xs text-primary font-semibold mt-0.5">Project Manager</p>
                   </div>
                 </div>
-                
-                <a
-                  href={`mailto:${projectManager.email}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-600" />
+
+                <a href={`mailto:${projectManager.email}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-brand-blue" />
                   </div>
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Email</p>
-                    <p className="text-slate-800 group-hover:text-green-600 transition-colors">
-                      {projectManager.email}
-                    </p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                    <p className="text-foreground group-hover:text-brand-blue transition-colors break-words">{projectManager.email}</p>
                   </div>
                 </a>
-                
+
                 {projectManager.phone && (
-                  <a
-                    href={`tel:${projectManager.phone}`}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-blue-600" />
+                  <a href={`tel:${projectManager.phone}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group">
+                    <div className="w-10 h-10 rounded-lg bg-brand-pink/12 flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-5 h-5 text-brand-pink" />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-400 mb-0.5">Phone</p>
-                      <p className="text-slate-800 group-hover:text-blue-600 transition-colors">
-                        {projectManager.phone}
-                      </p>
+                      <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                      <p className="text-foreground group-hover:text-brand-pink transition-colors">{projectManager.phone}</p>
                     </div>
                   </a>
                 )}
@@ -413,60 +423,48 @@ export default function CustomerProjectView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className={card}
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
-                Your Installation Manager
-              </h2>
+              <h2 className={cn(sectionLabel, "mb-4")}>Your Installation Manager</h2>
               <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-secondary">
                   {installationManager.profile_photo ? (
                     <img
                       src={installationManager.profile_photo}
                       alt={`${installationManager.first_name} ${installationManager.last_name}`}
-                      className="w-16 h-16 rounded-xl object-cover border-2 border-white shadow-md"
+                      className="w-16 h-16 rounded-xl object-cover border-2 border-card shadow-md"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl border-2 border-white shadow-md">
+                    <div className="w-16 h-16 rounded-xl bg-brand-blue flex items-center justify-center text-white font-bold text-xl border-2 border-card shadow-md">
                       {installationManager.first_name?.[0]}{installationManager.last_name?.[0]}
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="font-semibold text-slate-800 text-lg">
+                    <p className="font-semibold text-foreground text-lg">
                       {installationManager.first_name} {installationManager.last_name}
                     </p>
-                    <p className="text-xs text-blue-600 font-medium mt-0.5">Installation Manager</p>
+                    <p className="text-xs text-brand-blue font-semibold mt-0.5">Installation Manager</p>
                   </div>
                 </div>
-                
-                <a
-                  href={`mailto:${installationManager.email}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-600" />
+
+                <a href={`mailto:${installationManager.email}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-brand-blue" />
                   </div>
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Email</p>
-                    <p className="text-slate-800 group-hover:text-green-600 transition-colors">
-                      {installationManager.email}
-                    </p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                    <p className="text-foreground group-hover:text-brand-blue transition-colors break-words">{installationManager.email}</p>
                   </div>
                 </a>
-                
+
                 {installationManager.phone && (
-                  <a
-                    href={`tel:${installationManager.phone}`}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-blue-600" />
+                  <a href={`tel:${installationManager.phone}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group">
+                    <div className="w-10 h-10 rounded-lg bg-brand-pink/12 flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-5 h-5 text-brand-pink" />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-400 mb-0.5">Phone</p>
-                      <p className="text-slate-800 group-hover:text-blue-600 transition-colors">
-                        {installationManager.phone}
-                      </p>
+                      <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                      <p className="text-foreground group-hover:text-brand-pink transition-colors">{installationManager.phone}</p>
                     </div>
                   </a>
                 )}
@@ -480,25 +478,23 @@ export default function CustomerProjectView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className={card}
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
-                Your Contract
-              </h2>
+              <h2 className={cn(sectionLabel, "mb-4")}>Your Contract</h2>
               <a
                 href={sale.contract_file_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 hover:shadow-md transition-all group"
+                className="flex items-center gap-4 p-4 rounded-xl bg-secondary border border-border hover:shadow-md transition-all group"
               >
-                <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-6 h-6 text-primary-foreground" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-slate-800 mb-0.5">Sales Contract</p>
-                  <p className="text-xs text-slate-500">Click to view or download</p>
+                  <p className="font-semibold text-foreground mb-0.5">Sales Contract</p>
+                  <p className="text-xs text-muted-foreground">Tap to view or download</p>
                 </div>
-                <Download className="w-5 h-5 text-indigo-600 group-hover:text-indigo-700" />
+                <Download className="w-5 h-5 text-primary" />
               </a>
             </motion.div>
           )}
@@ -509,71 +505,69 @@ export default function CustomerProjectView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className={card}
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
-                Scheduled Timeline
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
+              <h2 className={cn(sectionLabel, "mb-4")}>Scheduled Timeline</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {project.scheduled_start_date && (
-                  <div className="p-4 rounded-xl bg-blue-50 border border-blue-100">
-                    <p className="text-xs text-blue-600 font-medium mb-1">Start Date</p>
-                    <p className="text-slate-800 font-semibold">
+                  <div className="p-4 rounded-xl bg-secondary border border-border">
+                    <p className="text-xs text-brand-blue font-semibold mb-1">Start Date</p>
+                    <p className="text-foreground font-semibold">
                       {format(new Date(project.scheduled_start_date + 'T00:00:00'), 'MMM d, yyyy')}
                     </p>
                   </div>
                 )}
                 {project.scheduled_end_date && (
-                  <div className="p-4 rounded-xl bg-purple-50 border border-purple-100">
-                    <p className="text-xs text-purple-600 font-medium mb-1">End Date</p>
-                    <p className="text-slate-800 font-semibold">
+                  <div className="p-4 rounded-xl bg-secondary border border-border">
+                    <p className="text-xs text-brand-pink font-semibold mb-1">End Date</p>
+                    <p className="text-foreground font-semibold">
                       {format(new Date(project.scheduled_end_date + 'T00:00:00'), 'MMM d, yyyy')}
                     </p>
                   </div>
                 )}
               </div>
-              </motion.div>
-              )}
+            </motion.div>
+          )}
 
-              {/* Meet the CEO Button */}
-              <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="flex justify-center"
-              >
-              <Button
+          {/* Meet the CEO Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="flex justify-center pt-2"
+          >
+            <Button
               onClick={() => setVideoModalOpen(true)}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-6 h-auto text-lg rounded-xl shadow-lg hover:shadow-xl transition-all"
-              >
+              className="bg-brand-pink hover:bg-brand-pink/90 text-white px-8 py-6 h-auto text-lg rounded-xl shadow-lg hover:shadow-xl transition-all"
+            >
               <Video className="w-6 h-6 mr-3" />
               Meet the CEO
-              </Button>
-              </motion.div>
-              </div>
-              </div>
+            </Button>
+          </motion.div>
+        </div>
+      </div>
 
-              {/* CEO Video Modal */}
-              <Dialog open={videoModalOpen} onOpenChange={setVideoModalOpen}>
-              <DialogContent className="max-w-4xl p-0 overflow-hidden">
-              <div className="relative bg-black">
-              <button
+      {/* CEO Video Modal */}
+      <Dialog open={videoModalOpen} onOpenChange={setVideoModalOpen}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden">
+          <div className="relative bg-black">
+            <button
               onClick={() => setVideoModalOpen(false)}
               className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
-              >
+            >
               <X className="w-5 h-5 text-white" />
-              </button>
-              <video
+            </button>
+            <video
               controls
               autoPlay={showCeoVideo}
               className="w-full"
               src="https://upcdn.io/223k2X9/raw/videos/csp.mp4"
-              >
+            >
               Your browser does not support the video tag.
-              </video>
-              </div>
-              </DialogContent>
-              </Dialog>
-              </div>
-              );
-              }
+            </video>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

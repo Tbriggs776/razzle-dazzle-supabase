@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Badge } from "@/components/ui/badge";
-import { 
-  Calendar as CalendarIcon, 
+import {
+  Calendar as CalendarIcon,
   Clock,
   MapPin,
   User,
-  Mail,
-  Phone,
   Loader2,
   Check,
   Star,
@@ -19,11 +17,18 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+// Customer-facing appointment page. Floor Daddy brand (navy + razzle pink + gold),
+// themed via app tokens (dark-mode aware), mobile-first. Data comes from the
+// token-scoped get_public_appointment RPC (anon has no direct table access).
+
 const VIDEOS = [
   "https://upcdn.io/223k2X9/raw/videos/r3.mov",
   "https://upcdn.io/223k2X9/raw/videos/r1.MP4",
   "https://upcdn.io/223k2X9/raw/videos/r0.mov"
 ];
+
+const card = "bg-card rounded-2xl border border-border shadow-sm";
+const sectionLabel = "text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em]";
 
 function VideoCarousel() {
   const [current, setCurrent] = useState(0);
@@ -31,11 +36,11 @@ function VideoCarousel() {
   const next = () => setCurrent(prev => (prev + 1) % VIDEOS.length);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6">
-      <p className="text-lg font-bold text-slate-800 text-center mb-4">What Our Customers Have to Say</p>
+    <div className={cn(card, "p-5 sm:p-6")}>
+      <p className="text-lg font-bold text-foreground text-center mb-4">What Our Customers Have to Say</p>
       <div className="relative flex items-center">
-        <button onClick={prev} className="absolute left-0 z-10 p-1 rounded-full hover:bg-slate-100 transition-colors">
-          <ChevronLeft className="w-5 h-5 text-slate-500" />
+        <button onClick={prev} className="absolute left-0 z-10 p-1 rounded-full hover:bg-secondary transition-colors">
+          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
         </button>
         <motion.div
           key={current}
@@ -53,8 +58,8 @@ function VideoCarousel() {
             style={{ maxHeight: '80vh', width: 'auto' }}
           />
         </motion.div>
-        <button onClick={next} className="absolute right-0 z-10 p-1 rounded-full hover:bg-slate-100 transition-colors">
-          <ChevronRight className="w-5 h-5 text-slate-500" />
+        <button onClick={next} className="absolute right-0 z-10 p-1 rounded-full hover:bg-secondary transition-colors">
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
         </button>
       </div>
       <div className="flex justify-center gap-2 mt-4">
@@ -62,7 +67,8 @@ function VideoCarousel() {
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={cn("w-2 h-2 rounded-full transition-all", i === current ? "bg-indigo-600 w-4" : "bg-slate-300")}
+            className={cn("h-2 rounded-full transition-all", i === current ? "bg-brand-pink w-4" : "bg-border w-2")}
+            aria-label={`Video ${i + 1}`}
           />
         ))}
       </div>
@@ -100,18 +106,18 @@ function ReviewCarousel() {
   const item = REVIEWS[current];
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6">
+    <div className={cn(card, "p-5 sm:p-6")}>
       <div className="text-center mb-4">
-        <p className="text-lg font-bold text-slate-800">1,000s of Happy Customers</p>
+        <p className="text-lg font-bold text-foreground">1,000s of Happy Customers</p>
         <div className="flex justify-center gap-0.5 mt-1">
           {[...Array(5)].map((_, i) => (
-            <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+            <Star key={i} className="w-5 h-5 fill-brand-gold text-brand-gold" />
           ))}
         </div>
       </div>
       <div className="relative flex items-center">
-        <button onClick={prev} className="absolute left-0 z-10 p-1 rounded-full hover:bg-slate-100 transition-colors">
-          <ChevronLeft className="w-5 h-5 text-slate-500" />
+        <button onClick={prev} className="absolute left-0 z-10 p-1 rounded-full hover:bg-secondary transition-colors">
+          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
         </button>
         <motion.div
           key={current}
@@ -121,12 +127,12 @@ function ReviewCarousel() {
           className="px-8 w-full"
         >
           <div className="text-center min-h-[140px] flex flex-col justify-center">
-            <p className="text-slate-600 text-sm leading-relaxed italic">"{item.text}"</p>
-            <p className="mt-3 font-semibold text-slate-800 text-sm">— {item.name}</p>
+            <p className="text-muted-foreground text-sm leading-relaxed italic">"{item.text}"</p>
+            <p className="mt-3 font-semibold text-foreground text-sm">— {item.name}</p>
           </div>
         </motion.div>
-        <button onClick={next} className="absolute right-0 z-10 p-1 rounded-full hover:bg-slate-100 transition-colors">
-          <ChevronRight className="w-5 h-5 text-slate-500" />
+        <button onClick={next} className="absolute right-0 z-10 p-1 rounded-full hover:bg-secondary transition-colors">
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
         </button>
       </div>
       <div className="flex justify-center gap-2 mt-4">
@@ -134,7 +140,8 @@ function ReviewCarousel() {
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={cn("w-2 h-2 rounded-full transition-all", i === current ? "bg-indigo-600 w-4" : "bg-slate-300")}
+            className={cn("h-2 rounded-full transition-all", i === current ? "bg-brand-pink w-4" : "bg-border w-2")}
+            aria-label={`Review ${i + 1}`}
           />
         ))}
       </div>
@@ -142,13 +149,14 @@ function ReviewCarousel() {
   );
 }
 
+// Semantic status colors (kept distinct from the brand accent), dark-mode aware.
 const statusColors = {
-  'Lead': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200',
-  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'Cancelled': 'bg-red-100 text-red-800 border-red-200',
-  'Completed': 'bg-green-100 text-green-800 border-green-200'
+  'Lead': 'bg-secondary text-secondary-foreground border-border',
+  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
+  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'Cancelled': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'Completed': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
 };
 
 export default function LeadAppointmentView() {
@@ -174,55 +182,61 @@ export default function LeadAppointmentView() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!appointment) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center px-6">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">Appointment not found</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Appointment not found</h2>
+          <p className="text-muted-foreground">Please check your link, or contact us for a new one.</p>
         </div>
       </div>
     );
   }
 
-  const leadName = lead ? `${lead.first_name} ${lead.last_name}` : 'Loading...';
+  // Progress-tracker state (unchanged logic).
+  const finalStatuses = ['Completed', 'Sold', 'Lost', 'Pitch and Miss', 'One-Leg'];
+  const isFinal = finalStatuses.includes(appointment.status);
+  const isScheduledOrLater = ['Scheduled', 'Rescheduled'].includes(appointment.status) || appointment.consultant_en_route_time || isFinal;
+  const isEnRouteOrLater = appointment.consultant_en_route_time || isFinal;
+  const showTracker = ['Scheduled', 'Rescheduled', ...finalStatuses].includes(appointment.status);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-6 py-6">
+      <header className="bg-card border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-7">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col gap-6"
           >
             {/* Logo */}
-            <div className="text-center md:text-left">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                RAZZLE DAZZLE
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl font-extrabold tracking-tight">
+                <span className="text-foreground">Floor</span><span className="text-brand-gold">Daddy</span>
               </h1>
-              <p className="text-[9px] font-sans tracking-wider text-slate-400 uppercase mt-0.5">
-                BY FLOOR DADDY
+              <p className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-0.5">
+                Sexy Flooring · Quality Install
               </p>
             </div>
 
             {/* Appointment Header */}
-            <div className="flex flex-col md:flex-row md:items-center gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-200">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6">
+              <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg ring-4 ring-brand-gold/25 mx-auto sm:mx-0">
                 <CalendarIcon className="w-10 h-10" />
               </div>
 
-              <div className="flex-1">
-                <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Your Appointment</h2>
-                <p className="text-slate-500 text-sm mt-2">Questions or need to modify your appointment?</p>
-                <a href="tel:5555550100" className="text-indigo-600 font-bold text-xl mt-1 hover:underline">(555) 555-0100</a>
-                <div className="flex items-center gap-2 mt-3">
+              <div className="flex-1 text-center sm:text-left">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Your Appointment</h2>
+                <p className="text-muted-foreground text-sm mt-2">Questions or need to modify your appointment?</p>
+                <a href="tel:5555550100" className="text-primary font-bold text-xl mt-1 inline-block hover:underline">(555) 555-0100</a>
+                <div className="flex items-center justify-center sm:justify-start gap-2 mt-3">
                   <Badge variant="secondary" className={cn('border', statusColors[appointment.status])}>
                     {appointment.status}
                   </Badge>
@@ -231,88 +245,56 @@ export default function LeadAppointmentView() {
             </div>
           </motion.div>
         </div>
-      </div>
+      </header>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Progress Tracker */}
-        {(appointment.status === 'Scheduled' || appointment.status === 'Rescheduled' || appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg') && (
+        {showTracker && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
-            <div className="bg-white rounded-2xl border border-slate-100 p-6">
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-6 text-center">
-                Appointment Progress
-              </h2>
+            <div className={cn(card, "p-5 sm:p-6")}>
+              <h2 className={cn(sectionLabel, "mb-6 text-center")}>Appointment Progress</h2>
               <div className="relative">
-                {/* Progress Bar Background */}
-                <div className="absolute top-5 left-0 right-0 h-2 bg-slate-100 rounded-full" />
-                
-                {/* Progress Bar Fill */}
-                <div 
-                  className="absolute top-5 left-0 h-2 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500"
-                  style={{ 
-                    width: (appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg')
-                      ? '100%' 
-                      : appointment.consultant_en_route_time 
-                        ? '50%' 
-                        : '0%' 
-                  }}
+                {/* Progress bar background */}
+                <div className="absolute top-5 left-0 right-0 h-2 bg-muted rounded-full" />
+                {/* Progress bar fill */}
+                <div
+                  className="absolute top-5 left-0 h-2 bg-primary rounded-full transition-all duration-500"
+                  style={{ width: isFinal ? '100%' : appointment.consultant_en_route_time ? '50%' : '0%' }}
                 />
-                
-                {/* Steps */}
+
                 <div className="relative flex justify-between">
                   {/* Step 1: Scheduled */}
                   <div className="flex flex-col items-center" style={{ width: '33%' }}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                      appointment.status === 'Scheduled' || appointment.status === 'Rescheduled' || appointment.consultant_en_route_time || appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg'
-                        ? 'bg-indigo-600 border-indigo-600'
-                        : 'bg-white border-slate-200'
-                    }`}>
-                      {appointment.status === 'Scheduled' || appointment.status === 'Rescheduled' || appointment.consultant_en_route_time || appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg' ? (
-                        <Check className="w-5 h-5 text-white" />
-                      ) : (
-                        <span className="text-slate-400 font-semibold">1</span>
-                      )}
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center border-4 border-card transition-all duration-300",
+                      isScheduledOrLater ? "bg-primary" : "bg-muted"
+                    )}>
+                      {isScheduledOrLater ? <Check className="w-5 h-5 text-primary-foreground" /> : <span className="text-muted-foreground font-semibold">1</span>}
                     </div>
-                    <p className={`mt-3 text-sm font-medium text-center ${
-                      appointment.status === 'Scheduled' || appointment.status === 'Rescheduled' || appointment.consultant_en_route_time || appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg'
-                        ? 'text-indigo-600'
-                        : 'text-slate-400'
-                    }`}>
-                      Scheduled
-                    </p>
+                    <p className={cn("mt-3 text-sm font-medium text-center", isScheduledOrLater ? "text-primary" : "text-muted-foreground")}>Scheduled</p>
                     {appointment.appointment_date && (
-                      <p className="text-xs text-slate-500 mt-1 text-center">
+                      <p className="text-xs text-muted-foreground mt-1 text-center">
                         {format(new Date(appointment.appointment_date + 'T00:00:00'), 'MMM d')}
                       </p>
                     )}
                   </div>
 
-                  {/* Step 2: En Route */}
+                  {/* Step 2: En Route (the live/current step — pink pop) */}
                   <div className="flex flex-col items-center" style={{ width: '33%' }}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                      appointment.consultant_en_route_time || appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg'
-                        ? 'bg-indigo-600 border-indigo-600'
-                        : 'bg-white border-slate-200'
-                    }`}>
-                      {appointment.consultant_en_route_time || appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg' ? (
-                        <Check className="w-5 h-5 text-white" />
-                      ) : (
-                        <span className="text-slate-400 font-semibold">2</span>
-                      )}
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center border-4 border-card transition-all duration-300",
+                      isEnRouteOrLater ? (isFinal ? "bg-primary" : "bg-brand-pink") : "bg-muted"
+                    )}>
+                      {isEnRouteOrLater ? <Check className="w-5 h-5 text-white" /> : <span className="text-muted-foreground font-semibold">2</span>}
                     </div>
-                    <p className={`mt-3 text-sm font-medium text-center ${
-                      appointment.consultant_en_route_time || appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg'
-                        ? 'text-indigo-600'
-                        : 'text-slate-400'
-                    }`}>
-                      En Route
-                    </p>
+                    <p className={cn("mt-3 text-sm font-medium text-center", isEnRouteOrLater ? (isFinal ? "text-primary" : "text-brand-pink") : "text-muted-foreground")}>En Route</p>
                     {appointment.consultant_en_route_time && (
-                      <p className="text-xs text-slate-500 mt-1 text-center">
+                      <p className="text-xs text-muted-foreground mt-1 text-center">
                         {new Date(appointment.consultant_en_route_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                       </p>
                     )}
@@ -320,24 +302,13 @@ export default function LeadAppointmentView() {
 
                   {/* Step 3: Completed */}
                   <div className="flex flex-col items-center" style={{ width: '33%' }}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                      appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg'
-                        ? 'bg-indigo-600 border-indigo-600'
-                        : 'bg-white border-slate-200'
-                    }`}>
-                      {appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg' ? (
-                        <Check className="w-5 h-5 text-white" />
-                      ) : (
-                        <span className="text-slate-400 font-semibold">3</span>
-                      )}
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center border-4 border-card transition-all duration-300",
+                      isFinal ? "bg-primary" : "bg-muted"
+                    )}>
+                      {isFinal ? <Check className="w-5 h-5 text-primary-foreground" /> : <span className="text-muted-foreground font-semibold">3</span>}
                     </div>
-                    <p className={`mt-3 text-sm font-medium text-center ${
-                      appointment.status === 'Completed' || appointment.status === 'Sold' || appointment.status === 'Lost' || appointment.status === 'Pitch and Miss' || appointment.status === 'One-Leg'
-                        ? 'text-indigo-600'
-                        : 'text-slate-400'
-                    }`}>
-                      Completed
-                    </p>
+                    <p className={cn("mt-3 text-sm font-medium text-center", isFinal ? "text-primary" : "text-muted-foreground")}>Completed</p>
                   </div>
                 </div>
               </div>
@@ -345,26 +316,24 @@ export default function LeadAppointmentView() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
           {/* Appointment Details */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className={cn(card, "p-5 sm:p-6")}
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
-              Appointment Details
-            </h2>
+            <h2 className={cn(sectionLabel, "mb-4")}>Appointment Details</h2>
             <div className="space-y-4">
               {appointment.appointment_date && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <CalendarIcon className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center flex-shrink-0">
+                    <CalendarIcon className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Date</p>
-                    <p className="text-slate-800">
+                    <p className="text-xs text-muted-foreground mb-0.5">Date</p>
+                    <p className="text-foreground">
                       {format(new Date(appointment.appointment_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
                     </p>
                   </div>
@@ -372,13 +341,13 @@ export default function LeadAppointmentView() {
               )}
 
               {appointment.appointment_block && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-purple-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-brand-pink/12 flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-5 h-5 text-brand-pink" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Time Block</p>
-                    <p className="text-slate-800">{appointment.appointment_block}</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">Time Block</p>
+                    <p className="text-foreground">{appointment.appointment_block}</p>
                   </div>
                 </div>
               )}
@@ -390,22 +359,18 @@ export default function LeadAppointmentView() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className={cn(card, "p-5 sm:p-6")}
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
-              Location
-            </h2>
+            <h2 className={cn(sectionLabel, "mb-4")}>Location</h2>
             {appointment.location_address ? (
               <div className="flex items-start gap-4 p-3">
-                <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-orange-600" />
+                <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-5 h-5 text-brand-gold" />
                 </div>
-                <div>
-                  <p className="text-slate-800">{appointment.location_address}</p>
-                </div>
+                <p className="text-foreground">{appointment.location_address}</p>
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-6">No location specified</p>
+              <p className="text-muted-foreground text-center py-6">No location specified</p>
             )}
           </motion.div>
 
@@ -415,31 +380,29 @@ export default function LeadAppointmentView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className={cn(card, "p-5 sm:p-6 md:col-span-2")}
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
-                Your Design Consultant
-              </h2>
-              <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl">
-                <div className="float-left mr-5 mb-2 w-40 h-40 rounded-xl overflow-hidden shadow-lg flex-shrink-0">
+              <h2 className={cn(sectionLabel, "mb-4")}>Your Design Consultant</h2>
+              <div className="p-4 bg-secondary rounded-xl">
+                <div className="float-left mr-5 mb-2 w-32 h-32 sm:w-40 sm:h-40 rounded-xl overflow-hidden shadow-lg flex-shrink-0">
                   {dc.profile_photo ? (
-                    <img 
-                      src={dc.profile_photo} 
+                    <img
+                      src={dc.profile_photo}
                       alt={`${dc.first_name} ${dc.last_name}`}
                       className="w-full h-full object-contain"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl">
+                    <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl">
                       {`${dc.first_name?.[0] || ''}${dc.last_name?.[0] || ''}`.toUpperCase()}
                     </div>
                   )}
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-1">
+                <h3 className="text-xl font-bold text-foreground mb-1">
                   {dc.first_name} {dc.last_name}
                 </h3>
-                <p className="text-sm text-slate-500 mb-2">Design Consultant</p>
+                <p className="text-sm text-primary font-semibold mb-2">Design Consultant</p>
                 {dc.bio && (
-                  <p className="text-sm text-slate-600 leading-relaxed">{dc.bio}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{dc.bio}</p>
                 )}
                 <div className="clear-both" />
               </div>
@@ -452,16 +415,16 @@ export default function LeadAppointmentView() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className={cn(card, "p-5 sm:p-6 md:col-span-2")}
             >
               <div className="text-center py-8">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
-                  <User className="w-8 h-8 text-amber-600" />
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-brand-gold/15 flex items-center justify-center mb-4">
+                  <User className="w-8 h-8 text-brand-gold" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   Design Consultant Pending
                 </h3>
-                <p className="text-slate-500 max-w-md mx-auto">
+                <p className="text-muted-foreground max-w-md mx-auto">
                   Your design consultant will be assigned soon. You'll receive an update once they're confirmed.
                 </p>
               </div>
@@ -474,7 +437,7 @@ export default function LeadAppointmentView() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="mt-6"
+          className="mt-5 sm:mt-6"
         >
           <ReviewCarousel />
         </motion.div>
@@ -484,7 +447,7 @@ export default function LeadAppointmentView() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mt-8"
+          className="mt-6 sm:mt-8"
         >
           <VideoCarousel />
         </motion.div>
@@ -494,7 +457,7 @@ export default function LeadAppointmentView() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-8"
+          className="mt-6 sm:mt-8"
         >
           <img
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69402063235e76365e0f0fdd/381808dd5_comparison-img-fd.jpg"
