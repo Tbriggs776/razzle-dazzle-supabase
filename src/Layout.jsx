@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AudioRecorder from '@/components/AudioRecorder';
+import BrandLogo from '@/components/BrandLogo';
 
 const RecordingContext = createContext();
 
@@ -153,7 +154,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
           <h1 className="text-xl font-bold text-slate-800 mb-2">No access to this page</h1>
           <p className="text-slate-500 mb-6">Your role doesn't include this area. Contact an administrator if you think this is a mistake.</p>
-          <Link to={createPageUrl(home)} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors">
+          <Link to={createPageUrl(home)} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-primary text-primary-foreground hover:opacity-90 rounded-lg transition-colors">
             Go to my workspace
           </Link>
         </div>
@@ -164,11 +165,11 @@ export default function Layout({ children, currentPageName }) {
   // Show login splash if user is not logged in and trying to access protected pages
   if (!userLoading && !currentUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-secondary flex items-center justify-center p-6">
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 text-center">
-            <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <User className="w-10 h-10 text-indigo-600" />
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <User className="w-10 h-10 text-primary" />
             </div>
             <h1 className="text-2xl font-bold text-slate-800 mb-3">
               Login Required
@@ -178,7 +179,7 @@ export default function Layout({ children, currentPageName }) {
             </p>
             <button
               onClick={() => base44.auth.redirectToLogin(window.location.pathname)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm bg-primary text-primary-foreground hover:opacity-90 rounded-lg transition-colors"
             >
               <User className="w-4 h-4" />
               Login to Continue
@@ -193,7 +194,7 @@ export default function Layout({ children, currentPageName }) {
   const shouldShowSplash = appSettings?.show_role_assignment_splash && currentUser && (viewingAsRole === 'no_role' || (!teamMember?.role && currentUser.role !== 'admin'));
   if (shouldShowSplash) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-secondary flex items-center justify-center p-6">
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 text-center">
             <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -244,11 +245,11 @@ export default function Layout({ children, currentPageName }) {
           >
             <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-4">
               <div className="flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                <ShieldCheck className="w-5 h-5 text-primary" />
                 <div className="space-y-1">
                   <div className="text-xs text-slate-500 font-medium">Viewing as</div>
                   <Select value={viewingAsRole || currentUser.role} onValueChange={setViewingAsRole}>
-                    <SelectTrigger className="h-8 text-sm border-indigo-200">
+                    <SelectTrigger className="h-8 text-sm border-input">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -497,14 +498,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200">
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                RAZZLE DAZZLE
-              </h1>
-              <p className="text-[9px] font-sans tracking-wider text-slate-400 uppercase mt-0.5">
-                BY FLOOR DADDY
-              </p>
-            </div>
+            <BrandLogo imgClassName="h-8" />
             <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden p-2 hover:bg-slate-100 rounded-lg transition-colors"
@@ -529,7 +523,7 @@ export default function Layout({ children, currentPageName }) {
                       className={cn(
                         "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                         active
-                          ? "bg-indigo-50 text-indigo-600 shadow-sm"
+                          ? "bg-primary/10 text-primary shadow-sm"
                           : "text-slate-600 hover:bg-slate-50"
                       )}
                     >
@@ -553,7 +547,7 @@ export default function Layout({ children, currentPageName }) {
                               className={cn(
                                 "flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm",
                                 subActive
-                                  ? "bg-indigo-50 text-indigo-600"
+                                  ? "bg-primary/10 text-primary"
                                   : "text-slate-600 hover:bg-slate-50"
                               )}
                             >
@@ -575,7 +569,7 @@ export default function Layout({ children, currentPageName }) {
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                     active
-                      ? "bg-indigo-50 text-indigo-600 shadow-sm"
+                      ? "bg-primary/10 text-primary shadow-sm"
                       : "text-slate-600 hover:bg-slate-50"
                   )}
                   >
@@ -596,8 +590,8 @@ export default function Layout({ children, currentPageName }) {
             {currentUser ? (
               <>
                 <div className="flex items-center gap-3 px-3 py-2 bg-slate-50 rounded-lg">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-indigo-600" />
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-700 truncate">
@@ -622,7 +616,7 @@ export default function Layout({ children, currentPageName }) {
             ) : (
               <button
                 onClick={() => base44.auth.redirectToLogin()}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground hover:opacity-90 rounded-lg transition-colors"
               >
                 <User className="w-4 h-4" />
                 Login
@@ -646,12 +640,7 @@ export default function Layout({ children, currentPageName }) {
             <Menu className="w-6 h-6 text-slate-600" />
           </button>
           <div className="ml-4">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              RAZZLE DAZZLE
-            </h1>
-            <p className="text-[9px] font-sans tracking-wider text-slate-400 uppercase mt-0.5">
-              BY FLOOR DADDY
-            </p>
+            <BrandLogo imgClassName="h-7 sm:h-8" />
           </div>
         </div>
 
@@ -679,11 +668,11 @@ export default function Layout({ children, currentPageName }) {
           >
             <div className="bg-white rounded-xl shadow-xl border border-slate-200 p-4">
               <div className="flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                <ShieldCheck className="w-5 h-5 text-primary" />
                 <div className="space-y-1">
                   <div className="text-xs text-slate-500 font-medium">Viewing as</div>
                   <Select value={viewingAsRole || currentUser.role} onValueChange={setViewingAsRole}>
-                    <SelectTrigger className="h-8 text-sm border-indigo-200">
+                    <SelectTrigger className="h-8 text-sm border-input">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

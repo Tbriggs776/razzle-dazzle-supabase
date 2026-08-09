@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
 import { Loader2, LogIn } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function Login() {
   const { login } = useAuth();
@@ -22,15 +23,15 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">RAZZLE DAZZLE</h1>
-          <p className="text-slate-500 mt-1 text-sm">Sign in to your account</p>
+        <div className="flex flex-col items-center text-center mb-8">
+          <BrandLogo imgClassName="h-11" />
+          <p className="text-muted-foreground mt-4 text-sm">Sign in to your account</p>
         </div>
-        <form onSubmit={onSubmit} className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-4">
+        <form onSubmit={onSubmit} className="bg-card border border-border rounded-2xl shadow-sm p-6 space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
+            <label htmlFor="email" className="text-sm font-medium text-foreground">Email</label>
             <input
               id="email"
               type="email"
@@ -38,12 +39,12 @@ export default function Login() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-11 px-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full h-11 px-3 bg-background border border-input rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
               placeholder="you@company.com"
             />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-sm font-medium text-slate-700">Password</label>
+            <label htmlFor="password" className="text-sm font-medium text-foreground">Password</label>
             <input
               id="password"
               type="password"
@@ -51,19 +52,19 @@ export default function Login() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-11 px-3 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full h-11 px-3 bg-background border border-input rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring"
               placeholder="••••••••"
             />
           </div>
           {error && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2" role="alert">
+            <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2" role="alert">
               {error}
             </div>
           )}
           <button
             type="submit"
             disabled={submitting}
-            className="w-full h-11 inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold rounded-lg transition-colors"
+            className="w-full h-11 inline-flex items-center justify-center gap-2 bg-primary hover:opacity-90 disabled:opacity-60 text-primary-foreground font-semibold rounded-lg transition-opacity"
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
             {submitting ? 'Signing in…' : 'Sign in'}
