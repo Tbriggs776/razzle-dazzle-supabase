@@ -110,41 +110,41 @@ export default function MySales() {
 
   if (userLoading || salesLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-4 mb-2">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg">
               <DollarSign className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">My Sales</h1>
-              <p className="text-slate-500 mt-1">{isAdmin ? 'All closed sales' : 'Your closed sales and revenue'}</p>
+              <h1 className="text-3xl font-bold text-foreground">My Sales</h1>
+              <p className="text-muted-foreground mt-1">{isAdmin ? 'All closed sales' : 'Your closed sales and revenue'}</p>
             </div>
           </div>
         </motion.div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Total Sales</p>
-            <p className="text-2xl font-bold text-slate-800">{filteredSales.length}</p>
+          <div className="bg-card rounded-xl border border-border p-4">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Sales</p>
+            <p className="text-2xl font-bold text-foreground">{filteredSales.length}</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Total Revenue</p>
-            <p className="text-2xl font-bold text-emerald-600">${totalRevenue.toLocaleString()}</p>
+          <div className="bg-card rounded-xl border border-border p-4">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Revenue</p>
+            <p className="text-2xl font-bold text-primary">${totalRevenue.toLocaleString()}</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Avg Sale</p>
-            <p className="text-2xl font-bold text-slate-800">${Math.round(avgSale).toLocaleString()}</p>
+          <div className="bg-card rounded-xl border border-border p-4">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Avg Sale</p>
+            <p className="text-2xl font-bold text-foreground">${Math.round(avgSale).toLocaleString()}</p>
           </div>
         </div>
 
@@ -166,8 +166,8 @@ export default function MySales() {
                 onClick={() => setDatePreset(opt.value)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
                   datePreset === opt.value
-                    ? 'bg-indigo-600 text-white border-indigo-600'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card text-muted-foreground border-border hover:bg-secondary'
                 }`}
               >
                 {opt.label}
@@ -176,19 +176,19 @@ export default function MySales() {
           </div>
 
           {datePreset === 'custom' && (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <input
                 type="date"
                 value={customStart}
                 onChange={e => setCustomStart(e.target.value)}
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"
+                className="border border-border rounded-lg px-3 py-2 text-sm bg-card"
               />
-              <span className="text-slate-400 text-sm">to</span>
+              <span className="text-muted-foreground text-sm">to</span>
               <input
                 type="date"
                 value={customEnd}
                 onChange={e => setCustomEnd(e.target.value)}
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"
+                className="border border-border rounded-lg px-3 py-2 text-sm bg-card"
               />
             </div>
           )}
@@ -196,7 +196,7 @@ export default function MySales() {
           <div className="flex flex-col sm:flex-row gap-3">
             {isAdmin && (
               <Select value={selectedDcId || 'all'} onValueChange={v => setSelectedDcId(v === 'all' ? '' : v)}>
-                <SelectTrigger className="w-64 bg-white h-10">
+                <SelectTrigger className="w-full sm:w-64 bg-card h-10">
                   <SelectValue placeholder="All Consultants" />
                 </SelectTrigger>
                 <SelectContent>
@@ -210,12 +210,12 @@ export default function MySales() {
               </Select>
             )}
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 placeholder="Search by customer, location..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 bg-white border-slate-200"
+                className="pl-10 h-10 bg-card border-border"
               />
             </div>
           </div>
@@ -223,12 +223,12 @@ export default function MySales() {
 
         {/* Sales List */}
         {filteredSales.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-200">
-            <DollarSign className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-700 mb-2">
+          <div className="text-center py-12 bg-card rounded-2xl border border-border">
+            <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               {searchQuery || selectedDcId ? 'No matching sales' : 'No sales yet'}
             </h3>
-            <p className="text-slate-500">
+            <p className="text-muted-foreground">
               {searchQuery || selectedDcId ? 'Try adjusting your filters' : 'Your closed sales will appear here'}
             </p>
           </div>
@@ -243,30 +243,30 @@ export default function MySales() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
-                  className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center gap-4"
+                  className="bg-card rounded-xl border border-border p-4 flex flex-col sm:flex-row sm:items-center gap-4"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="font-semibold text-slate-800 text-lg">
+                      <span className="font-semibold text-foreground text-lg">
                         {customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown Customer'}
                       </span>
                       {dc && (
-                        <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50 text-xs">
+                        <Badge variant="outline" className="text-primary border-primary/20 bg-primary/10 text-xs">
                           <User className="w-3 h-3 mr-1" />{dc.first_name} {dc.last_name}
                         </Badge>
                       )}
                       {sale.sale_amount && (
-                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 font-bold">
+                        <Badge className="bg-primary/10 text-primary border-primary/20 font-bold">
                           ${sale.sale_amount.toLocaleString()}
                         </Badge>
                       )}
                       {sale.deposit_payment_method && (
-                        <Badge variant="outline" className="text-slate-500 text-xs">
+                        <Badge variant="outline" className="text-muted-foreground text-xs">
                           {sale.deposit_payment_method}
                         </Badge>
                       )}
                     </div>
-                    <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                       {sale.sale_date && (
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />

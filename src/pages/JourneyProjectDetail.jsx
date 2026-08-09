@@ -102,18 +102,18 @@ function JourneyProjectDetailInner() {
 
   if (userLoading || projectLoading || checkpointsLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">{t('jpdProjectNotFound')}</h2>
-          <Link to="/Journey" className="text-indigo-600 hover:underline">← {t('jpdBackJourney')}</Link>
+          <h2 className="text-xl font-semibold text-foreground mb-2">{t('jpdProjectNotFound')}</h2>
+          <Link to="/Journey" className="text-primary hover:underline">← {t('jpdBackJourney')}</Link>
         </div>
       </div>
     );
@@ -122,21 +122,21 @@ function JourneyProjectDetailInner() {
   const activeCheckpoint = checkpoints.find(c => c.step_key === activeStep);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4">
+      <div className="bg-card border-b border-border px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-4xl mx-auto">
-          <Link to={installerMode ? "/Journey?view=installer" : "/Journey"} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-3">
+          <Link to={installerMode ? "/Journey?view=installer" : "/Journey"} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3">
             <ArrowLeft className="w-4 h-4" />
             {installerMode ? t('jpdBackInstaller') : t('jpdBackJourney')}
           </Link>
 
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">
+              <h1 className="text-2xl font-bold text-foreground">
                 {customer?.first_name} {customer?.last_name}
               </h1>
-              <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
                 {(customer?.address_line1 || sale?.location_address) && (
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5" />
@@ -160,31 +160,31 @@ function JourneyProjectDetailInner() {
               </div>
             </div>
             <div className="text-right space-y-2">
-              <span className="inline-block px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium">
+              <span className="inline-block px-3 py-1 bg-secondary text-muted-foreground rounded-full text-xs font-medium">
                 {project.status}
               </span>
               {installerMode ? (
                 project.installer_crew_name && (
                   <div className="flex items-center gap-1.5 justify-end">
-                    <HardHat className="w-3.5 h-3.5 text-slate-400" />
-                    <span className="text-xs text-slate-600">{project.installer_crew_name}</span>
+                    <HardHat className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">{project.installer_crew_name}</span>
                   </div>
                 )
               ) : (
                 <div className="flex items-center gap-1.5">
-                  <HardHat className="w-3.5 h-3.5 text-slate-400" />
+                  <HardHat className="w-3.5 h-3.5 text-muted-foreground" />
                   <select
                     value={project.installer_crew_id || ''}
                     onChange={e => handleAssignInstaller(e.target.value)}
                     disabled={assigning}
-                    className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white text-slate-700"
+                    className="text-xs border border-border rounded-md px-2 py-1 bg-card text-foreground"
                   >
                     <option value="">{t('jpdAssignInstaller')}</option>
                     {installers.map(i => (
                       <option key={i.crew_id} value={String(i.crew_id)}>{i.crew_name}</option>
                     ))}
                   </select>
-                  {assigning && <Loader2 className="w-3 h-3 text-indigo-500 animate-spin" />}
+                  {assigning && <Loader2 className="w-3 h-3 text-primary animate-spin" />}
                 </div>
               )}
             </div>
@@ -193,7 +193,7 @@ function JourneyProjectDetailInner() {
       </div>
 
       {/* Progress Tracker */}
-      <div className="bg-white border-b border-slate-200 px-6 py-3">
+      <div className="bg-card border-b border-border px-4 sm:px-6 lg:px-8 py-3">
         <div className="max-w-4xl mx-auto">
           <CheckpointProgressTracker
             checkpoints={checkpoints}
@@ -205,13 +205,13 @@ function JourneyProjectDetailInner() {
       </div>
 
       {/* Active Step Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
           {activeStep === 'job_start_checklist' && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-lg font-semibold text-slate-800">{t('jpdJobStartTitle')}</h2>
-                <p className="text-sm text-slate-500">{t('jpdJobStartDesc')}</p>
+                <h2 className="text-lg font-semibold text-foreground">{t('jpdJobStartTitle')}</h2>
+                <p className="text-sm text-muted-foreground">{t('jpdJobStartDesc')}</p>
               </div>
               <JobStartChecklist
                 checkpoint={activeCheckpoint}
@@ -233,8 +233,8 @@ function JourneyProjectDetailInner() {
           {activeStep === 'floor_prep_checklist' && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-lg font-semibold text-slate-800">{t('jpdFloorPrepTitle')}</h2>
-                <p className="text-sm text-slate-500">{t('jpdFloorPrepDesc')}</p>
+                <h2 className="text-lg font-semibold text-foreground">{t('jpdFloorPrepTitle')}</h2>
+                <p className="text-sm text-muted-foreground">{t('jpdFloorPrepDesc')}</p>
               </div>
               <FloorPrepChecklist
                 checkpoint={activeCheckpoint}
@@ -247,8 +247,8 @@ function JourneyProjectDetailInner() {
           {activeStep === 'installation_checklist' && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-lg font-semibold text-slate-800">Installation</h2>
-                <p className="text-sm text-slate-500">Prep is approved — now let's lay a floor the customer brags about, Crew Lead. This is the part they see every day for years, so make every row tight and every detail clean. Work through each step in order. When you finish, you'll move to the Final Walk Through.</p>
+                <h2 className="text-lg font-semibold text-foreground">Installation</h2>
+                <p className="text-sm text-muted-foreground">Prep is approved — now let's lay a floor the customer brags about, Crew Lead. This is the part they see every day for years, so make every row tight and every detail clean. Work through each step in order. When you finish, you'll move to the Final Walk Through.</p>
               </div>
               <InstallationChecklist
                 checkpoint={activeCheckpoint}
@@ -261,8 +261,8 @@ function JourneyProjectDetailInner() {
           {activeStep === 'final_walkthrough_checklist' && (
             <div className="space-y-4">
               <div>
-                <h2 className="text-lg font-semibold text-slate-800">{t('jpdFinalWalkTitle')}</h2>
-                <p className="text-sm text-slate-500">{t('jpdFinalWalkDesc')}</p>
+                <h2 className="text-lg font-semibold text-foreground">{t('jpdFinalWalkTitle')}</h2>
+                <p className="text-sm text-muted-foreground">{t('jpdFinalWalkDesc')}</p>
               </div>
               <FinalWalkthroughChecklist
                 checkpoint={activeCheckpoint}

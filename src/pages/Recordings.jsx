@@ -104,22 +104,22 @@ export default function Recordings() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Appointment Recordings</h1>
-          <p className="text-slate-600">View and manage conversation recordings</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Appointment Recordings</h1>
+          <p className="text-muted-foreground">View and manage conversation recordings</p>
         </div>
 
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               placeholder="Search by customer, consultant, or location..."
               value={searchQuery}
@@ -130,10 +130,10 @@ export default function Recordings() {
         </div>
 
         {filteredAppointments.length === 0 ? (
-          <Card className="bg-white border border-slate-200">
+          <Card className="bg-card border border-border">
             <CardContent className="p-12 text-center">
-              <Mic className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-600">
+              <Mic className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
                 {searchQuery ? 'No recordings found matching your search' : 'No recordings available yet'}
               </p>
             </CardContent>
@@ -141,43 +141,43 @@ export default function Recordings() {
         ) : (
           <div className="space-y-4">
             {filteredAppointments.map((appointment) => (
-              <Card key={appointment.id} className="bg-white border border-slate-200 hover:shadow-lg transition-all">
+              <Card key={appointment.id} className="bg-card border border-border hover:shadow-lg transition-all">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <Link
                       to={createPageUrl(`RecordingDetail?id=${appointment.id}`)}
                       className="flex items-start gap-4 flex-1 min-w-0"
                     >
-                      <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                        <Mic className="w-6 h-6 text-indigo-600" />
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Mic className="w-6 h-6 text-primary" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                        <h3 className="text-lg font-semibold text-foreground mb-2">
                           {getLeadName(appointment.customer)}
                         </h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                          <div className="flex items-center gap-2 text-slate-600">
+                          <div className="flex items-center gap-2 text-muted-foreground">
                             <Calendar className="w-4 h-4 flex-shrink-0" />
                             <span>{moment(appointment.appointment_date).format('MMM D, YYYY')}</span>
                           </div>
                           
                           {appointment.assigned_dc && (
-                            <div className="flex items-center gap-2 text-slate-600">
+                            <div className="flex items-center gap-2 text-muted-foreground">
                               <User className="w-4 h-4 flex-shrink-0" />
                               <span className="truncate">{getDCName(appointment.assigned_dc)}</span>
                             </div>
                           )}
                           
-                          <div className="flex items-center gap-2 text-slate-600">
+                          <div className="flex items-center gap-2 text-muted-foreground">
                             <Clock className="w-4 h-4 flex-shrink-0" />
                             <span className="font-medium">{formatDuration(appointment.recording_duration)}</span>
                           </div>
                         </div>
                         
                         {appointment.location_address && (
-                          <div className="flex items-center gap-2 text-slate-600 text-sm mt-2">
+                          <div className="flex items-center gap-2 text-muted-foreground text-sm mt-2">
                             <MapPin className="w-4 h-4 flex-shrink-0" />
                             <span className="truncate">{appointment.location_address}</span>
                           </div>
@@ -189,7 +189,7 @@ export default function Recordings() {
                               href={appointment.recording_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-blue-600 hover:text-blue-700 hover:underline block truncate max-w-md"
+                              className="text-xs text-primary hover:underline block truncate max-w-md"
                               title={appointment.recording_url}
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -203,9 +203,9 @@ export default function Recordings() {
                     <div className="flex flex-col gap-2 items-end">
                       <div className={cn(
                         "px-3 py-1 rounded-full text-xs font-medium flex-shrink-0",
-                        appointment.status === 'Sold' && "bg-green-100 text-green-700",
-                        appointment.status === 'Completed' && "bg-blue-100 text-blue-700",
-                        !['Sold', 'Completed'].includes(appointment.status) && "bg-slate-100 text-slate-700"
+                        appointment.status === 'Sold' && "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300",
+                        appointment.status === 'Completed' && "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
+                        !['Sold', 'Completed'].includes(appointment.status) && "bg-secondary text-secondary-foreground"
                       )}>
                         {appointment.status}
                       </div>
@@ -213,9 +213,9 @@ export default function Recordings() {
                       {appointment.recording_status && (
                         <div className={cn(
                           "px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 flex items-center gap-1",
-                          appointment.recording_status === 'uploading' && "bg-amber-100 text-amber-700",
-                          appointment.recording_status === 'analyzing' && "bg-purple-100 text-purple-700",
-                          appointment.recording_status === 'completed' && "bg-green-100 text-green-700"
+                          appointment.recording_status === 'uploading' && "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+                          appointment.recording_status === 'analyzing' && "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300",
+                          appointment.recording_status === 'completed' && "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300"
                         )}>
                           {appointment.recording_status === 'uploading' && (
                             <>
@@ -266,7 +266,7 @@ export default function Recordings() {
                           setAppointmentToDelete(appointment);
                           setDeleteDialogOpen(true);
                         }}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>

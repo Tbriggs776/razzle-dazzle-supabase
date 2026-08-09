@@ -91,7 +91,7 @@ export default function DesignModView() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -99,18 +99,18 @@ export default function DesignModView() {
   if (!mod) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-slate-500">Design modification not found.</p>
+        <p className="text-muted-foreground">Design modification not found.</p>
       </div>
     );
   }
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+        <div className="bg-card rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">Design Modification Signed</h1>
-          <p className="text-slate-500">Thank you! Your design modification has been signed and submitted. Our team will be in touch shortly.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Design Modification Signed</h1>
+          <p className="text-muted-foreground">Thank you! Your design modification has been signed and submitted. Our team will be in touch shortly.</p>
         </div>
       </div>
     );
@@ -119,44 +119,44 @@ export default function DesignModView() {
   if (mod.status === 'signed') {
     const signedDate = mod.signed_at ? new Date(mod.signed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A';
     return (
-      <div className="min-h-screen bg-slate-50 py-10 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+      <div className="min-h-screen bg-background py-10 px-4">
+        <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <CheckCircle2 className="w-5 h-5 text-green-500" />
             <span className="text-green-600 font-semibold text-sm">Signed on {signedDate}</span>
           </div>
           <div className="text-center mb-8">
-            <p className="font-semibold text-slate-700">ROC352055</p>
-            <h1 className="text-2xl font-bold text-blue-600 mt-2 tracking-wide">DESIGN MODIFICATION</h1>
+            <p className="font-semibold text-foreground">ROC352055</p>
+            <h1 className="text-2xl font-bold text-primary mt-2 tracking-wide">DESIGN MODIFICATION</h1>
           </div>
           <div className="space-y-4 mb-6">
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-              <span className="text-sm text-slate-600 w-52 flex-shrink-0">Customer First Name</span>
-              <span className="font-semibold text-slate-800">{mod.customer_first_name}</span>
+            <div className="flex items-center gap-4 border-b border-border pb-3">
+              <span className="text-sm text-muted-foreground w-52 flex-shrink-0">Customer First Name</span>
+              <span className="font-semibold text-foreground">{mod.customer_first_name}</span>
             </div>
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-              <span className="text-sm text-slate-600 w-52 flex-shrink-0">Customer Last Name</span>
-              <span className="font-semibold text-slate-800">{mod.customer_last_name}</span>
+            <div className="flex items-center gap-4 border-b border-border pb-3">
+              <span className="text-sm text-muted-foreground w-52 flex-shrink-0">Customer Last Name</span>
+              <span className="font-semibold text-foreground">{mod.customer_last_name}</span>
             </div>
             {mod.job_number && (
-              <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-                <span className="text-sm text-slate-600 w-52 flex-shrink-0">Job Number CG</span>
-                <span className="font-semibold text-slate-800">{mod.job_number}</span>
+              <div className="flex items-center gap-4 border-b border-border pb-3">
+                <span className="text-sm text-muted-foreground w-52 flex-shrink-0">Job Number CG</span>
+                <span className="font-semibold text-foreground">{mod.job_number}</span>
               </div>
             )}
-            <div className="border-b border-slate-200 pb-3">
-              <p className="text-sm text-slate-600 mb-2">Products or installation changes:</p>
-              <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 text-slate-800 text-sm whitespace-pre-wrap min-h-24">
+            <div className="border-b border-border pb-3">
+              <p className="text-sm text-muted-foreground mb-2">Products or installation changes:</p>
+              <div className="border border-border rounded-lg p-3 bg-secondary text-foreground text-sm whitespace-pre-wrap min-h-24">
                 {mod.products_or_changes}
               </div>
             </div>
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-3 flex-wrap">
+            <div className="flex items-center gap-4 border-b border-border pb-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-600">Value Added Costs $</span>
-                <span className="font-semibold text-slate-800">{Number(mod.value_added_costs || 0).toLocaleString()}</span>
+                <span className="text-sm text-muted-foreground">Value Added Costs $</span>
+                <span className="font-semibold text-foreground">{Number(mod.value_added_costs || 0).toLocaleString()}</span>
               </div>
               <div className="flex items-center gap-4 flex-wrap">
-                <span className="text-sm text-slate-600">Funds Collected Terms</span>
+                <span className="text-sm text-muted-foreground">Funds Collected Terms</span>
                 <div className="flex items-center gap-4 text-sm">
                   <label className="flex items-center gap-1">
                     <input type="radio" readOnly checked={mod.funds_collected_terms === 'Credit Card'} onChange={() => {}} /> Credit Card
@@ -168,31 +168,31 @@ export default function DesignModView() {
               </div>
             </div>
           </div>
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-700 mb-6">
+          <div className="bg-secondary border border-border rounded-lg p-4 text-sm text-foreground mb-6">
             I agree to the design modifications and associated costs above. I agree to have them charged on my credit card or Synchrony Financing and for those charges to be collected prior to the new modifications commencing. No newly modifications will start prior to funds being collected. I agree to the terms and conditions for the above work and cost and agree to be bound by them.
           </div>
           <div className="space-y-4">
             {mod.customer_printed_name && (
-              <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-                <span className="text-sm text-slate-600 w-52 flex-shrink-0">Customer Printed Name</span>
-                <span className="font-semibold text-slate-800">{mod.customer_printed_name}</span>
+              <div className="flex items-center gap-4 border-b border-border pb-3">
+                <span className="text-sm text-muted-foreground w-52 flex-shrink-0">Customer Printed Name</span>
+                <span className="font-semibold text-foreground">{mod.customer_printed_name}</span>
               </div>
             )}
             {mod.customer_signature && (
-              <div className="border-b border-slate-200 pb-4">
-                <p className="text-sm text-slate-600 mb-2">Customer Signature</p>
-                <div className="border border-slate-200 rounded-lg bg-white p-2">
+              <div className="border-b border-border pb-4">
+                <p className="text-sm text-muted-foreground mb-2">Customer Signature</p>
+                <div className="border border-border rounded-lg bg-card p-2">
                   <img src={mod.customer_signature} alt="Customer Signature" className="max-h-32 w-auto" />
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-              <span className="text-sm text-slate-600 w-40 flex-shrink-0">Customer Email</span>
-              <span className="font-semibold text-slate-800">{mod.customer_email}</span>
+            <div className="flex items-center gap-4 border-b border-border pb-3">
+              <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Customer Email</span>
+              <span className="font-semibold text-foreground">{mod.customer_email}</span>
             </div>
             <div className="flex items-center gap-4 pb-3">
-              <span className="text-sm text-slate-600 w-40 flex-shrink-0">Date Signed:</span>
-              <span className="font-semibold text-slate-800">{signedDate}</span>
+              <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Date Signed:</span>
+              <span className="font-semibold text-foreground">{signedDate}</span>
             </div>
           </div>
         </div>
@@ -203,41 +203,41 @@ export default function DesignModView() {
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+    <div className="min-h-screen bg-background py-10 px-4">
+      <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
         <div className="text-center mb-8">
-          <p className="font-semibold text-slate-700">ROC352055</p>
-          <h1 className="text-2xl font-bold text-blue-600 mt-2 tracking-wide">DESIGN MODIFICATION</h1>
+          <p className="font-semibold text-foreground">ROC352055</p>
+          <h1 className="text-2xl font-bold text-primary mt-2 tracking-wide">DESIGN MODIFICATION</h1>
         </div>
 
         <div className="space-y-4 mb-6">
-          <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-            <span className="text-sm text-slate-600 w-52 flex-shrink-0">Customer First Name</span>
-            <span className="font-semibold text-slate-800">{mod.customer_first_name}</span>
+          <div className="flex items-center gap-4 border-b border-border pb-3">
+            <span className="text-sm text-muted-foreground w-52 flex-shrink-0">Customer First Name</span>
+            <span className="font-semibold text-foreground">{mod.customer_first_name}</span>
           </div>
-          <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-            <span className="text-sm text-slate-600 w-52 flex-shrink-0">Customer Last Name</span>
-            <span className="font-semibold text-slate-800">{mod.customer_last_name}</span>
+          <div className="flex items-center gap-4 border-b border-border pb-3">
+            <span className="text-sm text-muted-foreground w-52 flex-shrink-0">Customer Last Name</span>
+            <span className="font-semibold text-foreground">{mod.customer_last_name}</span>
           </div>
           {mod.job_number && (
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-              <span className="text-sm text-slate-600 w-52 flex-shrink-0">Job Number CG</span>
-              <span className="font-semibold text-slate-800">{mod.job_number}</span>
+            <div className="flex items-center gap-4 border-b border-border pb-3">
+              <span className="text-sm text-muted-foreground w-52 flex-shrink-0">Job Number CG</span>
+              <span className="font-semibold text-foreground">{mod.job_number}</span>
             </div>
           )}
-          <div className="border-b border-slate-200 pb-3">
-            <p className="text-sm text-slate-600 mb-2">Products or installation changes:</p>
-            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 text-slate-800 text-sm whitespace-pre-wrap min-h-24">
+          <div className="border-b border-border pb-3">
+            <p className="text-sm text-muted-foreground mb-2">Products or installation changes:</p>
+            <div className="border border-border rounded-lg p-3 bg-secondary text-foreground text-sm whitespace-pre-wrap min-h-24">
               {mod.products_or_changes}
             </div>
           </div>
-          <div className="flex items-center gap-4 border-b border-slate-200 pb-3 flex-wrap">
+          <div className="flex items-center gap-4 border-b border-border pb-3 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600">Value Added Costs $</span>
-              <span className="font-semibold text-slate-800">{Number(mod.value_added_costs || 0).toLocaleString()}</span>
+              <span className="text-sm text-muted-foreground">Value Added Costs $</span>
+              <span className="font-semibold text-foreground">{Number(mod.value_added_costs || 0).toLocaleString()}</span>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
-              <span className="text-sm text-slate-600">Funds Collected Terms (check one)</span>
+              <span className="text-sm text-muted-foreground">Funds Collected Terms (check one)</span>
               <div className="flex items-center gap-4 text-sm">
                 <label className="flex items-center gap-1">
                   <input type="radio" readOnly checked={mod.funds_collected_terms === 'Credit Card'} onChange={() => {}} /> Credit Card
@@ -250,7 +250,7 @@ export default function DesignModView() {
           </div>
         </div>
 
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-700 mb-6">
+        <div className="bg-secondary border border-border rounded-lg p-4 text-sm text-foreground mb-6">
           I agree to the design modifications and associated costs above. I agree to have them charged on my credit card or Synchrony Financing and for those charges to be collected prior to the new modifications commencing. No newly modifications will start prior to funds being collected. I agree to the terms and conditions for the above work and cost and agree to be bound by them.
         </div>
 
@@ -267,7 +267,7 @@ export default function DesignModView() {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <Label>Customer Signature *</Label>
-              <Button type="button" variant="ghost" size="sm" onClick={clearSignature} className="text-slate-500 h-7">
+              <Button type="button" variant="ghost" size="sm" onClick={clearSignature} className="text-muted-foreground h-7">
                 <Eraser className="w-3 h-3 mr-1" /> Clear
               </Button>
             </div>
@@ -275,7 +275,7 @@ export default function DesignModView() {
               ref={canvasRef}
               width={580}
               height={140}
-              className="w-full border-2 border-dashed border-slate-300 rounded-lg bg-white touch-none cursor-crosshair"
+              className="w-full border-2 border-dashed border-border rounded-lg bg-white touch-none cursor-crosshair"
               onMouseDown={startDraw}
               onMouseMove={draw}
               onMouseUp={endDraw}
@@ -284,16 +284,16 @@ export default function DesignModView() {
               onTouchMove={draw}
               onTouchEnd={endDraw}
             />
-            <p className="text-xs text-slate-400">Sign above using your mouse, trackpad, or finger</p>
+            <p className="text-xs text-muted-foreground">Sign above using your mouse, trackpad, or finger</p>
           </div>
 
-          <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-            <span className="text-sm text-slate-600 w-40 flex-shrink-0">Customer Email</span>
-            <span className="font-semibold text-slate-800">{mod.customer_email}</span>
+          <div className="flex items-center gap-4 border-b border-border pb-3">
+            <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Customer Email</span>
+            <span className="font-semibold text-foreground">{mod.customer_email}</span>
           </div>
           <div className="flex items-center gap-4 pb-3">
-            <span className="text-sm text-slate-600 w-40 flex-shrink-0">Date:</span>
-            <span className="font-semibold text-slate-800">{today}</span>
+            <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Date:</span>
+            <span className="font-semibold text-foreground">{today}</span>
           </div>
         </div>
 

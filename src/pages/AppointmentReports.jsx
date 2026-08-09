@@ -437,18 +437,18 @@ export default function AppointmentReports() {
   }, [filteredAppointments, dateFilter, bookedByDayLeadSource, allChecklists]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-center justify-between">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Appointment Reports</h1>
-              <p className="text-slate-500 mt-1">Analytics and insights for appointments</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Appointment Reports</h1>
+              <p className="text-muted-foreground mt-1">Analytics and insights for appointments</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -463,19 +463,19 @@ export default function AppointmentReports() {
               </Select>
               
               {dateRange === 'custom' && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <input
                     type="date"
                     value={customStartDate}
                     onChange={(e) => setCustomStartDate(e.target.value)}
-                    className="h-10 px-3 border border-slate-200 rounded-md text-sm"
+                    className="h-10 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   />
-                  <span className="text-slate-500">to</span>
+                  <span className="text-muted-foreground">to</span>
                   <input
                     type="date"
                     value={customEndDate}
                     onChange={(e) => setCustomEndDate(e.target.value)}
-                    className="h-10 px-3 border border-slate-200 rounded-md text-sm"
+                    className="h-10 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               )}
@@ -485,19 +485,19 @@ export default function AppointmentReports() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {appointmentsLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : (
           <>
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6 mb-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Appointments</CardTitle>
-                  <Calendar className="h-4 w-4 text-slate-400" />
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{appointmentStats.total}</div>
@@ -507,11 +507,11 @@ export default function AppointmentReports() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-slate-400" />
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{conversionRate}%</div>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {appointmentStats.sold} sold / {appointmentStats.completed} completed
                   </p>
                 </CardContent>
@@ -520,13 +520,13 @@ export default function AppointmentReports() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Avg Time to Schedule</CardTitle>
-                  <Clock className="h-4 w-4 text-slate-400" />
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
                     {avgScheduleDays > 0 ? `${avgScheduleDays}d ${avgScheduleHours}h` : `${avgScheduleHours}h`}
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Created to scheduled date
                   </p>
                 </CardContent>
@@ -535,13 +535,13 @@ export default function AppointmentReports() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Avg Time on Site</CardTitle>
-                  <Clock className="h-4 w-4 text-slate-400" />
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
                     {avgHours > 0 ? `${avgHours}h ${avgMinutes}m` : `${avgMinutes}m`}
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {completedWithTime.length} completed appointments
                   </p>
                 </CardContent>
@@ -550,7 +550,7 @@ export default function AppointmentReports() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Sales</CardTitle>
-                  <DollarSign className="h-4 w-4 text-slate-400" />
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{appointmentStats.sold}</div>
@@ -560,11 +560,11 @@ export default function AppointmentReports() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Cancellation Rate</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-red-400" />
+                  <TrendingUp className="h-4 w-4 text-destructive" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{cancellationRate}%</div>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <div className="text-2xl font-bold text-destructive">{cancellationRate}%</div>
+                  <p className="text-xs text-muted-foreground mt-1">
                     {appointmentStats.cancelled} cancelled / {appointmentStats.total} total
                   </p>
                 </CardContent>
@@ -574,7 +574,7 @@ export default function AppointmentReports() {
             {/* Appointments Booked by Day with Lead Source Filter */}
             <Card className="mb-6">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
                     <CardTitle>Appointments Booked by Day</CardTitle>
                     <CardDescription>
@@ -585,9 +585,9 @@ export default function AppointmentReports() {
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500">Lead Source:</span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">Lead Source:</span>
                     <Select value={bookedByDayLeadSource} onValueChange={setBookedByDayLeadSource}>
-                      <SelectTrigger className="w-48">
+                      <SelectTrigger className="w-full sm:w-48">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -627,7 +627,7 @@ export default function AppointmentReports() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-slate-400 text-center py-8">No appointments in selected date range</p>
+                  <p className="text-muted-foreground text-center py-8">No appointments in selected date range</p>
                 )}
               </CardContent>
             </Card>
@@ -715,19 +715,19 @@ export default function AppointmentReports() {
                     {csrPerformance.map((csr, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-slate-800">{csr.name}</p>
-                          <p className="text-xs text-slate-500">
+                          <p className="text-sm font-medium text-foreground">{csr.name}</p>
+                          <p className="text-xs text-muted-foreground">
                             {csr.scheduled} scheduled • {csr.completed} completed
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-indigo-600">{csr.booked}</p>
-                          <p className="text-xs text-slate-500">booked</p>
+                          <p className="text-sm font-bold text-primary">{csr.booked}</p>
+                          <p className="text-xs text-muted-foreground">booked</p>
                         </div>
                       </div>
                     ))}
                     {csrPerformance.length === 0 && (
-                      <p className="text-sm text-slate-500 text-center py-4">No data available</p>
+                      <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
                     )}
                   </div>
                 </CardContent>
@@ -735,13 +735,13 @@ export default function AppointmentReports() {
             </div>
 
             {/* Cancellation Quick Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Cancelled Yesterday</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{cancellationCounts.yesterday}</div>
+                  <div className="text-2xl font-bold text-destructive">{cancellationCounts.yesterday}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -749,7 +749,7 @@ export default function AppointmentReports() {
                   <CardTitle className="text-sm font-medium">Cancelled Last 7 Days</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{cancellationCounts.last7}</div>
+                  <div className="text-2xl font-bold text-destructive">{cancellationCounts.last7}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -757,7 +757,7 @@ export default function AppointmentReports() {
                   <CardTitle className="text-sm font-medium">Cancelled Last 30 Days</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-600">{cancellationCounts.last30}</div>
+                  <div className="text-2xl font-bold text-destructive">{cancellationCounts.last30}</div>
                 </CardContent>
               </Card>
             </div>
@@ -793,19 +793,19 @@ export default function AppointmentReports() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-slate-400 text-center py-8">No cancellations in selected date range</p>
+                  <p className="text-muted-foreground text-center py-8">No cancellations in selected date range</p>
                 )}
               </CardContent>
             </Card>
 
             {/* Reschedule Quick Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Rescheduled Yesterday</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">{rescheduleCounts.yesterday}</div>
+                  <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{rescheduleCounts.yesterday}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -813,7 +813,7 @@ export default function AppointmentReports() {
                   <CardTitle className="text-sm font-medium">Rescheduled Last 7 Days</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">{rescheduleCounts.last7}</div>
+                  <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{rescheduleCounts.last7}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -821,7 +821,7 @@ export default function AppointmentReports() {
                   <CardTitle className="text-sm font-medium">Rescheduled Last 30 Days</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600">{rescheduleCounts.last30}</div>
+                  <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{rescheduleCounts.last30}</div>
                 </CardContent>
               </Card>
             </div>
@@ -857,7 +857,7 @@ export default function AppointmentReports() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p className="text-slate-400 text-center py-8">No reschedules in selected date range</p>
+                  <p className="text-muted-foreground text-center py-8">No reschedules in selected date range</p>
                 )}
               </CardContent>
             </Card>
@@ -901,24 +901,24 @@ export default function AppointmentReports() {
                     {csrSalesPerformance.map((csr, index) => {
                       const conversionRate = csr.booked > 0 ? ((csr.soldCount / csr.booked) * 100).toFixed(1) : 0;
                       return (
-                        <div key={index} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <div key={index} className="flex items-center justify-between p-4 bg-secondary rounded-lg border border-border">
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-slate-800">{csr.name}</p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-sm font-medium text-foreground">{csr.name}</p>
+                            <p className="text-xs text-muted-foreground">
                               {csr.soldCount} sold out of {csr.booked} booked • {conversionRate}% conversion
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-bold text-green-600">
+                            <p className="text-lg font-bold text-green-600 dark:text-green-400">
                               ${csr.totalValue.toLocaleString()}
                             </p>
-                            <p className="text-xs text-slate-500">total value</p>
+                            <p className="text-xs text-muted-foreground">total value</p>
                           </div>
                         </div>
                       );
                     })}
                     {csrSalesPerformance.length === 0 && (
-                      <p className="text-sm text-slate-500 text-center py-8">No sales data available for this date range</p>
+                      <p className="text-sm text-muted-foreground text-center py-8">No sales data available for this date range</p>
                     )}
                   </div>
                 </CardContent>
@@ -948,30 +948,30 @@ export default function AppointmentReports() {
                 return (
                   <div
                     key={apt.id}
-                    className="p-4 bg-slate-50 rounded-lg border border-slate-200"
+                    className="p-4 bg-secondary rounded-lg border border-border"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-foreground">
                           {checklist?.customer_first_name} {checklist?.customer_last_name}
                         </p>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Created: {format(new Date(new Date(apt.created_date).getTime() - phoenixOffsetMs), 'MMM d, yyyy h:mm a')} GMT-7
                         </p>
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           {apt.appointment_date && format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')} • {apt.appointment_block}
                         </p>
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25">
                         {apt.status}
                       </span>
                     </div>
-                    <div className="space-y-1 text-xs text-slate-600 mt-3 pt-3 border-t border-slate-200">
+                    <div className="space-y-1 text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
                       {checklist?.customer_phone && (
                         <p><span className="font-medium">Phone:</span> {checklist.customer_phone}</p>
                       )}
                       {checklist?.customer_email && (
-                        <p><span className="font-medium">Email:</span> <a href={`mailto:${checklist.customer_email}`} className="text-indigo-600 hover:underline">{checklist.customer_email}</a></p>
+                        <p><span className="font-medium">Email:</span> <a href={`mailto:${checklist.customer_email}`} className="text-primary hover:underline">{checklist.customer_email}</a></p>
                       )}
                       {checklist?.customer_street && (
                         <p><span className="font-medium">Address:</span> {checklist.customer_street} {checklist.city}, {checklist.state} {checklist.postal_code}</p>
@@ -979,7 +979,7 @@ export default function AppointmentReports() {
                     </div>
                     <Link
                       to={createPageUrl('AppointmentDetail') + '?id=' + apt.id}
-                      className="inline-block mt-3 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                      className="inline-block mt-3 text-xs font-medium text-primary hover:text-primary"
                     >
                       View Full Details →
                     </Link>
@@ -1008,28 +1008,28 @@ export default function AppointmentReports() {
               .map(apt => {
                 const checklist = allChecklists.find(c => c.appointment === apt.id);
                 return (
-                  <div key={apt.id} className="p-4 bg-red-50 rounded-lg border border-red-200">
+                  <div key={apt.id} className="p-4 bg-red-50 rounded-lg border border-red-200 dark:bg-red-500/10 dark:border-red-500/25">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-foreground">
                           {checklist?.customer_first_name} {checklist?.customer_last_name}
                         </p>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Created: {format(new Date(new Date(apt.created_date).getTime() - phoenixOffsetMs), 'MMM d, yyyy h:mm a')} GMT-7
                         </p>
                         {apt.appointment_date && (
-                          <p className="text-xs text-slate-500 mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             Appt: {format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')} • {apt.appointment_block}
                           </p>
                         )}
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
                         Cancelled
                       </span>
                     </div>
                     <Link
                       to={createPageUrl('AppointmentDetail') + '?id=' + apt.id}
-                      className="inline-block mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                      className="inline-block mt-2 text-xs font-medium text-primary hover:text-primary"
                     >
                       View Full Details →
                     </Link>
@@ -1057,28 +1057,28 @@ export default function AppointmentReports() {
               .map(apt => {
                 const checklist = allChecklists.find(c => c.appointment === apt.id);
                 return (
-                  <div key={apt.id} className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div key={apt.id} className="p-4 bg-yellow-50 rounded-lg border border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/25">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-medium text-foreground">
                           {checklist?.customer_first_name} {checklist?.customer_last_name}
                         </p>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           Created: {format(new Date(new Date(apt.created_date).getTime() - phoenixOffsetMs), 'MMM d, yyyy h:mm a')} GMT-7
                         </p>
                         {apt.appointment_date && (
-                          <p className="text-xs text-slate-500 mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             Appt: {format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')} • {apt.appointment_block}
                           </p>
                         )}
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25">
                         Rescheduled
                       </span>
                     </div>
                     <Link
                       to={createPageUrl('AppointmentDetail') + '?id=' + apt.id}
-                      className="inline-block mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                      className="inline-block mt-2 text-xs font-medium text-primary hover:text-primary"
                     >
                       View Full Details →
                     </Link>
@@ -1109,20 +1109,20 @@ export default function AppointmentReports() {
                   <Link
                     key={apt.id}
                     to={createPageUrl('AppointmentDetail') + '?id=' + apt.id}
-                    className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors group"
+                    className="flex items-center justify-between p-4 bg-secondary hover:bg-muted rounded-lg border border-border transition-colors group"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-slate-800">
+                      <p className="text-sm font-medium text-foreground">
                         {checklist?.customer_first_name} {checklist?.customer_last_name}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-muted-foreground">
                         {apt.appointment_date && format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')} • {apt.status}
                         {projectStatus && (
-                          <span className="ml-1 text-green-700">• Project: {projectStatus}</span>
+                          <span className="ml-1 text-green-700 dark:text-green-400">• Project: {projectStatus}</span>
                         )}
                       </p>
                     </div>
-                    <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-indigo-600" />
+                    <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                   </Link>
                 );
               })}

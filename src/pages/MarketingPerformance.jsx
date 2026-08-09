@@ -446,20 +446,20 @@ export default function MarketingPerformance() {
   const fmtMoney2 = (n) => '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">Marketing Performance</h1>
-              <p className="text-sm text-slate-500 mt-0.5">Ad spend vs. leads, appointments & sales — cost per lead, appointment, and sale analysis</p>
+              <h1 className="text-2xl font-bold text-foreground">Marketing Performance</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Ad spend vs. leads, appointments & sales — cost per lead, appointment, and sale analysis</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <DateRangePicker value={dateRange} onChange={setDateRange} />
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
                 title="Spreadsheet settings"
               >
                 <Settings className="w-5 h-5" />
@@ -467,7 +467,7 @@ export default function MarketingPerformance() {
               <button
                 onClick={refreshGHL}
                 disabled={ghlLoading}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors disabled:opacity-50"
               >
                 <RefreshCw className={`w-4 h-4 ${ghlLoading ? 'animate-spin' : ''}`} />
                 Sync GHL
@@ -477,24 +477,24 @@ export default function MarketingPerformance() {
 
           {/* Settings panel */}
           {showSettings && (
-            <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
-              <label className="block text-sm font-medium text-slate-700 mb-2">Ad Spend Spreadsheet URL or ID</label>
-              <div className="flex gap-2">
+            <div className="mt-4 p-4 bg-muted rounded-xl border border-border">
+              <label className="block text-sm font-medium text-foreground mb-2">Ad Spend Spreadsheet URL or ID</label>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   value={spreadsheetInput}
                   onChange={e => setSpreadsheetInput(e.target.value)}
                   placeholder="https://docs.google.com/spreadsheets/d/XXXXX/edit or just the ID"
-                  className="flex-1 px-3 py-2 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 />
                 <button
                   onClick={handleSaveSpreadsheetId}
-                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors"
+                  className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 rounded-md transition-opacity"
                 >
                   Save & Load
                 </button>
               </div>
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="text-xs text-muted-foreground mt-2">
                 Expected format: one row per day, first column = date, remaining columns = ad platform spend.
                 Monthly TV, Grass Roots & Print Media actuals are read automatically from the <strong>"OtherChannels"</strong> tab in this same spreadsheet.
                 {!spreadsheetId && <span className="text-amber-600 font-medium"> No spreadsheet connected yet.</span>}
@@ -503,7 +503,7 @@ export default function MarketingPerformance() {
           )}
 
           {/* Sync status */}
-          <div className="flex items-center gap-4 mt-3 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground">
             {ghlSyncedAt && <span>GHL leads last synced: {ghlSyncedAt.toLocaleString()}</span>}
             {adSpendEntries && adSpendEntries.length > 0 && <span>Ad spend rows loaded: {adSpendEntries.length}</span>}
             {marketingBudget && marketingBudget.length > 0 && <span>Budget months loaded: {marketingBudget.length}</span>}
@@ -512,28 +512,28 @@ export default function MarketingPerformance() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {!spreadsheetId ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Settings className="w-12 h-12 text-slate-300 mb-4" />
-            <p className="text-lg font-medium text-slate-600 mb-2">No ad spend spreadsheet configured</p>
-            <p className="text-sm text-slate-400 mb-4">An admin needs to connect a Google Sheets URL via the settings gear</p>
+            <Settings className="w-12 h-12 text-muted-foreground/50 mb-4" />
+            <p className="text-lg font-medium text-foreground mb-2">No ad spend spreadsheet configured</p>
+            <p className="text-sm text-muted-foreground mb-4">An admin needs to connect a Google Sheets URL via the settings gear</p>
             <button
               onClick={() => setShowSettings(true)}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground hover:opacity-90 rounded-lg transition-opacity"
             >
               Open Settings
             </button>
           </div>
         ) : adSpendLoading || ghlLoading || apptLoading || salesLoading || budgetLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : adSpendError ? (
-          <div className="p-6 bg-red-50 border border-red-200 rounded-xl">
-            <p className="text-sm font-medium text-red-700">Error loading ad spend data:</p>
-            <p className="text-sm text-red-600 mt-1">{adSpendError}</p>
-            <button onClick={loadAdSpend} className="mt-3 px-3 py-1.5 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700">
+          <div className="p-6 bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/25 rounded-xl">
+            <p className="text-sm font-medium text-red-700 dark:text-red-300">Error loading ad spend data:</p>
+            <p className="text-sm text-red-600 dark:text-red-400 mt-1">{adSpendError}</p>
+            <button onClick={loadAdSpend} className="mt-3 px-3 py-1.5 text-sm bg-destructive text-destructive-foreground rounded-lg hover:opacity-90 transition-opacity">
               Retry
             </button>
           </div>

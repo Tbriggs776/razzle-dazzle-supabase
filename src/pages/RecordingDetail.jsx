@@ -113,18 +113,18 @@ export default function RecordingDetail() {
   if (appointmentLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!appointment || !appointment.recording_url) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-6">
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
-          <Card className="bg-white border border-slate-200">
+          <Card className="bg-card border border-border">
             <CardContent className="p-12 text-center">
-              <p className="text-slate-600">Recording not found</p>
+              <p className="text-muted-foreground">Recording not found</p>
               <Link to={createPageUrl('Recordings')}>
                 <Button className="mt-4" variant="outline">
                   <ArrowLeft className="w-4 h-4 mr-2" />
@@ -139,7 +139,7 @@ export default function RecordingDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-6">
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
         <Link to={createPageUrl('Recordings')}>
           <Button variant="outline" className="mb-6">
@@ -148,7 +148,7 @@ export default function RecordingDetail() {
           </Button>
         </Link>
 
-        <Card className="bg-white border border-slate-200 mb-6">
+        <Card className="bg-card border border-border mb-6">
           <CardHeader>
             <CardTitle className="text-2xl">
               {lead ? `${lead.first_name} ${lead.last_name}` : 'Loading...'}
@@ -156,10 +156,10 @@ export default function RecordingDetail() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="flex items-center gap-3 text-slate-700">
-                <Calendar className="w-5 h-5 text-slate-400" />
+              <div className="flex items-center gap-3 text-foreground">
+                <Calendar className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-slate-500">Appointment Date</p>
+                  <p className="text-sm text-muted-foreground">Appointment Date</p>
                   <p className="font-medium">
                     {moment(appointment.appointment_date).format('MMMM D, YYYY')}
                   </p>
@@ -167,35 +167,35 @@ export default function RecordingDetail() {
               </div>
 
               {dc && (
-                <div className="flex items-center gap-3 text-slate-700">
-                  <User className="w-5 h-5 text-slate-400" />
+                <div className="flex items-center gap-3 text-foreground">
+                  <User className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-slate-500">Design Consultant</p>
+                    <p className="text-sm text-muted-foreground">Design Consultant</p>
                     <p className="font-medium">{dc.first_name} {dc.last_name}</p>
                   </div>
                 </div>
               )}
 
               {appointment.location_address && (
-                <div className="flex items-center gap-3 text-slate-700">
-                  <MapPin className="w-5 h-5 text-slate-400" />
+                <div className="flex items-center gap-3 text-foreground">
+                  <MapPin className="w-5 h-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-slate-500">Location</p>
+                    <p className="text-sm text-muted-foreground">Location</p>
                     <p className="font-medium">{appointment.location_address}</p>
                   </div>
                 </div>
               )}
 
-              <div className="flex items-center gap-3 text-slate-700">
+              <div className="flex items-center gap-3 text-foreground">
                 <div className="w-5 h-5 flex items-center justify-center">
                   <div className={`w-3 h-3 rounded-full ${
                     appointment.status === 'Sold' ? 'bg-green-500' :
                     appointment.status === 'Completed' ? 'bg-blue-500' :
-                    'bg-slate-400'
+                    'bg-muted-foreground'
                   }`} />
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Status</p>
+                  <p className="text-sm text-muted-foreground">Status</p>
                   <p className="font-medium">{appointment.status}</p>
                 </div>
               </div>
@@ -224,38 +224,20 @@ export default function RecordingDetail() {
         />
 
         {/* Analysis Section */}
-        <Card className="bg-white border border-slate-200 mt-6">
+        <Card className="bg-card border border-border mt-6">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-600" />
+                <Sparkles className="w-5 h-5 text-primary" />
                 Call Analysis
               </CardTitle>
-              <Button
-                onClick={() => analyzeMutation.mutate()}
-                disabled={analyzeMutation.isPending}
-                className="bg-indigo-600 hover:bg-indigo-700"
-              >
-                {analyzeMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    {hasAnalysis ? 'Re-analyze Call' : 'Analyze Call'}
-                  </>
-                )}
-              </Button>
-              {hasAnalysis && valueAddAnalysis === null && (
+              <div className="flex flex-wrap gap-2">
                 <Button
-                  onClick={() => analyzeValueAddsMutation.mutate()}
-                  disabled={analyzeValueAddsMutation.isPending}
-                  variant="outline"
-                  className="ml-2"
+                  onClick={() => analyzeMutation.mutate()}
+                  disabled={analyzeMutation.isPending}
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
-                  {analyzeValueAddsMutation.isPending ? (
+                  {analyzeMutation.isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Analyzing...
@@ -263,59 +245,77 @@ export default function RecordingDetail() {
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 mr-2" />
-                      Analyze Value Adds
+                      {hasAnalysis ? 'Re-analyze Call' : 'Analyze Call'}
                     </>
                   )}
                 </Button>
-              )}
-              {hasAnalysis && valueAddAnalysis !== null && (
-                <Button
-                  onClick={() => analyzeValueAddsMutation.mutate()}
-                  disabled={analyzeValueAddsMutation.isPending}
-                  variant="ghost"
-                  size="sm"
-                  className="ml-2"
-                >
-                  {analyzeValueAddsMutation.isPending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    </>
-                  ) : (
-                    <Sparkles className="w-4 h-4 mr-1" />
-                  )}
-                  Refresh
-                </Button>
-              )}
+                {hasAnalysis && valueAddAnalysis === null && (
+                  <Button
+                    onClick={() => analyzeValueAddsMutation.mutate()}
+                    disabled={analyzeValueAddsMutation.isPending}
+                    variant="outline"
+                  >
+                    {analyzeValueAddsMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Analyze Value Adds
+                      </>
+                    )}
+                  </Button>
+                )}
+                {hasAnalysis && valueAddAnalysis !== null && (
+                  <Button
+                    onClick={() => analyzeValueAddsMutation.mutate()}
+                    disabled={analyzeValueAddsMutation.isPending}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    {analyzeValueAddsMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      </>
+                    ) : (
+                      <Sparkles className="w-4 h-4 mr-1" />
+                    )}
+                    Refresh
+                  </Button>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent>
             {analyzeMutation.isPending && (
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mb-4" />
-                <p className="text-slate-600">Analyzing recording with AI...</p>
-                <p className="text-sm text-slate-400 mt-2">This may take a few minutes</p>
+                <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+                <p className="text-muted-foreground">Analyzing recording with AI...</p>
+                <p className="text-sm text-muted-foreground mt-2">This may take a few minutes</p>
               </div>
             )}
 
             {!hasAnalysis && !analyzeMutation.isPending && (
               <div className="text-center py-12">
-                <Sparkles className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-600 mb-2">No analysis available yet</p>
-                <p className="text-sm text-slate-400">Click "Analyze Call" to generate transcription, sentiment, and summary</p>
+                <Sparkles className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground mb-2">No analysis available yet</p>
+                <p className="text-sm text-muted-foreground">Click "Analyze Call" to generate transcription, sentiment, and summary</p>
               </div>
             )}
 
             {hasAnalysis && (
               <div>
                 {/* Tabs */}
-                <div className="flex gap-2 mb-6 border-b border-slate-200 overflow-x-auto">
+                <div className="flex gap-2 mb-6 border-b border-border overflow-x-auto">
                   <button
                     onClick={() => setActiveTab('value-adds')}
                     className={cn(
                       "px-4 py-2 text-sm font-medium transition-colors border-b-2 whitespace-nowrap",
                       activeTab === 'value-adds'
-                        ? "border-indigo-600 text-indigo-600"
-                        : "border-transparent text-slate-600 hover:text-slate-800"
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <Sparkles className="w-4 h-4 inline mr-2" />
@@ -326,8 +326,8 @@ export default function RecordingDetail() {
                     className={cn(
                       "px-4 py-2 text-sm font-medium transition-colors border-b-2 whitespace-nowrap",
                       activeTab === 'transcript'
-                        ? "border-indigo-600 text-indigo-600"
-                        : "border-transparent text-slate-600 hover:text-slate-800"
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <MessageSquare className="w-4 h-4 inline mr-2" />
@@ -338,8 +338,8 @@ export default function RecordingDetail() {
                     className={cn(
                       "px-4 py-2 text-sm font-medium transition-colors border-b-2 whitespace-nowrap",
                       activeTab === 'sentiment'
-                        ? "border-indigo-600 text-indigo-600"
-                        : "border-transparent text-slate-600 hover:text-slate-800"
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <TrendingUp className="w-4 h-4 inline mr-2" />
@@ -350,8 +350,8 @@ export default function RecordingDetail() {
                     className={cn(
                       "px-4 py-2 text-sm font-medium transition-colors border-b-2 whitespace-nowrap",
                       activeTab === 'summary'
-                        ? "border-indigo-600 text-indigo-600"
-                        : "border-transparent text-slate-600 hover:text-slate-800"
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <FileText className="w-4 h-4 inline mr-2" />
@@ -364,40 +364,40 @@ export default function RecordingDetail() {
                   <div className="space-y-3">
                     {valueAddsLoading ? (
                       <div className="text-center py-8">
-                        <Loader2 className="w-6 h-6 text-indigo-600 animate-spin mx-auto mb-2" />
-                        <p className="text-slate-500">Analyzing value adds with AI...</p>
+                        <Loader2 className="w-6 h-6 text-primary animate-spin mx-auto mb-2" />
+                        <p className="text-muted-foreground">Analyzing value adds with AI...</p>
                       </div>
                     ) : !valueAddAnalysis ? (
                       <div className="text-center py-8">
-                        <p className="text-slate-500">No value add analysis yet. Click "Analyze Value Adds" to get started.</p>
+                        <p className="text-muted-foreground">No value add analysis yet. Click "Analyze Value Adds" to get started.</p>
                       </div>
                     ) : !settings?.value_add_keywords || settings.value_add_keywords.length === 0 ? (
                       <div className="text-center py-8">
-                        <p className="text-slate-500">No value add keywords configured. Add them in Settings.</p>
+                        <p className="text-muted-foreground">No value add keywords configured. Add them in Settings.</p>
                       </div>
                     ) : (
                       <>
                         {/* Summary Stats */}
                         <div className="grid grid-cols-2 gap-4 mb-6">
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="bg-green-50 dark:bg-green-500/15 border border-green-200 dark:border-green-500/25 rounded-lg p-4">
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 className="w-5 h-5 text-green-600" />
+                              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                               <div>
-                                <p className="text-2xl font-bold text-green-700">
+                                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
                                   {valueAddAnalysis.filter(v => v.mentioned).length}
                                 </p>
-                                <p className="text-xs text-green-600">Mentioned</p>
+                                <p className="text-xs text-green-600 dark:text-green-400">Mentioned</p>
                               </div>
                             </div>
                           </div>
-                          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <div className="bg-red-50 dark:bg-red-500/15 border border-red-200 dark:border-red-500/25 rounded-lg p-4">
                             <div className="flex items-center gap-2">
-                              <XCircle className="w-5 h-5 text-red-600" />
+                              <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
                               <div>
-                                <p className="text-2xl font-bold text-red-700">
+                                <p className="text-2xl font-bold text-red-700 dark:text-red-300">
                                   {valueAddAnalysis.filter(v => !v.mentioned).length}
                                 </p>
-                                <p className="text-xs text-red-600">Not Mentioned</p>
+                                <p className="text-xs text-red-600 dark:text-red-400">Not Mentioned</p>
                               </div>
                             </div>
                           </div>
@@ -410,21 +410,21 @@ export default function RecordingDetail() {
                             className={cn(
                               "p-4 rounded-lg border-2",
                               item.mentioned
-                                ? "bg-green-50 border-green-200"
-                                : "bg-red-50 border-red-200"
+                                ? "bg-green-50 dark:bg-green-500/15 border-green-200 dark:border-green-500/25"
+                                : "bg-red-50 dark:bg-red-500/15 border-red-200 dark:border-red-500/25"
                             )}
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex items-start gap-3 flex-1">
                                 {item.mentioned ? (
-                                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                                 ) : (
-                                  <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                  <XCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                                 )}
                                 <div className="flex-1">
                                   <p className={cn(
                                     "font-medium",
-                                    item.mentioned ? "text-green-900" : "text-red-900"
+                                    item.mentioned ? "text-green-900 dark:text-green-200" : "text-red-900 dark:text-red-200"
                                   )}>
                                     {item.keyword}
                                   </p>
@@ -446,7 +446,7 @@ export default function RecordingDetail() {
                                           return (
                                             <>
                                               {text.substring(0, startIdx)}
-                                              <span className="bg-yellow-200 font-semibold px-1 rounded">
+                                              <span className="bg-yellow-200 dark:bg-yellow-500/30 font-semibold px-1 rounded">
                                                 {text.substring(startIdx, endIdx)}
                                               </span>
                                               {text.substring(endIdx)}
@@ -457,20 +457,20 @@ export default function RecordingDetail() {
                                         return (
                                           <div
                                             key={mIdx}
-                                            className="bg-white border border-green-200 rounded-lg p-3"
+                                            className="bg-card border border-green-200 dark:border-green-500/25 rounded-lg p-3"
                                           >
                                             <div className="flex items-center gap-2 mb-2">
-                                              <Clock className="w-3 h-3 text-green-600" />
-                                              <span className="text-xs font-semibold text-green-600">
+                                              <Clock className="w-3 h-3 text-green-600 dark:text-green-400" />
+                                              <span className="text-xs font-semibold text-green-600 dark:text-green-400">
                                                 {Math.floor(mention.timestamp / 60)}:{String(Math.floor(mention.timestamp % 60)).padStart(2, '0')}
                                               </span>
                                             </div>
-                                            <p className="text-sm text-slate-700 leading-relaxed">
+                                            <p className="text-sm text-foreground leading-relaxed">
                                               {renderTextWithHighlight()}
                                             </p>
                                             {mention.matchingWords && (
-                                              <div className="mt-2 pt-2 border-t border-green-200">
-                                                <p className="text-xs text-green-600">
+                                              <div className="mt-2 pt-2 border-t border-green-200 dark:border-green-500/25">
+                                                <p className="text-xs text-green-600 dark:text-green-400">
                                                   <span className="font-semibold">Matching words:</span> {mention.matchingWords}
                                                 </p>
                                               </div>
@@ -482,7 +482,7 @@ export default function RecordingDetail() {
                                   )}
 
                                   {!item.mentioned && (
-                                    <p className="text-xs text-red-600 mt-1">
+                                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
                                       Not mentioned during conversation
                                     </p>
                                   )}
@@ -500,13 +500,13 @@ export default function RecordingDetail() {
                 {activeTab === 'transcript' && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between mb-4">
-                      <p className="text-sm text-slate-600">
+                      <p className="text-sm text-muted-foreground">
                         Duration: {Math.floor(analysis.duration / 60)}m {Math.floor(analysis.duration % 60)}s
                         {analysis.utterances && ` • ${analysis.utterances.length} utterances`}
                       </p>
                       <div className="flex items-center gap-3">
                         {analysis.analyzedAt && (
-                          <p className="text-xs text-slate-400">
+                          <p className="text-xs text-muted-foreground">
                             Analyzed {moment(analysis.analyzedAt).fromNow()}
                           </p>
                         )}
@@ -540,13 +540,13 @@ export default function RecordingDetail() {
                       };
                       
                       return (
-                        <div key={idx} className="flex gap-3 p-4 rounded-lg bg-slate-50">
+                        <div key={idx} className="flex gap-3 p-4 rounded-lg bg-secondary">
                           <Badge variant="outline" className="h-6 flex-shrink-0 text-xs">
                             {speakerLabel}
                           </Badge>
                           <div className="flex-1">
-                            <p className="text-xs text-slate-500 mb-1">[{formatTime(utterance.start)} - {formatTime(utterance.end)}]</p>
-                            <p className="text-slate-700">{utterance.text}</p>
+                            <p className="text-xs text-muted-foreground mb-1">[{formatTime(utterance.start)} - {formatTime(utterance.end)}]</p>
+                            <p className="text-foreground">{utterance.text}</p>
                           </div>
                         </div>
                       );
@@ -554,8 +554,8 @@ export default function RecordingDetail() {
                     
                     {/* Pagination */}
                     {analysis.utterances && analysis.utterances.length > itemsPerPage && (
-                      <div className="flex items-center justify-between pt-4 border-t">
-                        <p className="text-sm text-slate-600">
+                      <div className="flex items-center justify-between pt-4 border-t border-border">
+                        <p className="text-sm text-muted-foreground">
                           Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, analysis.utterances.length)} of {analysis.utterances.length}
                         </p>
                         <div className="flex items-center gap-2">
@@ -567,7 +567,7 @@ export default function RecordingDetail() {
                           >
                             <ChevronLeft className="w-4 h-4" />
                           </Button>
-                          <span className="text-sm text-slate-600">
+                          <span className="text-sm text-muted-foreground">
                             Page {currentPage} of {Math.ceil(analysis.utterances.length / itemsPerPage)}
                           </span>
                           <Button
@@ -617,33 +617,33 @@ export default function RecordingDetail() {
                       };
                       
                       return (
-                        <div key={idx} className="p-4 rounded-lg border border-slate-200">
+                        <div key={idx} className="p-4 rounded-lg border border-border">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-xs">
                                 {speakerLabel}
                               </Badge>
                               <Badge className={cn(
-                                sentiment.sentiment === 'POSITIVE' && "bg-green-100 text-green-700",
-                                sentiment.sentiment === 'NEGATIVE' && "bg-red-100 text-red-700",
-                                sentiment.sentiment === 'NEUTRAL' && "bg-slate-100 text-slate-700"
+                                sentiment.sentiment === 'POSITIVE' && "bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300",
+                                sentiment.sentiment === 'NEGATIVE' && "bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-300",
+                                sentiment.sentiment === 'NEUTRAL' && "bg-secondary text-foreground"
                               )}>
                                 {sentiment.sentiment}
                               </Badge>
                             </div>
-                            <span className="text-xs text-slate-500">
+                            <span className="text-xs text-muted-foreground">
                               {formatTime(sentiment.start)} - Confidence: {(sentiment.confidence * 100).toFixed(0)}%
                             </span>
                           </div>
-                          <p className="text-slate-700">{sentiment.text}</p>
+                          <p className="text-foreground">{sentiment.text}</p>
                           </div>
                           );
                           })}
 
                           {/* Pagination */}
                           {analysis.sentiment && analysis.sentiment.length > itemsPerPage && (
-                          <div className="flex items-center justify-between pt-4 border-t">
-                          <p className="text-sm text-slate-600">
+                          <div className="flex items-center justify-between pt-4 border-t border-border">
+                          <p className="text-sm text-muted-foreground">
                             Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, analysis.sentiment.length)} of {analysis.sentiment.length}
                           </p>
                           <div className="flex items-center gap-2">
@@ -655,7 +655,7 @@ export default function RecordingDetail() {
                             >
                               <ChevronLeft className="w-4 h-4" />
                             </Button>
-                            <span className="text-sm text-slate-600">
+                            <span className="text-sm text-muted-foreground">
                               Page {currentPage} of {Math.ceil(analysis.sentiment.length / itemsPerPage)}
                             </span>
                             <Button
@@ -676,21 +676,21 @@ export default function RecordingDetail() {
                 {activeTab === 'summary' && (
                   <div className="space-y-6">
                     {analysis.summary?.map((chapter, idx) => (
-                      <div key={idx} className="p-4 rounded-lg bg-indigo-50 border border-indigo-200">
-                        <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                      <div key={idx} className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+                        <h3 className="text-lg font-semibold text-foreground mb-2">
                           {chapter.headline}
                         </h3>
-                        <p className="text-sm text-indigo-600 mb-3">{chapter.gist}</p>
-                        <p className="text-slate-700">{chapter.summary}</p>
+                        <p className="text-sm text-primary mb-3">{chapter.gist}</p>
+                        <p className="text-foreground">{chapter.summary}</p>
                       </div>
                     ))}
                     
                     {analysis.topics && Object.keys(analysis.topics).length > 0 && (
-                      <div className="mt-6 p-4 rounded-lg bg-purple-50 border border-purple-200">
-                        <h3 className="text-sm font-semibold text-slate-800 mb-3">Topics Discussed</h3>
+                      <div className="mt-6 p-4 rounded-lg bg-secondary border border-border">
+                        <h3 className="text-sm font-semibold text-foreground mb-3">Topics Discussed</h3>
                         <div className="flex flex-wrap gap-2">
                           {Object.entries(analysis.topics).slice(0, 10).map(([topic, relevance]) => (
-                            <Badge key={topic} variant="outline" className="bg-white">
+                            <Badge key={topic} variant="outline" className="bg-card">
                               {topic.split('>').pop()?.trim() || topic}
                             </Badge>
                           ))}
@@ -708,13 +708,13 @@ export default function RecordingDetail() {
         {isAdmin && (
           <>
             {appointment.recording_transcript_id && (
-              <Card className="bg-white border border-slate-200 mt-6">
+              <Card className="bg-card border border-border mt-6">
                 <CardHeader>
-                  <CardTitle className="text-sm text-slate-600">AssemblyAI Transcript ID (Admin Only)</CardTitle>
+                  <CardTitle className="text-sm text-muted-foreground">AssemblyAI Transcript ID (Admin Only)</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2">
-                    <code className="bg-slate-50 px-3 py-2 rounded text-sm text-slate-700 border border-slate-200 font-mono">
+                    <code className="bg-secondary px-3 py-2 rounded text-sm text-foreground border border-border font-mono">
                       {appointment.recording_transcript_id}
                     </code>
                   </div>
@@ -723,12 +723,12 @@ export default function RecordingDetail() {
             )}
             
             {hasAnalysis && (
-              <Card className="bg-white border border-slate-200 mt-6">
+              <Card className="bg-card border border-border mt-6">
                 <CardHeader>
-                  <CardTitle className="text-sm text-slate-600">AssemblyAI Response (Admin Only)</CardTitle>
+                  <CardTitle className="text-sm text-muted-foreground">AssemblyAI Response (Admin Only)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <pre className="bg-slate-50 p-4 rounded-lg text-xs overflow-x-auto whitespace-pre-wrap max-h-96 overflow-y-auto border border-slate-200">
+                  <pre className="bg-secondary p-4 rounded-lg text-xs overflow-x-auto whitespace-pre-wrap max-h-96 overflow-y-auto border border-border">
                     {JSON.stringify(analysis, null, 2)}
                   </pre>
                 </CardContent>
@@ -736,12 +736,12 @@ export default function RecordingDetail() {
             )}
 
               {valueAddAnalysis && (
-                <Card className="bg-white border border-slate-200 mt-6">
+                <Card className="bg-card border border-border mt-6">
                   <CardHeader>
-                    <CardTitle className="text-sm text-slate-600">Value Adds Analysis JSON (Admin Only)</CardTitle>
+                    <CardTitle className="text-sm text-muted-foreground">Value Adds Analysis JSON (Admin Only)</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <pre className="bg-slate-50 p-4 rounded-lg text-xs overflow-x-auto whitespace-pre-wrap max-h-96 overflow-y-auto border border-slate-200">
+                    <pre className="bg-secondary p-4 rounded-lg text-xs overflow-x-auto whitespace-pre-wrap max-h-96 overflow-y-auto border border-border">
                       {JSON.stringify(valueAddAnalysis, null, 2)}
                     </pre>
                   </CardContent>
@@ -756,7 +756,7 @@ export default function RecordingDetail() {
             <DialogHeader>
               <DialogTitle>Analysis Response</DialogTitle>
             </DialogHeader>
-            <pre className="bg-slate-50 p-4 rounded-lg text-xs overflow-x-auto whitespace-pre-wrap">
+            <pre className="bg-secondary p-4 rounded-lg text-xs overflow-x-auto whitespace-pre-wrap">
               {JSON.stringify(analysisResponse, null, 2)}
             </pre>
           </DialogContent>

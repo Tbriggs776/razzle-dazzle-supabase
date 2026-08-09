@@ -230,92 +230,92 @@ export default function CommunicationHub() {
 
   const RelatedRecordsPanel = () => (
     <div className="space-y-3">
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Related Records</p>
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Related Records</p>
 
       {relatedData?.appointments?.length > 0 ? relatedData.appointments.slice(0, 3).map(apt => {
         const dc = relatedData.teamMembers?.find(tm => tm.id === apt.assigned_dc);
         return (
-          <a key={apt.id} href={`/AppointmentDetail?id=${apt.id}`} className="block p-3 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+          <a key={apt.id} href={`/AppointmentDetail?id=${apt.id}`} className="block p-3 rounded-lg border border-border hover:border-primary/40 hover:bg-primary/5 transition-colors">
             <div className="flex items-center gap-2 mb-2">
-              <Calendar className="w-3.5 h-3.5 text-indigo-500" />
-              <span className="text-xs font-semibold text-slate-700">Appointment</span>
-              <ExternalLink className="w-3 h-3 text-slate-400 ml-auto" />
+              <Calendar className="w-3.5 h-3.5 text-primary" />
+              <span className="text-xs font-semibold text-foreground">Appointment</span>
+              <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
             </div>
             <div className="space-y-1">
               <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0',
-                apt.status === 'Sold' ? 'border-emerald-200 text-emerald-700 bg-emerald-50' :
-                apt.status === 'Scheduled' || apt.status === 'Rescheduled' ? 'border-blue-200 text-blue-700 bg-blue-50' :
-                apt.status === 'Cancelled' ? 'border-red-200 text-red-700 bg-red-50' :
-                'border-slate-200 text-slate-600'
+                apt.status === 'Sold' ? 'border-emerald-200 text-emerald-700 bg-emerald-50 dark:border-emerald-500/25 dark:text-emerald-300 dark:bg-emerald-500/15' :
+                apt.status === 'Scheduled' || apt.status === 'Rescheduled' ? 'border-blue-200 text-blue-700 bg-blue-50 dark:border-blue-500/25 dark:text-blue-300 dark:bg-blue-500/15' :
+                apt.status === 'Cancelled' ? 'border-red-200 text-red-700 bg-red-50 dark:border-red-500/25 dark:text-red-300 dark:bg-red-500/15' :
+                'border-border text-muted-foreground'
               )}>{apt.status}</Badge>
               {apt.appointment_date && (
-                <p className="text-xs text-slate-600">{new Date(apt.appointment_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                <p className="text-xs text-muted-foreground">{new Date(apt.appointment_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
               )}
-              {apt.appointment_block && <p className="text-xs text-slate-500">{apt.appointment_block}</p>}
-              {dc && <p className="text-xs text-slate-500">DC: {dc.first_name} {dc.last_name}</p>}
+              {apt.appointment_block && <p className="text-xs text-muted-foreground">{apt.appointment_block}</p>}
+              {dc && <p className="text-xs text-muted-foreground">DC: {dc.first_name} {dc.last_name}</p>}
             </div>
           </a>
         );
       }) : (
-        <div className="p-3 rounded-lg border border-dashed border-slate-200 text-center">
-          <Calendar className="w-4 h-4 text-slate-300 mx-auto mb-1" />
-          <p className="text-xs text-slate-400">No appointments</p>
+        <div className="p-3 rounded-lg border border-dashed border-border text-center">
+          <Calendar className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+          <p className="text-xs text-muted-foreground">No appointments</p>
         </div>
       )}
 
       {relatedData?.sales?.length > 0 ? relatedData.sales.slice(0, 2).map(sale => (
-        <a key={sale.id} href={`/SaleDetail?id=${sale.id}`} className="block p-3 rounded-lg border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 transition-colors">
+        <a key={sale.id} href={`/SaleDetail?id=${sale.id}`} className="block p-3 rounded-lg border border-border hover:border-emerald-300 dark:hover:border-emerald-500/40 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
-            <span className="text-xs font-semibold text-slate-700">Sale</span>
-            <ExternalLink className="w-3 h-3 text-slate-400 ml-auto" />
+            <span className="text-xs font-semibold text-foreground">Sale</span>
+            <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
           </div>
           <div className="space-y-1">
-            {sale.sale_amount && <p className="text-sm font-bold text-emerald-700">${sale.sale_amount.toLocaleString()}</p>}
-            {sale.sale_date && <p className="text-xs text-slate-500">{new Date(sale.sale_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>}
-            {sale.deposit_amount && <p className="text-xs text-slate-500">Deposit: ${sale.deposit_amount.toLocaleString()}</p>}
-            {sale.deposit_payment_method && <p className="text-xs text-slate-500">{sale.deposit_payment_method}</p>}
+            {sale.sale_amount && <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">${sale.sale_amount.toLocaleString()}</p>}
+            {sale.sale_date && <p className="text-xs text-muted-foreground">{new Date(sale.sale_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>}
+            {sale.deposit_amount && <p className="text-xs text-muted-foreground">Deposit: ${sale.deposit_amount.toLocaleString()}</p>}
+            {sale.deposit_payment_method && <p className="text-xs text-muted-foreground">{sale.deposit_payment_method}</p>}
           </div>
         </a>
       )) : (
-        <div className="p-3 rounded-lg border border-dashed border-slate-200 text-center">
-          <DollarSign className="w-4 h-4 text-slate-300 mx-auto mb-1" />
-          <p className="text-xs text-slate-400">No sales</p>
+        <div className="p-3 rounded-lg border border-dashed border-border text-center">
+          <DollarSign className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+          <p className="text-xs text-muted-foreground">No sales</p>
         </div>
       )}
 
       {relatedData?.projects?.length > 0 ? relatedData.projects.slice(0, 2).map(proj => (
-        <a key={proj.id} href={`/ProjectDetail?id=${proj.id}`} className="block p-3 rounded-lg border border-slate-200 hover:border-purple-300 hover:bg-purple-50 transition-colors">
+        <a key={proj.id} href={`/ProjectDetail?id=${proj.id}`} className="block p-3 rounded-lg border border-border hover:border-purple-300 dark:hover:border-purple-500/40 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-colors">
           <div className="flex items-center gap-2 mb-2">
             <ClipboardCheck className="w-3.5 h-3.5 text-purple-500" />
-            <span className="text-xs font-semibold text-slate-700">Project</span>
-            <ExternalLink className="w-3 h-3 text-slate-400 ml-auto" />
+            <span className="text-xs font-semibold text-foreground">Project</span>
+            <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
           </div>
           <div className="space-y-1">
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-purple-200 text-purple-700 bg-purple-50">{proj.status}</Badge>
-            {proj.installation_date && <p className="text-xs text-slate-600">Install: {new Date(proj.installation_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>}
-            {proj.scheduled_start_date && <p className="text-xs text-slate-500">Start: {new Date(proj.scheduled_start_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>}
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-purple-200 text-purple-700 bg-purple-50 dark:border-purple-500/25 dark:text-purple-300 dark:bg-purple-500/15">{proj.status}</Badge>
+            {proj.installation_date && <p className="text-xs text-muted-foreground">Install: {new Date(proj.installation_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>}
+            {proj.scheduled_start_date && <p className="text-xs text-muted-foreground">Start: {new Date(proj.scheduled_start_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>}
           </div>
         </a>
       )) : (
-        <div className="p-3 rounded-lg border border-dashed border-slate-200 text-center">
-          <ClipboardCheck className="w-4 h-4 text-slate-300 mx-auto mb-1" />
-          <p className="text-xs text-slate-400">No projects</p>
+        <div className="p-3 rounded-lg border border-dashed border-border text-center">
+          <ClipboardCheck className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+          <p className="text-xs text-muted-foreground">No projects</p>
         </div>
       )}
     </div>
   );
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-4 py-3 flex-shrink-0">
+      <div className="bg-card border-b border-border px-4 py-3 flex-shrink-0">
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 min-w-0">
-            <MessageSquare className="w-5 h-5 text-indigo-600 flex-shrink-0" />
-            <h1 className="text-lg font-bold text-slate-800 truncate">Communication Hub</h1>
+            <MessageSquare className="w-5 h-5 text-primary flex-shrink-0" />
+            <h1 className="text-lg font-bold text-foreground truncate">Communication Hub</h1>
             {unreadCount > 0 && (
-              <Badge className="bg-red-500 text-white flex-shrink-0 text-xs">{unreadCount}</Badge>
+              <Badge className="bg-destructive text-destructive-foreground flex-shrink-0 text-xs">{unreadCount}</Badge>
             )}
           </div>
           <Button
@@ -335,14 +335,14 @@ export default function CommunicationHub() {
             className={cn(
               'text-xs px-2 py-1 rounded-lg border font-medium transition-colors whitespace-nowrap flex-shrink-0',
               hideAutomated
-                ? 'bg-amber-100 border-amber-300 text-amber-800'
-                : 'bg-white border-slate-200 text-slate-500'
+                ? 'bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/30 dark:text-amber-300'
+                : 'bg-card border-border text-muted-foreground'
             )}
           >
             {hideAutomated ? '🚫 Auto' : '👁 Auto'}
           </button>
 
-          <div className="flex items-center gap-0.5 border border-slate-200 rounded-lg p-0.5 bg-white flex-shrink-0">
+          <div className="flex items-center gap-0.5 border border-border rounded-lg p-0.5 bg-card flex-shrink-0">
             {[['all', 'All'], ['external', 'Customers'], ['internal', 'Team']].map(([val, label]) => (
               <button
                 key={val}
@@ -350,8 +350,8 @@ export default function CommunicationHub() {
                 className={cn(
                   'text-xs px-2 py-1 rounded font-medium transition-colors whitespace-nowrap',
                   internalFilter === val
-                    ? val === 'internal' ? 'bg-violet-600 text-white' : 'bg-indigo-600 text-white'
-                    : 'text-slate-500 hover:bg-slate-100'
+                    ? val === 'internal' ? 'bg-violet-600 text-white' : 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-secondary'
                 )}
               >
                 {label}
@@ -359,14 +359,14 @@ export default function CommunicationHub() {
             ))}
           </div>
 
-          <div className="flex items-center gap-0.5 border border-slate-200 rounded-lg p-0.5 bg-white flex-shrink-0">
+          <div className="flex items-center gap-0.5 border border-border rounded-lg p-0.5 bg-card flex-shrink-0">
             {['all', 'SMS', 'Email'].map(t => (
               <button
                 key={t}
                 onClick={() => setTypeFilter(t)}
                 className={cn(
                   'text-xs px-2 py-1 rounded font-medium transition-colors',
-                  typeFilter === t ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-slate-100'
+                  typeFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'
                 )}
               >
                 {t}
@@ -381,13 +381,13 @@ export default function CommunicationHub() {
 
         {/* Conversation List — always visible on desktop, hidden on mobile when thread is open */}
         <div className={cn(
-          "flex flex-col bg-white border-r border-slate-200",
+          "flex flex-col bg-card border-r border-border",
           "w-full md:w-80 md:flex-shrink-0",
           showMobileThread ? "hidden md:flex" : "flex"
         )}>
-          <div className="p-3 border-b border-slate-100 flex-shrink-0">
+          <div className="p-3 border-b border-border flex-shrink-0">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search conversations..."
                 value={searchQuery}
@@ -399,10 +399,10 @@ export default function CommunicationHub() {
           <div className="flex-1 overflow-y-auto">
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
               </div>
             ) : sortedFilteredConversations.length === 0 ? (
-              <div className="text-center py-12 text-slate-400 text-sm">No conversations yet</div>
+              <div className="text-center py-12 text-muted-foreground text-sm">No conversations yet</div>
             ) : (
               sortedFilteredConversations.map(conv => {
                 const lastMsg = conv.messages[conv.messages.length - 1];
@@ -412,37 +412,37 @@ export default function CommunicationHub() {
                     <button
                       onClick={() => handleSelectConversation(conv)}
                       className={cn(
-                        "w-full text-left px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition-colors",
-                        isSelected && "bg-indigo-50 border-l-2 border-l-indigo-500",
-                        isUnread(conv) && !isSelected && "bg-blue-50"
+                        "w-full text-left px-4 py-3 border-b border-border hover:bg-secondary transition-colors",
+                        isSelected && "bg-primary/10 border-l-2 border-l-primary",
+                        isUnread(conv) && !isSelected && "bg-blue-50 dark:bg-blue-500/10"
                       )}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={cn("text-sm truncate", isUnread(conv) ? "font-bold text-slate-900" : "font-semibold text-slate-800")}>
+                            <span className={cn("text-sm truncate", isUnread(conv) ? "font-bold text-foreground" : "font-semibold text-foreground")}>
                               {conv.contact_name}
                             </span>
                             {conv.is_internal && (
-                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 font-semibold flex-shrink-0">TEAM</span>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300 font-semibold flex-shrink-0">TEAM</span>
                             )}
                             {isUnread(conv) && (
                               <span className="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0" />
                             )}
                           </div>
-                          <p className={cn("text-xs mt-1 truncate", isUnread(conv) ? "text-slate-700 font-medium" : "text-slate-500")}>
+                          <p className={cn("text-xs mt-1 truncate", isUnread(conv) ? "text-foreground font-medium" : "text-muted-foreground")}>
                             {lastMsg?.direction === 'inbound' ? '← ' : '→ '}
                             {lastMsg?.body?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}
                           </p>
                         </div>
                         <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                          <span className={cn('text-xs px-1.5 py-0.5 rounded font-medium', lastMsg?.type === 'SMS' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600')}>
+                          <span className={cn('text-xs px-1.5 py-0.5 rounded font-medium', lastMsg?.type === 'SMS' ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300' : 'bg-purple-50 text-purple-600 dark:bg-purple-500/15 dark:text-purple-300')}>
                             {lastMsg?.type}
                           </span>
-                          <span className="text-[10px] text-slate-400">
+                          <span className="text-[10px] text-muted-foreground">
                             {lastMsg?.created_date && format(new Date(lastMsg.created_date + (lastMsg.created_date.includes('Z') ? '' : 'Z')), 'MMM d')}
                           </span>
-                          <span className="text-[10px] text-slate-400">{conv.messages.length} msg{conv.messages.length !== 1 ? 's' : ''}</span>
+                          <span className="text-[10px] text-muted-foreground">{conv.messages.length} msg{conv.messages.length !== 1 ? 's' : ''}</span>
                         </div>
                       </div>
                     </button>
@@ -450,7 +450,7 @@ export default function CommunicationHub() {
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteThread(conv); }}
                         disabled={deletingKey === conv.key}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-100 hover:bg-red-200 text-red-600 rounded p-1 text-xs leading-none"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive/20 text-destructive rounded p-1 text-xs leading-none"
                         title="Delete thread"
                       >
                         {deletingKey === conv.key ? '…' : '🗑'}

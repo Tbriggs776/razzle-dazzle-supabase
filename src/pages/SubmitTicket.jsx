@@ -208,43 +208,43 @@ export default function SubmitTicket() {
 
   if (!currentUser || !currentTeamMember) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8">
-      <div className="max-w-3xl mx-auto px-6">
+    <div className="min-h-screen bg-background py-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+          className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-6">
+          <div className="bg-primary px-6 sm:px-8 py-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                <ClipboardCheck className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-primary-foreground/15 flex items-center justify-center">
+                <ClipboardCheck className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Submit Ticket</h1>
-                <p className="text-indigo-100 text-sm">Job Shorts, Claims & Repairs</p>
+                <h1 className="text-2xl font-bold text-primary-foreground">Submit Ticket</h1>
+                <p className="text-primary-foreground/80 text-sm">Job Shorts, Claims & Repairs</p>
               </div>
             </div>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
             {error && (
-              <div className="flex items-center gap-2 p-4 rounded-lg bg-red-50 border border-red-200">
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                <p className="text-sm text-red-800">{error}</p>
+              <div className="flex items-center gap-2 p-4 rounded-lg bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/25">
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="orderNumber">Order Number *</Label>
                 <Input
@@ -270,7 +270,7 @@ export default function SubmitTicket() {
 
             <div className="space-y-3">
               <Label>Categories *</Label>
-              <div className="grid grid-cols-1 gap-3 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <div className="grid grid-cols-1 gap-3 p-4 bg-secondary rounded-lg border border-border">
                 {TICKET_CATEGORIES.map((category) => (
                   <div key={category} className="flex items-center gap-2">
                     <Checkbox
@@ -280,7 +280,7 @@ export default function SubmitTicket() {
                     />
                     <label
                       htmlFor={category}
-                      className="text-sm text-slate-700 cursor-pointer select-none"
+                      className="text-sm text-foreground cursor-pointer select-none"
                     >
                       {category}
                     </label>
@@ -288,7 +288,7 @@ export default function SubmitTicket() {
                 ))}
               </div>
               {selectedCategories.length > 0 && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   {selectedCategories.length} {selectedCategories.length === 1 ? 'category' : 'categories'} selected
                 </p>
               )}
@@ -306,7 +306,7 @@ export default function SubmitTicket() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="requester">Requester *</Label>
                 <Select
@@ -355,7 +355,7 @@ export default function SubmitTicket() {
               <Button
                 type="submit"
                 disabled={createTicketMutation.isPending}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                className="flex-1 bg-primary text-primary-foreground hover:opacity-90"
               >
                 {createTicketMutation.isPending ? (
                   <>

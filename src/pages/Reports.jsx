@@ -169,18 +169,18 @@ export default function Reports() {
   const avgMinutes = Math.floor(avgTimeOnSite % 60);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-center justify-between">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Reports</h1>
-              <p className="text-slate-500 mt-1">Analytics and insights for your business</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Reports</h1>
+              <p className="text-muted-foreground mt-1">Analytics and insights for your business</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -195,19 +195,19 @@ export default function Reports() {
               </Select>
               
               {dateRange === 'custom' && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <input
                     type="date"
                     value={customStartDate}
                     onChange={(e) => setCustomStartDate(e.target.value)}
-                    className="h-10 px-3 border border-slate-200 rounded-md text-sm"
+                    className="h-10 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   />
-                  <span className="text-slate-500">to</span>
+                  <span className="text-muted-foreground">to</span>
                   <input
                     type="date"
                     value={customEndDate}
                     onChange={(e) => setCustomEndDate(e.target.value)}
-                    className="h-10 px-3 border border-slate-200 rounded-md text-sm"
+                    className="h-10 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               )}
@@ -217,28 +217,30 @@ export default function Reports() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs defaultValue="appointments" className="space-y-6">
-          <TabsList className="bg-white border border-slate-200 p-1">
-            <TabsTrigger value="appointments" className="rounded-lg">Appointments</TabsTrigger>
-            <TabsTrigger value="discrepancy" className="rounded-lg">
-              <GitMerge className="w-4 h-4 mr-2" />Contract vs RFMS
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-1">
+            <TabsList className="bg-card border border-border p-1">
+              <TabsTrigger value="appointments" className="rounded-lg">Appointments</TabsTrigger>
+              <TabsTrigger value="discrepancy" className="rounded-lg">
+                <GitMerge className="w-4 h-4 mr-2" />Contract vs RFMS
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="appointments" className="space-y-6">
             {appointmentsLoading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
             ) : (
               <>
                 {/* Key Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Total Appointments</CardTitle>
-                      <Calendar className="h-4 w-4 text-slate-400" />
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{appointmentStats.total}</div>
@@ -248,11 +250,11 @@ export default function Reports() {
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-                      <TrendingUp className="h-4 w-4 text-slate-400" />
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{conversionRate}%</div>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {appointmentStats.sold} sold / {appointmentStats.completed} completed
                       </p>
                     </CardContent>
@@ -261,13 +263,13 @@ export default function Reports() {
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Avg Time on Site</CardTitle>
-                      <Clock className="h-4 w-4 text-slate-400" />
+                      <Clock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">
                         {avgHours > 0 ? `${avgHours}h ${avgMinutes}m` : `${avgMinutes}m`}
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {completedWithTime.length} completed appointments
                       </p>
                     </CardContent>
@@ -276,7 +278,7 @@ export default function Reports() {
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Sales</CardTitle>
-                      <DollarSign className="h-4 w-4 text-slate-400" />
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{appointmentStats.sold}</div>
@@ -367,19 +369,19 @@ export default function Reports() {
                         {consultantPerformance.slice(0, 5).map((consultant, index) => (
                           <div key={index} className="flex items-center justify-between">
                             <div className="flex-1">
-                              <p className="text-sm font-medium text-slate-800">{consultant.name}</p>
-                              <p className="text-xs text-slate-500">
+                              <p className="text-sm font-medium text-foreground">{consultant.name}</p>
+                              <p className="text-xs text-muted-foreground">
                                 {consultant.appointments} appointments • {consultant.sales} sales
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm font-bold text-indigo-600">{consultant.conversionRate}%</p>
-                              <p className="text-xs text-slate-500">conversion</p>
+                              <p className="text-sm font-bold text-primary">{consultant.conversionRate}%</p>
+                              <p className="text-xs text-muted-foreground">conversion</p>
                             </div>
                           </div>
                         ))}
                         {consultantPerformance.length === 0 && (
-                          <p className="text-sm text-slate-500 text-center py-4">No data available</p>
+                          <p className="text-sm text-muted-foreground text-center py-4">No data available</p>
                         )}
                       </div>
                     </CardContent>

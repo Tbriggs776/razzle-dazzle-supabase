@@ -26,11 +26,11 @@ const SERVICE_TYPES = [
 import { format } from 'date-fns';
 
 const statusColors = {
-  scheduled: 'bg-blue-100 text-blue-800 border-blue-200',
-  in_progress: 'bg-orange-100 text-orange-800 border-orange-200',
-  completed: 'bg-green-100 text-green-800 border-green-200',
-  overdue: 'bg-red-100 text-red-800 border-red-200',
-  cancelled: 'bg-slate-100 text-slate-700 border-slate-200'
+  scheduled: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  in_progress: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+  completed: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
+  overdue: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  cancelled: 'bg-secondary text-secondary-foreground border-border'
 };
 
 const EMPTY = { vehicle_id: '', service_type: '', scheduled_date: '', status: 'scheduled', description: '', cost: '', vendor: '', receipt_urls: [] };
@@ -112,26 +112,26 @@ export default function FleetMaintenance() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="min-h-screen bg-background">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Maintenance Schedule</h1>
-            <p className="text-slate-500 mt-1">Track vehicle maintenance and service records</p>
+            <h1 className="text-3xl font-bold text-foreground">Maintenance Schedule</h1>
+            <p className="text-muted-foreground mt-1">Track vehicle maintenance and service records</p>
           </div>
-          <Button onClick={openNew} className="bg-indigo-600 hover:bg-indigo-700 self-start md:self-auto">
+          <Button onClick={openNew} className="bg-primary text-primary-foreground hover:opacity-90 self-start md:self-auto">
             <Plus className="w-4 h-4 mr-2" /> Add Record
           </Button>
         </div>
-        <div className="max-w-5xl mx-auto px-6 pb-4 flex gap-3 flex-wrap">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4 flex gap-3 flex-wrap">
           <div className="relative flex-1 min-w-48">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Search maintenance..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-nowrap overflow-x-auto pb-1">
             {['all', 'scheduled', 'overdue', 'in_progress', 'completed'].map(s => (
               <Button key={s} size="sm" variant={statusFilter === s ? 'default' : 'outline'} onClick={() => setStatusFilter(s)}
-                className={statusFilter === s ? 'bg-indigo-600 hover:bg-indigo-700' : ''}>
+                className={statusFilter === s ? 'bg-primary text-primary-foreground hover:opacity-90 whitespace-nowrap' : 'whitespace-nowrap'}>
                 {s === 'all' ? 'All' : s.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
                 {s !== 'all' && ` (${maintenance.filter(m => m.status === s).length})`}
               </Button>
@@ -140,34 +140,34 @@ export default function FleetMaintenance() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
-          <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 text-indigo-600 animate-spin" /></div>
+          <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 text-primary animate-spin" /></div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
-            <Wrench className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500">No maintenance records found</p>
+          <div className="text-center py-12 bg-card rounded-2xl border border-border">
+            <Wrench className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">No maintenance records found</p>
           </div>
         ) : (
           <div className="grid gap-3">
             {filtered.map(m => (
-              <div key={m.id} className="bg-white rounded-xl border border-slate-100 p-4 flex items-center gap-4 hover:shadow-md transition-all">
-                <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                  <Wrench className="w-5 h-5 text-orange-600" />
+              <div key={m.id} className="bg-card rounded-xl border border-border p-4 flex items-center gap-4 hover:shadow-md transition-all">
+                <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center flex-shrink-0">
+                  <Wrench className="w-5 h-5 text-brand-gold" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-800">{m.service_type}</p>
-                  <div className="flex gap-3 text-sm text-slate-500 flex-wrap">
+                  <p className="font-semibold text-foreground">{m.service_type}</p>
+                  <div className="flex gap-3 text-sm text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-1"><Car className="w-3 h-3" />{getVehicleName(m.vehicle_id)}</span>
                     {m.scheduled_date && <span>{format(new Date(m.scheduled_date + 'T00:00:00'), 'MMM d, yyyy')}</span>}
                     {m.vendor && <span>Vendor: {m.vendor}</span>}
                     {m.cost && <span>${parseFloat(m.cost).toLocaleString()}</span>}
                   </div>
-                  {m.description && <p className="text-xs text-slate-400 mt-0.5 truncate">{m.description}</p>}
+                  {m.description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{m.description}</p>}
                   {m.receipt_urls && m.receipt_urls.length > 0 && (
                     <div className="flex gap-1 mt-1 flex-wrap">
                       {m.receipt_urls.map((r, i) => (
-                        <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-indigo-600 hover:underline flex items-center gap-0.5 bg-indigo-50 px-1.5 py-0.5 rounded">
+                        <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline flex items-center gap-0.5 bg-primary/10 px-1.5 py-0.5 rounded">
                           <Paperclip className="w-2.5 h-2.5" />{r.name || `Receipt ${i+1}`}
                         </a>
                       ))}
@@ -177,7 +177,7 @@ export default function FleetMaintenance() {
                 <Badge className={`border ${statusColors[m.status] || statusColors.scheduled}`}>{(m.status||'scheduled').replace('_', ' ')}</Badge>
                 <div className="flex gap-1">
                   <Button size="sm" variant="ghost" onClick={() => openEdit(m)}><Pencil className="w-4 h-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleDelete(m.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleDelete(m.id)} className="text-destructive hover:opacity-80"><Trash2 className="w-4 h-4" /></Button>
                 </div>
               </div>
             ))}
@@ -231,21 +231,21 @@ export default function FleetMaintenance() {
             {/* Receipts */}
             <div>
               <Label>Receipts / Attachments</Label>
-              <label className="mt-1 flex items-center justify-center w-full p-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
+              <label className="mt-1 flex items-center justify-center w-full p-3 border-2 border-dashed border-border rounded-lg hover:border-primary/40 hover:bg-primary/10 transition-colors cursor-pointer">
                 <input type="file" multiple accept="image/*,.pdf" onChange={handleReceiptUpload} disabled={uploadingReceipt} className="hidden" />
                 {uploadingReceipt ? (
-                  <><Loader2 className="w-4 h-4 text-indigo-600 animate-spin mr-2" /><span className="text-sm text-slate-500">Uploading...</span></>
+                  <><Loader2 className="w-4 h-4 text-primary animate-spin mr-2" /><span className="text-sm text-muted-foreground">Uploading...</span></>
                 ) : (
-                  <><Paperclip className="w-4 h-4 text-slate-400 mr-2" /><span className="text-sm text-slate-500">Attach receipts or photos</span></>
+                  <><Paperclip className="w-4 h-4 text-muted-foreground mr-2" /><span className="text-sm text-muted-foreground">Attach receipts or photos</span></>
                 )}
               </label>
               {form.receipt_urls && form.receipt_urls.length > 0 && (
                 <div className="mt-2 space-y-1">
                   {form.receipt_urls.map((r, i) => (
-                    <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
-                      <Paperclip className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                      <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:underline flex-1 truncate">{r.name || 'Receipt'}</a>
-                      <button type="button" onClick={() => removeReceipt(i)} className="text-red-400 hover:text-red-600"><X className="w-3 h-3" /></button>
+                    <div key={i} className="flex items-center gap-2 p-2 bg-secondary rounded-lg border border-border">
+                      <Paperclip className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex-1 truncate">{r.name || 'Receipt'}</a>
+                      <button type="button" onClick={() => removeReceipt(i)} className="text-destructive hover:opacity-80"><X className="w-3 h-3" /></button>
                     </div>
                   ))}
                 </div>
@@ -254,7 +254,7 @@ export default function FleetMaintenance() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground hover:opacity-90">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}{editId ? 'Save' : 'Add Record'}
             </Button>
           </DialogFooter>

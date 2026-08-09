@@ -13,9 +13,9 @@ import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 
 const STATUS_STYLES = {
-  draft: 'bg-slate-100 text-slate-600 border-slate-200',
-  sent: 'bg-amber-100 text-amber-700 border-amber-200',
-  signed: 'bg-green-100 text-green-700 border-green-200'
+  draft: 'bg-secondary text-muted-foreground border-border',
+  sent: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
+  signed: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
 };
 
 export default function ManualDesignMods() {
@@ -251,41 +251,41 @@ export default function ManualDesignMods() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-6">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link
             to={createPageUrl('Dashboard')}
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
           </Link>
-          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Document Center</h1>
-          <p className="text-slate-500 mt-1">Send design modification requests and pre-installation checklists for customer signature</p>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Document Center</h1>
+          <p className="text-muted-foreground mt-1">Send design modification requests and pre-installation checklists for customer signature</p>
           {/* Tabs */}
-          <div className="flex gap-2 mt-6">
+          <div className="flex gap-2 mt-6 flex-nowrap overflow-x-auto pb-1">
             <button
               onClick={() => setActiveTab('design_mod')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all ${
-                activeTab === 'design_mod' ? 'bg-indigo-600 text-white shadow' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${
+                activeTab === 'design_mod' ? 'bg-primary text-primary-foreground shadow' : 'bg-card border border-border text-muted-foreground hover:bg-secondary'
               }`}
             >
               <Wrench className="w-4 h-4" /> Design Mods
             </button>
             <button
               onClick={() => setActiveTab('pre_install')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all ${
-                activeTab === 'pre_install' ? 'bg-indigo-600 text-white shadow' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${
+                activeTab === 'pre_install' ? 'bg-primary text-primary-foreground shadow' : 'bg-card border border-border text-muted-foreground hover:bg-secondary'
               }`}
             >
               <FileText className="w-4 h-4" /> Pre-Install Checklists
             </button>
             <button
               onClick={() => setActiveTab('sales_contract')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all ${
-                activeTab === 'sales_contract' ? 'bg-indigo-600 text-white shadow' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${
+                activeTab === 'sales_contract' ? 'bg-primary text-primary-foreground shadow' : 'bg-card border border-border text-muted-foreground hover:bg-secondary'
               }`}
             >
               <DollarSign className="w-4 h-4" /> Sales Contracts
@@ -295,94 +295,94 @@ export default function ManualDesignMods() {
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Design Mods Tab */}
         {activeTab === 'design_mod' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-slate-100 p-6">
-              <h2 className="text-lg font-semibold text-slate-800 mb-6">New Design Mod</h2>
+            <div className="bg-card rounded-2xl border border-border p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-6">New Design Mod</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="first_name" className="text-slate-700">First Name *</Label>
-                  <Input id="first_name" value={formData.customer_first_name} onChange={(e) => setFormData({ ...formData, customer_first_name: e.target.value })} required className="h-10 border-slate-200" />
+                  <Label htmlFor="first_name" className="text-foreground">First Name *</Label>
+                  <Input id="first_name" value={formData.customer_first_name} onChange={(e) => setFormData({ ...formData, customer_first_name: e.target.value })} required className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last_name" className="text-slate-700">Last Name *</Label>
-                  <Input id="last_name" value={formData.customer_last_name} onChange={(e) => setFormData({ ...formData, customer_last_name: e.target.value })} required className="h-10 border-slate-200" />
+                  <Label htmlFor="last_name" className="text-foreground">Last Name *</Label>
+                  <Input id="last_name" value={formData.customer_last_name} onChange={(e) => setFormData({ ...formData, customer_last_name: e.target.value })} required className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-slate-700">Email</Label>
-                  <Input id="email" type="email" value={formData.customer_email} onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })} className="h-10 border-slate-200" />
+                  <Label htmlFor="email" className="text-foreground">Email</Label>
+                  <Input id="email" type="email" value={formData.customer_email} onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })} className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="job_number" className="text-slate-700">Job Number</Label>
-                  <Input id="job_number" value={formData.job_number} onChange={(e) => setFormData({ ...formData, job_number: e.target.value })} className="h-10 border-slate-200" />
+                  <Label htmlFor="job_number" className="text-foreground">Job Number</Label>
+                  <Input id="job_number" value={formData.job_number} onChange={(e) => setFormData({ ...formData, job_number: e.target.value })} className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="products" className="text-slate-700">Products or Changes *</Label>
-                  <Textarea id="products" value={formData.products_or_changes} onChange={(e) => setFormData({ ...formData, products_or_changes: e.target.value })} required rows={4} className="border-slate-200" />
+                  <Label htmlFor="products" className="text-foreground">Products or Changes *</Label>
+                  <Textarea id="products" value={formData.products_or_changes} onChange={(e) => setFormData({ ...formData, products_or_changes: e.target.value })} required rows={4} className="border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="cost" className="text-slate-700">Value Added Costs ($)</Label>
-                  <Input id="cost" type="number" step="0.01" value={formData.value_added_costs} onChange={(e) => setFormData({ ...formData, value_added_costs: e.target.value })} className="h-10 border-slate-200" />
+                  <Label htmlFor="cost" className="text-foreground">Value Added Costs ($)</Label>
+                  <Input id="cost" type="number" step="0.01" value={formData.value_added_costs} onChange={(e) => setFormData({ ...formData, value_added_costs: e.target.value })} className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="terms" className="text-slate-700">Funds Collected Terms</Label>
+                  <Label htmlFor="terms" className="text-foreground">Funds Collected Terms</Label>
                   <Select value={formData.funds_collected_terms} onValueChange={(value) => setFormData({ ...formData, funds_collected_terms: value })}>
-                    <SelectTrigger className="h-10 border-slate-200"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-10 border-border"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Credit Card">Credit Card</SelectItem>
                       <SelectItem value="Existing Synchrony Financing Account">Existing Synchrony Financing Account</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" disabled={createMutation.isPending} className="w-full h-10 bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" disabled={createMutation.isPending} className="w-full h-10 bg-primary text-primary-foreground hover:opacity-90">
                   {createMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : <><Plus className="w-4 h-4 mr-2" />Create & Send</>}
                 </Button>
               </form>
             </div>
           </div>
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-100 p-6">
+            <div className="bg-card rounded-2xl border border-border p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-slate-800">Design Mods</h2>
-                <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
+                <h2 className="text-lg font-semibold text-foreground">Design Mods</h2>
+                <div className="flex gap-1 bg-secondary rounded-lg p-1">
                   <button
                     onClick={() => setModFilter('manual')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${modFilter === 'manual' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${modFilter === 'manual' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     Manual ({designMods.length})
                   </button>
                   <button
                     onClick={() => setModFilter('project')}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${modFilter === 'project' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${modFilter === 'project' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                   >
                     From Projects ({projectDesignMods.length})
                   </button>
                 </div>
               </div>
               {isLoading ? (
-                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-indigo-600 animate-spin" /></div>
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
               ) : modFilter === 'manual' && designMods.length === 0 ? (
-                <p className="text-slate-400 text-center py-8">No manual design mods yet</p>
+                <p className="text-muted-foreground text-center py-8">No manual design mods yet</p>
               ) : modFilter === 'project' && projectDesignMods.length === 0 ? (
-                <p className="text-slate-400 text-center py-8">No project design mods yet</p>
+                <p className="text-muted-foreground text-center py-8">No project design mods yet</p>
               ) : modFilter === 'manual' ? (
                 <div className="space-y-3">
                   {designMods.map((mod) => (
-                    <div key={mod.id} className="border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div key={mod.id} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-secondary hover:bg-muted transition-colors">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="font-medium text-slate-800">{mod.customer_first_name} {mod.customer_last_name}</span>
+                          <span className="font-medium text-foreground">{mod.customer_first_name} {mod.customer_last_name}</span>
                           <Badge variant="outline" className={STATUS_STYLES[mod.status || 'draft']}>
                             {mod.status === 'signed' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
                             {mod.status || 'draft'}
                           </Badge>
-                          {mod.job_number && <span className="text-xs text-slate-500">Job #{mod.job_number}</span>}
+                          {mod.job_number && <span className="text-xs text-muted-foreground">Job #{mod.job_number}</span>}
                         </div>
-                        <p className="text-sm text-slate-600 line-clamp-2">{mod.products_or_changes}</p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-400 flex-wrap">
+                        <p className="text-sm text-muted-foreground line-clamp-2">{mod.products_or_changes}</p>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
                           {mod.value_added_costs > 0 && <span>${Number(mod.value_added_costs).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
                           {mod.funds_collected_terms && <span>• {mod.funds_collected_terms}</span>}
                           {mod.created_by_name && <span>• By {mod.created_by_name}</span>}
@@ -393,26 +393,26 @@ export default function ManualDesignMods() {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {mod.status === 'signed' ? (
-                          <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700">
+                          <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
                           </a>
                         ) : (
                           <>
-                            <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors text-indigo-700">
+                            <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
                               <Pen className="w-3 h-3" />Sign in Person
                             </a>
                             {mod.short_url && (
-                              <button onClick={() => window.open(mod.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-white transition-colors text-slate-600">
+                              <button onClick={() => window.open(mod.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
                                 <ExternalLink className="w-3 h-3" />Customer Link
                               </button>
                             )}
-                            <button onClick={() => handleResend(mod)} disabled={sendingId === mod.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50">
+                            <button onClick={() => handleResend(mod)} disabled={sendingId === mod.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10">
                               {sendingId === mod.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                               {sendingId === mod.id ? 'Sending...' : mod.email_sent_at ? 'Resend' : 'Send'}
                             </button>
                           </>
                         )}
-                        <button onClick={() => deleteMutation.mutate(mod.id)} disabled={deleteMutation.isPending} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                        <button onClick={() => deleteMutation.mutate(mod.id)} disabled={deleteMutation.isPending} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors" title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -422,18 +422,18 @@ export default function ManualDesignMods() {
               ) : (
                 <div className="space-y-3">
                   {projectDesignMods.map((mod) => (
-                    <div key={mod.id} className="border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div key={mod.id} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-secondary hover:bg-muted transition-colors">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="font-medium text-slate-800">{mod.customer_first_name} {mod.customer_last_name}</span>
+                          <span className="font-medium text-foreground">{mod.customer_first_name} {mod.customer_last_name}</span>
                           <Badge variant="outline" className={STATUS_STYLES[mod.status || 'draft']}>
                             {mod.status === 'signed' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
                             {mod.status || 'draft'}
                           </Badge>
-                          {mod.job_number && <span className="text-xs text-slate-500">Job #{mod.job_number}</span>}
+                          {mod.job_number && <span className="text-xs text-muted-foreground">Job #{mod.job_number}</span>}
                         </div>
-                        <p className="text-sm text-slate-600 line-clamp-2">{mod.products_or_changes}</p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-400 flex-wrap">
+                        <p className="text-sm text-muted-foreground line-clamp-2">{mod.products_or_changes}</p>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
                           {mod.value_added_costs > 0 && <span>${Number(mod.value_added_costs).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
                           {mod.funds_collected_terms && <span>• {mod.funds_collected_terms}</span>}
                           {mod.created_by_name && <span>• By {mod.created_by_name}</span>}
@@ -444,26 +444,26 @@ export default function ManualDesignMods() {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {mod.status === 'signed' ? (
-                          <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700">
+                          <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
                           </a>
                         ) : (
                           <>
-                            <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors text-indigo-700">
+                            <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
                               <Pen className="w-3 h-3" />Sign in Person
                             </a>
                             {mod.short_url && (
-                              <button onClick={() => window.open(mod.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-white transition-colors text-slate-600">
+                              <button onClick={() => window.open(mod.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
                                 <ExternalLink className="w-3 h-3" />Customer Link
                               </button>
                             )}
-                            <button onClick={() => handleResend(mod)} disabled={sendingId === mod.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50">
+                            <button onClick={() => handleResend(mod)} disabled={sendingId === mod.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10">
                               {sendingId === mod.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                               {sendingId === mod.id ? 'Sending...' : mod.email_sent_at ? 'Resend' : 'Send'}
                             </button>
                           </>
                         )}
-                        <a href={`/ProjectDetail?id=${mod.project}`} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-white transition-colors text-slate-600">
+                        <a href={`/ProjectDetail?id=${mod.project}`} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
                           <ExternalLink className="w-3 h-3" />View Project
                         </a>
                       </div>
@@ -480,30 +480,30 @@ export default function ManualDesignMods() {
         {activeTab === 'pre_install' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-slate-100 p-6">
-              <h2 className="text-lg font-semibold text-slate-800 mb-6">New Pre-Install Checklist</h2>
+            <div className="bg-card rounded-2xl border border-border p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-6">New Pre-Install Checklist</h2>
               <form onSubmit={handlePiSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-700">First Name *</Label>
-                  <Input value={piFormData.customer_first_name} onChange={(e) => setPiFormData({ ...piFormData, customer_first_name: e.target.value })} required className="h-10 border-slate-200" />
+                  <Label className="text-foreground">First Name *</Label>
+                  <Input value={piFormData.customer_first_name} onChange={(e) => setPiFormData({ ...piFormData, customer_first_name: e.target.value })} required className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Last Name *</Label>
-                  <Input value={piFormData.customer_last_name} onChange={(e) => setPiFormData({ ...piFormData, customer_last_name: e.target.value })} required className="h-10 border-slate-200" />
+                  <Label className="text-foreground">Last Name *</Label>
+                  <Input value={piFormData.customer_last_name} onChange={(e) => setPiFormData({ ...piFormData, customer_last_name: e.target.value })} required className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Email *</Label>
-                  <Input type="email" value={piFormData.customer_email} onChange={(e) => setPiFormData({ ...piFormData, customer_email: e.target.value })} required className="h-10 border-slate-200" />
+                  <Label className="text-foreground">Email *</Label>
+                  <Input type="email" value={piFormData.customer_email} onChange={(e) => setPiFormData({ ...piFormData, customer_email: e.target.value })} required className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Job Number</Label>
-                  <Input value={piFormData.job_number} onChange={(e) => setPiFormData({ ...piFormData, job_number: e.target.value })} className="h-10 border-slate-200" />
+                  <Label className="text-foreground">Job Number</Label>
+                  <Input value={piFormData.job_number} onChange={(e) => setPiFormData({ ...piFormData, job_number: e.target.value })} className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Product Name / Style / Color *</Label>
-                  <Textarea value={piFormData.product_info} onChange={(e) => setPiFormData({ ...piFormData, product_info: e.target.value })} required rows={3} placeholder="e.g. Shaw Floorté Pro 5 Series - Mineral Oak" className="border-slate-200" />
+                  <Label className="text-foreground">Product Name / Style / Color *</Label>
+                  <Textarea value={piFormData.product_info} onChange={(e) => setPiFormData({ ...piFormData, product_info: e.target.value })} required rows={3} placeholder="e.g. Shaw Floorté Pro 5 Series - Mineral Oak" className="border-border" />
                 </div>
-                <Button type="submit" disabled={piCreateMutation.isPending} className="w-full h-10 bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" disabled={piCreateMutation.isPending} className="w-full h-10 bg-primary text-primary-foreground hover:opacity-90">
                   {piCreateMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</> : <><Send className="w-4 h-4 mr-2" />Create & Send</>}
                 </Button>
               </form>
@@ -512,28 +512,28 @@ export default function ManualDesignMods() {
           <div className="lg:col-span-2 space-y-6">
             {/* In-Person Checklists (from Appointment flow) */}
             {(appointmentsWithChecklist.length > 0 || apptChecklistLoading) && (
-              <div className="bg-white rounded-2xl border border-slate-100 p-6">
-                <h2 className="text-lg font-semibold text-slate-800 mb-2">In-Person Signed (During Sale)</h2>
-                <p className="text-sm text-slate-500 mb-5">Checklists signed by customers at time of sale</p>
+              <div className="bg-card rounded-2xl border border-border p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-2">In-Person Signed (During Sale)</h2>
+                <p className="text-sm text-muted-foreground mb-5">Checklists signed by customers at time of sale</p>
                 {apptChecklistLoading ? (
-                  <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 text-indigo-600 animate-spin" /></div>
+                  <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
                 ) : (
                   <div className="space-y-3">
                     {appointmentsWithChecklist.map((appt) => (
-                      <div key={appt.id} className="border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50">
+                      <div key={appt.id} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-secondary">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="font-medium text-slate-800">
+                            <span className="font-medium text-foreground">
                               {appt._lead ? `${appt._lead.first_name} ${appt._lead.last_name}` : 'Unknown Customer'}
                             </span>
-                            <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200">
+                            <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25">
                               <CheckCircle2 className="w-3 h-3 mr-1" />signed
                             </Badge>
                           </div>
                           {appt.pre_install_product_info && (
-                            <p className="text-sm text-slate-600 line-clamp-1">{appt.pre_install_product_info}</p>
+                            <p className="text-sm text-muted-foreground line-clamp-1">{appt.pre_install_product_info}</p>
                           )}
-                          <div className="text-xs text-slate-400 mt-1">
+                          <div className="text-xs text-muted-foreground mt-1">
                             {appt.appointment_date && <span>Appt: {appt.appointment_date}</span>}
                           </div>
                         </div>
@@ -542,7 +542,7 @@ export default function ManualDesignMods() {
                             href={appt.pre_install_checklist_signature_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10"
                           >
                             <CheckCircle2 className="w-3 h-3" />View Signature
                           </a>
@@ -550,7 +550,7 @@ export default function ManualDesignMods() {
                             href={`/ConsultantAppointmentView?id=${appt.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors text-indigo-700"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary"
                           >
                             <ExternalLink className="w-3 h-3" />View Appointment
                           </a>
@@ -562,27 +562,27 @@ export default function ManualDesignMods() {
               </div>
             )}
 
-            <div className="bg-white rounded-2xl border border-slate-100 p-6">
-              <h2 className="text-lg font-semibold text-slate-800 mb-6">All Pre-Install Checklists</h2>
+            <div className="bg-card rounded-2xl border border-border p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-6">All Pre-Install Checklists</h2>
               {piLoading ? (
-                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-indigo-600 animate-spin" /></div>
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
               ) : preInstallChecklists.length === 0 ? (
-                <p className="text-slate-400 text-center py-8">No pre-install checklists yet</p>
+                <p className="text-muted-foreground text-center py-8">No pre-install checklists yet</p>
               ) : (
                 <div className="space-y-3">
                   {preInstallChecklists.map((record) => (
-                    <div key={record.id} className="border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div key={record.id} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-secondary hover:bg-muted transition-colors">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="font-medium text-slate-800">{record.customer_first_name} {record.customer_last_name}</span>
+                          <span className="font-medium text-foreground">{record.customer_first_name} {record.customer_last_name}</span>
                           <Badge variant="outline" className={STATUS_STYLES[record.status || 'draft']}>
                             {record.status === 'signed' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
                             {record.status || 'draft'}
                           </Badge>
-                          {record.job_number && <span className="text-xs text-slate-500">Job #{record.job_number}</span>}
+                          {record.job_number && <span className="text-xs text-muted-foreground">Job #{record.job_number}</span>}
                         </div>
-                        {record.product_info && <p className="text-sm text-slate-600 line-clamp-1">{record.product_info}</p>}
-                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-400 flex-wrap">
+                        {record.product_info && <p className="text-sm text-muted-foreground line-clamp-1">{record.product_info}</p>}
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
                           {record.created_by && <span>By {record.created_by}</span>}
                           {record.signed_at && <span>• Signed {format(new Date(record.signed_at), 'MMM d, yyyy')}</span>}
                           {record.email_sent_at && record.status !== 'signed' && <span>• Sent {format(new Date(record.email_sent_at), 'MMM d, yyyy h:mm a')}</span>}
@@ -591,26 +591,26 @@ export default function ManualDesignMods() {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {record.status === 'signed' ? (
-                          <a href={`/PreInstallChecklistView?id=${record.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700">
+                          <a href={`/PreInstallChecklistView?id=${record.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
                           </a>
                         ) : (
                           <>
-                            <a href={`/PreInstallChecklistView?id=${record.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors text-indigo-700">
+                            <a href={`/PreInstallChecklistView?id=${record.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
                               <Pen className="w-3 h-3" />Sign in Person
                             </a>
                             {record.short_url && (
-                              <button onClick={() => window.open(record.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-white transition-colors text-slate-600">
+                              <button onClick={() => window.open(record.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
                                 <ExternalLink className="w-3 h-3" />Customer Link
                               </button>
                             )}
-                            <button onClick={() => piResend(record)} disabled={sendingId === record.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50">
+                            <button onClick={() => piResend(record)} disabled={sendingId === record.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10">
                               {sendingId === record.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                               {sendingId === record.id ? 'Sending...' : record.email_sent_at ? 'Resend' : 'Send'}
                             </button>
                           </>
                         )}
-                        <button onClick={() => piDeleteMutation.mutate(record.id)} disabled={piDeleteMutation.isPending} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                        <button onClick={() => piDeleteMutation.mutate(record.id)} disabled={piDeleteMutation.isPending} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors" title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -627,61 +627,61 @@ export default function ManualDesignMods() {
         {activeTab === 'sales_contract' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-slate-100 p-6">
-              <h2 className="text-lg font-semibold text-slate-800 mb-6">New Sales Contract</h2>
+            <div className="bg-card rounded-2xl border border-border p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-6">New Sales Contract</h2>
               <form onSubmit={handleScSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label className="text-slate-700">First Name *</Label>
-                    <Input value={scFormData.customer_first_name} onChange={e => setScFormData({...scFormData, customer_first_name: e.target.value})} required className="h-10 border-slate-200" />
+                    <Label className="text-foreground">First Name *</Label>
+                    <Input value={scFormData.customer_first_name} onChange={e => setScFormData({...scFormData, customer_first_name: e.target.value})} required className="h-10 border-border" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-700">Last Name *</Label>
-                    <Input value={scFormData.customer_last_name} onChange={e => setScFormData({...scFormData, customer_last_name: e.target.value})} required className="h-10 border-slate-200" />
+                    <Label className="text-foreground">Last Name *</Label>
+                    <Input value={scFormData.customer_last_name} onChange={e => setScFormData({...scFormData, customer_last_name: e.target.value})} required className="h-10 border-border" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Email</Label>
-                  <Input type="email" value={scFormData.customer_email} onChange={e => setScFormData({...scFormData, customer_email: e.target.value})} className="h-10 border-slate-200" />
+                  <Label className="text-foreground">Email</Label>
+                  <Input type="email" value={scFormData.customer_email} onChange={e => setScFormData({...scFormData, customer_email: e.target.value})} className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Phone</Label>
-                  <Input value={scFormData.customer_phone} onChange={e => setScFormData({...scFormData, customer_phone: e.target.value})} className="h-10 border-slate-200" />
+                  <Label className="text-foreground">Phone</Label>
+                  <Input value={scFormData.customer_phone} onChange={e => setScFormData({...scFormData, customer_phone: e.target.value})} className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Installation Address</Label>
-                  <Input value={scFormData.customer_address} onChange={e => setScFormData({...scFormData, customer_address: e.target.value})} className="h-10 border-slate-200" />
+                  <Label className="text-foreground">Installation Address</Label>
+                  <Input value={scFormData.customer_address} onChange={e => setScFormData({...scFormData, customer_address: e.target.value})} className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Design Consultant</Label>
-                  <Input value={scFormData.consultant_name} onChange={e => setScFormData({...scFormData, consultant_name: e.target.value})} className="h-10 border-slate-200" />
+                  <Label className="text-foreground">Design Consultant</Label>
+                  <Input value={scFormData.consultant_name} onChange={e => setScFormData({...scFormData, consultant_name: e.target.value})} className="h-10 border-border" />
                 </div>
                 <div className="space-y-2">
-                   <Label className="text-slate-700">Sale Date *</Label>
-                   <Input type="date" value={scFormData.sale_date} onChange={e => setScFormData({...scFormData, sale_date: e.target.value})} required className="h-10 border-slate-200" />
+                   <Label className="text-foreground">Sale Date *</Label>
+                   <Input type="date" value={scFormData.sale_date} onChange={e => setScFormData({...scFormData, sale_date: e.target.value})} required className="h-10 border-border" />
                  </div>
                  <div className="space-y-2">
-                   <Label className="text-slate-700">Install Date</Label>
-                   <Input type="date" value={scFormData.install_date} onChange={e => setScFormData({...scFormData, install_date: e.target.value})} className="h-10 border-slate-200" />
+                   <Label className="text-foreground">Install Date</Label>
+                   <Input type="date" value={scFormData.install_date} onChange={e => setScFormData({...scFormData, install_date: e.target.value})} className="h-10 border-border" />
                  </div>
                  <div className="space-y-2">
-                   <Label className="text-slate-700">Products / Services *</Label>
-                  <Textarea value={scFormData.products_description} onChange={e => setScFormData({...scFormData, products_description: e.target.value})} required rows={4} className="border-slate-200" placeholder="Describe products and services..." />
+                   <Label className="text-foreground">Products / Services *</Label>
+                  <Textarea value={scFormData.products_description} onChange={e => setScFormData({...scFormData, products_description: e.target.value})} required rows={4} className="border-border" placeholder="Describe products and services..." />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label className="text-slate-700">Sale Amount ($) *</Label>
-                    <Input type="number" step="0.01" value={scFormData.sale_amount} onChange={e => setScFormData({...scFormData, sale_amount: e.target.value})} required className="h-10 border-slate-200" />
+                    <Label className="text-foreground">Sale Amount ($) *</Label>
+                    <Input type="number" step="0.01" value={scFormData.sale_amount} onChange={e => setScFormData({...scFormData, sale_amount: e.target.value})} required className="h-10 border-border" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-700">Deposit ($)</Label>
-                    <Input type="number" step="0.01" value={scFormData.deposit_amount} onChange={e => setScFormData({...scFormData, deposit_amount: e.target.value})} className="h-10 border-slate-200" />
+                    <Label className="text-foreground">Deposit ($)</Label>
+                    <Input type="number" step="0.01" value={scFormData.deposit_amount} onChange={e => setScFormData({...scFormData, deposit_amount: e.target.value})} className="h-10 border-border" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Payment Method</Label>
+                  <Label className="text-foreground">Payment Method</Label>
                   <Select value={scFormData.deposit_payment_method} onValueChange={val => setScFormData({...scFormData, deposit_payment_method: val})}>
-                    <SelectTrigger className="h-10 border-slate-200"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-10 border-border"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Credit Card">Credit Card</SelectItem>
                       <SelectItem value="Check">Check</SelectItem>
@@ -696,43 +696,43 @@ export default function ManualDesignMods() {
                 </div>
                 {(scFormData.deposit_payment_method === 'Check' || scFormData.deposit_payment_method === 'Post-Dated Check') && (
                   <div className="space-y-2">
-                    <Label className="text-slate-700">Check Number</Label>
-                    <Input value={scFormData.check_number} onChange={e => setScFormData({...scFormData, check_number: e.target.value})} className="h-10 border-slate-200" />
+                    <Label className="text-foreground">Check Number</Label>
+                    <Input value={scFormData.check_number} onChange={e => setScFormData({...scFormData, check_number: e.target.value})} className="h-10 border-border" />
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label className="text-slate-700">Notes</Label>
-                  <Textarea value={scFormData.notes} onChange={e => setScFormData({...scFormData, notes: e.target.value})} rows={2} className="border-slate-200" />
+                  <Label className="text-foreground">Notes</Label>
+                  <Textarea value={scFormData.notes} onChange={e => setScFormData({...scFormData, notes: e.target.value})} rows={2} className="border-border" />
                 </div>
-                <Button type="submit" disabled={scCreateMutation.isPending} className="w-full h-10 bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" disabled={scCreateMutation.isPending} className="w-full h-10 bg-primary text-primary-foreground hover:opacity-90">
                   {scCreateMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : <><Plus className="w-4 h-4 mr-2" />Create & Send</>}
                 </Button>
               </form>
             </div>
           </div>
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-slate-100 p-6">
-              <h2 className="text-lg font-semibold text-slate-800 mb-6">All Sales Contracts</h2>
+            <div className="bg-card rounded-2xl border border-border p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-6">All Sales Contracts</h2>
               {scLoading ? (
-                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-indigo-600 animate-spin" /></div>
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
               ) : salesContracts.length === 0 ? (
-                <p className="text-slate-400 text-center py-8">No manual sales contracts yet</p>
+                <p className="text-muted-foreground text-center py-8">No manual sales contracts yet</p>
               ) : (
                 <div className="space-y-3">
                   {salesContracts.map((contract) => (
-                    <div key={contract.id} className="border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <div key={contract.id} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 bg-secondary hover:bg-muted transition-colors">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
-                          <span className="font-medium text-slate-800">{contract.customer_first_name} {contract.customer_last_name}</span>
+                          <span className="font-medium text-foreground">{contract.customer_first_name} {contract.customer_last_name}</span>
                           <Badge variant="outline" className={STATUS_STYLES[contract.status || 'draft']}>
                             {contract.status === 'signed' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
                             {contract.status || 'draft'}
                           </Badge>
-                          {contract.sale_date && <span className="text-xs text-slate-500">{contract.sale_date}</span>}
+                          {contract.sale_date && <span className="text-xs text-muted-foreground">{contract.sale_date}</span>}
                         </div>
-                        <p className="text-sm text-slate-600 line-clamp-1">{contract.products_description}</p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-400 flex-wrap">
-                          {contract.sale_amount > 0 && <span className="font-medium text-slate-600">${Number(contract.sale_amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>}
+                        <p className="text-sm text-muted-foreground line-clamp-1">{contract.products_description}</p>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
+                          {contract.sale_amount > 0 && <span className="font-medium text-muted-foreground">${Number(contract.sale_amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>}
                           {contract.deposit_amount > 0 && <span>• Deposit: ${Number(contract.deposit_amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>}
                           {contract.consultant_name && <span>• {contract.consultant_name}</span>}
                           {contract.signed_at && <span>• Signed {format(new Date(contract.signed_at), 'MMM d, yyyy')}</span>}
@@ -741,26 +741,26 @@ export default function ManualDesignMods() {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {contract.status === 'signed' ? (
-                          <a href={`/ManualSalesContractView?id=${contract.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700">
+                          <a href={`/ManualSalesContractView?id=${contract.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
                           </a>
                         ) : (
                           <>
-                            <a href={`/ManualSalesContractView?id=${contract.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors text-indigo-700">
+                            <a href={`/ManualSalesContractView?id=${contract.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
                               <Pen className="w-3 h-3" />Sign in Person
                             </a>
                             {contract.short_url && (
-                              <button onClick={() => window.open(contract.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-slate-300 rounded-lg hover:bg-white transition-colors text-slate-600">
+                              <button onClick={() => window.open(contract.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
                                 <ExternalLink className="w-3 h-3" />Customer Link
                               </button>
                             )}
-                            <button onClick={() => scResend(contract)} disabled={sendingId === contract.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50">
+                            <button onClick={() => scResend(contract)} disabled={sendingId === contract.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10">
                               {sendingId === contract.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                               {sendingId === contract.id ? 'Sending...' : contract.email_sent_at ? 'Resend' : 'Send'}
                             </button>
                           </>
                         )}
-                        <button onClick={() => scDeleteMutation.mutate(contract.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                        <button onClick={() => scDeleteMutation.mutate(contract.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors" title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>

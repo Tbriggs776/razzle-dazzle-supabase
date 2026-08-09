@@ -14,10 +14,10 @@ import ProjectClaimForm from '@/components/projects/ProjectClaimForm';
 import InspectionReportForm from '@/components/projects/InspectionReportForm';
 
 const claimTypeColors = {
-  'Claim': 'bg-red-100 text-red-800 border-red-200',
-  'Repair': 'bg-orange-100 text-orange-800 border-orange-200',
-  'Short Item': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'Product Swap': 'bg-purple-100 text-purple-800 border-purple-200',
+  'Claim': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'Repair': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+  'Short Item': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'Product Swap': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
 };
 
 export default function ClaimsDashboard() {
@@ -228,12 +228,12 @@ export default function ClaimsDashboard() {
     const Icon = active ? (sort.dir === 'asc' ? ArrowUp : ArrowDown) : ArrowUpDown;
     return (
       <th
-        className={cn("px-4 py-3 text-slate-600 font-medium cursor-pointer select-none hover:bg-slate-100 transition-colors", center ? 'text-center' : 'text-left')}
+        className={cn("px-4 py-3 text-muted-foreground font-medium cursor-pointer select-none hover:bg-secondary transition-colors", center ? 'text-center' : 'text-left')}
         onClick={() => setSort(prev => prev.col === col ? { col, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'desc' })}
       >
         <span className={cn("inline-flex items-center gap-1", center && "justify-center w-full")}>
           {label}
-          <Icon className={cn("w-3 h-3", active ? 'text-indigo-600' : 'text-slate-400')} />
+          <Icon className={cn("w-3 h-3", active ? 'text-primary' : 'text-muted-foreground')} />
         </span>
       </th>
     );
@@ -280,18 +280,18 @@ export default function ClaimsDashboard() {
             {Object.entries(selectedItem)
               .filter(([k]) => !['images', 'files', 'customer_signature'].includes(k))
               .map(([key, val]) => (
-                <div key={key} className="flex gap-3 py-2 border-b border-slate-50">
-                  <span className="text-slate-500 font-medium w-48 shrink-0 capitalize">{key.replace(/_/g, ' ')}</span>
-                  <span className="text-slate-800 break-all">{formatValue(key, val)}</span>
+                <div key={key} className="flex gap-3 py-2 border-b border-border">
+                  <span className="text-muted-foreground font-medium w-48 shrink-0 capitalize">{key.replace(/_/g, ' ')}</span>
+                  <span className="text-foreground break-all">{formatValue(key, val)}</span>
                 </div>
               ))}
             {selectedItem.images?.length > 0 && (
               <div className="py-2">
-                <p className="text-slate-500 font-medium mb-2">Images ({selectedItem.images.length})</p>
+                <p className="text-muted-foreground font-medium mb-2">Images ({selectedItem.images.length})</p>
                 <div className="flex flex-wrap gap-2">
                   {selectedItem.images.map((url, i) => (
                     <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                      <img src={url} alt={`Image ${i+1}`} className="w-20 h-20 object-cover rounded border border-slate-200" />
+                      <img src={url} alt={`Image ${i+1}`} className="w-20 h-20 object-cover rounded border border-border" />
                     </a>
                   ))}
                 </div>
@@ -300,10 +300,10 @@ export default function ClaimsDashboard() {
           </div>
         )}
         {selectedItem?.project && (
-          <div className="pt-4 border-t border-slate-100">
+          <div className="pt-4 border-t border-border">
             <Link
               to={createPageUrl('ProjectDetail') + `?id=${selectedItem.project}`}
-              className="text-indigo-600 hover:underline text-sm font-medium"
+              className="text-primary hover:underline text-sm font-medium"
               onClick={() => setSelectedItem(null)}
             >
               View Full Project →
@@ -313,30 +313,30 @@ export default function ClaimsDashboard() {
       </DialogContent>
     </Dialog>
 
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-slate-800">Claims & Inspections Dashboard</h1>
-          <p className="text-slate-500 mt-1">View all inspection reports and claims / repairs / short items</p>
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-3xl font-bold text-foreground">Claims & Inspections Dashboard</h1>
+          <p className="text-muted-foreground mt-1">View all inspection reports and claims / repairs / short items</p>
 
           <div className="relative mt-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               placeholder="Search by customer name, job #, or address..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-11 h-12 bg-white border-slate-200"
+              className="pl-11 h-12 bg-card border-border"
             />
           </div>
 
-          <div className="flex gap-2 mt-6 overflow-x-auto pb-2">
+          <div className="flex flex-nowrap gap-2 mt-6 overflow-x-auto pb-2">
             {tabs.map(tab => (
               <Button
                 key={tab.id}
                 variant={activeTab === tab.id ? 'default' : 'outline'}
                 onClick={() => setActiveTab(tab.id)}
-                className={cn("h-10 whitespace-nowrap", activeTab === tab.id ? 'bg-indigo-600 hover:bg-indigo-700' : '')}
+                className={cn("h-10 whitespace-nowrap", activeTab === tab.id ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
               >
                 {tab.label} ({tab.count})
               </Button>
@@ -349,7 +349,7 @@ export default function ClaimsDashboard() {
                     variant={typeFilter === t ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setTypeFilter(t)}
-                    className={cn("h-10 whitespace-nowrap", typeFilter === t ? 'bg-slate-700 hover:bg-slate-800' : '')}
+                    className={cn("h-10 whitespace-nowrap", typeFilter === t ? 'bg-brand-navy text-white hover:opacity-90' : '')}
                   >
                     {t === 'all' ? 'All Types' : t}
                   </Button>
@@ -360,10 +360,10 @@ export default function ClaimsDashboard() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : (
           <>
@@ -371,49 +371,49 @@ export default function ClaimsDashboard() {
             {(activeTab === 'all' || activeTab === 'inspections') && (
               <section>
                 {activeTab === 'all' && (
-                  <h2 className="text-lg font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-indigo-500" /> Inspection Reports ({filteredReports.length})
+                  <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" /> Inspection Reports ({filteredReports.length})
                   </h2>
                 )}
                 {filteredReports.length === 0 ? (
-                  <div className="text-center py-8 bg-white rounded-xl border border-slate-100 text-slate-500">No inspection reports found.</div>
+                  <div className="text-center py-8 bg-card rounded-xl border border-border text-muted-foreground">No inspection reports found.</div>
                 ) : (
-                  <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                  <div className="bg-card rounded-xl border border-border overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-slate-50 border-b border-slate-100">
+                      <thead className="bg-muted border-b border-border">
                         <tr>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Customer</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Job #</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Address</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Installer</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Inspected By</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Inspected On</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Created</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Action</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Customer</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Job #</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Address</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Installer</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Inspected By</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Inspected On</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Created</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
+                      <tbody className="divide-y divide-border">
                         {filteredReports.map(report => {
                           const project = projects.find(p => p.id === report.project);
                           const customerName = report.customer_name || getCustomerName(project) || '—';
                           return (
-                            <tr key={report.id} className="hover:bg-indigo-50 transition-colors cursor-pointer" onClick={() => { setSelectedItem(report); setSelectedItemType('inspection'); }}>
-                              <td className="px-4 py-3 font-medium text-slate-800">{customerName}</td>
-                              <td className="px-4 py-3 text-slate-600">{report.job_number || '—'}</td>
-                              <td className="px-4 py-3 text-slate-600 max-w-xs truncate">{report.address || '—'}</td>
-                              <td className="px-4 py-3 text-slate-600">{(report.installers?.length ? report.installers : report.installer_name ? [report.installer_name] : []).join(', ') || '—'}</td>
-                              <td className="px-4 py-3 text-slate-600">{report.inspected_by || '—'}</td>
-                              <td className="px-4 py-3 text-slate-600">
+                            <tr key={report.id} className="hover:bg-primary/5 transition-colors cursor-pointer" onClick={() => { setSelectedItem(report); setSelectedItemType('inspection'); }}>
+                              <td className="px-4 py-3 font-medium text-foreground">{customerName}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{report.job_number || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">{report.address || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{(report.installers?.length ? report.installers : report.installer_name ? [report.installer_name] : []).join(', ') || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{report.inspected_by || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">
                                 {report.inspected_on ? format(new Date(report.inspected_on + 'T00:00:00'), 'MMM d, yyyy') : '—'}
                               </td>
-                              <td className="px-4 py-3 text-slate-500 text-xs">
+                              <td className="px-4 py-3 text-muted-foreground text-xs">
                                 {format(new Date(report.created_date), 'MMM d, yyyy')}
                               </td>
                               <td className="px-4 py-3">
                                 <div className="flex items-center gap-2">
                                   <button
                                    onClick={(e) => { e.stopPropagation(); setEditingReport(report); }}
-                                   className="text-slate-400 hover:text-indigo-600 transition-colors"
+                                   className="text-muted-foreground hover:text-primary transition-colors"
                                    title="Edit"
                                   >
                                    <Pencil className="w-4 h-4" />
@@ -421,7 +421,7 @@ export default function ClaimsDashboard() {
                                   {currentUser?.role === 'admin' && (
                                    <button
                                      onClick={(e) => { e.stopPropagation(); handleDeleteReport(report); }}
-                                     className="text-slate-400 hover:text-red-600 transition-colors"
+                                     className="text-muted-foreground hover:text-destructive transition-colors"
                                      title="Delete"
                                    >
                                      <Trash2 className="w-4 h-4" />
@@ -430,7 +430,7 @@ export default function ClaimsDashboard() {
                                   {project && (
                                    <Link
                                      to={createPageUrl('ProjectDetail') + `?id=${project.id}`}
-                                     className="text-indigo-600 hover:underline text-xs font-medium"
+                                     className="text-primary hover:underline text-xs font-medium"
                                      onClick={(e) => e.stopPropagation()}
                                    >
                                      View Project →
@@ -452,63 +452,63 @@ export default function ClaimsDashboard() {
             {(activeTab === 'all' || activeTab === 'claims') && (
               <section>
                 {activeTab === 'all' && (
-                  <h2 className="text-lg font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
                     <ClipboardList className="w-5 h-5 text-orange-500" /> Claims / Repairs / Short Items ({filteredClaims.length})
                   </h2>
                 )}
                 {filteredClaims.length === 0 ? (
-                  <div className="text-center py-8 bg-white rounded-xl border border-slate-100 text-slate-500">No claims found.</div>
+                  <div className="text-center py-8 bg-card rounded-xl border border-border text-muted-foreground">No claims found.</div>
                 ) : (
-                  <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                  <div className="bg-card rounded-xl border border-border overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-slate-50 border-b border-slate-100">
+                      <thead className="bg-muted border-b border-border">
                         <tr>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Type</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Installer</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Customer</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">DC</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Job #</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Address</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Submitted By</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Submitted On</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Status</th>
-                          <th className="text-left px-4 py-3 text-slate-600 font-medium">Action</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Type</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Installer</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Customer</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">DC</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Job #</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Address</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Submitted By</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Submitted On</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Status</th>
+                          <th className="text-left px-4 py-3 text-muted-foreground font-medium">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
+                      <tbody className="divide-y divide-border">
                         {filteredClaims.map(claim => {
                           const project = projects.find(p => p.id === claim.project);
                           const customerName = claim.customer_name || getCustomerName(project) || '—';
                           return (
-                            <tr key={claim.id} className="hover:bg-indigo-50 transition-colors cursor-pointer" onClick={() => { setSelectedItem(claim); setSelectedItemType('claim'); }}>
+                            <tr key={claim.id} className="hover:bg-primary/5 transition-colors cursor-pointer" onClick={() => { setSelectedItem(claim); setSelectedItemType('claim'); }}>
                               <td className="px-4 py-3">
-                                <Badge className={cn('border text-xs', claimTypeColors[claim.claim_type] || 'bg-slate-100 text-slate-700')}>
+                                <Badge className={cn('border text-xs', claimTypeColors[claim.claim_type] || 'bg-secondary text-secondary-foreground')}>
                                   {claim.claim_type || '—'}
                                 </Badge>
                               </td>
-                              <td className="px-4 py-3 text-slate-600">{(claim.installers?.length ? claim.installers : claim.installer_name ? [claim.installer_name] : []).join(', ') || '—'}</td>
-                              <td className="px-4 py-3 font-medium text-slate-800">{customerName}</td>
-                              <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{getDCName(project)}</td>
-                              <td className="px-4 py-3 text-slate-600">{claim.job_number || '—'}</td>
-                              <td className="px-4 py-3 text-slate-600 max-w-xs truncate">{claim.address || '—'}</td>
-                              <td className="px-4 py-3 text-slate-600">{claim.submitted_by || '—'}</td>
-                              <td className="px-4 py-3 text-slate-600">
+                              <td className="px-4 py-3 text-muted-foreground">{(claim.installers?.length ? claim.installers : claim.installer_name ? [claim.installer_name] : []).join(', ') || '—'}</td>
+                              <td className="px-4 py-3 font-medium text-foreground">{customerName}</td>
+                              <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{getDCName(project)}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{claim.job_number || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">{claim.address || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">{claim.submitted_by || '—'}</td>
+                              <td className="px-4 py-3 text-muted-foreground">
                                 {claim.submitted_on ? format(new Date(claim.submitted_on + 'T00:00:00'), 'MMM d, yyyy') : '—'}
                               </td>
                               <td className="px-4 py-3">
                                  {claim.is_cancelled ? (
-                                   <Badge className="bg-slate-100 text-slate-600 border-slate-200 border text-xs">Cancelled</Badge>
+                                   <Badge className="bg-secondary text-muted-foreground border-border border text-xs">Cancelled</Badge>
                                  ) : claim.is_completed ? (
-                                   <Badge className="bg-green-100 text-green-800 border-green-200 border text-xs">Completed</Badge>
+                                   <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25 border text-xs">Completed</Badge>
                                  ) : (
-                                   <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 border text-xs">Open</Badge>
+                                   <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25 border text-xs">Open</Badge>
                                  )}
                                </td>
                               <td className="px-4 py-3">
                                <div className="flex items-center gap-2">
                                  <button
                                    onClick={(e) => { e.stopPropagation(); setEditingClaim(claim); }}
-                                   className="text-slate-400 hover:text-indigo-600 transition-colors"
+                                   className="text-muted-foreground hover:text-primary transition-colors"
                                    title="Edit"
                                  >
                                    <Pencil className="w-4 h-4" />
@@ -516,7 +516,7 @@ export default function ClaimsDashboard() {
                                  {!claim.is_cancelled && (
                                    <button
                                      onClick={(e) => { e.stopPropagation(); handleCompleteClaim(claim); }}
-                                     className={claim.is_completed ? 'text-green-500 hover:text-slate-400 transition-colors' : 'text-slate-400 hover:text-green-600 transition-colors'}
+                                     className={claim.is_completed ? 'text-green-500 hover:text-muted-foreground transition-colors' : 'text-muted-foreground hover:text-green-600 transition-colors'}
                                      title={claim.is_completed ? 'Mark Incomplete' : 'Mark Completed'}
                                    >
                                      <CheckCircle2 className="w-4 h-4" />
@@ -525,7 +525,7 @@ export default function ClaimsDashboard() {
                                  {!claim.is_cancelled && (
                                    <button
                                      onClick={(e) => { e.stopPropagation(); handleCancelClaim(claim); }}
-                                     className="text-slate-400 hover:text-orange-600 transition-colors"
+                                     className="text-muted-foreground hover:text-orange-600 transition-colors"
                                      title="Cancel"
                                    >
                                      <XCircle className="w-4 h-4" />
@@ -534,7 +534,7 @@ export default function ClaimsDashboard() {
                                  {currentUser?.role === 'admin' && (
                                    <button
                                      onClick={(e) => { e.stopPropagation(); handleDeleteClaim(claim); }}
-                                     className="text-slate-400 hover:text-red-600 transition-colors"
+                                     className="text-muted-foreground hover:text-destructive transition-colors"
                                      title="Delete"
                                    >
                                      <Trash2 className="w-4 h-4" />
@@ -543,7 +543,7 @@ export default function ClaimsDashboard() {
                                  {project && (
                                    <Link
                                      to={createPageUrl('ProjectDetail') + `?id=${project.id}`}
-                                     className="text-indigo-600 hover:underline text-xs font-medium"
+                                     className="text-primary hover:underline text-xs font-medium"
                                      onClick={(e) => e.stopPropagation()}
                                    >
                                      View Project →
@@ -564,11 +564,11 @@ export default function ClaimsDashboard() {
             {activeTab === 'by_dc' && (
               <section>
                 {dcBreakdown.length === 0 ? (
-                  <div className="text-center py-8 bg-white rounded-xl border border-slate-100 text-slate-500">No claims data found.</div>
+                  <div className="text-center py-8 bg-card rounded-xl border border-border text-muted-foreground">No claims data found.</div>
                 ) : (
-                  <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                  <div className="bg-card rounded-xl border border-border overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-slate-50 border-b border-slate-100">
+                      <thead className="bg-muted border-b border-border">
                         <tr>
                           <SortTh col="name" label="Design Consultant" sort={dcSort} setSort={setDcSort} />
                           <SortTh col="total" label="Total" sort={dcSort} setSort={setDcSort} center />
@@ -580,30 +580,30 @@ export default function ClaimsDashboard() {
                           <SortTh col="cancelled" label="Cancelled" sort={dcSort} setSort={setDcSort} center />
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
+                      <tbody className="divide-y divide-border">
                         {dcBreakdown.map(([dc, data]) => (
-                          <tr key={dc} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-4 py-3 font-medium text-slate-800">{dc}</td>
+                          <tr key={dc} className="hover:bg-secondary transition-colors">
+                            <td className="px-4 py-3 font-medium text-foreground">{dc}</td>
                             <td className="px-4 py-3 text-center">
-                              <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded-full">{data.total}</span>
+                              <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-full">{data.total}</span>
                             </td>
                             {claimTypes.map(t => (
                               <td key={t} className="px-4 py-3 text-center">
                                 {data[t] > 0 ? (
-                                  <span className={cn('text-xs font-semibold px-2 py-1 rounded-full border', claimTypeColors[t] || 'bg-slate-100 text-slate-700')}>{data[t]}</span>
+                                  <span className={cn('text-xs font-semibold px-2 py-1 rounded-full border', claimTypeColors[t] || 'bg-secondary text-secondary-foreground')}>{data[t]}</span>
                                 ) : (
-                                  <span className="text-slate-300">—</span>
+                                  <span className="text-muted-foreground/60">—</span>
                                 )}
                               </td>
                             ))}
                             <td className="px-4 py-3 text-center">
-                              {data.open > 0 ? <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">{data.open}</span> : <span className="text-slate-300">—</span>}
+                              {data.open > 0 ? <span className="bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300 text-xs font-semibold px-2 py-1 rounded-full">{data.open}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                             <td className="px-4 py-3 text-center">
-                              {data.completed > 0 ? <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full">{data.completed}</span> : <span className="text-slate-300">—</span>}
+                              {data.completed > 0 ? <span className="bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300 text-xs font-semibold px-2 py-1 rounded-full">{data.completed}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                             <td className="px-4 py-3 text-center">
-                              {data.cancelled > 0 ? <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-2 py-1 rounded-full">{data.cancelled}</span> : <span className="text-slate-300">—</span>}
+                              {data.cancelled > 0 ? <span className="bg-secondary text-muted-foreground text-xs font-semibold px-2 py-1 rounded-full">{data.cancelled}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                           </tr>
                         ))}
@@ -618,11 +618,11 @@ export default function ClaimsDashboard() {
             {activeTab === 'by_installer' && (
               <section>
                 {installerBreakdown.length === 0 ? (
-                  <div className="text-center py-8 bg-white rounded-xl border border-slate-100 text-slate-500">No claims data found.</div>
+                  <div className="text-center py-8 bg-card rounded-xl border border-border text-muted-foreground">No claims data found.</div>
                 ) : (
-                  <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                  <div className="bg-card rounded-xl border border-border overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead className="bg-slate-50 border-b border-slate-100">
+                      <thead className="bg-muted border-b border-border">
                         <tr>
                           <SortTh col="name" label="Installer" sort={installerSort} setSort={setInstallerSort} />
                           <SortTh col="total" label="Total" sort={installerSort} setSort={setInstallerSort} center />
@@ -634,30 +634,30 @@ export default function ClaimsDashboard() {
                           <SortTh col="cancelled" label="Cancelled" sort={installerSort} setSort={setInstallerSort} center />
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-50">
+                      <tbody className="divide-y divide-border">
                         {installerBreakdown.map(([installer, data]) => (
-                          <tr key={installer} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-4 py-3 font-medium text-slate-800">{installer}</td>
+                          <tr key={installer} className="hover:bg-secondary transition-colors">
+                            <td className="px-4 py-3 font-medium text-foreground">{installer}</td>
                             <td className="px-4 py-3 text-center">
-                              <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1 rounded-full">{data.total}</span>
+                              <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-full">{data.total}</span>
                             </td>
                             {claimTypes.map(t => (
                               <td key={t} className="px-4 py-3 text-center">
                                 {data[t] > 0 ? (
-                                  <span className={cn('text-xs font-semibold px-2 py-1 rounded-full border', claimTypeColors[t] || 'bg-slate-100 text-slate-700')}>{data[t]}</span>
+                                  <span className={cn('text-xs font-semibold px-2 py-1 rounded-full border', claimTypeColors[t] || 'bg-secondary text-secondary-foreground')}>{data[t]}</span>
                                 ) : (
-                                  <span className="text-slate-300">—</span>
+                                  <span className="text-muted-foreground/60">—</span>
                                 )}
                               </td>
                             ))}
                             <td className="px-4 py-3 text-center">
-                              {data.open > 0 ? <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">{data.open}</span> : <span className="text-slate-300">—</span>}
+                              {data.open > 0 ? <span className="bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300 text-xs font-semibold px-2 py-1 rounded-full">{data.open}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                             <td className="px-4 py-3 text-center">
-                              {data.completed > 0 ? <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded-full">{data.completed}</span> : <span className="text-slate-300">—</span>}
+                              {data.completed > 0 ? <span className="bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300 text-xs font-semibold px-2 py-1 rounded-full">{data.completed}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                             <td className="px-4 py-3 text-center">
-                              {data.cancelled > 0 ? <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-2 py-1 rounded-full">{data.cancelled}</span> : <span className="text-slate-300">—</span>}
+                              {data.cancelled > 0 ? <span className="bg-secondary text-muted-foreground text-xs font-semibold px-2 py-1 rounded-full">{data.cancelled}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                           </tr>
                         ))}

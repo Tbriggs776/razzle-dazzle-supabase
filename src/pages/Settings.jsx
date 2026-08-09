@@ -729,31 +729,31 @@ export default function Settings() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-50">
+    <div className="bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <SettingsIcon className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
+              <SettingsIcon className="w-7 h-7 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Settings</h1>
-              <p className="text-slate-500 mt-1">Configure SMS templates and role permissions</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Settings</h1>
+              <p className="text-muted-foreground mt-1">Configure SMS templates and role permissions</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* App Settings */}
         {currentUser?.role === 'admin' && !loadingAppSettings && (
           <motion.div
@@ -764,7 +764,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-indigo-600" />
+                  <Users className="w-5 h-5 text-primary" />
                   App Access Settings
                 </CardTitle>
                 <CardDescription>
@@ -772,10 +772,10 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border">
                 <div>
-                  <p className="font-medium text-slate-800">Show Role Assignment Splash Screen</p>
-                  <p className="text-sm text-slate-500 mt-1">Display splash screen for users without assigned roles</p>
+                  <p className="font-medium text-foreground">Show Role Assignment Splash Screen</p>
+                  <p className="text-sm text-muted-foreground mt-1">Display splash screen for users without assigned roles</p>
                 </div>
                 <Switch
                   checked={appFormData.show_role_assignment_splash}
@@ -783,15 +783,15 @@ export default function Settings() {
                 />
                 </div>
 
-                <div className="mt-4 p-4 rounded-lg border border-violet-200 bg-violet-50 space-y-3">
-                <p className="font-semibold text-violet-900 flex items-center gap-2">
+                <div className="mt-4 p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-3">
+                <p className="font-semibold text-foreground flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Quote System
                 </p>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-slate-800">Enable Quotes</p>
-                    <p className="text-sm text-slate-500">Allow Design Consultants to create quotes from appointment results</p>
+                    <p className="font-medium text-foreground">Enable Quotes</p>
+                    <p className="text-sm text-muted-foreground">Allow Design Consultants to create quotes from appointment results</p>
                   </div>
                   <Switch
                     checked={appFormData.quotes_enabled}
@@ -799,10 +799,10 @@ export default function Settings() {
                   />
                 </div>
                 {appFormData.quotes_enabled && (
-                  <div className="flex items-center justify-between pt-2 border-t border-violet-200">
+                  <div className="flex items-center justify-between pt-2 border-t border-primary/20">
                     <div>
-                      <p className="font-medium text-slate-800">Admin Only (Testing Mode)</p>
-                      <p className="text-sm text-slate-500">Only show Quote option to admin users — to test before rolling out to the team</p>
+                      <p className="font-medium text-foreground">Admin Only (Testing Mode)</p>
+                      <p className="text-sm text-muted-foreground">Only show Quote option to admin users — to test before rolling out to the team</p>
                     </div>
                     <Switch
                       checked={appFormData.quotes_admin_only}
@@ -812,12 +812,12 @@ export default function Settings() {
                 )}
                 </div>
 
-                <div className="mt-4 p-4 rounded-lg border border-blue-200 bg-blue-50 space-y-3">
-                  <p className="font-semibold text-blue-900 flex items-center gap-2">
+                <div className="mt-4 p-4 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-500/10 dark:border-blue-500/25 space-y-3">
+                  <p className="font-semibold text-blue-900 dark:text-blue-200 flex items-center gap-2">
                     <DollarSign className="w-4 h-4" />
                     Ad Spend Spreadsheet
                   </p>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-muted-foreground">
                     Paste the Google Sheets URL or ID used for the Marketing Performance dashboard. This is shared across all users.
                   </p>
                   <input
@@ -825,15 +825,15 @@ export default function Settings() {
                     value={appFormData.ad_spend_spreadsheet_id}
                     onChange={(e) => setAppFormData({ ...appFormData, ad_spend_spreadsheet_id: e.target.value })}
                     placeholder="https://docs.google.com/spreadsheets/d/... or spreadsheet ID"
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               </CardContent>
-              <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+              <div className="px-6 py-4 border-t border-border flex justify-end">
                 <Button
                   onClick={handleSaveAppSettings}
                   disabled={saveAppSettingsMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveAppSettingsMutation.isPending ? (
                     <>
@@ -866,13 +866,13 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-xs text-slate-500">Select team members to receive the alert (their phone number from their profile will be used):</p>
+                <p className="text-xs text-muted-foreground">Select team members to receive the alert (their phone number from their profile will be used):</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {allTeamMembersForAlert.sort((a,b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)).map(member => (
                     <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       pastDueMemberIds.includes(member.id)
-                        ? 'bg-amber-50 border-amber-300'
-                        : 'bg-white border-slate-200 hover:bg-slate-50'
+                        ? 'bg-amber-50 border-amber-300 dark:bg-amber-500/15 dark:border-amber-500/30'
+                        : 'bg-card border-border hover:bg-secondary'
                     }`}>
                       <input
                         type="checkbox"
@@ -884,20 +884,20 @@ export default function Settings() {
                         className="rounded"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-800">{member.first_name} {member.last_name}</p>
-                        <p className="text-xs text-slate-500">{member.role}</p>
+                        <p className="text-sm font-medium text-foreground">{member.first_name} {member.last_name}</p>
+                        <p className="text-xs text-muted-foreground">{member.role}</p>
                       </div>
                       {member.phone ? (
-                        <span className="text-xs font-mono text-slate-400">{member.phone}</span>
+                        <span className="text-xs font-mono text-muted-foreground">{member.phone}</span>
                       ) : (
-                        <span className="text-xs text-red-400">No phone</span>
+                        <span className="text-xs text-destructive">No phone</span>
                       )}
                     </label>
                   ))}
-                  {allTeamMembersForAlert.length === 0 && <p className="text-xs text-slate-400">No active team members found.</p>}
+                  {allTeamMembersForAlert.length === 0 && <p className="text-xs text-muted-foreground">No active team members found.</p>}
                 </div>
               </CardContent>
-              <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-3">
+              <div className="px-6 py-4 border-t border-border flex items-center justify-between gap-3">
                 <Button
                   variant="outline"
                   onClick={async () => {
@@ -912,7 +912,7 @@ export default function Settings() {
                     }
                   }}
                   disabled={sendingPastDueAlert}
-                  className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                  className="border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10"
                 >
                   {sendingPastDueAlert ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
                   Send Now
@@ -920,7 +920,7 @@ export default function Settings() {
                 <Button
                   onClick={() => saveMutation.mutate({ ...formData, past_due_alert_member_ids: pastDueMemberIds })}
                   disabled={saveMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save</>}
                 </Button>
@@ -943,13 +943,13 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-xs text-slate-500">Select team members to receive the alert (their phone number from their profile will be used):</p>
+                <p className="text-xs text-muted-foreground">Select team members to receive the alert (their phone number from their profile will be used):</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {allTeamMembersForAlert.sort((a,b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)).map(member => (
                     <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       pendingCancellationMemberIds.includes(member.id)
-                        ? 'bg-orange-50 border-orange-300'
-                        : 'bg-white border-slate-200 hover:bg-slate-50'
+                        ? 'bg-orange-50 border-orange-300 dark:bg-orange-500/15 dark:border-orange-500/30'
+                        : 'bg-card border-border hover:bg-secondary'
                     }`}>
                       <input
                         type="checkbox"
@@ -961,20 +961,20 @@ export default function Settings() {
                         className="rounded"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-800">{member.first_name} {member.last_name}</p>
-                        <p className="text-xs text-slate-500">{member.role}</p>
+                        <p className="text-sm font-medium text-foreground">{member.first_name} {member.last_name}</p>
+                        <p className="text-xs text-muted-foreground">{member.role}</p>
                       </div>
                       {member.phone ? (
-                        <span className="text-xs font-mono text-slate-400">{member.phone}</span>
+                        <span className="text-xs font-mono text-muted-foreground">{member.phone}</span>
                       ) : (
-                        <span className="text-xs text-red-400">No phone</span>
+                        <span className="text-xs text-destructive">No phone</span>
                       )}
                     </label>
                   ))}
-                  {allTeamMembersForAlert.length === 0 && <p className="text-xs text-slate-400">No active team members found.</p>}
+                  {allTeamMembersForAlert.length === 0 && <p className="text-xs text-muted-foreground">No active team members found.</p>}
                 </div>
               </CardContent>
-              <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-3">
+              <div className="px-6 py-4 border-t border-border flex items-center justify-between gap-3">
                 <Button
                   variant="outline"
                   onClick={async () => {
@@ -989,7 +989,7 @@ export default function Settings() {
                     }
                   }}
                   disabled={sendingPendingCancellationAlert}
-                  className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                  className="border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-500/40 dark:text-orange-300 dark:hover:bg-orange-500/10"
                 >
                   {sendingPendingCancellationAlert ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
                   Send Now
@@ -997,7 +997,7 @@ export default function Settings() {
                 <Button
                   onClick={() => saveMutation.mutate({ ...formData, past_due_alert_member_ids: pastDueMemberIds, pending_cancellation_alert_member_ids: pendingCancellationMemberIds })}
                   disabled={saveMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save</>}
                 </Button>
@@ -1021,7 +1021,7 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-4">
-                  <label className="text-sm font-medium text-slate-700 whitespace-nowrap">GP% Threshold:</label>
+                  <label className="text-sm font-medium text-foreground whitespace-nowrap">GP% Threshold:</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
@@ -1030,26 +1030,26 @@ export default function Settings() {
                       step="1"
                       value={gpAlertThreshold}
                       onChange={e => setGpAlertThreshold(Number(e.target.value))}
-                      className="w-24 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-24 border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
-                    <span className="text-sm text-slate-500">% — alert fires when GP is <strong>below</strong> this</span>
+                    <span className="text-sm text-muted-foreground">% — alert fires when GP is <strong>below</strong> this</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200">
+                <div className="flex items-center justify-between p-3 rounded-lg border border-border">
                   <div>
-                    <p className="font-medium text-slate-800">Also alert the Design Consultant</p>
-                    <p className="text-sm text-slate-500 mt-0.5">Send the GP alert to the DC assigned to the sale</p>
+                    <p className="font-medium text-foreground">Also alert the Design Consultant</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">Send the GP alert to the DC assigned to the sale</p>
                   </div>
                   <Switch
                     checked={gpAlertIncludeDC}
                     onCheckedChange={setGpAlertIncludeDC}
                   />
                 </div>
-                <p className="text-xs text-slate-500">Select additional team members to always receive the alert:</p>
+                <p className="text-xs text-muted-foreground">Select additional team members to always receive the alert:</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {allTeamMembersForAlert.sort((a,b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)).map(member => (
                     <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      gpAlertMemberIds.includes(member.id) ? 'bg-emerald-50 border-emerald-300' : 'bg-white border-slate-200 hover:bg-slate-50'
+                      gpAlertMemberIds.includes(member.id) ? 'bg-emerald-50 border-emerald-300 dark:bg-emerald-500/15 dark:border-emerald-500/30' : 'bg-card border-border hover:bg-secondary'
                     }`}>
                       <input
                         type="checkbox"
@@ -1061,25 +1061,25 @@ export default function Settings() {
                         className="rounded"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-800">{member.first_name} {member.last_name}</p>
-                        <p className="text-xs text-slate-500">{member.role}</p>
+                        <p className="text-sm font-medium text-foreground">{member.first_name} {member.last_name}</p>
+                        <p className="text-xs text-muted-foreground">{member.role}</p>
                       </div>
                       {member.phone ? (
-                        <span className="text-xs font-mono text-slate-400">{member.phone}</span>
+                        <span className="text-xs font-mono text-muted-foreground">{member.phone}</span>
                       ) : (
-                        <span className="text-xs text-red-400">No phone</span>
+                        <span className="text-xs text-destructive">No phone</span>
                       )}
                     </label>
                   ))}
-                  {allTeamMembersForAlert.length === 0 && <p className="text-xs text-slate-400">No active team members found.</p>}
+                  {allTeamMembersForAlert.length === 0 && <p className="text-xs text-muted-foreground">No active team members found.</p>}
                 </div>
               </CardContent>
-              <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+              <div className="px-6 py-4 border-t border-border flex justify-end">
                 <Button
                   onClick={() => saveMutation.mutate({ ...formData, past_due_alert_member_ids: pastDueMemberIds, pending_cancellation_alert_member_ids: pendingCancellationMemberIds, gp_alert_member_ids: gpAlertMemberIds, gp_alert_threshold: gpAlertThreshold, gp_alert_include_dc: gpAlertIncludeDC })}
 
                   disabled={saveMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save</>}
                 </Button>
@@ -1102,16 +1102,16 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ul className="text-sm text-slate-600 list-disc list-inside space-y-1">
+                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                   <li><strong>Every day:</strong> Next-day appointments with no DC assigned</li>
                   <li><strong>Fridays only:</strong> Weekend appointments (Sat &amp; Sun) with no DC assigned</li>
                 </ul>
-                <p className="text-xs text-slate-500">Select team members to receive the alert (their phone number from their profile will be used):</p>
+                <p className="text-xs text-muted-foreground">Select team members to receive the alert (their phone number from their profile will be used):</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {allTeamMembersForAlert.sort((a,b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)).map(member => {
                     const selected = (formData.unassigned_dc_alert_phones || []).includes(member.id);
                     return (
-                      <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selected ? 'bg-red-50 border-red-300' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
+                      <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selected ? 'bg-red-50 border-red-300 dark:bg-red-500/15 dark:border-red-500/30' : 'bg-card border-border hover:bg-secondary'}`}>
                         <input
                           type="checkbox"
                           checked={selected}
@@ -1122,21 +1122,21 @@ export default function Settings() {
                           className="rounded"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-800">{member.first_name} {member.last_name}</p>
-                          <p className="text-xs text-slate-500">{member.role}</p>
+                          <p className="text-sm font-medium text-foreground">{member.first_name} {member.last_name}</p>
+                          <p className="text-xs text-muted-foreground">{member.role}</p>
                         </div>
                         {member.phone ? (
-                          <span className="text-xs font-mono text-slate-400">{member.phone}</span>
+                          <span className="text-xs font-mono text-muted-foreground">{member.phone}</span>
                         ) : (
-                          <span className="text-xs text-red-400">No phone</span>
+                          <span className="text-xs text-destructive">No phone</span>
                         )}
                       </label>
                     );
                   })}
-                  {allTeamMembersForAlert.length === 0 && <p className="text-xs text-slate-400">No active team members found.</p>}
+                  {allTeamMembersForAlert.length === 0 && <p className="text-xs text-muted-foreground">No active team members found.</p>}
                 </div>
               </CardContent>
-              <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-3">
+              <div className="px-6 py-4 border-t border-border flex items-center justify-between gap-3">
                 <Button
                   variant="outline"
                   onClick={async () => {
@@ -1147,7 +1147,7 @@ export default function Settings() {
                       toast.error('Failed: ' + e.message);
                     }
                   }}
-                  className="border-red-300 text-red-700 hover:bg-red-50"
+                  className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-500/40 dark:text-red-300 dark:hover:bg-red-500/10"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Test Send Now
@@ -1155,7 +1155,7 @@ export default function Settings() {
                 <Button
                   onClick={() => saveMutation.mutate({ ...formData, past_due_alert_member_ids: pastDueMemberIds })}
                   disabled={saveMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save</>}
                 </Button>
@@ -1182,7 +1182,7 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   These email addresses will receive an instant notification when a customer or lead replies via SMS.
                 </p>
                 <EmailInput
@@ -1191,11 +1191,11 @@ export default function Settings() {
                   placeholder="Type email and press Enter..."
                 />
               </CardContent>
-              <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+              <div className="px-6 py-4 border-t border-border flex justify-end">
                 <Button
                   onClick={handleSave}
                   disabled={saveMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveMutation.isPending ? (
                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
@@ -1218,7 +1218,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-indigo-600" />
+                  <MessageSquare className="w-5 h-5 text-primary" />
                   Sales Email Notification
                 </CardTitle>
                 <CardDescription>
@@ -1226,10 +1226,10 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border">
                   <div>
-                    <p className="font-medium text-slate-800">Enable Sales Email</p>
-                    <p className="text-sm text-slate-500 mt-1">Send email notifications when appointments are marked as sold</p>
+                    <p className="font-medium text-foreground">Enable Sales Email</p>
+                    <p className="text-sm text-muted-foreground mt-1">Send email notifications when appointments are marked as sold</p>
                   </div>
                   <Switch
                     checked={emailFormData.send_sale_confirmation_email}
@@ -1237,9 +1237,9 @@ export default function Settings() {
                   />
                 </div>
 
-                <div className="border-t border-slate-200 pt-6">
-                  <Label className="text-slate-700 font-medium mb-3 block">Email Template</Label>
-                  <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                <div className="border-t border-border pt-6">
+                  <Label className="text-foreground font-medium mb-3 block">Email Template</Label>
+                  <div className="bg-card border border-border rounded-lg overflow-hidden">
                     <ReactQuill
                       key="sale_confirmation_template"
                       value={emailFormData.sale_confirmation_template}
@@ -1259,14 +1259,14 @@ export default function Settings() {
                       style={{ minHeight: '300px' }}
                     />
                   </div>
-                  <p className="text-xs text-slate-500 mt-3">
+                  <p className="text-xs text-muted-foreground mt-3">
                     Use variables like {'{customer_name}'}, {'{consultant_name}'}, {'{sale_amount}'}, {'{appointment_date}'}, {'{location_address}'}, and {'{sale_detail_url}'} to personalize your email
                   </p>
                 </div>
 
-                <div className="border-t border-slate-200 pt-6">
-                  <Label className="text-slate-700 font-medium mb-3 block">Email Recipients</Label>
-                  <p className="text-xs text-slate-500 mb-3">
+                <div className="border-t border-border pt-6">
+                  <Label className="text-foreground font-medium mb-3 block">Email Recipients</Label>
+                  <p className="text-xs text-muted-foreground mb-3">
                     Add email addresses that should receive sales notifications
                   </p>
                   <EmailInput
@@ -1277,17 +1277,17 @@ export default function Settings() {
                   />
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-xs text-blue-700">
+                <div className="bg-blue-50 border border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/25 rounded-lg p-3">
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
                     <strong>Available Variables:</strong> {'{customer_name}'}, {'{sale_amount}'}, {'{consultant_name}'}, {'{appointment_date}'}, {'{location_address}'}, {'{sale_detail_url}'}
                   </p>
                 </div>
               </CardContent>
-              <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+              <div className="px-6 py-4 border-t border-border flex justify-end">
                 <Button
                   onClick={handleSaveEmail}
                   disabled={saveEmailMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveEmailMutation.isPending ? (
                     <>
@@ -1316,7 +1316,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <SettingsIcon className="w-5 h-5 text-indigo-600" />
+                  <SettingsIcon className="w-5 h-5 text-primary" />
                   Customer Project View Settings
                 </CardTitle>
                 <CardDescription>
@@ -1324,10 +1324,10 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border">
                   <div>
-                    <p className="font-medium text-slate-800">Show Progress Tracker</p>
-                    <p className="text-sm text-slate-500 mt-1">Display project status progress on customer project view</p>
+                    <p className="font-medium text-foreground">Show Progress Tracker</p>
+                    <p className="text-sm text-muted-foreground mt-1">Display project status progress on customer project view</p>
                   </div>
                   <Switch
                     checked={customerProjectFormData.show_progress_tracker}
@@ -1335,11 +1335,11 @@ export default function Settings() {
                   />
                 </div>
               </CardContent>
-              <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+              <div className="px-6 py-4 border-t border-border flex justify-end">
                 <Button
                   onClick={handleSaveCustomerProject}
                   disabled={saveCustomerProjectMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveCustomerProjectMutation.isPending ? (
                     <>
@@ -1368,7 +1368,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Palette className="w-5 h-5 text-indigo-600" />
+                  <Palette className="w-5 h-5 text-primary" />
                   Schedule Time Block Colors
                 </CardTitle>
                 <CardDescription>
@@ -1384,21 +1384,21 @@ export default function Settings() {
                     { key: 'time_block_6pm_8pm_color', label: '6pm - 8pm', defaultColor: '#DCFCE7' }
                   ].map(({ key, label, defaultColor }) => (
                     <div key={key} className="space-y-3">
-                      <Label className="text-slate-700 font-medium">{label}</Label>
+                      <Label className="text-foreground font-medium">{label}</Label>
                       <div className="flex items-center gap-4">
                         <div className="flex gap-3 items-center flex-wrap">
                           <input
                             type="color"
                             value={timeBlockFormData[key]}
                             onChange={(e) => setTimeBlockFormData({ ...timeBlockFormData, [key]: e.target.value })}
-                            className="w-16 h-16 rounded-lg cursor-pointer border border-slate-200"
+                            className="w-16 h-16 rounded-lg cursor-pointer border border-border"
                           />
                           <div>
-                            <p className="text-sm font-mono text-slate-600">{timeBlockFormData[key]}</p>
+                            <p className="text-sm font-mono text-muted-foreground">{timeBlockFormData[key]}</p>
                             <button
                               type="button"
                               onClick={() => setTimeBlockFormData({ ...timeBlockFormData, [key]: defaultColor })}
-                              className="text-xs text-indigo-600 hover:text-indigo-700 mt-1"
+                              className="text-xs text-primary hover:opacity-80 mt-1"
                             >
                               Reset to default
                             </button>
@@ -1409,11 +1409,11 @@ export default function Settings() {
                   ))}
                 </div>
               </CardContent>
-              <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+              <div className="px-6 py-4 border-t border-border flex justify-end">
                 <Button
                   onClick={handleSaveTimeBlocks}
                   disabled={saveTimeBlockMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveTimeBlockMutation.isPending ? (
                     <>
@@ -1438,7 +1438,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <SettingsIcon className="w-5 h-5 text-indigo-600" />
+                  <SettingsIcon className="w-5 h-5 text-primary" />
                   Appointment & Project Tags
                 </CardTitle>
                 <CardDescription>
@@ -1461,7 +1461,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-indigo-600" />
+                  <Shield className="w-5 h-5 text-primary" />
                   Role-Based Access Control
                 </CardTitle>
                 <CardDescription>
@@ -1477,7 +1477,7 @@ export default function Settings() {
                     return (
                       <div key={role} className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-slate-800">{role}</h3>
+                          <h3 className="font-semibold text-foreground">{role}</h3>
                           <Button
                             type="button"
                             variant="outline"

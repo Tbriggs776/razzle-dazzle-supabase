@@ -98,18 +98,18 @@ export default function CustomerDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!customer) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">Customer not found</h2>
-          <Link to={createPageUrl('Customers')} className="text-indigo-600 hover:underline">
+          <h2 className="text-xl font-semibold text-foreground mb-2">Customer not found</h2>
+          <Link to={createPageUrl('Customers')} className="text-primary hover:underline">
             Back to customers
           </Link>
         </div>
@@ -127,13 +127,13 @@ export default function CustomerDetail() {
   ].filter(Boolean).join(', ');
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link
             to={createPageUrl('Customers')}
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Customers
@@ -144,22 +144,22 @@ export default function CustomerDetail() {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col md:flex-row md:items-start gap-6"
           >
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-indigo-200">
+            <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg">
               {initials}
             </div>
 
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">
                 {customer.first_name} {customer.last_name}
               </h1>
-              <p className="text-slate-500 mt-1">Customer</p>
+              <p className="text-muted-foreground mt-1">Customer</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <Button
                 variant="outline"
                 onClick={() => setShowEditDialog(true)}
-                className="h-11 px-5 border-slate-200 hover:bg-slate-50"
+                className="h-11 px-5 border-border hover:bg-secondary"
               >
                 <Pencil className="w-4 h-4 mr-2" />
                 Edit
@@ -167,7 +167,7 @@ export default function CustomerDetail() {
               <Button
                 variant="outline"
                 onClick={() => setShowDeleteDialog(true)}
-                className="h-11 px-5 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                className="h-11 px-5 border-destructive/30 text-destructive hover:bg-destructive/10"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
@@ -178,29 +178,29 @@ export default function CustomerDetail() {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Contact Information */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Contact Information
             </h2>
             <div className="space-y-4">
               <a
                 href={`mailto:${customer.email}`}
-                className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
               >
-                <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-green-600" />
+                <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-brand-blue" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Email</p>
-                  <p className="text-slate-800 group-hover:text-green-600 transition-colors">
+                  <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                  <p className="text-foreground group-hover:text-brand-blue transition-colors">
                     {customer.email}
                   </p>
                 </div>
@@ -208,14 +208,14 @@ export default function CustomerDetail() {
               {customer.phone && (
                 <a
                   href={`tel:${customer.phone}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <Phone className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 rounded-lg bg-brand-pink/12 flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-brand-pink" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Phone</p>
-                    <p className="text-slate-800 group-hover:text-blue-600 transition-colors">
+                    <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                    <p className="text-foreground group-hover:text-brand-pink transition-colors">
                       {customer.phone}
                     </p>
                   </div>
@@ -229,22 +229,22 @@ export default function CustomerDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Address
             </h2>
             {fullAddress ? (
-              <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-orange-600" />
+              <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-5 h-5 text-brand-gold" />
                 </div>
                 <div>
-                  <p className="text-slate-800">{fullAddress}</p>
+                  <p className="text-foreground">{fullAddress}</p>
                 </div>
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-6">No address provided</p>
+              <p className="text-muted-foreground text-center py-6">No address provided</p>
             )}
           </motion.div>
 
@@ -254,18 +254,18 @@ export default function CustomerDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className="bg-card rounded-2xl border border-border p-6"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Lead Source
               </h2>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-amber-50">
-                <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-amber-600" />
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-brand-gold/10">
+                <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-brand-gold" />
                 </div>
                 <div>
-                  <p className="text-xs text-amber-600 mb-0.5">Heard About Us</p>
-                  <p className="text-slate-800 font-medium">
+                  <p className="text-xs text-brand-gold mb-0.5">Heard About Us</p>
+                  <p className="text-foreground font-medium">
                     {checklist.heard_about_us}{checklist.heard_about_us === 'Other' && checklist.heard_about_us_other ? ` — ${checklist.heard_about_us_other}` : ''}
                   </p>
                 </div>
@@ -279,16 +279,16 @@ export default function CustomerDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Notes
               </h2>
               <div className="flex items-start gap-4 p-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-purple-600" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-slate-700 whitespace-pre-wrap">{customer.notes}</p>
+                <p className="text-foreground whitespace-pre-wrap">{customer.notes}</p>
               </div>
             </motion.div>
           )}
@@ -298,35 +298,35 @@ export default function CustomerDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+            className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Record Information
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-50">
-                <Calendar className="w-5 h-5 text-slate-400" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
+                <Calendar className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Created</p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-xs text-muted-foreground mb-0.5">Created</p>
+                  <p className="text-sm text-foreground">
                     {format(new Date(customer.created_date + (customer.created_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy h:mm a')}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-50">
-                <Calendar className="w-5 h-5 text-slate-400" />
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
+                <Calendar className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Last Updated</p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-xs text-muted-foreground mb-0.5">Last Updated</p>
+                  <p className="text-sm text-foreground">
                     {format(new Date(customer.updated_date + (customer.updated_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy h:mm a')}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-slate-50">
-                <Mail className="w-5 h-5 text-slate-400" />
+              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
+                <Mail className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">Created By</p>
-                  <p className="text-sm text-slate-700 truncate">{customer.created_by}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Created By</p>
+                  <p className="text-sm text-foreground truncate">{customer.created_by}</p>
                 </div>
               </div>
             </div>
@@ -338,7 +338,7 @@ export default function CustomerDetail() {
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-slate-800">Edit Customer</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-foreground">Edit Customer</DialogTitle>
           </DialogHeader>
           <CustomerForm
             customer={customer}
@@ -353,8 +353,8 @@ export default function CustomerDetail() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-800">Delete Customer</DialogTitle>
-            <DialogDescription className="text-slate-500 mt-2">
+            <DialogTitle className="text-xl font-bold text-foreground">Delete Customer</DialogTitle>
+            <DialogDescription className="text-muted-foreground mt-2">
               Are you sure you want to delete {customer.first_name} {customer.last_name}? 
               This action cannot be undone.
             </DialogDescription>
@@ -363,7 +363,7 @@ export default function CustomerDetail() {
             <Button
               variant="outline"
               onClick={() => setShowDeleteDialog(false)}
-              className="border-slate-200"
+              className="border-border"
             >
               Cancel
             </Button>
@@ -371,7 +371,7 @@ export default function CustomerDetail() {
               variant="destructive"
               onClick={() => deleteMutation.mutate()}
               disabled={deleteMutation.isPending}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:opacity-90"
             >
               {deleteMutation.isPending ? (
                 <>

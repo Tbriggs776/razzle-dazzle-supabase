@@ -46,13 +46,13 @@ export default function DesignConsultants() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Link
             to={createPageUrl('TeamMembers')}
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             All Team Members
@@ -60,12 +60,12 @@ export default function DesignConsultants() {
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Design Consultants</h1>
-              <p className="text-slate-500 mt-1">Creative team members who work with clients on design projects</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Design Consultants</h1>
+              <p className="text-muted-foreground mt-1">Creative team members who work with clients on design projects</p>
             </div>
             <Button
               onClick={() => setShowCreateDialog(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-6 rounded-xl shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-200 transition-all"
+              className="bg-primary text-primary-foreground hover:opacity-90 h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all"
             >
               <Plus className="w-5 h-5 mr-2" />
               Add Design Consultant
@@ -74,22 +74,22 @@ export default function DesignConsultants() {
 
           {/* Search */}
           <div className="mt-8 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               placeholder="Search design consultants..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-14 bg-slate-50 border-slate-200 rounded-xl text-base focus:bg-white focus:border-blue-500 focus:ring-blue-500 transition-all"
+              className="pl-12 h-14 bg-secondary border-border rounded-xl text-base focus:bg-card focus:border-ring focus:ring-ring transition-all"
             />
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : filteredMembers.length === 0 ? (
           <motion.div
@@ -97,13 +97,13 @@ export default function DesignConsultants() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-blue-50 flex items-center justify-center mb-6">
-              <Palette className="w-10 h-10 text-blue-400" />
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
+              <Palette className="w-10 h-10 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               {searchQuery ? 'No design consultants found' : 'No design consultants yet'}
             </h3>
-            <p className="text-slate-500 mb-6">
+            <p className="text-muted-foreground mb-6">
               {searchQuery
                 ? 'Try adjusting your search query'
                 : 'Get started by adding your first design consultant'}
@@ -111,7 +111,7 @@ export default function DesignConsultants() {
             {!searchQuery && (
               <Button
                 onClick={() => setShowCreateDialog(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-primary text-primary-foreground hover:opacity-90"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Design Consultant
@@ -119,7 +119,7 @@ export default function DesignConsultants() {
             )}
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence>
               {filteredMembers.map((member, index) => (
                 <TeamMemberCard key={member.id} teamMember={member} index={index} />
@@ -130,7 +130,7 @@ export default function DesignConsultants() {
 
         {/* Results count */}
         {!isLoading && filteredMembers.length > 0 && (
-          <p className="text-center text-sm text-slate-400 mt-8">
+          <p className="text-center text-sm text-muted-foreground mt-8">
             Showing {filteredMembers.length} design consultant{filteredMembers.length !== 1 ? 's' : ''}
           </p>
         )}
@@ -140,7 +140,7 @@ export default function DesignConsultants() {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-slate-800">New Design Consultant</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-foreground">New Design Consultant</DialogTitle>
           </DialogHeader>
           <TeamMemberForm
             teamMember={{ role: 'Design Consultant' }}

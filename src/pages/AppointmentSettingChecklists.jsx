@@ -217,18 +217,18 @@ export default function AppointmentSettingChecklists() {
     : selectedLead;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Appointment Setting Checklists</h1>
-              <p className="text-slate-500 mt-1">Collect customer information and set appointments</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Appointment Setting Checklists</h1>
+              <p className="text-muted-foreground mt-1">Collect customer information and set appointments</p>
             </div>
             <Button
               onClick={() => setShowCreateDialog(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white h-12 px-6 rounded-xl shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-200 transition-all"
+              className="bg-primary text-primary-foreground hover:opacity-90 h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all"
             >
               <Plus className="w-5 h-5 mr-2" />
               New Checklist
@@ -238,12 +238,12 @@ export default function AppointmentSettingChecklists() {
           {/* Search */}
           <div className="mt-8">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 placeholder="Search by customer name, email, or phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-14 bg-slate-50 border-slate-200 rounded-xl text-base focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+                className="pl-12 h-14 bg-secondary border-border rounded-xl text-base focus:bg-card focus:border-ring focus:ring-ring transition-all"
               />
             </div>
           </div>

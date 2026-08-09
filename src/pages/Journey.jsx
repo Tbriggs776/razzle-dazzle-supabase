@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, X, Map, LayoutGrid, Layers, LogOut, User, ChevronDown, ChevronRight, Navigation, Bell, HardHat } from 'lucide-react';
+import { Loader2, X, Menu, Map, LayoutGrid, Layers, LogOut, User, ChevronDown, ChevronRight, Navigation, Bell, HardHat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import RegionMapEditor from '@/components/journey/RegionMapEditor';
 import RegionSidebar from '@/components/journey/RegionSidebar';
@@ -38,6 +38,7 @@ function JourneyInner() {
   const [manageExpanded, setManageExpanded] = useState(false);
   const [drawingRegion, setDrawingRegion] = useState(null);
   const [regionsOverlayOpen, setRegionsOverlayOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
@@ -87,8 +88,8 @@ function JourneyInner() {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
@@ -165,19 +166,42 @@ function JourneyInner() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-full min-h-0 bg-background">
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="md:hidden fixed inset-0 bg-black/40 z-[1080]"
+          aria-hidden="true"
+        />
+      )}
+
       {/* Left Sidebar */}
-      <aside className="w-56 bg-white border-r border-slate-200 flex flex-col shrink-0">
+      <aside
+        className={cn(
+          "w-56 bg-card border-r border-border flex-col shrink-0",
+          sidebarOpen
+            ? "flex fixed inset-y-0 left-0 z-[1090] shadow-xl md:static md:shadow-none"
+            : "hidden md:flex"
+        )}
+      >
         {/* Logo */}
-        <div className="h-14 flex items-center px-5 border-b border-slate-200 shrink-0">
+        <div className="h-14 flex items-center px-5 border-b border-border shrink-0">
           <div>
-            <h1 className="text-base font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent leading-none">
+            <h1 className="text-base font-bold text-primary leading-none">
               Journey
             </h1>
-            <p className="text-[9px] font-sans tracking-wider text-slate-400 uppercase mt-0.5">
+            <p className="text-[9px] font-sans tracking-wider text-muted-foreground uppercase mt-0.5">
               BY FLOOR DADDY
             </p>
           </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden ml-auto w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors"
+            aria-label="Close menu"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Nav items */}
@@ -346,7 +370,18 @@ function JourneyInner() {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {/* Mobile top bar */}
+        <div className="md:hidden h-12 flex items-center gap-3 px-3 border-b border-border bg-card shrink-0">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-foreground hover:bg-secondary transition-colors"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <span className="text-sm font-bold text-primary">Journey</span>
+        </div>
         {/* Drawing banner */}
         {drawingRegion && (
           <div className="h-10 bg-indigo-50 border-b border-indigo-200 flex items-center px-4 gap-2 shrink-0">
@@ -373,7 +408,7 @@ function JourneyInner() {
               />
 
               {/* Regions overlay — top right of map */}
-              <div className="absolute top-6 right-6 w-72 z-[1000] flex flex-col" style={{ maxHeight: 'calc(100% - 3rem)' }}>
+              <div className="absolute top-6 right-6 w-[min(18rem,90vw)] z-[1000] flex flex-col" style={{ maxHeight: 'calc(100% - 3rem)' }}>
                 <button
                   onClick={() => setRegionsOverlayOpen(o => !o)}
                   className="self-end flex items-center gap-1.5 bg-white border border-slate-200 shadow-md rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors mb-1"

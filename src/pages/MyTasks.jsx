@@ -247,56 +247,56 @@ export default function MyTasks() {
 
   if (isCheckingAuth || userLoading || (tasksLoading && pendingTasks.length === 0)) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">Please log in</h2>
-          <p className="text-slate-500">You need to be logged in to view your tasks</p>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Please log in</h2>
+          <p className="text-muted-foreground">You need to be logged in to view your tasks</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">My Tasks</h1>
-              <p className="text-slate-500 mt-1">Follow-up reminders for your appointments</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">My Tasks</h1>
+              <p className="text-muted-foreground mt-1">Follow-up reminders for your appointments</p>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-amber-50 dark:bg-amber-500/10 rounded-xl p-4 border border-amber-100 dark:border-amber-500/20">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                  <Circle className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
+                  <Circle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-amber-900">{pendingCount}</p>
-                  <p className="text-sm text-amber-700">Pending Tasks</p>
+                  <p className="text-2xl font-bold text-amber-900 dark:text-amber-200">{pendingCount}</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">Pending Tasks</p>
                 </div>
               </div>
             </div>
-            <div className="bg-green-50 rounded-xl p-4 border border-green-100">
+            <div className="bg-green-50 dark:bg-green-500/10 rounded-xl p-4 border border-green-100 dark:border-green-500/20">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-green-900">{completedCount}</p>
-                  <p className="text-sm text-green-700">Completed Tasks</p>
+                  <p className="text-2xl font-bold text-green-900 dark:text-green-200">{completedCount}</p>
+                  <p className="text-sm text-green-700 dark:text-green-300">Completed Tasks</p>
                 </div>
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function MyTasks() {
           {/* DC Task Summary (Admin Only) */}
           {currentUser?.role === 'admin' && allDCs.length > 0 && (
             <div className="mt-6">
-              <Label className="text-sm text-slate-700 mb-3 block">Task Summary by Design Consultant</Label>
+              <Label className="text-sm text-foreground mb-3 block">Task Summary by Design Consultant</Label>
               <div className="overflow-x-auto -mx-4 px-4">
                 <div className="flex gap-3 pb-2 min-w-max">
                   {allDCs
@@ -319,16 +319,16 @@ export default function MyTasks() {
                         key={dc.id}
                         onClick={() => setSelectedDC(dc.id)}
                         className={cn(
-                          "flex-shrink-0 w-44 bg-white rounded-xl border p-4 cursor-pointer transition-all hover:shadow-lg",
-                          selectedDC === dc.id && "border-indigo-300 bg-indigo-50"
+                          "flex-shrink-0 w-44 bg-card rounded-xl border border-border p-4 cursor-pointer transition-all hover:shadow-lg",
+                          selectedDC === dc.id && "border-primary bg-primary/10"
                         )}
                       >
-                        <p className="font-semibold text-slate-800 mb-3 truncate">
+                        <p className="font-semibold text-foreground mb-3 truncate">
                           {dc.first_name} {dc.last_name}
                         </p>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-slate-600">Pending</span>
-                          <span className="text-lg font-bold text-amber-600">{dcPending}</span>
+                          <span className="text-xs text-muted-foreground">Pending</span>
+                          <span className="text-lg font-bold text-amber-600 dark:text-amber-400">{dcPending}</span>
                         </div>
                       </div>
                     ))}
@@ -340,7 +340,7 @@ export default function MyTasks() {
           {/* DC Filter (Admin Only) */}
           {currentUser?.role === 'admin' && (
             <div className="mt-6">
-              <Label className="text-sm text-slate-700 mb-2 block">View Tasks For</Label>
+              <Label className="text-sm text-foreground mb-2 block">View Tasks For</Label>
               <Select value={selectedDC} onValueChange={setSelectedDC}>
                 <SelectTrigger className="w-full md:w-64">
                   <SelectValue />
@@ -364,14 +364,14 @@ export default function MyTasks() {
               <Button
                 variant={!showCompleted ? 'default' : 'outline'}
                 onClick={() => setShowCompleted(false)}
-                className={!showCompleted ? 'bg-indigo-600' : ''}
+                className={!showCompleted ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
               >
                 Pending ({pendingCount})
               </Button>
               <Button
                 variant={showCompleted ? 'default' : 'outline'}
                 onClick={() => setShowCompleted(true)}
-                className={showCompleted ? 'bg-indigo-600' : ''}
+                className={showCompleted ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
               >
                 {completedLoading && showCompleted ? (
                   <Loader2 className="w-3 h-3 mr-1 animate-spin" />
@@ -393,20 +393,20 @@ export default function MyTasks() {
       </div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {filteredTasks.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center mb-6">
-              <CheckCircle2 className="w-10 h-10 text-slate-400" />
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-secondary flex items-center justify-center mb-6">
+              <CheckCircle2 className="w-10 h-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               {showCompleted ? 'No completed tasks' : 'No pending tasks'}
             </h3>
-            <p className="text-slate-500">
+            <p className="text-muted-foreground">
               {showCompleted
                 ? 'Complete some tasks to see them here' 
                 : 'Tasks will appear here when appointments need follow-up'}
@@ -431,19 +431,19 @@ export default function MyTasks() {
                   transition={{ delay: index * 0.05 }}
                 >
                   <div className={cn(
-                    "bg-white rounded-2xl border p-5 transition-all",
-                    task.status === 'completed' && "border-green-200 bg-green-50/50",
-                    overdue && "border-red-200 bg-red-50/50",
-                    task.status === 'pending' && !overdue && "border-slate-100 hover:border-indigo-200 hover:shadow-lg"
+                    "bg-card rounded-2xl border p-5 transition-all",
+                    task.status === 'completed' && "border-green-200 bg-green-50/50 dark:border-green-500/25 dark:bg-green-500/10",
+                    overdue && "border-red-200 bg-red-50/50 dark:border-red-500/25 dark:bg-red-500/10",
+                    task.status === 'pending' && !overdue && "border-border hover:border-primary/40 hover:shadow-lg"
                   )}>
                     <div className="flex items-start gap-4">
                       {/* Status Icon */}
                       <div
                         className={cn(
                           "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5",
-                          task.status === 'completed' 
+                          task.status === 'completed'
                             ? "bg-green-600 text-white"
-                            : "bg-slate-200"
+                            : "bg-muted"
                         )}
                       >
                         {task.status === 'completed' && <CheckCircle2 className="w-4 h-4" />}
@@ -456,7 +456,7 @@ export default function MyTasks() {
                             deleteMutation.mutate(task.id);
                           }
                         }}
-                        className="flex-shrink-0 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="flex-shrink-0 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                         title="Delete task"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -469,21 +469,21 @@ export default function MyTasks() {
                             <Link
                               to={createPageUrl('AppointmentDetail') + `?id=${task.appointment}`}
                               className={cn(
-                                "font-semibold text-lg hover:text-indigo-600 transition-colors",
-                                task.status === 'completed' ? "line-through text-slate-500" : "text-slate-800"
+                                "font-semibold text-lg hover:text-primary transition-colors",
+                                task.status === 'completed' ? "line-through text-muted-foreground" : "text-foreground"
                               )}
                             >
                               {leadName}
                             </Link>
                             {assignedDC && (
-                              <p className="text-xs text-slate-500 mt-1">
+                              <p className="text-xs text-muted-foreground mt-1">
                                 Assigned to: {assignedDC.first_name} {assignedDC.last_name}
                               </p>
                             )}
                             {task.notes && (
                               <p className={cn(
                                 "text-sm mt-1",
-                                task.status === 'completed' ? "text-slate-400" : "text-slate-600"
+                                task.status === 'completed' ? "text-muted-foreground" : "text-muted-foreground"
                               )}>
                                 {task.notes}
                               </p>
@@ -495,9 +495,9 @@ export default function MyTasks() {
                             variant="outline" 
                             className={cn(
                               'flex items-center gap-1',
-                              overdue && 'bg-red-50 text-red-700 border-red-200',
-                              !overdue && task.status === 'pending' && 'bg-amber-50 text-amber-700 border-amber-200',
-                              task.status === 'completed' && 'bg-green-50 text-green-700 border-green-200'
+                              overdue && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+                              !overdue && task.status === 'pending' && 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
+                              task.status === 'completed' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
                             )}
                           >
                             <Clock className="w-3 h-3" />
@@ -514,13 +514,13 @@ export default function MyTasks() {
                                 {appointment.status}
                               </Badge>
                               {appointment.appointment_date && (
-                                <span className="text-xs text-slate-500 flex items-center gap-1">
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
                                   <CalendarIcon className="w-3 h-3" />
                                   {format(new Date(appointment.appointment_date), 'MMM d')}
                                 </span>
                               )}
                               {appointment.not_sold_deal_size > 0 && (
-                                <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                                <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25">
                                   Deal Size: ${Number(appointment.not_sold_deal_size).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </Badge>
                               )}
@@ -529,7 +529,7 @@ export default function MyTasks() {
                                {lead?.phone && (
                                  <a 
                                    href={`tel:${lead.phone}`}
-                                   className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-indigo-600 transition-colors"
+                                   className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
                                    onClick={(e) => e.stopPropagation()}
                                  >
                                    <Phone className="w-3.5 h-3.5" />
@@ -539,7 +539,7 @@ export default function MyTasks() {
                                {lead?.email && (
                                  <a 
                                    href={`mailto:${lead.email}`}
-                                   className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-indigo-600 transition-colors"
+                                   className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
                                    onClick={(e) => e.stopPropagation()}
                                  >
                                    <Mail className="w-3.5 h-3.5" />
@@ -562,7 +562,7 @@ export default function MyTasks() {
                                  }}
                                  className={cn(
                                    "h-7 text-xs",
-                                   task.status === 'pending' && "bg-indigo-600 hover:bg-indigo-700"
+                                   task.status === 'pending' && "bg-primary text-primary-foreground hover:opacity-90"
                                  )}
                                >
                                  <MessageCircle className="w-3 h-3 mr-1" />
@@ -572,22 +572,22 @@ export default function MyTasks() {
 
                             {/* Notes Section */}
                             {appointment?.notes && appointment.notes.length > 0 && (
-                             <div className="mt-3 border-t border-slate-200 pt-3">
-                               <p className="text-xs font-semibold text-slate-600 mb-2">Appointment Notes</p>
+                             <div className="mt-3 border-t border-border pt-3">
+                               <p className="text-xs font-semibold text-muted-foreground mb-2">Appointment Notes</p>
                                <div className="max-h-32 overflow-y-auto space-y-2 pr-2 overscroll-contain overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
                                  {[...appointment.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, idx) => (
-                                   <div key={idx} className="bg-slate-50 rounded-lg p-2.5 border border-slate-200 break-words">
+                                   <div key={idx} className="bg-muted rounded-lg p-2.5 border border-border break-words">
                                       <div className="flex items-start justify-between gap-2 mb-1">
-                                        <p className="text-xs font-semibold text-slate-700">{note.user_name}</p>
+                                        <p className="text-xs font-semibold text-foreground">{note.user_name}</p>
                                         {note.context && (
                                           <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
                                             {note.context}
                                           </Badge>
                                         )}
                                       </div>
-                                      <p className="text-xs text-slate-600 leading-relaxed">{note.content}</p>
+                                      <p className="text-xs text-muted-foreground leading-relaxed">{note.content}</p>
                                       {note.timestamp && (
-                                        <p className="text-[10px] text-slate-400 mt-1">
+                                        <p className="text-[10px] text-muted-foreground mt-1">
                                           {format(new Date(note.timestamp), 'MMM d, yyyy h:mm a')}
                                         </p>
                                       )}
@@ -613,7 +613,7 @@ export default function MyTasks() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Log Follow-Up</DialogTitle>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               {followUpDialog?.leadName}
             </p>
           </DialogHeader>
@@ -643,7 +643,7 @@ export default function MyTasks() {
               />
             </div>
 
-            <div className="border-t border-slate-200 pt-4 space-y-3">
+            <div className="border-t border-border pt-4 space-y-3">
               <div>
                 <Label>Next Follow-Up Due Date *</Label>
                 <input
@@ -651,9 +651,9 @@ export default function MyTasks() {
                   value={newTaskDueDate}
                   onChange={(e) => setNewTaskDueDate(e.target.value)}
                   disabled={markAsWonOrLost}
-                  className="mt-1.5 w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  className="mt-1.5 w-full px-3 py-2 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:cursor-not-allowed"
                 />
-                <p className="text-xs text-slate-500 mt-1.5">
+                <p className="text-xs text-muted-foreground mt-1.5">
                   A new follow-up task will be created automatically
                 </p>
               </div>
@@ -676,7 +676,7 @@ export default function MyTasks() {
                     window.location.href = `/ConsultantAppointmentView?id=${followUpDialog?.appointmentId}&action=sold`;
                   }}
                   disabled={!followUpNotes.trim() || saveFollowUpMutation.isPending}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   Mark as Won
@@ -696,7 +696,7 @@ export default function MyTasks() {
                   }}
                   disabled={!followUpNotes.trim() || saveFollowUpMutation.isPending}
                   variant="outline"
-                  className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                  className="flex-1 border-destructive/30 text-destructive hover:bg-destructive/10"
                 >
                   {saveFollowUpMutation.isPending ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -729,7 +729,7 @@ export default function MyTasks() {
                     });
                   }}
                   disabled={!followUpNotes.trim() || !newTaskDueDate || saveFollowUpMutation.isPending}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                  className="flex-1 bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {saveFollowUpMutation.isPending ? (
                     <>

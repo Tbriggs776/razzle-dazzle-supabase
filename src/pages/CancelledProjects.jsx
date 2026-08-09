@@ -223,20 +223,20 @@ export default function CancelledProjects() {
   })();
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Cancellations</h1>
-              <p className="text-slate-500 mt-1">Cancelled and pending cancellation projects</p>
+              <h1 className="text-3xl font-bold text-foreground">Cancellations</h1>
+              <p className="text-muted-foreground mt-1">Cancelled and pending cancellation projects</p>
             </div>
-            <div className="flex items-center gap-3 text-sm text-slate-500">
-              <span className="bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-medium">
+            <div className="flex flex-wrap items-center gap-3 gap-y-2 text-sm text-muted-foreground">
+              <span className="bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-medium dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
                 {cancelledProjects.length} Cancelled
               </span>
-              <span className="bg-orange-100 text-orange-700 border border-orange-200 rounded-lg px-3 py-1.5 font-medium">
+              <span className="bg-orange-100 text-orange-700 border border-orange-200 rounded-lg px-3 py-1.5 font-medium dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25">
                 {pendingCancellationProjects.length} Pending Cancellation
               </span>
             </div>
@@ -244,12 +244,12 @@ export default function CancelledProjects() {
 
           {/* Search */}
           <div className="relative mt-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               placeholder="Search by customer name or invoice number..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-11 h-12 bg-white border-slate-200"
+              className="pl-11 h-12 bg-card border-border"
             />
           </div>
 
@@ -258,21 +258,21 @@ export default function CancelledProjects() {
             <Button
               variant={filterType === 'all' ? 'default' : 'outline'}
               onClick={() => setFilterType('all')}
-              className={cn("h-9 whitespace-nowrap", filterType === 'all' ? 'bg-slate-800 hover:bg-slate-900' : '')}
+              className={cn("h-9 whitespace-nowrap", filterType === 'all' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
             >
               All ({cancelledProjects.length + pendingCancellationProjects.filter(p => p.status !== 'Cancelled').length})
             </Button>
             <Button
               variant={filterType === 'cancelled' ? 'default' : 'outline'}
               onClick={() => setFilterType('cancelled')}
-              className={cn("h-9 whitespace-nowrap", filterType === 'cancelled' ? 'bg-red-600 hover:bg-red-700' : 'border-red-200 text-red-700 hover:bg-red-50')}
+              className={cn("h-9 whitespace-nowrap", filterType === 'cancelled' ? 'bg-red-600 hover:bg-red-700 text-white' : 'border-red-200 text-red-700 hover:bg-red-50 dark:border-red-500/30 dark:text-red-300 dark:hover:bg-red-500/10')}
             >
               🚫 Cancelled ({cancelledProjects.length})
             </Button>
             <Button
               variant={filterType === 'pending_cancellation' ? 'default' : 'outline'}
               onClick={() => setFilterType('pending_cancellation')}
-              className={cn("h-9 whitespace-nowrap", filterType === 'pending_cancellation' ? 'bg-orange-600 hover:bg-orange-700' : 'border-orange-200 text-orange-700 hover:bg-orange-50')}
+              className={cn("h-9 whitespace-nowrap", filterType === 'pending_cancellation' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10')}
             >
               ⚠️ Pending Cancellation ({pendingCancellationProjects.length})
             </Button>
@@ -281,21 +281,21 @@ export default function CancelledProjects() {
       </div>
 
       {/* List */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-slate-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
-            <ClipboardCheck className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-800">No projects found</h3>
-            <p className="text-slate-500 mt-1">
+          <div className="text-center py-12 bg-card rounded-2xl border border-border">
+            <ClipboardCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground">No projects found</h3>
+            <p className="text-muted-foreground mt-1">
               {searchQuery ? 'Try adjusting your search' : 'No cancelled or pending cancellation projects'}
             </p>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
             {filteredProjects.map((project, index) => {
               const customer = customers.find(c => c.id === project.customer);
               const customerName = customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown';
@@ -310,16 +310,16 @@ export default function CancelledProjects() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.04 }}
                   className={cn(
-                    "bg-white rounded-xl border transition-all hover:shadow-md",
-                    isCancelled ? "border-red-200 hover:border-red-300" : "border-orange-200 hover:border-orange-300"
+                    "bg-card rounded-xl border transition-all hover:shadow-md",
+                    isCancelled ? "border-red-200 hover:border-red-300 dark:border-red-500/30 dark:hover:border-red-500/50" : "border-orange-200 hover:border-orange-300 dark:border-orange-500/30 dark:hover:border-orange-500/50"
                   )}
                 >
-                  <div className="px-6 pt-4 pb-0 flex justify-end gap-2">
+                  <div className="px-6 pt-4 pb-0 flex flex-wrap justify-end gap-2 gap-y-2">
                     {isCancelled && (
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-green-300 text-green-700 hover:bg-green-50"
+                        className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
                         disabled={uncancelling === project.id}
                         onClick={(e) => {
                           e.preventDefault();
@@ -339,7 +339,7 @@ export default function CancelledProjects() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-green-300 text-green-700 hover:bg-green-50"
+                          className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
                           disabled={clearingPending === project.id}
                           onClick={(e) => {
                             e.preventDefault();
@@ -356,7 +356,7 @@ export default function CancelledProjects() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          className="bg-red-600 hover:bg-red-700 text-white"
+                          className="bg-destructive text-destructive-foreground hover:opacity-90"
                           onClick={(e) => {
                             e.preventDefault();
                             setCancelDialog({ project, customerName });
@@ -372,7 +372,7 @@ export default function CancelledProjects() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-slate-300 text-slate-600 hover:bg-slate-50"
+                        className="border-border text-muted-foreground hover:bg-secondary"
                         disabled={savingAttempt === project.id}
                         onClick={(e) => {
                           e.preventDefault();
@@ -390,7 +390,7 @@ export default function CancelledProjects() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                        className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-500/30 dark:text-blue-300 dark:hover:bg-blue-500/10"
                         disabled={savingAttempt === project.id}
                         onClick={(e) => {
                           e.preventDefault();
@@ -415,26 +415,26 @@ export default function CancelledProjects() {
                           ) : (
                             <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0" />
                           )}
-                          <h3 className="text-lg font-semibold text-slate-800">{customerName}</h3>
+                          <h3 className="text-lg font-semibold text-foreground">{customerName}</h3>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {isCancelled && (
-                            <Badge className="bg-red-100 text-red-800 border border-red-200">
+                            <Badge className="bg-red-100 text-red-800 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
                               🚫 Cancelled
                             </Badge>
                           )}
                           {isPendingCancellation && !isCancelled && (
-                            <Badge className="bg-orange-100 text-orange-800 border border-orange-200">
+                            <Badge className="bg-orange-100 text-orange-800 border border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25">
                               ⚠️ Pending Cancellation
                             </Badge>
                           )}
                           {isPendingCancellation && isCancelled && (
-                            <Badge className="bg-orange-100 text-orange-800 border border-orange-200">
+                            <Badge className="bg-orange-100 text-orange-800 border border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25">
                               ⚠️ Pending Cancellation
                             </Badge>
                           )}
                           {project.status !== 'Cancelled' && (
-                            <Badge className="bg-slate-100 text-slate-600 border border-slate-200">
+                            <Badge className="bg-secondary text-secondary-foreground border border-border">
                               {project.status}
                             </Badge>
                           )}
@@ -444,12 +444,12 @@ export default function CancelledProjects() {
 
                     {/* Save attempt indicator */}
                     {project.cancellation_save_attempt_by && (
-                      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-3 space-y-1">
-                        <p className="text-xs text-blue-700">
+                      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-3 space-y-1 dark:bg-blue-500/10 dark:border-blue-500/20">
+                        <p className="text-xs text-blue-700 dark:text-blue-300">
                           <span className="font-medium">🛠️ Working this — trying to save:</span> {project.cancellation_save_attempt_by}
                         </p>
                         {project.cancellation_save_attempt_date && (
-                          <p className="text-xs text-blue-600">
+                          <p className="text-xs text-blue-600 dark:text-blue-300">
                             Flagged {format(new Date(project.cancellation_save_attempt_date), 'MMM d, yyyy h:mm a')}
                           </p>
                         )}
@@ -458,59 +458,59 @@ export default function CancelledProjects() {
 
                     {/* Cancellation details */}
                     {isCancelled && (project.cancelled_by || project.cancelled_date || project.cancelled_reason) && (
-                      <div className="bg-red-50 border border-red-100 rounded-lg p-3 mb-3 space-y-1">
+                      <div className="bg-red-50 border border-red-100 rounded-lg p-3 mb-3 space-y-1 dark:bg-red-500/10 dark:border-red-500/20">
                         {project.cancelled_by && (
-                          <p className="text-xs text-red-700"><span className="font-medium">Cancelled by:</span> {project.cancelled_by}</p>
+                          <p className="text-xs text-red-700 dark:text-red-300"><span className="font-medium">Cancelled by:</span> {project.cancelled_by}</p>
                         )}
                         {project.cancelled_date && (
-                          <p className="text-xs text-red-700">
+                          <p className="text-xs text-red-700 dark:text-red-300">
                             <span className="font-medium">Date:</span> {format(new Date(project.cancelled_date), 'MMM d, yyyy h:mm a')}
                           </p>
                         )}
                         {project.cancelled_reason && (
-                          <p className="text-xs text-red-700"><span className="font-medium">Reason:</span> {project.cancelled_reason}</p>
+                          <p className="text-xs text-red-700 dark:text-red-300"><span className="font-medium">Reason:</span> {project.cancelled_reason}</p>
                         )}
                       </div>
                     )}
 
                     <div className="space-y-1.5">
-                      <div className="flex items-center gap-2 text-sm text-slate-500">
-                        <Clock className="w-4 h-4 text-slate-400" />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
                         <span>Created: {project.created_date ? format(new Date(project.created_date + (project.created_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy') : 'N/A'}</span>
                       </div>
                       {isPendingCancellation && !isCancelled && project.pending_cancellation_date && (
-                        <div className="flex items-center gap-2 text-sm text-orange-600 font-medium">
+                        <div className="flex items-center gap-2 text-sm text-orange-600 font-medium dark:text-orange-400">
                           <AlertTriangle className="w-4 h-4 text-orange-500" />
                           <span>Pending Cancel: {format(new Date(project.pending_cancellation_date), 'MMM d, yyyy')} ({Math.floor((Date.now() - new Date(project.pending_cancellation_date).getTime()) / 86400000)} days)</span>
                         </div>
                       )}
                       {project.installation_date && (
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
-                          <CalendarIcon className="w-4 h-4 text-slate-400" />
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <CalendarIcon className="w-4 h-4 text-muted-foreground" />
                           <span>Install: {format(new Date(project.installation_date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                         </div>
                       )}
                       {sale?.location_address && (
-                        <div className="flex items-start gap-2 text-sm text-slate-500">
-                          <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                           <span className="line-clamp-1">{sale.location_address}</span>
                         </div>
                       )}
                       {sale?.invoice_number && (
-                        <div className="text-sm text-slate-500">
+                        <div className="text-sm text-muted-foreground">
                           <span>Invoice: </span>
-                          <span className="font-medium text-slate-700">#{sale.invoice_number}</span>
+                          <span className="font-medium text-foreground">#{sale.invoice_number}</span>
                         </div>
                       )}
                     </div>
                   </Link>
 
                   {/* Manual update box — outside the Link so the textarea is interactive */}
-                  <div className="px-6 pb-5 pt-3 border-t border-slate-100">
+                  <div className="px-6 pb-5 pt-3 border-t border-border">
                     <div className="flex items-center justify-between mb-1.5">
-                      <p className="text-xs font-medium text-slate-600">Manual Update to Cancellation List</p>
+                      <p className="text-xs font-medium text-muted-foreground">Manual Update to Cancellation List</p>
                       {project.cancellation_updates?.length > 0 && (
-                        <span className="text-[11px] text-slate-400">{project.cancellation_updates.length} update(s)</span>
+                        <span className="text-[11px] text-muted-foreground">{project.cancellation_updates.length} update(s)</span>
                       )}
                     </div>
                     <Textarea
@@ -523,7 +523,7 @@ export default function CancelledProjects() {
                     <div className="flex justify-end mt-2">
                       <Button
                         size="sm"
-                        className="bg-slate-800 hover:bg-slate-900 text-white"
+                        className="bg-primary text-primary-foreground hover:opacity-90"
                         disabled={sendingUpdate === project.id || !(updateTexts[project.id] || '').trim()}
                         onClick={(e) => {
                           e.preventDefault();
@@ -541,9 +541,9 @@ export default function CancelledProjects() {
                     {project.cancellation_updates?.length > 0 && (
                       <div className="mt-3 space-y-2">
                         {project.cancellation_updates.slice().reverse().map((u, i) => (
-                          <div key={i} className="bg-slate-50 border border-slate-100 rounded-lg p-2.5">
-                            <p className="text-xs text-slate-700 whitespace-pre-wrap">{u.content}</p>
-                            <p className="text-[11px] text-slate-400 mt-1">
+                          <div key={i} className="bg-secondary border border-border rounded-lg p-2.5">
+                            <p className="text-xs text-foreground whitespace-pre-wrap">{u.content}</p>
+                            <p className="text-[11px] text-muted-foreground mt-1">
                               {u.user_name}{u.timestamp ? ` · ${format(new Date(u.timestamp), 'MMM d, yyyy h:mm a')}` : ''}
                             </p>
                           </div>
@@ -564,7 +564,7 @@ export default function CancelledProjects() {
             <DialogTitle>Cancel Project — {cancelDialog?.customerName}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               This will mark the project as <strong>Cancelled</strong>. This action cannot be automatically undone.
             </p>
             <div className="space-y-2">

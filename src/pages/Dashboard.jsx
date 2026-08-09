@@ -15,13 +15,13 @@ function LeverSlider({ label, value, min, max, step, format, onChange, onDetail 
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between items-baseline gap-2">
-        <span className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</span>
+        <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{label}</span>
         <div className="flex items-baseline gap-2">
-          <span className="text-lg font-black text-slate-900 whitespace-nowrap">{format(value)}</span>
+          <span className="text-lg font-black text-foreground whitespace-nowrap">{format(value)}</span>
           {onDetail && (
             <button
               onClick={onDetail}
-              className="px-2 py-0.5 text-xs font-semibold bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors"
+              className="px-2 py-0.5 text-xs font-semibold bg-brand-pink text-white rounded-lg hover:opacity-90 transition-opacity"
             >
               Detail
             </button>
@@ -31,7 +31,7 @@ function LeverSlider({ label, value, min, max, step, format, onChange, onDetail 
       <input
         type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(Number(e.target.value))}
-        className="w-full h-1.5 rounded-full cursor-pointer accent-red-700"
+        className="w-full h-1.5 rounded-full cursor-pointer accent-[hsl(var(--brand-pink))]"
       />
     </div>
   );
@@ -39,26 +39,26 @@ function LeverSlider({ label, value, min, max, step, format, onChange, onDetail 
 
 function PillarCard({ pillarNum, pillarName, mainValue, mainLabel, rows, onDetail }) {
   return (
-    <div className="border border-slate-200 rounded-xl p-5">
-      <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Pillar {pillarNum}</p>
-      <p className="text-sm font-bold uppercase text-slate-700 mb-3">{pillarName}</p>
+    <div className="border border-border rounded-xl p-5 bg-card">
+      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Pillar {pillarNum}</p>
+      <p className="text-sm font-bold uppercase text-foreground mb-3">{pillarName}</p>
       <div className="flex items-baseline gap-3">
-        <p className="text-4xl font-black text-slate-900">{mainValue}</p>
+        <p className="text-4xl font-black text-foreground">{mainValue}</p>
         {onDetail && (
           <button
             onClick={onDetail}
-            className="px-2.5 py-0.5 text-xs font-semibold bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors"
+            className="px-2.5 py-0.5 text-xs font-semibold bg-brand-pink text-white rounded-lg hover:opacity-90 transition-opacity"
           >
             Detail
           </button>
         )}
       </div>
-      <p className="text-sm text-slate-500 mb-4">{mainLabel}</p>
-      <div className="border-t border-dashed border-slate-200 pt-3 space-y-2">
+      <p className="text-sm text-muted-foreground mb-4">{mainLabel}</p>
+      <div className="border-t border-dashed border-border pt-3 space-y-2">
         {rows.map((r, i) => (
           <div key={i} className="flex justify-between text-sm">
-            <span className="text-slate-500">{r.label}</span>
-            <span className="font-semibold text-slate-800">{r.value}</span>
+            <span className="text-muted-foreground">{r.label}</span>
+            <span className="font-semibold text-foreground">{r.value}</span>
           </div>
         ))}
       </div>
@@ -68,7 +68,7 @@ function PillarCard({ pillarNum, pillarName, mainValue, mainLabel, rows, onDetai
 
 function FlowBox({ value, label, highlight }) {
   return (
-    <div className={`flex-1 min-w-[80px] rounded-xl p-4 text-center ${highlight ? 'bg-red-700 text-white' : 'bg-slate-800 text-white'}`}>
+    <div className={`flex-1 min-w-[80px] rounded-xl p-4 text-center ${highlight ? 'bg-brand-pink text-white' : 'bg-brand-navy text-white'}`}>
       <p className="text-3xl font-black">{value}</p>
       <p className="text-xs font-semibold uppercase tracking-wider mt-1 opacity-80">{label}</p>
     </div>
@@ -77,7 +77,7 @@ function FlowBox({ value, label, highlight }) {
 
 function SectionHeader({ title }) {
   return (
-    <h2 className="text-lg font-black uppercase tracking-wide text-slate-900 border-l-4 border-red-700 pl-3 mb-4">{title}</h2>
+    <h2 className="text-lg font-black uppercase tracking-wide text-foreground border-l-4 border-brand-pink pl-3 mb-4">{title}</h2>
   );
 }
 
@@ -302,26 +302,26 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-5xl mx-auto p-6 space-y-10">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-10">
 
         {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-black uppercase tracking-wide text-slate-900">Operational Levers</h1>
-            <p className="text-sm text-slate-500 mt-1">Adjust the levers — the scoreboard recomputes instantly.</p>
+            <h1 className="text-2xl font-black uppercase tracking-wide text-foreground">Operational Levers</h1>
+            <p className="text-sm text-muted-foreground mt-1">Adjust the levers — the scoreboard recomputes instantly.</p>
           </div>
-          <div className="flex items-center gap-3">
-            {ghlLoading && <Loader2 className="w-4 h-4 animate-spin text-slate-400" />}
+          <div className="flex flex-wrap items-center gap-3">
+            {ghlLoading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
             {!ghlLoading && lastFetched && (
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-muted-foreground">
                 Updated {lastFetched.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
               </span>
             )}
             <button
               onClick={refreshGHL}
               disabled={ghlLoading}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-border rounded-lg hover:bg-secondary disabled:opacity-50 transition-colors"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${ghlLoading ? 'animate-spin' : ''}`} />
               Refresh GHL
@@ -335,7 +335,7 @@ export default function Dashboard() {
         {/* 4-PILLAR SCOREBOARD */}
         <section>
           <SectionHeader title="The 4-Pillar Scoreboard (Per Day)" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <PillarCard pillarNum={1} pillarName="Marketing" mainValue={ghlLeadsTotal ?? leadsPerDay} mainLabel={ghlLeadsTotal != null ? `leads in range (${leadsPerDay}/day avg)` : "leads generated"}
               rows={[{ label: 'Spend', value: fmtDollar(marketingSpend) }, { label: 'Cost per lead', value: fmtDollar(costPerLead) }]}
               onDetail={() => setShowLeadsChart(true)} />
@@ -355,11 +355,11 @@ export default function Dashboard() {
           <SectionHeader title="The Flow" />
           <div className="flex items-center gap-2 flex-wrap">
             <FlowBox value={leadsPerDay} label="Leads" highlight={false} />
-            <div className="text-center px-1 shrink-0"><p className="text-sm font-bold text-slate-500">{fmtPct(realBookingRate)}</p></div>
+            <div className="text-center px-1 shrink-0"><p className="text-sm font-bold text-muted-foreground">{fmtPct(realBookingRate)}</p></div>
             <FlowBox value={fmt(appsRun)} label="Run Appts" highlight={false} />
-            <div className="text-center px-1 shrink-0"><p className="text-sm font-bold text-slate-500">{fmtPct(realCloseRate)}</p></div>
+            <div className="text-center px-1 shrink-0"><p className="text-sm font-bold text-muted-foreground">{fmtPct(realCloseRate)}</p></div>
             <FlowBox value={fmt(jobsSold)} label="Sold" highlight={true} />
-            <div className="text-center px-1 shrink-0"><p className="text-sm font-bold text-slate-500">100%</p></div>
+            <div className="text-center px-1 shrink-0"><p className="text-sm font-bold text-muted-foreground">100%</p></div>
             <FlowBox value={fmt(jobsCompleted)} label="Installed" highlight={false} />
           </div>
         </section>
@@ -367,19 +367,19 @@ export default function Dashboard() {
         {/* DAILY PRODUCTION & CASH */}
         <section>
           <SectionHeader title="Daily Production & Cash" />
-          <div className="flex gap-2 mb-4">
+          <div className="flex flex-nowrap gap-2 mb-4 overflow-x-auto pb-1">
             {['day', 'month', 'year'].map(tab => (
               <button key={tab} onClick={() => setCashTab(tab)}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${cashTab === tab ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}>
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold border whitespace-nowrap transition-colors ${cashTab === tab ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:bg-secondary'}`}>
                 Per {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </div>
-          <div className="border border-slate-200 rounded-xl overflow-hidden">
+          <div className="border border-border rounded-xl overflow-hidden bg-card">
             {cashRows.map((row, i) => (
-              <div key={i} className={`flex justify-between items-center px-6 py-3 ${row.bold ? 'border-t-2 border-slate-800 bg-slate-50' : i > 0 ? 'border-t border-dashed border-slate-200' : ''}`}>
-                <span className={`text-sm ${row.bold ? 'font-bold text-slate-900' : 'text-slate-600'}`}>{row.label}</span>
-                <span className={`text-sm ${row.bold ? 'font-bold text-slate-900' : 'font-semibold text-slate-800'}`}>{row.value}</span>
+              <div key={i} className={`flex justify-between items-center px-6 py-3 ${row.bold ? 'border-t-2 border-foreground bg-secondary' : i > 0 ? 'border-t border-dashed border-border' : ''}`}>
+                <span className={`text-sm ${row.bold ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>{row.label}</span>
+                <span className={`text-sm ${row.bold ? 'font-bold text-foreground' : 'font-semibold text-foreground'}`}>{row.value}</span>
               </div>
             ))}
           </div>
@@ -388,11 +388,11 @@ export default function Dashboard() {
         {/* INSTALL BALANCE */}
         <section>
           <SectionHeader title="Install Balance" />
-          <div className="border border-slate-200 rounded-xl p-5 flex items-start gap-4">
-            <span className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${inBalance ? 'bg-slate-800 text-white' : backlogged ? 'bg-red-700 text-white' : 'bg-amber-500 text-white'}`}>
+          <div className="border border-border rounded-xl p-5 flex items-start gap-4 bg-card">
+            <span className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${inBalance ? 'bg-brand-navy text-white' : backlogged ? 'bg-brand-pink text-white' : 'bg-amber-500 text-white'}`}>
               {inBalance ? 'In Balance' : backlogged ? 'Backlogged' : 'Surplus Capacity'}
             </span>
-            <p className="text-sm text-slate-700 mt-0.5">
+            <p className="text-sm text-foreground mt-0.5">
               {inBalance
                 ? `Crews finish exactly what sales writes, ${fmt(jobsCompleted)} jobs a day. The cycle is closed and the day clears clean.`
                 : backlogged
@@ -400,7 +400,7 @@ export default function Dashboard() {
                   : `Install capacity (${installCapacity}/day) exceeds sales volume (${fmt(jobsSold)}/day). Crews have idle capacity — push harder on marketing or close rate.`}
             </p>
           </div>
-          <p className="text-xs text-slate-400 mt-3">Planning model for operations. Booking and close rates start at Floor Daddy's stated 22.5% and 38.9%. Tune every lever to your real numbers and the whole day reflows.</p>
+          <p className="text-xs text-muted-foreground mt-3">Planning model for operations. Booking and close rates start at Floor Daddy's stated 22.5% and 38.9%. Tune every lever to your real numbers and the whole day reflows.</p>
         </section>
 
       </div>
@@ -408,20 +408,20 @@ export default function Dashboard() {
       {/* Sales per day chart modal */}
       {showSalesChart && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowSalesChart(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-3xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-2xl shadow-2xl p-6 w-full max-w-3xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-lg font-black uppercase tracking-wide text-slate-900 border-l-4 border-red-700 pl-3">Sales Per Day</h2>
-                <p className="text-xs text-slate-400 mt-1 ml-4">
+                <h2 className="text-lg font-black uppercase tracking-wide text-foreground border-l-4 border-brand-pink pl-3">Sales Per Day</h2>
+                <p className="text-xs text-muted-foreground mt-1 ml-4">
                   {dateRange.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – {dateRange.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
-              <button onClick={() => setShowSalesChart(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-slate-500" />
+              <button onClick={() => setShowSalesChart(false)} className="p-2 hover:bg-secondary rounded-lg transition-colors">
+                <X className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
             {salesPerDayData.length === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-10">No data available for this range.</p>
+              <p className="text-sm text-muted-foreground text-center py-10">No data available for this range.</p>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={salesPerDayData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
@@ -441,20 +441,20 @@ export default function Dashboard() {
       {/* Appointments per day chart modal */}
       {showApptChart && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowApptChart(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-3xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-2xl shadow-2xl p-6 w-full max-w-3xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-lg font-black uppercase tracking-wide text-slate-900 border-l-4 border-red-700 pl-3">Appointments Run Per Day</h2>
-                <p className="text-xs text-slate-400 mt-1 ml-4">
+                <h2 className="text-lg font-black uppercase tracking-wide text-foreground border-l-4 border-brand-pink pl-3">Appointments Run Per Day</h2>
+                <p className="text-xs text-muted-foreground mt-1 ml-4">
                   {dateRange.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – {dateRange.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
-              <button onClick={() => setShowApptChart(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-slate-500" />
+              <button onClick={() => setShowApptChart(false)} className="p-2 hover:bg-secondary rounded-lg transition-colors">
+                <X className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
             {apptPerDayData.length === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-10">No data available for this range.</p>
+              <p className="text-sm text-muted-foreground text-center py-10">No data available for this range.</p>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={apptPerDayData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
@@ -474,20 +474,20 @@ export default function Dashboard() {
       {/* Leads per day chart modal */}
       {showLeadsChart && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setShowLeadsChart(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-3xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-card rounded-2xl shadow-2xl p-6 w-full max-w-3xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h2 className="text-lg font-black uppercase tracking-wide text-slate-900 border-l-4 border-red-700 pl-3">Leads Per Day</h2>
-                <p className="text-xs text-slate-400 mt-1 ml-4">
+                <h2 className="text-lg font-black uppercase tracking-wide text-foreground border-l-4 border-brand-pink pl-3">Leads Per Day</h2>
+                <p className="text-xs text-muted-foreground mt-1 ml-4">
                   {dateRange.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – {dateRange.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
-              <button onClick={() => setShowLeadsChart(false)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-slate-500" />
+              <button onClick={() => setShowLeadsChart(false)} className="p-2 hover:bg-secondary rounded-lg transition-colors">
+                <X className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
             {leadsPerDayData.length === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-10">No data available for this range.</p>
+              <p className="text-sm text-muted-foreground text-center py-10">No data available for this range.</p>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={leadsPerDayData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>

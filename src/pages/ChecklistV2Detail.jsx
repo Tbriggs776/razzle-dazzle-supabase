@@ -256,29 +256,29 @@ export default function ChecklistV2Detail() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <div className="bg-card border-b border-border sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center">
-              <ClipboardList className="w-5 h-5 text-indigo-600" />
+            <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+              <ClipboardList className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="font-bold text-slate-800">Checklist 2.0</p>
-              <p className="text-xs text-slate-500">Appointment Setting</p>
+              <p className="font-bold text-foreground">Checklist 2.0</p>
+              <p className="text-xs text-muted-foreground">Appointment Setting</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             {linkedAppointment ? (
               <Link to={createPageUrl('AppointmentDetail') + `?id=${linkedAppointment.id}`}>
-                <Button className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs">
+                <Button className="h-8 px-3 bg-primary text-primary-foreground hover:opacity-90 text-xs">
                   <Calendar className="w-3.5 h-3.5 mr-1.5" />
                   View Appointment
                 </Button>
@@ -293,26 +293,26 @@ export default function ChecklistV2Detail() {
               </Button>
             )}
             {saveStatus === 'saving' && (
-              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 Saving...
               </div>
             )}
             {saveStatus === 'saved' && (
-              <div className="flex items-center gap-1.5 text-xs text-green-600">
+              <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
                 <CheckCircle2 className="w-3 h-3" />
                 Saved
               </div>
             )}
             {/* Progress pill */}
-            <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-full px-3 py-1">
-              <div className="w-20 h-1.5 bg-indigo-100 rounded-full overflow-hidden">
+            <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-3 py-1">
+              <div className="w-20 h-1.5 bg-primary/20 rounded-full overflow-hidden">
                 <div
-                  className={cn("h-full transition-all duration-500", percentage === 100 ? "bg-green-500" : "bg-indigo-600")}
+                  className={cn("h-full transition-all duration-500", percentage === 100 ? "bg-green-500" : "bg-primary")}
                   style={{ width: `${percentage}%` }}
                 />
               </div>
-              <span className="text-xs font-semibold text-indigo-700">{percentage}%</span>
+              <span className="text-xs font-semibold text-primary">{percentage}%</span>
             </div>
           </div>
         </div>
@@ -330,7 +330,7 @@ export default function ChecklistV2Detail() {
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div className="space-y-2">
-              <Label>Customer Service Rep <span className="text-red-500">*</span></Label>
+              <Label>Customer Service Rep <span className="text-destructive">*</span></Label>
               <Select value={selectedCSR} onValueChange={setSelectedCSR}>
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Select CSR" />

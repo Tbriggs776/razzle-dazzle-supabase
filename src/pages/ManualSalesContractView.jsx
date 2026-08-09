@@ -85,11 +85,11 @@ export default function ManualSalesContractView() {
   });
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>;
+    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   }
 
   if (!contract) {
-    return <div className="min-h-screen flex items-center justify-center"><p className="text-slate-500">Contract not found.</p></div>;
+    return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground">Contract not found.</p></div>;
   }
 
   if (submitted || contract.status === 'signed') {
@@ -99,19 +99,19 @@ export default function ManualSalesContractView() {
 
     if (submitted) {
       return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-          <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+          <div className="bg-card rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">Contract Signed!</h1>
-            <p className="text-slate-500">Thank you! Your sales contract commitment has been signed. Our team will be in touch shortly.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Contract Signed!</h1>
+            <p className="text-muted-foreground">Thank you! Your sales contract commitment has been signed. Our team will be in touch shortly.</p>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="min-h-screen bg-slate-50 py-10 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+      <div className="min-h-screen bg-background py-10 px-4">
+        <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <CheckCircle2 className="w-5 h-5 text-green-500" />
             <span className="text-green-600 font-semibold text-sm">Signed on {signedDate}</span>
@@ -119,22 +119,22 @@ export default function ManualSalesContractView() {
           <ContractBody contract={contract} />
           <div className="space-y-4 mt-6">
             {contract.customer_printed_name && (
-              <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-                <span className="text-sm text-slate-600 w-52 flex-shrink-0">Customer Printed Name</span>
-                <span className="font-semibold text-slate-800">{contract.customer_printed_name}</span>
+              <div className="flex items-center gap-4 border-b border-border pb-3">
+                <span className="text-sm text-muted-foreground w-52 flex-shrink-0">Customer Printed Name</span>
+                <span className="font-semibold text-foreground">{contract.customer_printed_name}</span>
               </div>
             )}
             {contract.customer_signature && (
-              <div className="border-b border-slate-200 pb-4">
-                <p className="text-sm text-slate-600 mb-2">Customer Signature</p>
-                <div className="border border-slate-200 rounded-lg bg-white p-2">
+              <div className="border-b border-border pb-4">
+                <p className="text-sm text-muted-foreground mb-2">Customer Signature</p>
+                <div className="border border-border rounded-lg bg-card p-2">
                   <img src={contract.customer_signature} alt="Customer Signature" className="max-h-32 w-auto" />
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-              <span className="text-sm text-slate-600 w-40 flex-shrink-0">Date Signed</span>
-              <span className="font-semibold text-slate-800">{signedDate}</span>
+            <div className="flex items-center gap-4 border-b border-border pb-3">
+              <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Date Signed</span>
+              <span className="font-semibold text-foreground">{signedDate}</span>
             </div>
           </div>
         </div>
@@ -145,11 +145,11 @@ export default function ManualSalesContractView() {
   const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+    <div className="min-h-screen bg-background py-10 px-4">
+      <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
         <ContractBody contract={contract} />
 
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-700 mb-6 mt-6">
+        <div className="bg-secondary border border-border rounded-lg p-4 text-sm text-foreground mb-6 mt-6">
           I, the undersigned, hereby commit to the purchase of the products and services described above from Floor Daddy, LLC. I understand this is a commitment to purchase and that a formal contract will be provided upon system availability. The deposit collected is non-refundable per our standard terms and conditions.
         </div>
 
@@ -161,7 +161,7 @@ export default function ManualSalesContractView() {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <Label>Customer Signature *</Label>
-              <Button type="button" variant="ghost" size="sm" onClick={clearSignature} className="text-slate-500 h-7">
+              <Button type="button" variant="ghost" size="sm" onClick={clearSignature} className="text-muted-foreground h-7">
                 <Eraser className="w-3 h-3 mr-1" /> Clear
               </Button>
             </div>
@@ -169,22 +169,22 @@ export default function ManualSalesContractView() {
               ref={canvasRef}
               width={580}
               height={140}
-              className="w-full border-2 border-dashed border-slate-300 rounded-lg bg-white touch-none cursor-crosshair"
+              className="w-full border-2 border-dashed border-border rounded-lg bg-white touch-none cursor-crosshair"
               onMouseDown={startDraw} onMouseMove={draw} onMouseUp={endDraw} onMouseLeave={endDraw}
               onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={endDraw}
             />
-            <p className="text-xs text-slate-400">Sign above using your mouse, trackpad, or finger</p>
+            <p className="text-xs text-muted-foreground">Sign above using your mouse, trackpad, or finger</p>
           </div>
           <div className="flex items-center gap-4 pb-3">
-            <span className="text-sm text-slate-600 w-40 flex-shrink-0">Date:</span>
-            <span className="font-semibold text-slate-800">{today}</span>
+            <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Date:</span>
+            <span className="font-semibold text-foreground">{today}</span>
           </div>
         </div>
 
         <Button
           onClick={() => submitMutation.mutate()}
           disabled={submitMutation.isPending || !customerPrintedName.trim()}
-          className="w-full mt-6 h-12 bg-blue-600 hover:bg-blue-700 text-base font-bold tracking-wide"
+          className="w-full mt-6 h-12 bg-primary text-primary-foreground hover:opacity-90 text-base font-bold tracking-wide"
         >
           {submitMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
           SIGN CONTRACT
@@ -198,9 +198,9 @@ function ContractBody({ contract }) {
   return (
     <div>
       <div className="text-center mb-8">
-        <p className="font-semibold text-slate-700">ROC352055</p>
-        <h1 className="text-2xl font-bold text-blue-600 mt-2 tracking-wide">SALES CONTRACT COMMITMENT</h1>
-        <p className="text-xs text-slate-400 mt-1">FLOOR DADDY, LLC</p>
+        <p className="font-semibold text-foreground">ROC352055</p>
+        <h1 className="text-2xl font-bold text-primary mt-2 tracking-wide">SALES CONTRACT COMMITMENT</h1>
+        <p className="text-xs text-muted-foreground mt-1">FLOOR DADDY, LLC</p>
       </div>
       <div className="space-y-3">
         <Row label="Customer First Name" value={contract.customer_first_name} />
@@ -209,9 +209,9 @@ function ContractBody({ contract }) {
         {contract.customer_address && <Row label="Installation Address" value={contract.customer_address} />}
         {contract.consultant_name && <Row label="Design Consultant" value={contract.consultant_name} />}
         {contract.sale_date && <Row label="Sale Date" value={contract.sale_date} />}
-        <div className="border-b border-slate-200 pb-3">
-          <p className="text-sm text-slate-600 mb-2">Products / Services:</p>
-          <div className="border border-slate-200 rounded-lg p-3 bg-slate-50 text-slate-800 text-sm whitespace-pre-wrap min-h-20">
+        <div className="border-b border-border pb-3">
+          <p className="text-sm text-muted-foreground mb-2">Products / Services:</p>
+          <div className="border border-border rounded-lg p-3 bg-secondary text-foreground text-sm whitespace-pre-wrap min-h-20">
             {contract.products_description}
           </div>
         </div>
@@ -228,9 +228,9 @@ function ContractBody({ contract }) {
 
 function Row({ label, value }) {
   return (
-    <div className="flex items-start gap-4 border-b border-slate-200 pb-3">
-      <span className="text-sm text-slate-600 w-52 flex-shrink-0">{label}</span>
-      <span className="font-semibold text-slate-800">{value}</span>
+    <div className="flex items-start gap-4 border-b border-border pb-3">
+      <span className="text-sm text-muted-foreground w-52 flex-shrink-0">{label}</span>
+      <span className="font-semibold text-foreground">{value}</span>
     </div>
   );
 }

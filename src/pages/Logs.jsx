@@ -18,10 +18,10 @@ const logTypeIcons = {
 };
 
 const levelColors = {
-  'error': 'bg-red-100 text-red-800 border-red-200',
-  'warning': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'info': 'bg-blue-100 text-blue-800 border-blue-200',
-  'debug': 'bg-slate-100 text-slate-800 border-slate-200'
+  'error': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'warning': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'info': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  'debug': 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-500/15 dark:text-slate-300 dark:border-slate-500/25'
 };
 
 const levelIcons = {
@@ -85,11 +85,11 @@ export default function Logs() {
   // Only admins can view logs
   if (currentUser && currentUser.role !== 'admin') {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center max-w-md">
-          <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Access Denied</h2>
-          <p className="text-slate-600">Only administrators can view system logs.</p>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div className="bg-card rounded-2xl border border-border p-8 text-center max-w-md">
+          <AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-foreground mb-2">Access Denied</h2>
+          <p className="text-muted-foreground">Only administrators can view system logs.</p>
         </div>
       </div>
     );
@@ -104,17 +104,17 @@ export default function Logs() {
 
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl">
+            <div className="w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center text-xl">
               📊
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">System Logs</h1>
-              <p className="text-sm text-slate-500 mt-1">Monitor calendar sync and system events</p>
+              <h1 className="text-3xl font-bold text-foreground">System Logs</h1>
+              <p className="text-sm text-muted-foreground mt-1">Monitor calendar sync and system events</p>
             </div>
           </div>
 
@@ -124,10 +124,10 @@ export default function Logs() {
               placeholder="Search by function name..."
               value={searchFunction}
               onChange={(e) => setSearchFunction(e.target.value)}
-              className="h-10 border-slate-200 max-w-xs"
+              className="h-10 border-border w-full sm:max-w-xs"
             />
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="h-10 w-48 border-slate-200">
+              <SelectTrigger className="h-10 w-full sm:w-48 border-border">
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
@@ -139,7 +139,7 @@ export default function Logs() {
               </SelectContent>
             </Select>
             <Select value={filterLevel} onValueChange={setFilterLevel}>
-              <SelectTrigger className="h-10 w-40 border-slate-200">
+              <SelectTrigger className="h-10 w-full sm:w-40 border-border">
                 <SelectValue placeholder="Filter by level" />
               </SelectTrigger>
               <SelectContent>
@@ -157,17 +157,17 @@ export default function Logs() {
                 setFilterLevel('');
                 setSearchFunction('');
               }}
-              className="h-10 border-slate-200"
+              className="h-10 border-border"
             >
               Clear Filters
             </Button>
             <div className="flex items-center gap-2 ml-auto">
-              <span className="text-sm text-slate-600">Per page:</span>
+              <span className="text-sm text-muted-foreground">Per page:</span>
               <Select value={itemsPerPage.toString()} onValueChange={(val) => {
                 setItemsPerPage(Number(val));
                 setCurrentPage(1);
               }}>
-                <SelectTrigger className="h-10 w-24 border-slate-200">
+                <SelectTrigger className="h-10 w-24 border-border">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -182,14 +182,14 @@ export default function Logs() {
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : logs.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-            <p className="text-slate-500">No logs found matching your filters.</p>
+          <div className="bg-card rounded-2xl border border-border p-12 text-center">
+            <p className="text-muted-foreground">No logs found matching your filters.</p>
           </div>
         ) : (
           <>
@@ -213,15 +213,15 @@ export default function Logs() {
                       </div>
                       <p className="text-sm font-medium mb-2">{log.message}</p>
                       {log.error_message && (
-                        <p className="text-sm text-red-700 mb-2">Error: {log.error_message}</p>
+                        <p className="text-sm text-red-700 dark:text-red-300 mb-2">Error: {log.error_message}</p>
                       )}
                       {log.appointment_id && (
-                        <p className="text-xs text-slate-600 mb-2">Appointment: {log.appointment_id}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-2">Appointment: {log.appointment_id}</p>
                       )}
                       {log.details && (
-                        <details className="text-xs text-slate-600 cursor-pointer">
-                          <summary className="hover:text-slate-800">View Details</summary>
-                          <pre className="mt-2 p-2 bg-slate-50 rounded overflow-auto max-h-32">
+                        <details className="text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
+                          <summary className="hover:text-slate-900 dark:hover:text-white">View Details</summary>
+                          <pre className="mt-2 p-2 bg-slate-50 dark:bg-slate-900/40 rounded overflow-auto max-h-32">
                             {JSON.stringify(log.details, null, 2)}
                           </pre>
                         </details>
@@ -229,7 +229,7 @@ export default function Logs() {
                     </div>
                   </div>
                   <div className="flex-shrink-0 text-right">
-                    <p className="text-xs text-slate-600 whitespace-nowrap">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 whitespace-nowrap">
                       {format(new Date(log.created_date), 'MMM d, yyyy h:mm a')}
                     </p>
                   </div>
@@ -240,28 +240,28 @@ export default function Logs() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6 p-4 bg-white rounded-lg border border-slate-200">
-                <div className="text-sm text-slate-600">
+              <div className="flex items-center justify-between flex-wrap gap-3 mt-6 p-4 bg-card rounded-lg border border-border">
+                <div className="text-sm text-muted-foreground">
                   Showing {startIndex + 1} to {Math.min(endIndex, logs.length)} of {logs.length} logs
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="border-slate-200"
+                    className="border-border"
                   >
                     Previous
                   </Button>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 flex-wrap">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                       <Button
                         key={page}
                         variant={currentPage === page ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setCurrentPage(page)}
-                        className={currentPage === page ? 'bg-indigo-600 hover:bg-indigo-700' : 'border-slate-200'}
+                        className={currentPage === page ? 'bg-primary text-primary-foreground hover:opacity-90' : 'border-border'}
                       >
                         {page}
                       </Button>
@@ -272,7 +272,7 @@ export default function Logs() {
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="border-slate-200"
+                    className="border-border"
                   >
                     Next
                   </Button>

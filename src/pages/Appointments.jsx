@@ -346,10 +346,10 @@ export default function Appointments() {
     .sort((a, b) => b.count - a.count);
 
   return (
-    <div className="bg-slate-50">
+    <div className="bg-background text-foreground">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Stats Header */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
               <button
@@ -357,50 +357,50 @@ export default function Appointments() {
                   setSelectedStatPeriod({ type: 'today', date: today });
                   setShowStatModal(true);
                 }}
-                className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-3 border border-indigo-200 cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-500/10 dark:to-indigo-500/15 rounded-lg p-3 border border-indigo-200 dark:border-indigo-500/25 cursor-pointer hover:shadow-md transition-shadow"
               >
-                <div className="text-xs text-indigo-600 font-medium">Booked Today</div>
-                <div className="text-2xl font-bold text-indigo-900">{bookedToday}</div>
+                <div className="text-xs text-indigo-600 dark:text-indigo-300 font-medium">Booked Today</div>
+                <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-200">{bookedToday}</div>
               </button>
               <button
                 onClick={() => {
                   setSelectedStatPeriod({ type: 'yesterday', date: yesterday });
                   setShowStatModal(true);
                 }}
-                className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 border border-purple-200 cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-500/10 dark:to-purple-500/15 rounded-lg p-3 border border-purple-200 dark:border-purple-500/25 cursor-pointer hover:shadow-md transition-shadow"
               >
-                <div className="text-xs text-purple-600 font-medium">1 Day Ago</div>
-                <div className="text-2xl font-bold text-purple-900">{bookedYesterday}</div>
+                <div className="text-xs text-purple-600 dark:text-purple-300 font-medium">1 Day Ago</div>
+                <div className="text-2xl font-bold text-purple-900 dark:text-purple-200">{bookedYesterday}</div>
               </button>
               <button
                 onClick={() => {
                   setSelectedStatPeriod({ type: '2daysago', date: twoDaysAgo });
                   setShowStatModal(true);
                 }}
-                className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-3 border border-pink-200 cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-500/10 dark:to-pink-500/15 rounded-lg p-3 border border-pink-200 dark:border-pink-500/25 cursor-pointer hover:shadow-md transition-shadow"
               >
-                <div className="text-xs text-pink-600 font-medium">2 Days Ago</div>
-                <div className="text-2xl font-bold text-pink-900">{booked2DaysAgo}</div>
+                <div className="text-xs text-pink-600 dark:text-pink-300 font-medium">2 Days Ago</div>
+                <div className="text-2xl font-bold text-pink-900 dark:text-pink-200">{booked2DaysAgo}</div>
               </button>
               <button
                 onClick={() => {
                   setSelectedStatPeriod({ type: '3daysago', date: threeDaysAgo });
                   setShowStatModal(true);
                 }}
-                className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 border border-orange-200 cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-500/10 dark:to-orange-500/15 rounded-lg p-3 border border-orange-200 dark:border-orange-500/25 cursor-pointer hover:shadow-md transition-shadow"
               >
-                <div className="text-xs text-orange-600 font-medium">3 Days Ago</div>
-                <div className="text-2xl font-bold text-orange-900">{booked3DaysAgo}</div>
+                <div className="text-xs text-orange-600 dark:text-orange-300 font-medium">3 Days Ago</div>
+                <div className="text-2xl font-bold text-orange-900 dark:text-orange-200">{booked3DaysAgo}</div>
               </button>
               <button
                 onClick={() => {
                   setSelectedStatPeriod({ type: 'last7days', start: last7DaysStart, end: today });
                   setShowStatModal(true);
                 }}
-                className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200 cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/15 rounded-lg p-3 border border-blue-200 dark:border-blue-500/25 cursor-pointer hover:shadow-md transition-shadow"
               >
-                <div className="text-xs text-blue-600 font-medium">Last 7 Days</div>
-                <div className="text-2xl font-bold text-blue-900">{bookedLast7Days}</div>
+                <div className="text-xs text-blue-600 dark:text-blue-300 font-medium">Last 7 Days</div>
+                <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{bookedLast7Days}</div>
               </button>
             </div>
 
@@ -408,9 +408,9 @@ export default function Appointments() {
           {dcCounts.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {dcCounts.map(dc => (
-                <div key={dc.id} className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-1.5">
-                  <span className="text-sm font-medium text-indigo-800">{dc.name}</span>
-                  <span className="bg-indigo-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{dc.count}</span>
+                <div key={dc.id} className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-1.5">
+                  <span className="text-sm font-medium text-primary">{dc.name}</span>
+                  <span className="bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{dc.count}</span>
                 </div>
               ))}
             </div>
@@ -418,16 +418,16 @@ export default function Appointments() {
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Appointments</h1>
-              <p className="text-slate-500 mt-1">Manage appointments and schedule meetings</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Appointments</h1>
+              <p className="text-muted-foreground mt-1">Manage appointments and schedule meetings</p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 border border-slate-200 rounded-lg p-1 bg-white">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 border border-border rounded-lg p-1 bg-card">
                 <Button
                   variant={viewMode === 'cards' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('cards')}
-                  className={viewMode === 'cards' ? 'bg-indigo-600 hover:bg-indigo-700' : ''}
+                  className={viewMode === 'cards' ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </Button>
@@ -435,27 +435,27 @@ export default function Appointments() {
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('list')}
-                  className={viewMode === 'list' ? 'bg-indigo-600 hover:bg-indigo-700' : ''}
+                  className={viewMode === 'list' ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
                 >
                   <List className="w-4 h-4" />
                 </Button>
               </div>
               <Link to={createPageUrl('ScheduledThisWeek')}>
-                <Button variant="outline" className="border-slate-200">
+                <Button variant="outline" className="border-border">
                   This Week
                 </Button>
               </Link>
               <Button
                 onClick={() => setShowChecklistDialog(true)}
                 variant="outline"
-                className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                className="border-primary/30 text-primary hover:bg-primary/10"
               >
                 <ClipboardCheck className="w-5 h-5 mr-2" />
                 From Checklist
               </Button>
               <Button
                 onClick={() => setShowCreateDialog(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white h-12 px-6 rounded-xl shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-200 transition-all"
+                className="bg-primary text-primary-foreground hover:opacity-90 h-12 px-6 rounded-xl shadow-lg transition-all"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 New Appointment
@@ -467,12 +467,12 @@ export default function Appointments() {
           <div className="mt-8 space-y-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 placeholder="Search appointments..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-14 bg-slate-50 border-slate-200 rounded-xl text-base focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+                className="pl-12 h-14 bg-secondary border-border rounded-xl text-base focus:bg-card focus:border-ring focus:ring-ring transition-all"
               />
             </div>
 
@@ -485,15 +485,17 @@ export default function Appointments() {
                   setEndDate('');
                 }
               }}>
-                <TabsList className="bg-slate-100 p-1">
-                  <TabsTrigger value="all" className="rounded-lg">All Dates</TabsTrigger>
-                  <TabsTrigger value="today" className="rounded-lg">Today</TabsTrigger>
-                  <TabsTrigger value="tomorrow" className="rounded-lg">Tomorrow</TabsTrigger>
-                </TabsList>
+                <div className="overflow-x-auto">
+                  <TabsList className="bg-secondary p-1 flex-nowrap">
+                    <TabsTrigger value="all" className="rounded-lg">All Dates</TabsTrigger>
+                    <TabsTrigger value="today" className="rounded-lg">Today</TabsTrigger>
+                    <TabsTrigger value="tomorrow" className="rounded-lg">Tomorrow</TabsTrigger>
+                  </TabsList>
+                </div>
               </Tabs>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-600">Date Range:</span>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground">Date Range:</span>
                 <Input
                   type="date"
                   value={startDate}
@@ -501,10 +503,10 @@ export default function Appointments() {
                     setStartDate(e.target.value);
                     if (e.target.value) setDateFilter('all');
                   }}
-                  className="h-10 w-40"
+                  className="h-10 w-full sm:w-40"
                   placeholder="Start date"
                 />
-                <span className="text-slate-400">to</span>
+                <span className="text-muted-foreground">to</span>
                 <Input
                   type="date"
                   value={endDate}
@@ -512,7 +514,7 @@ export default function Appointments() {
                     setEndDate(e.target.value);
                     if (e.target.value) setDateFilter('all');
                   }}
-                  className="h-10 w-40"
+                  className="h-10 w-full sm:w-40"
                   placeholder="End date"
                 />
                 {(startDate || endDate) && (
@@ -523,7 +525,7 @@ export default function Appointments() {
                       setStartDate('');
                       setEndDate('');
                     }}
-                    className="text-slate-500 hover:text-slate-700"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     Clear
                   </Button>
@@ -534,9 +536,9 @@ export default function Appointments() {
             {/* Sort and Status */}
             <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-600">Sort by:</span>
+                <span className="text-sm text-muted-foreground">Sort by:</span>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="h-10 w-48 border-slate-200">
+                  <SelectTrigger className="h-10 w-48 border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -549,30 +551,34 @@ export default function Appointments() {
 
             {/* Status tabs */}
             <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-              <TabsList className="bg-slate-100 p-1">
-                <TabsTrigger value="all" className="rounded-lg">All</TabsTrigger>
-                <TabsTrigger value="Scheduled" className="rounded-lg">Scheduled</TabsTrigger>
-                <TabsTrigger value="Rescheduled" className="rounded-lg">Rescheduled</TabsTrigger>
-                <TabsTrigger value="Follow-Up" className="rounded-lg">Follow-Up</TabsTrigger>
-                <TabsTrigger value="Cancelled" className="rounded-lg">Cancelled</TabsTrigger>
-                <TabsTrigger value="Completed" className="rounded-lg">Completed</TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto">
+                <TabsList className="bg-secondary p-1 flex-nowrap">
+                  <TabsTrigger value="all" className="rounded-lg">All</TabsTrigger>
+                  <TabsTrigger value="Scheduled" className="rounded-lg">Scheduled</TabsTrigger>
+                  <TabsTrigger value="Rescheduled" className="rounded-lg">Rescheduled</TabsTrigger>
+                  <TabsTrigger value="Follow-Up" className="rounded-lg">Follow-Up</TabsTrigger>
+                  <TabsTrigger value="Cancelled" className="rounded-lg">Cancelled</TabsTrigger>
+                  <TabsTrigger value="Completed" className="rounded-lg">Completed</TabsTrigger>
+                </TabsList>
+              </div>
             </Tabs>
 
             {/* Assignment filter */}
             <Tabs value={assignmentFilter} onValueChange={setAssignmentFilter}>
-              <TabsList className="bg-slate-100 p-1">
-                <TabsTrigger value="all" className="rounded-lg">All Assignments</TabsTrigger>
-                <TabsTrigger value="assigned" className="rounded-lg">Assigned</TabsTrigger>
-                <TabsTrigger value="unassigned" className="rounded-lg">Unassigned</TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto">
+                <TabsList className="bg-secondary p-1 flex-nowrap">
+                  <TabsTrigger value="all" className="rounded-lg">All Assignments</TabsTrigger>
+                  <TabsTrigger value="assigned" className="rounded-lg">Assigned</TabsTrigger>
+                  <TabsTrigger value="unassigned" className="rounded-lg">Unassigned</TabsTrigger>
+                </TabsList>
+              </div>
             </Tabs>
 
             {/* CSR filter */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600">CSR:</span>
+              <span className="text-sm text-muted-foreground">CSR:</span>
               <Select value={csrFilter} onValueChange={setCsrFilter}>
-                <SelectTrigger className="h-10 w-56 border-slate-200">
+                <SelectTrigger className="h-10 w-full sm:w-56 border-border">
                   <SelectValue placeholder="All CSRs" />
                 </SelectTrigger>
                 <SelectContent>
@@ -592,9 +598,9 @@ export default function Appointments() {
 
             {/* DC filter */}
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600">DC:</span>
+              <span className="text-sm text-muted-foreground">DC:</span>
               <Select value={dcFilter} onValueChange={setDcFilter}>
-                <SelectTrigger className="h-10 w-56 border-slate-200">
+                <SelectTrigger className="h-10 w-full sm:w-56 border-border">
                   <SelectValue placeholder="All DCs" />
                 </SelectTrigger>
                 <SelectContent>
@@ -614,21 +620,23 @@ export default function Appointments() {
 
             {/* Sold filter */}
             <Tabs value={soldFilter} onValueChange={setSoldFilter}>
-              <TabsList className="bg-slate-100 p-1">
-                <TabsTrigger value="all" className="rounded-lg">All Appointments</TabsTrigger>
-                <TabsTrigger value="not_sold" className="rounded-lg">Not Sold</TabsTrigger>
-                <TabsTrigger value="sold" className="rounded-lg">Sold Only</TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto">
+                <TabsList className="bg-secondary p-1 flex-nowrap">
+                  <TabsTrigger value="all" className="rounded-lg">All Appointments</TabsTrigger>
+                  <TabsTrigger value="not_sold" className="rounded-lg">Not Sold</TabsTrigger>
+                  <TabsTrigger value="sold" className="rounded-lg">Sold Only</TabsTrigger>
+                </TabsList>
+              </div>
             </Tabs>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : filteredAppointments.length === 0 ? (
           <motion.div
@@ -636,13 +644,13 @@ export default function Appointments() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center mb-6">
-              <CalendarDays className="w-10 h-10 text-slate-400" />
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-secondary flex items-center justify-center mb-6">
+              <CalendarDays className="w-10 h-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               {searchQuery || statusFilter !== 'all' ? 'No appointments found' : 'No appointments yet'}
             </h3>
-            <p className="text-slate-500 mb-6">
+            <p className="text-muted-foreground mb-6">
               {searchQuery || statusFilter !== 'all'
                 ? 'Try adjusting your filters'
                 : 'Get started by creating your first appointment'}
@@ -650,7 +658,7 @@ export default function Appointments() {
             {!searchQuery && statusFilter === 'all' && (
               <Button
                 onClick={() => setShowCreateDialog(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="bg-primary text-primary-foreground hover:opacity-90"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Appointment
@@ -666,16 +674,16 @@ export default function Appointments() {
               
               return (
                 <div key={dateKey}>
-                  <div className="sticky top-0 z-10 bg-slate-50 pb-3">
-                    <h2 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
-                      <CalendarDays className="w-5 h-5 text-indigo-600" />
+                  <div className="sticky top-0 z-10 bg-background pb-3">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <CalendarDays className="w-5 h-5 text-primary" />
                       {dateLabel}
                       <Badge variant="outline" className="ml-2">
                         {groupedAppointments[dateKey].length}
                       </Badge>
                     </h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     <AnimatePresence>
                       {groupedAppointments[dateKey].map((appointment, index) => (
                         <AppointmentCard key={appointment.id} appointment={appointment} index={index} />
@@ -695,9 +703,9 @@ export default function Appointments() {
               
               return (
                 <div key={dateKey}>
-                  <div className="sticky top-0 z-10 bg-slate-50 pb-3">
-                    <h2 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
-                      <CalendarDays className="w-5 h-5 text-indigo-600" />
+                  <div className="sticky top-0 z-10 bg-background pb-3">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <CalendarDays className="w-5 h-5 text-primary" />
                       {dateLabel}
                       <Badge variant="outline" className="ml-2">
                         {groupedAppointments[dateKey].length}
@@ -716,35 +724,35 @@ export default function Appointments() {
                 >
                   <Link
                     to={createPageUrl('AppointmentDetail') + `?id=${appointment.id}`}
-                    className="block bg-white border border-slate-200 rounded-xl p-4 hover:border-indigo-300 hover:shadow-md transition-all"
+                    className="block bg-card border border-border rounded-xl p-4 hover:border-primary/40 hover:shadow-md transition-all"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-4 flex-1 min-w-0">
                         <div className="flex-shrink-0">
-                          <CalendarDays className="w-5 h-5 text-slate-400" />
+                          <CalendarDays className="w-5 h-5 text-muted-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <Badge
                               className={
                                 appointment.status === 'Scheduled' || appointment.status === 'Rescheduled'
-                                  ? 'bg-green-100 text-green-700 hover:bg-green-100'
+                                  ? 'bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/15 dark:text-green-300 dark:hover:bg-green-500/15'
                                   : appointment.status === 'Cancelled'
-                                  ? 'bg-red-100 text-red-700 hover:bg-red-100'
+                                  ? 'bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/15'
                                   : appointment.status === 'Completed' || appointment.status === 'Sold'
-                                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-100'
-                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-100'
+                                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-500/15 dark:text-blue-300 dark:hover:bg-blue-500/15'
+                                  : 'bg-secondary text-secondary-foreground hover:bg-secondary'
                               }
                             >
                               {appointment.status}
                             </Badge>
                             {appointment.rfms_sync_status === 'synced' && (
-                              <Badge className="bg-green-50 text-green-700 hover:bg-green-50 border border-green-200">
+                              <Badge className="bg-green-50 text-green-700 hover:bg-green-50 border border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25">
                                 RFMS
                               </Badge>
                             )}
                             {appointment.rfms_sync_status === 'error' && (
-                              <Badge className="bg-red-50 text-red-700 hover:bg-red-50 border border-red-200">
+                              <Badge className="bg-red-50 text-red-700 hover:bg-red-50 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
                                 RFMS Error
                               </Badge>
                             )}
@@ -752,11 +760,11 @@ export default function Appointments() {
                               const user = currentUser;
                               if (user?.role === 'admin') {
                                 return (
-                                  <Badge 
-                                    className={cn('border font-mono text-xs', 
-                                      appointment.google_calendar_event_id 
-                                        ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                                        : 'bg-slate-100 text-slate-500 border-slate-200'
+                                  <Badge
+                                    className={cn('border font-mono text-xs',
+                                      appointment.google_calendar_event_id
+                                        ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25'
+                                        : 'bg-secondary text-muted-foreground border-border'
                                     )}
                                   >
                                     GCal: {appointment.google_calendar_event_id || 'None'}
@@ -768,7 +776,7 @@ export default function Appointments() {
                             {(() => {
                               const checklist = checklists.find(c => c.appointment === appointment.id);
                               return checklist?.photos?.length > 0 ? (
-                                <Badge className="bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-50">
+                                <Badge className="bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-50 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/25">
                                   📷 {checklist.photos.length} photos
                                 </Badge>
                               ) : null;
@@ -777,13 +785,13 @@ export default function Appointments() {
                               const lead = leads.find(l => l.id === appointment.customer);
                               const name = lead ? `${lead.first_name} ${lead.last_name}` : null;
                               return name ? (
-                                <span className="text-sm text-slate-700 font-medium">{name}</span>
+                                <span className="text-sm text-foreground font-medium">{name}</span>
                               ) : null;
                             })()}
                             {(() => {
                               const lead = leads.find(l => l.id === appointment.customer);
                               return lead?.phone ? (
-                                <span className="text-sm text-slate-500">• {lead.phone}</span>
+                                <span className="text-sm text-muted-foreground">• {lead.phone}</span>
                               ) : null;
                             })()}
                             {appointment.tags && appointment.tags.length > 0 && appointment.tags.map(tagId => {
@@ -803,8 +811,8 @@ export default function Appointments() {
                                   className={cn(
                                     "text-xs font-medium",
                                     completedCount === totalCount 
-                                      ? "bg-green-50 text-green-700 border-green-200"
-                                      : "bg-amber-50 text-amber-700 border-amber-200"
+                                      ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25"
+                                      : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25"
                                   )}
                                 >
                                   <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -813,7 +821,7 @@ export default function Appointments() {
                               );
                             })()}
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                             {appointment.appointment_date && (
                               <span className="font-medium">
                                 {new Date(appointment.appointment_date + 'T00:00:00').toLocaleDateString('en-US', {
@@ -827,7 +835,7 @@ export default function Appointments() {
                               <span>• {appointment.appointment_block}</span>
                             )}
                             {appointment.created_date && (
-                              <span className="text-xs text-slate-400">
+                              <span className="text-xs text-muted-foreground">
                                 • {new Date(appointment.created_date + (appointment.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString('en-US', {
                                   month: 'short',
                                   day: 'numeric',
@@ -846,7 +854,7 @@ export default function Appointments() {
                               const hours = Math.floor(durationMs / (1000 * 60 * 60));
                               const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
                               return (
-                                <span className="text-indigo-600 font-medium">
+                                <span className="text-primary font-medium">
                                   • {hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`} on site
                                 </span>
                               );
@@ -859,25 +867,25 @@ export default function Appointments() {
                           {(() => {
                             const csr = appointment.assigned_csr ? teamMembers.find(tm => tm.id === appointment.assigned_csr) : null;
                             return csr ? (
-                              <span className="text-xs text-slate-500">Booked by: {csr.first_name} {csr.last_name}</span>
+                              <span className="text-xs text-muted-foreground">Booked by: {csr.first_name} {csr.last_name}</span>
                             ) : null;
                           })()}
                           {appointment.assigned_dc ? (
                             <>
-                              <Badge variant="outline" className="border-indigo-200 text-indigo-700">
+                              <Badge variant="outline" className="border-primary/30 text-primary">
                                 Assigned
                               </Badge>
                               {(() => {
                                 const dc = teamMembers.find(tm => tm.id === appointment.assigned_dc);
                                 return dc ? (
-                                  <span className="text-xs text-slate-600">
+                                  <span className="text-xs text-muted-foreground">
                                     {dc.first_name} {dc.last_name}
                                   </span>
                                 ) : null;
                               })()}
                             </>
                           ) : (
-                            <Badge variant="outline" className="border-slate-200 text-slate-500">
+                            <Badge variant="outline" className="border-border text-muted-foreground">
                               Unassigned
                             </Badge>
                           )}
@@ -894,8 +902,8 @@ export default function Appointments() {
                                 className={cn(
                                   "text-xs font-medium",
                                   completedCount === totalCount 
-                                    ? "bg-green-50 text-green-700 border-green-200"
-                                    : "bg-amber-50 text-amber-700 border-amber-200"
+                                    ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25"
+                                    : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25"
                                 )}
                               >
                                 <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -909,22 +917,22 @@ export default function Appointments() {
 
                     {/* Notes Section */}
                     {appointment.notes && appointment.notes.length > 0 && (
-                      <div className="border-t border-slate-200 pt-3 mt-3">
-                        <p className="text-xs font-semibold text-slate-600 mb-2">Appointment Notes</p>
+                      <div className="border-t border-border pt-3 mt-3">
+                        <p className="text-xs font-semibold text-muted-foreground mb-2">Appointment Notes</p>
                         <div className="max-h-32 overflow-y-auto space-y-2 pr-2 overscroll-contain overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
                           {[...appointment.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, idx) => (
-                            <div key={idx} className="bg-slate-50 rounded-lg p-2.5 border border-slate-200 break-words">
+                            <div key={idx} className="bg-secondary rounded-lg p-2.5 border border-border break-words">
                               <div className="flex items-start justify-between gap-2 mb-1">
-                                <p className="text-xs font-semibold text-slate-700">{note.user_name}</p>
+                                <p className="text-xs font-semibold text-foreground">{note.user_name}</p>
                                 {note.context && (
                                   <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
                                     {note.context}
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-xs text-slate-600 leading-relaxed">{note.content}</p>
+                              <p className="text-xs text-muted-foreground leading-relaxed">{note.content}</p>
                               {note.timestamp && (
-                                <p className="text-[10px] text-slate-400 mt-1">
+                                <p className="text-[10px] text-muted-foreground mt-1">
                                   {format(new Date(note.timestamp), 'MMM d, yyyy h:mm a')}
                                 </p>
                               )}
@@ -946,7 +954,7 @@ export default function Appointments() {
 
         {/* Results count */}
         {!isLoading && filteredAppointments.length > 0 && (
-          <p className="text-center text-sm text-slate-400 mt-8">
+          <p className="text-center text-sm text-muted-foreground mt-8">
             Showing {filteredAppointments.length} of {appointments.length} appointments
           </p>
         )}
@@ -965,7 +973,7 @@ export default function Appointments() {
           }}
         >
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-slate-800">New Appointment</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-foreground">New Appointment</DialogTitle>
           </DialogHeader>
           <AppointmentForm
             onSubmit={(data) => createMutation.mutate(data)}
@@ -1005,14 +1013,14 @@ export default function Appointments() {
             });
             const csrEntries = Object.entries(csrMap).sort((a, b) => b[1] - a[1]);
             return csrEntries.length > 0 ? (
-              <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-slate-200">
+              <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-border">
                 {csrEntries.map(([csrId, count]) => {
                   const csr = csrId !== '__unassigned__' ? teamMembers.find(tm => tm.id === csrId) : null;
                   const name = csr ? `${csr.first_name} ${csr.last_name}` : 'Unassigned';
                   return (
-                    <div key={csrId} className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-1.5">
-                      <span className="text-sm font-medium text-indigo-800">{name}</span>
-                      <span className="bg-indigo-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{count}</span>
+                    <div key={csrId} className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-1.5">
+                      <span className="text-sm font-medium text-primary">{name}</span>
+                      <span className="bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">{count}</span>
                     </div>
                   );
                 })}
@@ -1040,32 +1048,32 @@ export default function Appointments() {
                   <Link
                     key={apt.id}
                     to={createPageUrl('AppointmentDetail') + `?id=${apt.id}`}
-                    className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors"
+                    className="flex items-center justify-between p-4 bg-secondary hover:bg-muted rounded-lg border border-border transition-colors"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-800">
+                      <p className="text-sm font-medium text-foreground">
                         {lead?.first_name} {lead?.last_name}
                       </p>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {lead?.phone}
                       </p>
                       {lead?.email && (
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          <a href={`mailto:${lead.email}`} className="text-indigo-600 hover:underline">
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          <a href={`mailto:${lead.email}`} className="text-primary hover:underline">
                             {lead.email}
                           </a>
                         </p>
                       )}
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {format(phoenixDate, 'MMM d, yyyy h:mm a')} GMT-7
                       </p>
                     </div>
                     <div className="ml-2 flex-shrink-0 text-right">
-                     <span className="text-xs font-medium text-slate-600 block">{apt.status}</span>
+                     <span className="text-xs font-medium text-muted-foreground block">{apt.status}</span>
                      {apt.assigned_csr && (() => {
                        const csr = teamMembers.find(tm => tm.id === apt.assigned_csr);
                        return csr ? (
-                         <span className="text-xs text-indigo-600 block mt-0.5">
+                         <span className="text-xs text-primary block mt-0.5">
                            {csr.first_name} {csr.last_name}
                          </span>
                        ) : null;
@@ -1082,8 +1090,8 @@ export default function Appointments() {
       <Dialog open={showChecklistDialog} onOpenChange={setShowChecklistDialog}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-slate-800">Select Checklist</DialogTitle>
-            <p className="text-slate-500">Choose a completed checklist to convert to an appointment</p>
+            <DialogTitle className="text-2xl font-bold text-foreground">Select Checklist</DialogTitle>
+            <p className="text-muted-foreground">Choose a completed checklist to convert to an appointment</p>
           </DialogHeader>
           <div className="space-y-3 mt-4">
             {checklists
@@ -1104,19 +1112,19 @@ export default function Appointments() {
                   <Link
                     key={checklist.id}
                     to={createPageUrl('ChecklistDetail') + `?id=${checklist.id}`}
-                    className="block p-4 border border-slate-200 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-all"
+                    className="block p-4 border border-border rounded-lg hover:border-primary/40 hover:bg-primary/5 transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-slate-800">{customerName}</h3>
+                        <h3 className="font-semibold text-foreground">{customerName}</h3>
                         {checklist.customer_phone && (
-                          <p className="text-sm text-slate-500 mt-1">{checklist.customer_phone}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{checklist.customer_phone}</p>
                         )}
                         {csr && (
-                          <p className="text-xs text-indigo-600 mt-1">Booked by: {csr.first_name} {csr.last_name}</p>
+                          <p className="text-xs text-primary mt-1">Booked by: {csr.first_name} {csr.last_name}</p>
                         )}
                       </div>
-                      <ClipboardCheck className="w-5 h-5 text-indigo-600" />
+                      <ClipboardCheck className="w-5 h-5 text-primary" />
                     </div>
                   </Link>
                 );

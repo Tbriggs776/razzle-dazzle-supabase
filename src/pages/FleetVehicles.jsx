@@ -10,9 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Car, Loader2, Pencil, Trash2 } from 'lucide-react';
 
 const statusColors = {
-  active: 'bg-green-100 text-green-800 border-green-200',
-  inactive: 'bg-slate-100 text-slate-700 border-slate-200',
-  maintenance: 'bg-orange-100 text-orange-800 border-orange-200'
+  active: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
+  inactive: 'bg-secondary text-secondary-foreground border-border',
+  maintenance: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25'
 };
 
 const EMPTY = { make: '', model: '', year: '', vin: '', license_plate: '', status: 'active', notes: '' };
@@ -56,48 +56,48 @@ export default function FleetVehicles() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="min-h-screen bg-background">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Vehicles</h1>
-            <p className="text-slate-500 mt-1">Master list of all fleet vehicles</p>
+            <h1 className="text-3xl font-bold text-foreground">Vehicles</h1>
+            <p className="text-muted-foreground mt-1">Master list of all fleet vehicles</p>
           </div>
-          <Button onClick={openNew} className="bg-indigo-600 hover:bg-indigo-700 self-start md:self-auto">
+          <Button onClick={openNew} className="bg-primary text-primary-foreground hover:opacity-90 self-start md:self-auto">
             <Plus className="w-4 h-4 mr-2" /> Add Vehicle
           </Button>
         </div>
-        <div className="max-w-5xl mx-auto px-6 pb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Search vehicles..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
-          <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 text-indigo-600 animate-spin" /></div>
+          <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 text-primary animate-spin" /></div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
-            <Car className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500">No vehicles found</p>
+          <div className="text-center py-12 bg-card rounded-2xl border border-border">
+            <Car className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">No vehicles found</p>
           </div>
         ) : (
           <div className="grid gap-3">
             {filtered.map(v => (
-              <div key={v.id} className="bg-white rounded-xl border border-slate-100 p-4 flex items-center gap-4 hover:shadow-md transition-all">
-                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                  <Car className="w-5 h-5 text-blue-600" />
+              <div key={v.id} className="bg-card rounded-xl border border-border p-4 flex items-center gap-4 hover:shadow-md transition-all">
+                <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center flex-shrink-0">
+                  <Car className="w-5 h-5 text-brand-blue" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-800">{v.year} {v.make} {v.model}</p>
-                  <p className="text-sm text-slate-500">{v.license_plate && `Plate: ${v.license_plate}`}{v.vin && ` · VIN: ${v.vin}`}</p>
+                  <p className="font-semibold text-foreground">{v.year} {v.make} {v.model}</p>
+                  <p className="text-sm text-muted-foreground">{v.license_plate && `Plate: ${v.license_plate}`}{v.vin && ` · VIN: ${v.vin}`}</p>
                 </div>
                 <Badge className={`border ${statusColors[v.status] || statusColors.active}`}>{v.status || 'active'}</Badge>
                 <div className="flex gap-1">
                   <Button size="sm" variant="ghost" onClick={() => openEdit(v)}><Pencil className="w-4 h-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleDelete(v.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleDelete(v.id)} className="text-destructive hover:opacity-80"><Trash2 className="w-4 h-4" /></Button>
                 </div>
               </div>
             ))}
@@ -132,7 +132,7 @@ export default function FleetVehicles() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground hover:opacity-90">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}{editId ? 'Save' : 'Add Vehicle'}
             </Button>
           </DialogFooter>

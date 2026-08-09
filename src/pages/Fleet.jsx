@@ -30,7 +30,7 @@ export default function Fleet() {
       count: vehicles.length,
       sub: `${vehicles.filter(v => v.status === 'active').length} active`,
       href: 'FleetVehicles',
-      color: 'from-blue-500 to-blue-600'
+      color: 'bg-brand-blue'
     },
     {
       title: 'Drivers',
@@ -38,7 +38,7 @@ export default function Fleet() {
       count: drivers.length,
       sub: `${drivers.filter(d => d.status === 'active').length} active`,
       href: 'FleetDrivers',
-      color: 'from-indigo-500 to-indigo-600'
+      color: 'bg-primary'
     },
     {
       title: 'Maintenance',
@@ -46,39 +46,39 @@ export default function Fleet() {
       count: upcomingMaintenance.length,
       sub: 'upcoming / overdue',
       href: 'FleetMaintenance',
-      color: 'from-orange-500 to-orange-600'
+      color: 'bg-brand-pink'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-background">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-              <Truck className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+              <Truck className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Fleet Management</h1>
-              <p className="text-slate-500 mt-0.5">Manage your vehicles, drivers, and maintenance</p>
+              <h1 className="text-3xl font-bold text-foreground">Fleet Management</h1>
+              <p className="text-muted-foreground mt-0.5">Manage your vehicles, drivers, and maintenance</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {cards.map(card => {
             const Icon = card.icon;
             return (
               <Link key={card.title} to={createPageUrl(card.href)} className="block group">
-                <div className="bg-white rounded-2xl border border-slate-100 p-6 hover:shadow-lg hover:border-indigo-200 transition-all">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center mb-4`}>
+                <div className="bg-card rounded-2xl border border-border p-6 hover:shadow-lg hover:border-primary/30 transition-all">
+                  <div className={`w-12 h-12 rounded-xl ${card.color} flex items-center justify-center mb-4`}>
                     <Icon className="w-6 h-6 text-white" />
                   </div>
-                  <p className="text-3xl font-bold text-slate-800">{card.count}</p>
-                  <p className="text-lg font-semibold text-slate-700 mt-1">{card.title}</p>
-                  <p className="text-sm text-slate-500 mt-0.5">{card.sub}</p>
+                  <p className="text-3xl font-bold text-foreground">{card.count}</p>
+                  <p className="text-lg font-semibold text-foreground mt-1">{card.title}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{card.sub}</p>
                 </div>
               </Link>
             );

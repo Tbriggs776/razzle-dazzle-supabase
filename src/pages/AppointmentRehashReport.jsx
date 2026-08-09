@@ -22,19 +22,19 @@ const PRODUCT_TYPES = {
 const CHART_COLORS = ['#6366f1','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316','#84cc16'];
 
 const STATUS_COLORS = {
-  'Sold': 'bg-green-100 text-green-800 border-green-200',
-  'Lost': 'bg-red-100 text-red-800 border-red-200',
-  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200',
-  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200',
-  'Follow-Up': 'bg-purple-100 text-purple-800 border-purple-200',
-  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Rescheduled': 'bg-cyan-100 text-cyan-800 border-cyan-200',
-  'Cancelled': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Completed': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-  'In Route': 'bg-sky-100 text-sky-800 border-sky-200',
-  'On Site': 'bg-teal-100 text-teal-800 border-teal-200',
-  'Awaiting Assignment': 'bg-gray-100 text-gray-800 border-gray-200',
+  'Sold': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
+  'Lost': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/25',
+  'Follow-Up': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
+  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  'Rescheduled': 'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/25',
+  'Cancelled': 'bg-secondary text-secondary-foreground border-border',
+  'Completed': 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/25',
+  'In Route': 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/25',
+  'On Site': 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-500/15 dark:text-teal-300 dark:border-teal-500/25',
+  'Awaiting Assignment': 'bg-secondary text-secondary-foreground border-border',
 };
 
 const REHASH_STATUSES = ['Lost', 'Pitch and Miss', 'One-Leg', 'Credit Decline', 'Follow-Up', 'Cancelled', 'Rescheduled'];
@@ -175,7 +175,7 @@ export default function AppointmentRehashReport() {
   };
 
   const SortIcon = ({ col }) => {
-    if (sortCol !== col) return <span className="ml-1 text-slate-300 text-xs">↕</span>;
+    if (sortCol !== col) return <span className="ml-1 text-muted-foreground text-xs">↕</span>;
     return <span className="ml-1 text-xs">{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
@@ -255,18 +255,18 @@ export default function AppointmentRehashReport() {
   }, [rows]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Sales Manager Dashboard</h1>
-              <p className="text-slate-500 mt-1">Review past appointments to identify re-hash opportunities</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Sales Manager Dashboard</h1>
+              <p className="text-muted-foreground mt-1">Review past appointments to identify re-hash opportunities</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-44">
+                <SelectTrigger className="w-full sm:w-44">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -282,10 +282,10 @@ export default function AppointmentRehashReport() {
                 </SelectContent>
               </Select>
               {dateRange === 'custom' && (
-                <div className="flex items-center gap-2">
-                  <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} className="h-9 px-3 border border-slate-200 rounded-md text-sm" />
-                  <span className="text-slate-400 text-sm">to</span>
-                  <input type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} className="h-9 px-3 border border-slate-200 rounded-md text-sm" />
+                <div className="flex flex-wrap items-center gap-2">
+                  <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)} className="h-9 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <span className="text-muted-foreground text-sm">to</span>
+                  <input type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)} className="h-9 px-3 bg-background border border-border rounded-md text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
               )}
             </div>
@@ -293,10 +293,10 @@ export default function AppointmentRehashReport() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : (
           <>
@@ -304,8 +304,8 @@ export default function AppointmentRehashReport() {
             <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-6">
               <Card>
                 <CardContent className="pt-5">
-                  <p className="text-2xl font-bold text-slate-800">{rows.length}</p>
-                  <p className="text-xs text-slate-500 mt-1">Total Appointments</p>
+                  <p className="text-2xl font-bold text-foreground">{rows.length}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Total Appointments</p>
                 </CardContent>
               </Card>
             </div>
@@ -317,7 +317,7 @@ export default function AppointmentRehashReport() {
                   <button
                     key={status}
                     onClick={() => setStatusFilter(prev => prev === status ? 'all' : status)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all ${STATUS_COLORS[status] || 'bg-slate-100 text-slate-700 border-slate-200'} ${statusFilter === status ? 'ring-2 ring-offset-1 ring-indigo-400' : 'hover:opacity-80'}`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all ${STATUS_COLORS[status] || 'bg-secondary text-secondary-foreground border-border'} ${statusFilter === status ? 'ring-2 ring-offset-1 ring-ring ring-offset-background' : 'hover:opacity-80'}`}
                   >
                     {status} <span className="font-bold">{count}</span>
                   </button>
@@ -367,17 +367,17 @@ export default function AppointmentRehashReport() {
                 {/* Filter row */}
                 <div className="flex flex-wrap gap-3 mt-3">
                   <div className="relative flex-1 min-w-[200px]">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                       type="text"
                       placeholder="Search customer, phone, email, DC..."
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
-                      className="w-full h-9 pl-9 pr-3 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                      className="w-full h-9 pl-9 pr-3 text-sm bg-background text-foreground border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-44 h-9 text-sm">
+                    <SelectTrigger className="w-full sm:w-44 h-9 text-sm">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -395,7 +395,7 @@ export default function AppointmentRehashReport() {
                     </SelectContent>
                   </Select>
                   <Select value={dcFilter} onValueChange={setDcFilter}>
-                    <SelectTrigger className="w-44 h-9 text-sm">
+                    <SelectTrigger className="w-full sm:w-44 h-9 text-sm">
                       <SelectValue placeholder="Design Consultant" />
                     </SelectTrigger>
                     <SelectContent>
@@ -412,7 +412,7 @@ export default function AppointmentRehashReport() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
+                      <tr className="border-b border-border bg-muted text-xs text-muted-foreground uppercase tracking-wider">
                         {[
                           ['appointment_date', 'Appt Date'],
                           ['customerName', 'Customer'],
@@ -422,7 +422,7 @@ export default function AppointmentRehashReport() {
                         ].map(([col, label]) => (
                           <th
                             key={col}
-                            className="px-4 py-3 text-left font-medium cursor-pointer select-none hover:text-slate-700"
+                            className="px-4 py-3 text-left font-medium cursor-pointer select-none hover:text-foreground"
                             onClick={() => handleSort(col)}
                           >
                             {label}<SortIcon col={col} />
@@ -433,49 +433,49 @@ export default function AppointmentRehashReport() {
                         <th className="px-4 py-3"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-border">
                       {rows.length === 0 && (
                         <tr>
-                          <td colSpan={8} className="text-center text-slate-400 py-12">No appointments found for current filters</td>
+                          <td colSpan={8} className="text-center text-muted-foreground py-12">No appointments found for current filters</td>
                         </tr>
                       )}
                       {pagedRows.map(row => {
                         const lastNote = row.notes.length > 0 ? row.notes[row.notes.length - 1] : null;
                         return (
-                          <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-4 py-3 whitespace-nowrap text-slate-600">
+                          <tr key={row.id} className="hover:bg-muted transition-colors">
+                            <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
                               <div>{row.appointment_date ? format(new Date(row.appointment_date + 'T00:00:00'), 'MMM d, yyyy') : '—'}</div>
-                              {row.appointment_block && <div className="text-xs text-slate-400">{row.appointment_block}</div>}
+                              {row.appointment_block && <div className="text-xs text-muted-foreground">{row.appointment_block}</div>}
                             </td>
                             <td className="px-4 py-3">
-                              <p className="font-medium text-slate-800">{row.customerName}</p>
-                              {row.address && <p className="text-xs text-slate-400 mt-0.5 max-w-[200px] truncate">{row.address}</p>}
+                              <p className="font-medium text-foreground">{row.customerName}</p>
+                              {row.address && <p className="text-xs text-muted-foreground mt-0.5 max-w-[200px] truncate">{row.address}</p>}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
-                              <Badge variant="outline" className={`text-xs border ${STATUS_COLORS[row.status] || 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                              <Badge variant="outline" className={`text-xs border ${STATUS_COLORS[row.status] || 'bg-secondary text-secondary-foreground border-border'}`}>
                                 {row.status}
                               </Badge>
                               {row.analyzedReason && (
-                                <p className="text-xs text-indigo-500 mt-1">{row.analyzedReason}</p>
+                                <p className="text-xs text-primary mt-1">{row.analyzedReason}</p>
                               )}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
                               {row.saleAmount != null ? (
-                                <span className="font-semibold text-green-600">${row.saleAmount.toLocaleString()}</span>
+                                <span className="font-semibold text-green-600 dark:text-green-400">${row.saleAmount.toLocaleString()}</span>
                               ) : (
-                                <span className="text-xs text-amber-600 font-medium bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">No amount</span>
+                                <span className="text-xs text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-500/25">No amount</span>
                               )}
                             </td>
-                            <td className="px-4 py-3 whitespace-nowrap text-slate-600 text-xs">{row.dcName}</td>
+                            <td className="px-4 py-3 whitespace-nowrap text-muted-foreground text-xs">{row.dcName}</td>
                             <td className="px-4 py-3">
                               <div className="flex flex-col gap-1">
                                 {row.phone && (
-                                  <a href={`tel:${row.phone}`} className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-600">
+                                  <a href={`tel:${row.phone}`} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">
                                     <Phone className="w-3 h-3" />{row.phone}
                                   </a>
                                 )}
                                 {row.email && (
-                                  <a href={`mailto:${row.email}`} className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-600 truncate max-w-[160px]">
+                                  <a href={`mailto:${row.email}`} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary truncate max-w-[160px]">
                                     <Mail className="w-3 h-3" />{row.email}
                                   </a>
                                 )}
@@ -484,17 +484,17 @@ export default function AppointmentRehashReport() {
                             <td className="px-4 py-3 max-w-[200px]">
                               {lastNote ? (
                                 <div>
-                                  <p className="text-xs text-slate-600 line-clamp-2">{lastNote.content}</p>
-                                  <p className="text-xs text-slate-400 mt-0.5">{lastNote.user_name}</p>
+                                  <p className="text-xs text-muted-foreground line-clamp-2">{lastNote.content}</p>
+                                  <p className="text-xs text-muted-foreground mt-0.5">{lastNote.user_name}</p>
                                 </div>
                               ) : (
-                                <span className="text-xs text-slate-300">—</span>
+                                <span className="text-xs text-muted-foreground">—</span>
                               )}
                             </td>
                             <td className="px-4 py-3">
                               <Link
                                 to={createPageUrl('AppointmentDetail') + '?id=' + row.id}
-                                className="text-slate-400 hover:text-indigo-600 transition-colors"
+                                className="text-muted-foreground hover:text-primary transition-colors"
                               >
                                 <ExternalLink className="w-4 h-4" />
                               </Link>
@@ -511,13 +511,13 @@ export default function AppointmentRehashReport() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-4">
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, rows.length)} of {rows.length}
                 </p>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={() => setPage(1)} disabled={page === 1}>«</Button>
                   <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>‹ Prev</Button>
-                  <span className="text-sm text-slate-600 px-2">Page {page} of {totalPages}</span>
+                  <span className="text-sm text-muted-foreground px-2">Page {page} of {totalPages}</span>
                   <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next ›</Button>
                   <Button variant="outline" size="sm" onClick={() => setPage(totalPages)} disabled={page === totalPages}>»</Button>
                 </div>

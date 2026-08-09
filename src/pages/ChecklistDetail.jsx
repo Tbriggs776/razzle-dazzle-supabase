@@ -369,17 +369,17 @@ export default function ChecklistDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!checklist) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Checklist not found</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Checklist not found</h2>
           <Link to={createPageUrl('AppointmentSettingChecklists')}>
             <Button variant="outline">Back to Checklists</Button>
           </Link>
@@ -393,10 +393,10 @@ export default function ChecklistDetail() {
     : 'Unnamed Customer';
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-4">
             <Link to={createPageUrl('AppointmentSettingChecklists')}>
               <Button variant="ghost" size="icon" className="rounded-xl">
@@ -404,14 +404,14 @@ export default function ChecklistDetail() {
               </Button>
             </Link>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-slate-800">{customerName}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{customerName}</h1>
               <div className="flex items-center gap-4 mt-1 flex-wrap">
-                <p className="text-sm text-slate-500">Appointment Setting Checklist</p>
+                <p className="text-sm text-muted-foreground">Appointment Setting Checklist</p>
                 {assignedCSR && (
-                  <p className="text-sm text-indigo-600 font-medium">Booked by: {assignedCSR.first_name} {assignedCSR.last_name}</p>
+                  <p className="text-sm text-primary font-medium">Booked by: {assignedCSR.first_name} {assignedCSR.last_name}</p>
                 )}
                 {checklist.created_date && (
-                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Clock className="w-3.5 h-3.5" />
                     <span>
                       Created {new Date(checklist.created_date + (checklist.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', {
@@ -426,7 +426,7 @@ export default function ChecklistDetail() {
                   </div>
                 )}
                 {getTimeToSchedule() && (
-                  <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs font-medium">
+                  <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 border border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25 rounded-lg text-xs font-medium">
                     ⚡ Converted in {getTimeToSchedule()}
                   </div>
                 )}
@@ -437,15 +437,15 @@ export default function ChecklistDetail() {
       </div>
 
       {/* Sticky Action Bar */}
-      <div className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+      <div className="sticky top-0 z-30 bg-card border-b border-border shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-600">{customerName}</span>
+            <span className="text-sm text-muted-foreground">{customerName}</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             {appointment && !['Lead', 'Cancelled'].includes(appointment?.status) && (
               <Link to={createPageUrl('AppointmentDetail') + `?id=${appointment.id}`}>
-                <Button variant="outline" className="h-10 px-5 border-indigo-200 text-indigo-600 hover:bg-indigo-50">
+                <Button variant="outline" className="h-10 px-5 border-primary/30 text-primary hover:bg-primary/10">
                   <Calendar className="w-4 h-4 mr-2" />
                   View Appointment
                 </Button>
@@ -456,8 +456,8 @@ export default function ChecklistDetail() {
                       onClick={() => setShowScheduleDialog(true)}
                       disabled={!isChecklistComplete()}
                       className={isChecklistComplete() 
-                        ? "h-10 px-5 bg-indigo-600 hover:bg-indigo-700 text-white" 
-                        : "h-10 px-5 bg-slate-200 text-slate-400 cursor-not-allowed"
+                        ? "h-10 px-5 bg-primary text-primary-foreground hover:opacity-90"
+                        : "h-10 px-5 bg-secondary text-muted-foreground cursor-not-allowed"
                       }
                     >
                       <Calendar className="w-4 h-4 mr-2" />
@@ -468,9 +468,9 @@ export default function ChecklistDetail() {
               onClick={handleSave}
               disabled={saveStatus !== 'idle'}
               variant="outline"
-              className={saveStatus === 'saved' 
-                ? "h-10 px-5 border-green-600 bg-green-50 text-green-600"
-                : "h-10 px-5 border-slate-200 hover:bg-slate-50"
+              className={saveStatus === 'saved'
+                ? "h-10 px-5 border-green-600 bg-green-50 text-green-600 dark:border-green-500/30 dark:bg-green-500/15 dark:text-green-300"
+                : "h-10 px-5 border-border hover:bg-secondary"
               }
             >
               {saveStatus === 'saving' ? (
@@ -494,7 +494,7 @@ export default function ChecklistDetail() {
               variant="ghost"
               size="icon"
               onClick={() => setShowDeleteDialog(true)}
-              className="h-10 w-10 text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="h-10 w-10 text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="w-5 h-5" />
             </Button>
@@ -503,7 +503,7 @@ export default function ChecklistDetail() {
       </div>
 
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ChecklistPanel 
           checklistId={id}
           onChecklistUpdate={() => {
@@ -561,9 +561,9 @@ export default function ChecklistDetail() {
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="csr" className="text-slate-700">Customer Service Rep <span className="text-red-500">*</span></Label>
+              <Label htmlFor="csr" className="text-foreground">Customer Service Rep <span className="text-destructive">*</span></Label>
               <Select value={selectedCSR} onValueChange={setSelectedCSR}>
-                <SelectTrigger className="h-12 border-slate-200">
+                <SelectTrigger className="h-12 border-border">
                   <SelectValue placeholder="Select CSR" />
                 </SelectTrigger>
                 <SelectContent>
@@ -576,9 +576,9 @@ export default function ChecklistDetail() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="dc" className="text-slate-700">Design Consultant (Optional)</Label>
+              <Label htmlFor="dc" className="text-foreground">Design Consultant (Optional)</Label>
               <Select value={selectedDC} onValueChange={setSelectedDC}>
-                <SelectTrigger className="h-12 border-slate-200">
+                <SelectTrigger className="h-12 border-border">
                   <SelectValue placeholder="Select Design Consultant" />
                 </SelectTrigger>
                 <SelectContent>
@@ -591,7 +591,7 @@ export default function ChecklistDetail() {
                 </SelectContent>
               </Select>
               {!selectedDC && (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   If left unassigned, the appointment status will be "Awaiting Assignment"
                 </p>
               )}
@@ -608,7 +608,7 @@ export default function ChecklistDetail() {
             <Button
               onClick={() => convertToAppointmentMutation.mutate()}
               disabled={convertToAppointmentMutation.isPending || !selectedCSR}
-              className={!selectedCSR ? "bg-slate-300 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}
+              className={!selectedCSR ? "bg-secondary text-muted-foreground cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}
             >
               {convertToAppointmentMutation.isPending ? (
                 <>

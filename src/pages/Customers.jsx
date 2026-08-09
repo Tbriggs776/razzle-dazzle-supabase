@@ -38,8 +38,8 @@ export default function Customers() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -48,12 +48,12 @@ export default function Customers() {
         >
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Customers</h1>
-              <p className="text-slate-500 mt-1">Manage your customers</p>
+              <h1 className="text-3xl font-bold text-foreground">Customers</h1>
+              <p className="text-muted-foreground mt-1">Manage your customers</p>
             </div>
             <Button
               onClick={() => setShowCreateDialog(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 h-11 px-5"
+              className="bg-primary text-primary-foreground hover:opacity-90 h-11 px-5"
             >
               <Plus className="w-5 h-5 mr-2" />
               Add Customer
@@ -62,12 +62,12 @@ export default function Customers() {
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               placeholder="Search customers by name, email, or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 border-slate-200"
+              className="pl-10 h-12 border-border"
             />
           </div>
         </motion.div>
@@ -75,7 +75,7 @@ export default function Customers() {
         {/* Customers Grid */}
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : filteredCustomers.length === 0 ? (
           <motion.div
@@ -83,13 +83,13 @@ export default function Customers() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center mb-6">
-              <Users className="w-10 h-10 text-slate-400" />
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-secondary flex items-center justify-center mb-6">
+              <Users className="w-10 h-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-800 mb-2">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
               {searchQuery ? 'No customers found' : 'No customers yet'}
             </h3>
-            <p className="text-slate-500 mb-6 max-w-md mx-auto">
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
               {searchQuery 
                 ? 'Try adjusting your search terms'
                 : 'Customers will appear here when appointments are marked as sold'}
@@ -100,7 +100,7 @@ export default function Customers() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-sm text-slate-500 mb-4"
+              className="text-sm text-muted-foreground mb-4"
             >
               Showing {filteredCustomers.length} customer{filteredCustomers.length !== 1 ? 's' : ''}
             </motion.p>
@@ -108,7 +108,7 @@ export default function Customers() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             >
               {filteredCustomers.map((customer, index) => (
                 <motion.div
@@ -129,7 +129,7 @@ export default function Customers() {
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-slate-800">Add New Customer</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-foreground">Add New Customer</DialogTitle>
           </DialogHeader>
           <CustomerForm
             onSubmit={(data) => createMutation.mutate(data)}

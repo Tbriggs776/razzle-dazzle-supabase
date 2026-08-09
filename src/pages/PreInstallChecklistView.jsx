@@ -123,13 +123,13 @@ export default function PreInstallChecklistView() {
 
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center">
-      <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <Loader2 className="w-8 h-8 animate-spin text-primary" />
     </div>
   );
 
   if (!checklist) return (
     <div className="min-h-screen flex items-center justify-center">
-      <p className="text-slate-500">Pre-installation checklist not found.</p>
+      <p className="text-muted-foreground">Pre-installation checklist not found.</p>
     </div>
   );
 
@@ -137,75 +137,75 @@ export default function PreInstallChecklistView() {
     const signedDate = checklist.signed_at ? format(new Date(checklist.signed_at), 'MMMM d, yyyy') : format(new Date(), 'MMMM d, yyyy');
     const initials = `${checklist.customer_first_name?.[0] || ''}${checklist.customer_last_name?.[0] || ''}`.toUpperCase();
     return (
-      <div className="min-h-screen bg-slate-50 py-10 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-          <div className="flex items-center gap-3 mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+      <div className="min-h-screen bg-background py-10 px-4">
+        <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
+          <div className="flex items-center gap-3 mb-6 p-4 bg-green-50 border border-green-200 rounded-xl dark:bg-green-500/10 dark:border-green-500/25">
             <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
             <div>
-              <p className="font-semibold text-green-800">Pre-Installation Checklist Signed</p>
-              <p className="text-sm text-green-600">Signed on {signedDate}</p>
+              <p className="font-semibold text-green-800 dark:text-green-300">Pre-Installation Checklist Signed</p>
+              <p className="text-sm text-green-600 dark:text-green-400">Signed on {signedDate}</p>
             </div>
           </div>
 
           <div className="text-center mb-6">
-            <p className="font-bold text-slate-700">FLOOR DADDY, LLC</p>
-            <p className="font-semibold text-slate-500 text-xs">ROC352055</p>
-            <h1 className="text-2xl font-bold text-blue-600 mt-2 tracking-wide">PRE-INSTALLATION CHECKLIST</h1>
+            <p className="font-bold text-foreground">FLOOR DADDY, LLC</p>
+            <p className="font-semibold text-muted-foreground text-xs">ROC352055</p>
+            <h1 className="text-2xl font-bold text-primary mt-2 tracking-wide">PRE-INSTALLATION CHECKLIST</h1>
           </div>
 
           <div className="space-y-3 mb-6 text-sm">
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-2">
-              <span className="font-bold text-slate-600 w-40 flex-shrink-0">Customer Name:</span>
-              <span className="text-slate-800">{checklist.customer_first_name} {checklist.customer_last_name}</span>
+            <div className="flex items-center gap-4 border-b border-border pb-2">
+              <span className="font-bold text-muted-foreground w-40 flex-shrink-0">Customer Name:</span>
+              <span className="text-foreground">{checklist.customer_first_name} {checklist.customer_last_name}</span>
             </div>
             {checklist.product_info && (
-              <div className="flex items-center gap-4 border-b border-slate-200 pb-2">
-                <span className="font-bold text-slate-600 w-40 flex-shrink-0">Product / Style / Color:</span>
-                <span className="text-slate-800">{checklist.product_info}</span>
+              <div className="flex items-center gap-4 border-b border-border pb-2">
+                <span className="font-bold text-muted-foreground w-40 flex-shrink-0">Product / Style / Color:</span>
+                <span className="text-foreground">{checklist.product_info}</span>
               </div>
             )}
             {checklist.job_number && (
-              <div className="flex items-center gap-4 border-b border-slate-200 pb-2">
-                <span className="font-bold text-slate-600 w-40 flex-shrink-0">Job Number:</span>
-                <span className="text-slate-800">{checklist.job_number}</span>
+              <div className="flex items-center gap-4 border-b border-border pb-2">
+                <span className="font-bold text-muted-foreground w-40 flex-shrink-0">Job Number:</span>
+                <span className="text-foreground">{checklist.job_number}</span>
               </div>
             )}
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-2">
-              <span className="font-bold text-slate-600 w-40 flex-shrink-0">Date:</span>
-              <span className="text-slate-800">{signedDate}</span>
+            <div className="flex items-center gap-4 border-b border-border pb-2">
+              <span className="font-bold text-muted-foreground w-40 flex-shrink-0">Date:</span>
+              <span className="text-foreground">{signedDate}</span>
             </div>
           </div>
 
           <div className="space-y-4 mb-6">
             {CHECKLIST_ITEMS.map((item) => (
               <div key={item.id} className="flex gap-3">
-                <span className="flex-shrink-0 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5 h-fit mt-0.5 min-w-[32px] text-center">
+                <span className="flex-shrink-0 text-xs font-bold text-primary bg-primary/10 border border-primary/20 rounded px-1.5 py-0.5 h-fit mt-0.5 min-w-[32px] text-center">
                   {initials}
                 </span>
-                <div className="flex-1 text-sm leading-relaxed text-slate-700">
+                <div className="flex-1 text-sm leading-relaxed text-foreground">
                   <span className="font-bold">{item.title}</span> — {item.text}
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="border-t-2 border-slate-200 pt-6 space-y-4">
-            <p className="text-sm text-slate-600 font-medium">By signing below, I acknowledge that I have read and agree to all items above.</p>
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-              <span className="text-sm text-slate-600 w-40 flex-shrink-0">Customer Printed Name:</span>
-              <span className="font-semibold text-slate-800">{checklist.customer_printed_name}</span>
+          <div className="border-t-2 border-border pt-6 space-y-4">
+            <p className="text-sm text-muted-foreground font-medium">By signing below, I acknowledge that I have read and agree to all items above.</p>
+            <div className="flex items-center gap-4 border-b border-border pb-3">
+              <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Customer Printed Name:</span>
+              <span className="font-semibold text-foreground">{checklist.customer_printed_name}</span>
             </div>
             {checklist.signature_url && (
               <div>
-                <p className="text-sm text-slate-600 mb-2">Customer Signature:</p>
-                <div className="border border-slate-200 rounded-lg p-2 bg-white inline-block">
+                <p className="text-sm text-muted-foreground mb-2">Customer Signature:</p>
+                <div className="border border-border rounded-lg p-2 bg-card inline-block">
                   <img src={checklist.signature_url} alt="Signature" className="max-h-24" />
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-              <span className="text-sm text-slate-600 w-40 flex-shrink-0">Customer Email:</span>
-              <span className="font-semibold text-slate-800">{checklist.customer_email}</span>
+            <div className="flex items-center gap-4 border-b border-border pb-3">
+              <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Customer Email:</span>
+              <span className="font-semibold text-foreground">{checklist.customer_email}</span>
             </div>
           </div>
         </div>
@@ -217,46 +217,46 @@ export default function PreInstallChecklistView() {
   const initials = `${checklist.customer_first_name?.[0] || ''}${checklist.customer_last_name?.[0] || ''}`.toUpperCase();
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+    <div className="min-h-screen bg-background py-10 px-4">
+      <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
         <div className="text-center mb-6">
-          <p className="font-semibold text-slate-700">ROC352055</p>
-          <h1 className="text-2xl font-bold text-blue-600 mt-2 tracking-wide">PRE-INSTALLATION CHECKLIST</h1>
+          <p className="font-semibold text-foreground">ROC352055</p>
+          <h1 className="text-2xl font-bold text-primary mt-2 tracking-wide">PRE-INSTALLATION CHECKLIST</h1>
           <div className="flex gap-4 mt-4 text-sm">
-            <div className="flex-1 border border-slate-300 rounded px-3 py-1.5 text-left">
-              <span className="text-slate-500 mr-1">Name:</span>
+            <div className="flex-1 border border-border rounded px-3 py-1.5 text-left">
+              <span className="text-muted-foreground mr-1">Name:</span>
               <span className="font-medium">{checklist.customer_first_name} {checklist.customer_last_name}</span>
             </div>
-            <div className="flex-1 border border-slate-300 rounded px-3 py-1.5 text-left">
-              <span className="text-slate-500 mr-1">Date:</span>
+            <div className="flex-1 border border-border rounded px-3 py-1.5 text-left">
+              <span className="text-muted-foreground mr-1">Date:</span>
               <span className="font-medium">{today}</span>
             </div>
           </div>
         </div>
 
         {checklist.product_info && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
-            <span className="font-semibold text-blue-800">Product Confirmed: </span>
-            <span className="text-blue-700">{checklist.product_info}</span>
-            <p className="text-blue-600 text-xs mt-1">I am confirming the product style and color is correct. If I am not home the day of the installation, you agree to allow us to install this style and color.</p>
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm dark:bg-blue-500/10 dark:border-blue-500/25">
+            <span className="font-semibold text-blue-800 dark:text-blue-300">Product Confirmed: </span>
+            <span className="text-blue-700 dark:text-blue-300">{checklist.product_info}</span>
+            <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">I am confirming the product style and color is correct. If I am not home the day of the installation, you agree to allow us to install this style and color.</p>
           </div>
         )}
 
         <div className="space-y-4 mb-6">
           {CHECKLIST_ITEMS.map((item) => (
             <div key={item.id} className="flex gap-3">
-              <span className="flex-shrink-0 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5 h-fit mt-0.5 min-w-[32px] text-center">
+              <span className="flex-shrink-0 text-xs font-bold text-primary bg-primary/10 border border-primary/20 rounded px-1.5 py-0.5 h-fit mt-0.5 min-w-[32px] text-center">
                 {initials}
               </span>
-              <div className="flex-1 text-sm leading-relaxed text-slate-700">
+              <div className="flex-1 text-sm leading-relaxed text-foreground">
                 <span className="font-bold">{item.title}</span> — {item.text}
               </div>
             </div>
           ))}
         </div>
 
-        <div className="border-t-2 border-slate-200 pt-6 space-y-4">
-          <p className="text-sm text-slate-600 font-medium">
+        <div className="border-t-2 border-border pt-6 space-y-4">
+          <p className="text-sm text-muted-foreground font-medium">
             By signing below, I acknowledge that I have read and agree to all items above.
           </p>
 
@@ -276,7 +276,7 @@ export default function PreInstallChecklistView() {
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <Label>Customer Signature <span className="text-red-500">*</span></Label>
-              <Button type="button" variant="ghost" size="sm" onClick={clearSignature} className="text-slate-500 h-7">
+              <Button type="button" variant="ghost" size="sm" onClick={clearSignature} className="text-muted-foreground h-7">
                 <Eraser className="w-3 h-3 mr-1" /> Clear
               </Button>
             </div>
@@ -285,7 +285,7 @@ export default function PreInstallChecklistView() {
               width={580}
               height={140}
               className={`w-full border-2 border-dashed rounded-lg bg-white touch-none cursor-crosshair ${
-                submitAttempted && !hasSigned ? 'border-red-400' : 'border-slate-300'
+                submitAttempted && !hasSigned ? 'border-red-400' : 'border-border'
               }`}
               onMouseDown={startDraw}
               onMouseMove={draw}
@@ -298,24 +298,24 @@ export default function PreInstallChecklistView() {
             {submitAttempted && !hasSigned ? (
               <p className="text-xs text-red-500">Signature is required.</p>
             ) : (
-              <p className="text-xs text-slate-400">Sign above using your mouse, trackpad, or finger</p>
+              <p className="text-xs text-muted-foreground">Sign above using your mouse, trackpad, or finger</p>
             )}
           </div>
 
-          <div className="flex items-center gap-4 border-b border-slate-200 pb-3">
-            <span className="text-sm text-slate-600 w-40 flex-shrink-0">Customer Email</span>
-            <span className="font-semibold text-slate-800">{checklist.customer_email}</span>
+          <div className="flex items-center gap-4 border-b border-border pb-3">
+            <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Customer Email</span>
+            <span className="font-semibold text-foreground">{checklist.customer_email}</span>
           </div>
           <div className="flex items-center gap-4 pb-3">
-            <span className="text-sm text-slate-600 w-40 flex-shrink-0">Date:</span>
-            <span className="font-semibold text-slate-800">{today}</span>
+            <span className="text-sm text-muted-foreground w-40 flex-shrink-0">Date:</span>
+            <span className="font-semibold text-foreground">{today}</span>
           </div>
         </div>
 
         <Button
           onClick={handleSubmit}
           disabled={submitMutation.isPending}
-          className="w-full mt-6 h-12 bg-blue-600 hover:bg-blue-700 text-base font-bold tracking-wide"
+          className="w-full mt-6 h-12 bg-primary text-primary-foreground hover:opacity-90 text-base font-bold tracking-wide"
         >
           {submitMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
           SUBMIT

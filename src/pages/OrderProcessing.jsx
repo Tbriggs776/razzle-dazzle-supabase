@@ -534,24 +534,24 @@ export default function OrderProcessing() {
     return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
   });
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <Package className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
+              <Package className="w-7 h-7 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Order Processing</h1>
-              <p className="text-slate-500 mt-1">Manage orders and calculate materials</p>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Order Processing</h1>
+              <p className="text-muted-foreground mt-1">Manage orders and calculate materials</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Quick Access Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Manage Orders Card */}
@@ -560,14 +560,14 @@ export default function OrderProcessing() {
             animate={{ opacity: 1, y: 0 }}
           >
             <Card className="h-full relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full -mr-16 -mt-16 opacity-50" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 opacity-50" />
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <Package className="w-5 h-5 text-indigo-600" />
+                    <Package className="w-5 h-5 text-primary" />
                     Manage Orders
                   </CardTitle>
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25">
                     Coming Soon
                   </Badge>
                 </div>
@@ -576,17 +576,17 @@ export default function OrderProcessing() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 text-sm text-slate-600">
+                <div className="space-y-3 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                     <span>Create and track orders</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                     <span>Manage inventory</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                     <span>Track delivery status</span>
                   </div>
                 </div>
@@ -601,32 +601,32 @@ export default function OrderProcessing() {
             transition={{ delay: 0.1 }}
           >
             <Link to={createPageUrl('Calculators')}>
-              <Card className="h-full hover:shadow-lg hover:border-indigo-200 transition-all cursor-pointer group relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full -mr-16 -mt-16 opacity-50" />
+              <Card className="h-full hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 opacity-50" />
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Calculator className="w-5 h-5 text-blue-600" />
+                      <Calculator className="w-5 h-5 text-primary" />
                       Calculators
                     </div>
-                    <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                   </CardTitle>
                   <CardDescription className="mt-2">
                     Tools for material and cost calculations
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3 text-sm text-slate-600">
+                  <div className="space-y-3 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                       <span>Glue usage calculator</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                       <span>Optimal container mix</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                       <span>Cost optimization</span>
                     </div>
                   </div>
@@ -646,8 +646,8 @@ export default function OrderProcessing() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                    <TicketIcon className="w-5 h-5 text-orange-600" />
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <TicketIcon className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <CardTitle>Order Tickets</CardTitle>
@@ -656,7 +656,7 @@ export default function OrderProcessing() {
                     </CardDescription>
                   </div>
                 </div>
-                <Button onClick={() => setShowCreateDialog(true)} className="bg-orange-600 hover:bg-orange-700">
+                <Button onClick={() => setShowCreateDialog(true)} className="bg-primary text-primary-foreground hover:opacity-90">
                   <Plus className="w-4 h-4 mr-2" />
                   New Ticket
                 </Button>
@@ -664,13 +664,13 @@ export default function OrderProcessing() {
             </CardHeader>
             <CardContent>
               {/* Filter Tabs and Sort */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+                <div className="flex flex-wrap items-center gap-2">
                   <Button
                     variant={filterStatus === 'all' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilterStatus('all')}
-                    className={filterStatus === 'all' ? 'bg-indigo-600' : ''}
+                    className={filterStatus === 'all' ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
                   >
                     All ({tickets.length})
                   </Button>
@@ -692,7 +692,7 @@ export default function OrderProcessing() {
                   </Button>
                 </div>
                 <Select value={sortOrder} onValueChange={setSortOrder}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -705,12 +705,12 @@ export default function OrderProcessing() {
               {/* Tickets List */}
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+                  <Loader2 className="w-6 h-6 text-primary animate-spin" />
                 </div>
               ) : filteredTickets.length === 0 ? (
                 <div className="text-center py-12">
-                  <TicketIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-500">
+                  <TicketIcon className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">
                     {filterStatus === 'all' ? 'No tickets yet' : `No ${filterStatus.toLowerCase()} tickets`}
                   </p>
                 </div>
@@ -747,19 +747,19 @@ export default function OrderProcessing() {
                         key={ticket.id}
                         className={cn(
                           "p-4 rounded-lg border transition-all",
-                          ticketStatus === 'Open' 
-                            ? "bg-red-50 border-red-200" 
-                            : "bg-green-50 border-green-200"
+                          ticketStatus === 'Open'
+                            ? "bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/25"
+                            : "bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/25"
                         )}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2 flex-wrap">
-                              <Badge variant="secondary" className="bg-white border-slate-200">
+                              <Badge variant="secondary" className="bg-card border-border">
                                 Order #{ticket.order_number}
                               </Badge>
                               {ticket.customer_last_name && (
-                                <Badge variant="secondary" className="bg-slate-100 text-slate-700 border-slate-300">
+                                <Badge variant="secondary" className="bg-secondary text-foreground border-border">
                                   {ticket.customer_last_name}
                                 </Badge>
                               )}
@@ -768,8 +768,8 @@ export default function OrderProcessing() {
                                 className={cn(
                                   "border",
                                   ticketStatus === 'Open' 
-                                    ? "bg-red-100 text-red-800 border-red-300" 
-                                    : "bg-green-100 text-green-800 border-green-300"
+                                    ? "bg-red-100 text-red-800 border-red-300 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25"
+                                    : "bg-green-100 text-green-800 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25"
                                 )}
                               >
                                 {ticketStatus === 'Open' ? (
@@ -780,12 +780,12 @@ export default function OrderProcessing() {
                                 {resolvedCount} of {totalCount} Resolved
                               </Badge>
                               {requesterOP && (
-                                <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                                <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25">
                                   Req: {requesterOP.first_name} {requesterOP.last_name}
                                 </Badge>
                               )}
                               {assignedDC && (
-                                <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                                <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25">
                                   {assignedDC.first_name} {assignedDC.last_name}
                                 </Badge>
                               )}
@@ -795,14 +795,14 @@ export default function OrderProcessing() {
                                   variant="outline"
                                   onClick={() => sendReminderMutation.mutate(ticket.id)}
                                   disabled={sendReminderMutation.isPending}
-                                  className="h-6 px-2 text-xs border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                                  className="h-6 px-2 text-xs border-primary/30 text-primary hover:bg-primary/10"
                                 >
                                   <Send className="w-3 h-3 mr-1" />
                                   Remind DC
                                 </Button>
                               )}
                               {recentlyResolved && (
-                                <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-300 animate-pulse">
+                                <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25 animate-pulse">
                                   <Sparkles className="w-3 h-3 mr-1" />
                                   Updated
                                 </Badge>
@@ -814,22 +814,22 @@ export default function OrderProcessing() {
                                   <div key={idx} className={cn(
                                     "flex items-center justify-between gap-2 p-2 rounded border",
                                     cat.status === 'Resolved' 
-                                      ? "bg-green-50 border-green-200"
+                                      ? "bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/25"
                                       : cat.status === 'Requested Resolve'
-                                      ? "bg-yellow-50 border-yellow-200"
-                                      : "bg-white border-slate-200"
+                                      ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/25"
+                                      : "bg-card border-border"
                                   )}>
                                     <div className="flex items-center gap-2 flex-1">
                                       {cat.status === 'Resolved' ? (
-                                        <CheckCircle2 className="w-3 h-3 text-green-600" />
+                                        <CheckCircle2 className="w-3 h-3 text-green-600 dark:text-green-400" />
                                       ) : cat.status === 'Requested Resolve' ? (
-                                        <Clock className="w-3 h-3 text-yellow-600" />
+                                        <Clock className="w-3 h-3 text-yellow-600 dark:text-yellow-400" />
                                       ) : (
-                                        <AlertCircle className="w-3 h-3 text-red-600" />
+                                        <AlertCircle className="w-3 h-3 text-red-600 dark:text-red-400" />
                                       )}
                                       <span className={cn(
                                         "text-sm",
-                                        cat.status === 'Resolved' ? "text-green-900 line-through" : "text-slate-700"
+                                        cat.status === 'Resolved' ? "text-green-900 dark:text-green-300 line-through" : "text-foreground"
                                       )}>
                                         {cat.name}
                                       </span>
@@ -844,7 +844,7 @@ export default function OrderProcessing() {
                                             categoryIndex: idx
                                           })}
                                           disabled={approveCategoryMutation.isPending || denyCategoryMutation.isPending}
-                                          className="h-7 px-2 text-xs bg-green-100 text-green-700 hover:bg-green-200"
+                                          className="h-7 px-2 text-xs bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-500/15 dark:text-green-300 dark:hover:bg-green-500/25"
                                         >
                                           Approve
                                         </Button>
@@ -856,7 +856,7 @@ export default function OrderProcessing() {
                                             categoryIndex: idx
                                           })}
                                           disabled={approveCategoryMutation.isPending || denyCategoryMutation.isPending}
-                                          className="h-7 px-2 text-xs bg-red-100 text-red-700 hover:bg-red-200"
+                                          className="h-7 px-2 text-xs bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25"
                                         >
                                           Deny
                                         </Button>
@@ -871,7 +871,7 @@ export default function OrderProcessing() {
                                           categoryIndex: idx
                                         })}
                                         disabled={requestResolveMutation.isPending}
-                                        className="h-7 px-2 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                        className="h-7 px-2 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:hover:bg-blue-500/25"
                                       >
                                         Request Resolved
                                       </Button>
@@ -885,7 +885,7 @@ export default function OrderProcessing() {
                                           categoryIndex: idx
                                         })}
                                         disabled={approveCategoryMutation.isPending || denyCategoryMutation.isPending}
-                                        className="h-7 px-2 text-xs text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+                                        className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-secondary"
                                       >
                                         Reopen
                                       </Button>
@@ -893,11 +893,11 @@ export default function OrderProcessing() {
                                   </div>
                                 ))
                               ) : (
-                                <span className="text-sm text-slate-500">No categories</span>
+                                <span className="text-sm text-muted-foreground">No categories</span>
                               )}
                             </div>
-                            <p className="text-sm text-slate-600 mb-2">{ticket.description}</p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-sm text-muted-foreground mb-2">{ticket.description}</p>
+                            <p className="text-xs text-muted-foreground">
                               Created {new Date(ticket.created_date + (ticket.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString()} at{' '}
                               {new Date(ticket.created_date + (ticket.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
@@ -905,7 +905,7 @@ export default function OrderProcessing() {
                             {/* Chat Messages */}
                             <Accordion type="single" collapsible className="mt-3" onValueChange={(value) => value === 'chat' && scrollToBottom(ticket.id)}>
                               <AccordionItem value="chat" className="border-none">
-                                <AccordionTrigger className="text-xs text-indigo-600 hover:no-underline py-2">
+                                <AccordionTrigger className="text-xs text-primary hover:no-underline py-2">
                                   <div className="flex items-center gap-2">
                                     💬 Chat ({messages.length})
                                     {newMessages.length > 0 && (
@@ -938,12 +938,12 @@ export default function OrderProcessing() {
                                         <div key={msg.id} className={cn(
                                           "text-xs p-2 rounded border",
                                           msg.sender_role === 'Requester' 
-                                            ? "bg-indigo-50 border-indigo-200 ml-8" 
-                                            : "bg-slate-50 border-slate-200 mr-8"
+                                            ? "bg-primary/10 border-primary/30 ml-8" 
+                                            : "bg-secondary border-border mr-8"
                                         )}>
-                                          <p className="font-medium text-slate-700">{msg.sender_name}</p>
+                                          <p className="font-medium text-foreground">{msg.sender_name}</p>
                                           {msg.message && msg.message !== '(attached files)' && (
-                                            <p className="text-slate-600 mt-1">{msg.message}</p>
+                                            <p className="text-muted-foreground mt-1">{msg.message}</p>
                                           )}
                                           {msg.file_urls && msg.file_urls.length > 0 && (
                                             <div className="flex flex-wrap gap-2 mt-2">
@@ -962,7 +962,7 @@ export default function OrderProcessing() {
                                                     <img 
                                                       src={url} 
                                                       alt={`Attachment ${idx + 1}`}
-                                                      className="max-w-[200px] max-h-[200px] rounded border border-slate-300 hover:opacity-90 cursor-pointer"
+                                                      className="max-w-[200px] max-h-[200px] rounded border border-border hover:opacity-90 cursor-pointer"
                                                     />
                                                   </button>
                                                 ) : (
@@ -971,7 +971,7 @@ export default function OrderProcessing() {
                                                     href={url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 rounded hover:bg-slate-50"
+                                                    className="flex items-center gap-1 px-2 py-1 bg-card border border-border rounded hover:bg-secondary"
                                                   >
                                                     <Paperclip className="w-3 h-3" />
                                                     <span className="text-xs">{getFileName(url)}</span>
@@ -980,7 +980,7 @@ export default function OrderProcessing() {
                                               ))}
                                             </div>
                                           )}
-                                          <p className="text-slate-400 mt-1">
+                                          <p className="text-muted-foreground mt-1">
                                             {new Date(msg.created_date + (msg.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString()} at{' '}
                                             {new Date(msg.created_date + (msg.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                           </p>
@@ -993,7 +993,7 @@ export default function OrderProcessing() {
                                     {uploadingFiles[ticket.id] && uploadingFiles[ticket.id].length > 0 && (
                                       <div className="flex flex-wrap gap-2">
                                         {uploadingFiles[ticket.id].map((file, idx) => (
-                                          <div key={idx} className="flex items-center gap-1 px-2 py-1 bg-slate-100 border border-slate-300 rounded text-xs">
+                                          <div key={idx} className="flex items-center gap-1 px-2 py-1 bg-secondary border border-border rounded text-xs">
                                             <ImageIcon className="w-3 h-3" />
                                             <span className="truncate max-w-[100px]">{file.name}</span>
                                             <button
@@ -1003,7 +1003,7 @@ export default function OrderProcessing() {
                                                   [ticket.id]: prev[ticket.id].filter((_, i) => i !== idx)
                                                 }));
                                               }}
-                                              className="ml-1 hover:text-red-600"
+                                              className="ml-1 hover:text-destructive"
                                             >
                                               <X className="w-3 h-3" />
                                             </button>
@@ -1093,7 +1093,7 @@ export default function OrderProcessing() {
                                           }
                                         }}
                                         disabled={(!messageText[ticket.id]?.trim() && !uploadingFiles[ticket.id]?.length) || sendMessageMutation.isPending}
-                                        className="bg-indigo-600 hover:bg-indigo-700"
+                                        className="bg-primary text-primary-foreground hover:opacity-90"
                                       >
                                         {sendMessageMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Send'}
                                       </Button>
@@ -1107,18 +1107,18 @@ export default function OrderProcessing() {
                             {logs.length > 0 && (
                               <Accordion type="single" collapsible className="mt-2">
                                 <AccordionItem value="log" className="border-none">
-                                  <AccordionTrigger className="text-xs text-slate-500 hover:no-underline py-2">
+                                  <AccordionTrigger className="text-xs text-muted-foreground hover:no-underline py-2">
                                     Activity Log ({logs.length})
                                   </AccordionTrigger>
                                   <AccordionContent>
                                     <div className="space-y-2 mt-2">
                                       {logs.map((log) => (
-                                        <div key={log.id} className="text-xs p-2 bg-white rounded border border-slate-200">
+                                        <div key={log.id} className="text-xs p-2 bg-card rounded border border-border">
                                           <div className="flex items-start justify-between gap-2">
                                             <div className="flex-1">
-                                              <p className="font-medium text-slate-700">{log.action}</p>
-                                              {log.details && <p className="text-slate-500 mt-0.5">{log.details}</p>}
-                                              <p className="text-slate-400 mt-1">
+                                              <p className="font-medium text-foreground">{log.action}</p>
+                                              {log.details && <p className="text-muted-foreground mt-0.5">{log.details}</p>}
+                                              <p className="text-muted-foreground mt-1">
                                                 {log.user_name} • {new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString()} at{' '}
                                                 {new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                               </p>
@@ -1141,7 +1141,7 @@ export default function OrderProcessing() {
                                     size="sm"
                                     variant="outline"
                                     onClick={() => window.open(ticket.requester_short_url, '_blank')}
-                                    className="h-8 text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200"
+                                    className="h-8 text-xs text-purple-600 hover:bg-purple-50 border-purple-200 dark:text-purple-300 dark:hover:bg-purple-500/10 dark:border-purple-500/30"
                                   >
                                     <ExternalLink className="w-3 h-3 mr-1" />
                                     Requester View
@@ -1152,7 +1152,7 @@ export default function OrderProcessing() {
                                     size="sm"
                                     variant="outline"
                                     onClick={() => window.open(ticket.dc_short_url, '_blank')}
-                                    className="h-8 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
+                                    className="h-8 text-xs text-primary hover:bg-primary/10 border-primary/30"
                                   >
                                     <ExternalLink className="w-3 h-3 mr-1" />
                                     DC View
@@ -1167,7 +1167,7 @@ export default function OrderProcessing() {
                                 setEditingTicket(ticket);
                                 setShowEditDialog(true);
                               }}
-                              className="h-8 w-8 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50"
+                              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
                             >
                               <Pencil className="w-4 h-4" />
                             </Button>
@@ -1180,7 +1180,7 @@ export default function OrderProcessing() {
                                 }
                               }}
                               disabled={deleteMutation.isPending}
-                              className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -1203,7 +1203,7 @@ export default function OrderProcessing() {
             <DialogTitle>Create New Ticket</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="order_number">Order Number *</Label>
                 <Input
@@ -1225,7 +1225,7 @@ export default function OrderProcessing() {
             </div>
             <div className="space-y-2">
               <Label>Categories * (select all that apply)</Label>
-              <div className="border border-slate-200 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
+              <div className="border border-border rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
                 {TICKET_CATEGORIES.map((cat) => (
                   <div key={cat} className="flex items-center gap-2">
                   <Checkbox
@@ -1280,7 +1280,7 @@ export default function OrderProcessing() {
             </div>
             <div className="space-y-2">
               <Label>CC (Text Notifications)</Label>
-              <div className="border border-slate-200 rounded-lg p-3 max-h-40 overflow-y-auto space-y-2">
+              <div className="border border-border rounded-lg p-3 max-h-40 overflow-y-auto space-y-2">
                 {[...designConsultants, ...orderProcessors, ...operationsMembers]
                   .filter((m, i, arr) => arr.findIndex(x => x.id === m.id) === i)
                   .map((member) => (
@@ -1297,7 +1297,7 @@ export default function OrderProcessing() {
                       }}
                     />
                     <Label htmlFor={`cc-${member.id}`} className="cursor-pointer font-normal text-sm">
-                      {member.first_name} {member.last_name} <span className="text-slate-400">({member.role})</span>
+                      {member.first_name} {member.last_name} <span className="text-muted-foreground">({member.role})</span>
                     </Label>
                   </div>
                 ))}
@@ -1325,7 +1325,7 @@ export default function OrderProcessing() {
             <Button
               onClick={() => createMutation.mutate(newTicket)}
               disabled={!newTicket.order_number || newTicket.categories.length === 0 || !newTicket.description || createMutation.isPending}
-              className="bg-orange-600 hover:bg-orange-700"
+              className="bg-primary text-primary-foreground hover:opacity-90"
             >
               {createMutation.isPending ? (
                 <>
@@ -1350,7 +1350,7 @@ export default function OrderProcessing() {
             <DialogTitle>Edit Ticket</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit_order_number">Order Number *</Label>
                 <Input
@@ -1372,7 +1372,7 @@ export default function OrderProcessing() {
             </div>
             <div className="space-y-2">
               <Label>Categories * (select all that apply)</Label>
-              <div className="border border-slate-200 rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
+              <div className="border border-border rounded-lg p-4 max-h-64 overflow-y-auto space-y-2">
                 {TICKET_CATEGORIES.map((cat) => (
                   <div key={cat} className="flex items-center gap-2">
                   <Checkbox
@@ -1460,7 +1460,7 @@ export default function OrderProcessing() {
                 }
               })}
               disabled={!editingTicket?.order_number || !editingTicket?.categories?.length || !editingTicket?.description || updateMutation.isPending}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-primary text-primary-foreground hover:opacity-90"
             >
               {updateMutation.isPending ? (
                 <>

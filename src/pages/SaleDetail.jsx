@@ -487,18 +487,18 @@ export default function SaleDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   if (!sale) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-slate-800 mb-2">Sale not found</h2>
-          <Link to={createPageUrl('Sales')} className="text-indigo-600 hover:underline">
+          <h2 className="text-xl font-semibold text-foreground mb-2">Sale not found</h2>
+          <Link to={createPageUrl('Sales')} className="text-primary hover:underline">
             Back to sales
           </Link>
         </div>
@@ -510,13 +510,13 @@ export default function SaleDetail() {
   const consultantName = consultant ? `${consultant.first_name} ${consultant.last_name}` : 'Loading...';
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
+      <div className="bg-card border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-6">
           <Link
             to={createPageUrl('Sales')}
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Sales
@@ -532,16 +532,16 @@ export default function SaleDetail() {
               </div>
 
               <div className="flex-1 min-w-0">
-                <h1 className="text-3xl font-bold text-slate-800 tracking-tight">{customerName}</h1>
-                <p className="text-slate-500 mt-1">
+                <h1 className="text-3xl font-bold text-foreground tracking-tight">{customerName}</h1>
+                <p className="text-muted-foreground mt-1">
                   Sold on {format(parseISO(sale.sale_date), 'MMMM d, yyyy')} at {format(parseISO(sale.sale_date), 'h:mm a')}
                 </p>
               </div>
 
               {sale.sale_amount && (
                 <div className="text-right">
-                  <p className="text-sm text-slate-500">Sale Amount</p>
-                  <p className="text-3xl font-bold text-emerald-600">
+                  <p className="text-sm text-muted-foreground">Sale Amount</p>
+                  <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
                     ${sale.sale_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -552,7 +552,7 @@ export default function SaleDetail() {
               {project ? (
                 <Button
                   onClick={() => navigate(createPageUrl('ProjectDetail') + `?id=${project.id}`)}
-                  className="bg-indigo-600 hover:bg-indigo-700 h-11 px-5"
+                  className="bg-primary text-primary-foreground hover:opacity-90 h-11 px-5"
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   View Project
@@ -561,7 +561,7 @@ export default function SaleDetail() {
                 <Button
                   onClick={() => createProjectMutation.mutate()}
                   disabled={createProjectMutation.isPending}
-                  className="bg-indigo-600 hover:bg-indigo-700 h-11 px-5"
+                  className="bg-primary text-primary-foreground hover:opacity-90 h-11 px-5"
                 >
                   {createProjectMutation.isPending ? (
                     <>
@@ -579,7 +579,7 @@ export default function SaleDetail() {
               <Button
                 onClick={handleDownloadContract}
                 variant="outline"
-                className="h-11 px-5 border-slate-300"
+                className="h-11 px-5 border-border"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Download Contract
@@ -587,7 +587,7 @@ export default function SaleDetail() {
               <Button
                 onClick={() => setShowReplaceContractDialog(true)}
                 variant="outline"
-                className="h-11 px-5 border-blue-300 text-blue-600 hover:bg-blue-50"
+                className="h-11 px-5 border-brand-blue/40 text-brand-blue hover:bg-brand-blue/12"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Replace Contract
@@ -595,7 +595,7 @@ export default function SaleDetail() {
               <Button
                 onClick={handleEditClick}
                 variant="outline"
-                className="h-11 px-5 border-slate-300"
+                className="h-11 px-5 border-border"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Sale
@@ -649,37 +649,37 @@ export default function SaleDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Customer Information
             </h2>
             {customer ? (
               <div className="space-y-4">
                 <Link
                   to={createPageUrl('CustomerDetail') + `?id=${customer.id}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                    <User className="w-5 h-5 text-indigo-600" />
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <User className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs text-slate-400 mb-0.5">Name</p>
-                    <p className="text-slate-800 group-hover:text-indigo-600 transition-colors">
+                    <p className="text-xs text-muted-foreground mb-0.5">Name</p>
+                    <p className="text-foreground group-hover:text-primary transition-colors">
                       {customerName}
                     </p>
                   </div>
                 </Link>
                 <a
                   href={`mailto:${customer.email}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-500/15 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-green-600 dark:text-green-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Email</p>
-                    <p className="text-slate-800 group-hover:text-green-600 transition-colors">
+                    <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                    <p className="text-foreground group-hover:text-green-600 transition-colors">
                       {customer.email}
                     </p>
                   </div>
@@ -687,14 +687,14 @@ export default function SaleDetail() {
                 {customer.phone && (
                   <a
                     href={`tel:${customer.phone}`}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-blue-600" />
+                    <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                      <Phone className="w-5 h-5 text-brand-blue" />
                     </div>
                     <div>
-                      <p className="text-xs text-slate-400 mb-0.5">Phone</p>
-                      <p className="text-slate-800 group-hover:text-blue-600 transition-colors">
+                      <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
+                      <p className="text-foreground group-hover:text-brand-blue transition-colors">
                         {customer.phone}
                       </p>
                     </div>
@@ -702,7 +702,7 @@ export default function SaleDetail() {
                 )}
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-4">Loading customer information...</p>
+              <p className="text-muted-foreground text-center py-4">Loading customer information...</p>
             )}
           </motion.div>
 
@@ -711,39 +711,39 @@ export default function SaleDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Design Consultant
             </h2>
             {consultant ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-blue-50">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <User className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-brand-blue/12">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
+                    <User className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div>
-                    <p className="text-xs text-blue-600 mb-0.5">Name</p>
-                    <p className="text-slate-800">{consultantName}</p>
+                    <p className="text-xs text-brand-blue mb-0.5">Name</p>
+                    <p className="text-foreground">{consultantName}</p>
                   </div>
                 </div>
                 <a
                   href={`mailto:${consultant.email}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-600" />
+                  <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-500/15 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-green-600 dark:text-green-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Email</p>
-                    <p className="text-slate-800 group-hover:text-green-600 transition-colors">
+                    <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                    <p className="text-foreground group-hover:text-green-600 transition-colors">
                       {consultant.email}
                     </p>
                   </div>
                 </a>
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-4">Loading consultant information...</p>
+              <p className="text-muted-foreground text-center py-4">Loading consultant information...</p>
             )}
           </motion.div>
 
@@ -752,44 +752,44 @@ export default function SaleDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Original Appointment
             </h2>
             <div className="space-y-4">
               {sale.appointment_date && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <CalendarIcon className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                    <CalendarIcon className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Date</p>
-                    <p className="text-slate-800">
+                    <p className="text-xs text-muted-foreground mb-0.5">Date</p>
+                    <p className="text-foreground">
                       {format(new Date(sale.appointment_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
                     </p>
                   </div>
                 </div>
               )}
               {sale.appointment_block && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-purple-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-500/15 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-purple-600 dark:text-purple-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Time Block</p>
-                    <p className="text-slate-800">{sale.appointment_block}</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">Time Block</p>
+                    <p className="text-foreground">{sale.appointment_block}</p>
                   </div>
                 </div>
               )}
               {checklist?.heard_about_us && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-amber-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-500/15 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-amber-600 dark:text-amber-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Lead Source</p>
-                    <p className="text-slate-800">
+                    <p className="text-xs text-muted-foreground mb-0.5">Lead Source</p>
+                    <p className="text-foreground">
                       {checklist.heard_about_us}{checklist.heard_about_us === 'Other' && checklist.heard_about_us_other ? ` — ${checklist.heard_about_us_other}` : ''}
                     </p>
                   </div>
@@ -797,14 +797,14 @@ export default function SaleDetail() {
               )}
               <Link
                 to={createPageUrl('AppointmentDetail') + `?id=${sale.appointment}`}
-                className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
               >
-                <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-indigo-600" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">View Details</p>
-                  <p className="text-indigo-600 group-hover:underline">Full Appointment</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">View Details</p>
+                  <p className="text-primary group-hover:underline">Full Appointment</p>
                 </div>
               </Link>
             </div>
@@ -815,55 +815,55 @@ export default function SaleDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Payment Details
             </h2>
             <div className="space-y-4">
               {sale.deposit_payment_method && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Payment Method</p>
-                    <p className="text-slate-800">{sale.deposit_payment_method}</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">Payment Method</p>
+                    <p className="text-foreground">{sale.deposit_payment_method}</p>
                   </div>
                 </div>
               )}
               {sale.deposit_amount && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-green-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-500/15 flex items-center justify-center">
+                    <DollarSign className="w-5 h-5 text-green-600 dark:text-green-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Deposit Amount</p>
-                    <p className="text-slate-800">
+                    <p className="text-xs text-muted-foreground mb-0.5">Deposit Amount</p>
+                    <p className="text-foreground">
                       ${sale.deposit_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   </div>
                 </div>
               )}
               {sale.check_number && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Check Number</p>
-                    <p className="text-slate-800">{sale.check_number}</p>
+                    <p className="text-xs text-muted-foreground mb-0.5">Check Number</p>
+                    <p className="text-foreground">{sale.check_number}</p>
                   </div>
                 </div>
               )}
               {sale.check_date && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                    <CalendarIcon className="w-5 h-5 text-purple-600" />
+                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-500/15 flex items-center justify-center">
+                    <CalendarIcon className="w-5 h-5 text-purple-600 dark:text-purple-300" />
                   </div>
                   <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Check Date</p>
-                    <p className="text-slate-800">
+                    <p className="text-xs text-muted-foreground mb-0.5">Check Date</p>
+                    <p className="text-foreground">
                       {format(new Date(sale.check_date + 'T00:00:00'), 'MMMM d, yyyy')}
                     </p>
                   </div>
@@ -877,22 +877,22 @@ export default function SaleDetail() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl border border-slate-100 p-6"
+            className="bg-card rounded-2xl border border-border p-6"
           >
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Location
             </h2>
             {sale.location_address ? (
               <div className="flex items-start gap-4 p-3">
-                <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-orange-600" />
+                <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-500/15 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-300" />
                 </div>
                 <div>
-                  <p className="text-slate-800">{sale.location_address}</p>
+                  <p className="text-foreground">{sale.location_address}</p>
                 </div>
               </div>
             ) : (
-              <p className="text-slate-400 text-center py-6">No location specified</p>
+              <p className="text-muted-foreground text-center py-6">No location specified</p>
             )}
           </motion.div>
 
@@ -902,16 +902,16 @@ export default function SaleDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Final Product Selected Photos
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {sale.product_photos.map((url, idx) => (
                   <div key={idx}>
-                    <p className="text-xs font-medium text-slate-500 mb-1">Product {idx + 1}</p>
-                    <div className="rounded-lg overflow-hidden border border-slate-200">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Product {idx + 1}</p>
+                    <div className="rounded-lg overflow-hidden border border-border">
                       <img
                         src={url}
                         alt={`Product ${idx + 1}`}
@@ -930,12 +930,12 @@ export default function SaleDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6"
+              className="bg-card rounded-2xl border border-border p-6"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Driver's License
               </h2>
-              <div className="rounded-lg overflow-hidden border border-slate-200">
+              <div className="rounded-lg overflow-hidden border border-border">
                 <img
                   src={sale.driver_license_photo_url}
                   alt="Driver's License"
@@ -951,16 +951,16 @@ export default function SaleDetail() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55 }}
-              className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
             >
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
                 Sale Notes
               </h2>
               <div className="flex items-start gap-4 p-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-purple-600" />
+                <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-500/15 flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-5 h-5 text-purple-600 dark:text-purple-300" />
                 </div>
-                <p className="text-slate-700 whitespace-pre-wrap">{sale.notes}</p>
+                <p className="text-foreground whitespace-pre-wrap">{sale.notes}</p>
               </div>
             </motion.div>
           )}
@@ -970,15 +970,15 @@ export default function SaleDetail() {
            initial={{ opacity: 0, y: 20 }}
            animate={{ opacity: 1, y: 0 }}
            transition={{ delay: 0.6 }}
-           className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+           className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
           >
            <div className="flex items-center justify-between mb-4">
              <div>
-               <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                  Invoice Details
                </h2>
                {sale.invoice_number && (
-                 <p className="text-xs text-slate-500 mt-1">Invoice #{sale.invoice_number}</p>
+                 <p className="text-xs text-muted-foreground mt-1">Invoice #{sale.invoice_number}</p>
                )}
              </div>
            </div>
@@ -1008,9 +1008,9 @@ export default function SaleDetail() {
                 if (!lines || lines.length === 0) {
                   return (
                     <div className="text-center py-8">
-                      <Download className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                      <p className="text-slate-500 text-sm">No RFMS data available</p>
-                      <p className="text-slate-400 text-xs mt-1">
+                      <Download className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                      <p className="text-muted-foreground text-sm">No RFMS data available</p>
+                      <p className="text-muted-foreground text-xs mt-1">
                         {sale.invoice_number
                           ? 'Click "Fetch from RFMS" in the RFMS Order Data section below'
                           : 'Invoice number required to fetch RFMS data'}
@@ -1028,7 +1028,7 @@ export default function SaleDetail() {
                     <div className="border rounded-lg overflow-hidden">
                       <Table>
                         <TableHeader>
-                          <TableRow className="bg-slate-50">
+                          <TableRow className="bg-muted">
                             <TableHead>Supplier</TableHead>
                             <TableHead>Style Name</TableHead>
                             <TableHead>Color</TableHead>
@@ -1047,8 +1047,8 @@ export default function SaleDetail() {
                               <TableCell className="font-medium">{item.supplierName}</TableCell>
                               <TableCell>{item.styleName}</TableCell>
                               <TableCell>{item.colorName}</TableCell>
-                              <TableCell className="text-slate-600">{item.productCode ?? '—'}</TableCell>
-                              <TableCell className="text-slate-600 whitespace-nowrap">{PRODUCT_TYPES[parseInt(item.productCode, 10)] || '—'}</TableCell>
+                              <TableCell className="text-muted-foreground">{item.productCode ?? '—'}</TableCell>
+                              <TableCell className="text-muted-foreground whitespace-nowrap">{PRODUCT_TYPES[parseInt(item.productCode, 10)] || '—'}</TableCell>
                               <TableCell className="text-right">{item.quantity}</TableCell>
                               <TableCell className="text-right">${item.unitCost?.toFixed(2) || '0.00'}</TableCell>
                               <TableCell className="text-right">{(() => { const c = catalogCostMap[String(item.styleName).toLowerCase()]; return c != null ? `$${Number(c).toFixed(2)}` : '—'; })()}</TableCell>
@@ -1060,31 +1060,31 @@ export default function SaleDetail() {
                       </Table>
                     </div>
                      {/* New GP calc using catalog per_unit_cost (larger) */}
-                     <div className="border-t-2 border-slate-300 pt-4 mt-6 space-y-2">
+                     <div className="border-t-2 border-border pt-4 mt-6 space-y-2">
                        <div className="flex justify-between items-center">
-                         <span className="text-base font-semibold text-slate-800">Total Cost (Catalog):</span>
-                         <span className="text-2xl font-bold text-slate-700">
+                         <span className="text-base font-semibold text-foreground">Total Cost (Catalog):</span>
+                         <span className="text-2xl font-bold text-foreground">
                            ${catalogTotalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                          </span>
                        </div>
                        <div className="flex justify-between items-center">
-                         <span className="text-base font-semibold text-slate-800">Order Total:</span>
-                         <span className="text-3xl font-bold text-emerald-600">
+                         <span className="text-base font-semibold text-foreground">Order Total:</span>
+                         <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
                            ${orderTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                          </span>
                        </div>
-                       <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-                         <span className="text-base font-semibold text-slate-800">Gross Profit % (Catalog):</span>
-                         <span className="text-2xl font-bold text-blue-600">{catalogGPPercent.toFixed(2)}%</span>
+                       <div className="flex justify-between items-center pt-2 border-t border-border">
+                         <span className="text-base font-semibold text-foreground">Gross Profit % (Catalog):</span>
+                         <span className="text-2xl font-bold text-brand-blue">{catalogGPPercent.toFixed(2)}%</span>
                        </div>
                        <div className="flex justify-between items-center pt-2">
-                         <span className="text-base font-semibold text-slate-800">Gross Profit $ (Catalog):</span>
-                         <span className="text-2xl font-bold text-green-600">${(orderTotal - catalogTotalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                         <span className="text-base font-semibold text-foreground">Gross Profit $ (Catalog):</span>
+                         <span className="text-2xl font-bold text-green-600 dark:text-green-400">${(orderTotal - catalogTotalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                        </div>
                      </div>
                      {/* Old GP calc using RFMS unit cost (smaller, for diff) */}
-                     <div className="border-t border-slate-200 pt-3 mt-4 space-y-1 bg-slate-50 rounded-lg p-3">
-                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">RFMS Unit Cost GP (legacy)</p>
+                     <div className="border-t border-border pt-3 mt-4 space-y-1 bg-muted rounded-lg p-3">
+                       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">RFMS Unit Cost GP (legacy)</p>
                        <div
                          className="flex justify-between items-center cursor-pointer group"
                          onClick={() => {
@@ -1092,59 +1092,59 @@ export default function SaleDetail() {
                            setShowCostBreakdown(true);
                          }}
                        >
-                         <span className="text-xs font-medium text-slate-500 group-hover:underline">Total Cost:</span>
-                         <span className="text-sm font-semibold text-slate-500 group-hover:underline">
+                         <span className="text-xs font-medium text-muted-foreground group-hover:underline">Total Cost:</span>
+                         <span className="text-sm font-semibold text-muted-foreground group-hover:underline">
                            ${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                          </span>
                        </div>
                        <div className="flex justify-between items-center">
-                         <span className="text-xs font-medium text-slate-500">Order Total:</span>
-                         <span className="text-sm font-semibold text-slate-500">
+                         <span className="text-xs font-medium text-muted-foreground">Order Total:</span>
+                         <span className="text-sm font-semibold text-muted-foreground">
                            ${orderTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                          </span>
                        </div>
                        <div className="flex justify-between items-center">
-                         <span className="text-xs font-medium text-slate-500">Gross Profit %:</span>
-                         <span className="text-sm font-bold text-slate-500">{grossProfitPercent.toFixed(2)}%</span>
+                         <span className="text-xs font-medium text-muted-foreground">Gross Profit %:</span>
+                         <span className="text-sm font-bold text-muted-foreground">{grossProfitPercent.toFixed(2)}%</span>
                        </div>
                        <div className="flex justify-between items-center">
-                         <span className="text-xs font-medium text-slate-500">Gross Profit $:</span>
-                         <span className="text-sm font-bold text-slate-500">${(orderTotal - totalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                         <span className="text-xs font-medium text-muted-foreground">Gross Profit $:</span>
+                         <span className="text-sm font-bold text-muted-foreground">${(orderTotal - totalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                        </div>
                      </div>
                      <div className="mt-6 space-y-2">
-                      <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-3">GP% by Line Item</h3>
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">GP% by Line Item</h3>
                       {lines.map((item, index) => {
                          const itemGP = item.total > 0 ? ((item.total - (item.unitCost * item.quantity)) / item.total * 100) : 0;
                          return (
-                           <div key={index} className="flex items-center justify-between p-2 bg-slate-50 rounded">
+                           <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
                              <div className="flex-1 min-w-0">
-                               <p className="text-xs font-medium text-slate-700 truncate">{item.styleName}</p>
+                               <p className="text-xs font-medium text-foreground truncate">{item.styleName}</p>
                              </div>
-                             <span className="text-xs font-bold text-blue-600 ml-2">{itemGP.toFixed(1)}%</span>
+                             <span className="text-xs font-bold text-brand-blue ml-2">{itemGP.toFixed(1)}%</span>
                            </div>
                          );
                        })}
                      </div>
                      {(publicNotes || privateNotes || workOrderNotes) && (
-                       <div className="mt-6 space-y-4 border-t border-slate-200 pt-4">
-                         <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Order Notes</h3>
+                       <div className="mt-6 space-y-4 border-t border-border pt-4">
+                         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order Notes</h3>
                          {publicNotes && (
                            <div>
-                             <p className="text-xs font-medium text-slate-500 mb-1">Public Notes</p>
-                             <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: publicNotes }} />
+                             <p className="text-xs font-medium text-muted-foreground mb-1">Public Notes</p>
+                             <div className="bg-muted rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: publicNotes }} />
                            </div>
                          )}
                          {privateNotes && (
                            <div>
-                             <p className="text-xs font-medium text-slate-500 mb-1">Private Notes</p>
-                             <div className="bg-amber-50 rounded-lg p-3 text-sm text-slate-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: privateNotes }} />
+                             <p className="text-xs font-medium text-muted-foreground mb-1">Private Notes</p>
+                             <div className="bg-amber-50 dark:bg-amber-500/10 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: privateNotes }} />
                            </div>
                          )}
                          {workOrderNotes && (
                            <div>
-                             <p className="text-xs font-medium text-slate-500 mb-1">Work Order Notes</p>
-                             <div className="bg-blue-50 rounded-lg p-3 text-sm text-slate-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: workOrderNotes }} />
+                             <p className="text-xs font-medium text-muted-foreground mb-1">Work Order Notes</p>
+                             <div className="bg-brand-blue/12 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: workOrderNotes }} />
                            </div>
                          )}
                        </div>
@@ -1161,7 +1161,7 @@ export default function SaleDetail() {
                    disabled={sale?.contract_extraction_status === 'processing'}
                    variant="outline"
                    size="sm"
-                   className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                   className="border-primary/30 text-primary hover:bg-primary/10"
                  >
                    {sale?.contract_extraction_status === 'processing' ? (
                      <>
@@ -1184,23 +1184,23 @@ export default function SaleDetail() {
 
                {sale.invoice_line_items && sale.invoice_line_items.length > 0 ? (
                  <div>
-                   <div className="border-b border-slate-200 pb-2 mb-4">
-                     <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">Item</h3>
+                   <div className="border-b border-border pb-2 mb-4">
+                     <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Item</h3>
                    </div>
                     <div className="space-y-0">
                       {sale.invoice_line_items.map((item, index) => (
-                        <div key={index} className="py-2 border-b border-slate-100 last:border-0">
-                          <div className="text-slate-800 text-sm">{item.description}</div>
+                        <div key={index} className="py-2 border-b border-border last:border-0">
+                          <div className="text-foreground text-sm">{item.description}</div>
                           {item.area && (
-                            <div className="text-slate-500 text-xs mt-1 ml-4">Area: {item.area}</div>
+                            <div className="text-muted-foreground text-xs mt-1 ml-4">Area: {item.area}</div>
                           )}
                         </div>
                       ))}
                     </div>
                     {sale.sale_amount && (
-                      <div className="border-t-2 border-slate-300 pt-4 mt-6 flex justify-between items-center">
-                        <span className="text-sm font-semibold text-slate-800">Invoice Total:</span>
-                        <span className="text-2xl font-bold text-emerald-600">
+                      <div className="border-t-2 border-border pt-4 mt-6 flex justify-between items-center">
+                        <span className="text-sm font-semibold text-foreground">Invoice Total:</span>
+                        <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                           ${sale.sale_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
@@ -1208,9 +1208,9 @@ export default function SaleDetail() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <ClipboardCheck className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500 text-sm">No invoice details extracted yet</p>
-                    <p className="text-slate-400 text-xs mt-1">Click "Extract from Contract" to analyze the contract PDF</p>
+                    <ClipboardCheck className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground text-sm">No invoice details extracted yet</p>
+                    <p className="text-muted-foreground text-xs mt-1">Click "Extract from Contract" to analyze the contract PDF</p>
                   </div>
                 )}
              </TabsContent>
@@ -1223,15 +1223,15 @@ export default function SaleDetail() {
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.65 }}
-             className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+             className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
            >
              <div className="flex items-center justify-between mb-4">
                <div>
-                 <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+                 <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                    RFMS Order Data
                  </h2>
                  {sale.rfms_sync_date && (
-                   <p className="text-xs text-slate-500 mt-1">
+                   <p className="text-xs text-muted-foreground mt-1">
                      Last synced: {format(parseISO(sale.rfms_sync_date), 'MMM d, yyyy h:mm a')}
                    </p>
                  )}
@@ -1263,7 +1263,7 @@ export default function SaleDetail() {
                     disabled={fetchingRFMS || !sale.invoice_number}
                     variant="outline"
                     size="sm"
-                    className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                    className="border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
                   >
                     {fetchingRFMS ? (
                       <>
@@ -1281,16 +1281,16 @@ export default function SaleDetail() {
              </div>
 
              {sale.rfms_order_data ? (
-               <div className="bg-slate-50 rounded-lg p-4 max-h-96 overflow-auto">
-                 <pre className="text-xs text-slate-700 whitespace-pre-wrap">
+               <div className="bg-muted rounded-lg p-4 max-h-96 overflow-auto">
+                 <pre className="text-xs text-foreground whitespace-pre-wrap">
                    {JSON.stringify(sale.rfms_order_data, null, 2)}
                  </pre>
                </div>
              ) : (
                <div className="text-center py-8">
-                 <Download className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                 <p className="text-slate-500 text-sm">No RFMS order data fetched yet</p>
-                 <p className="text-slate-400 text-xs mt-1">
+                 <Download className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                 <p className="text-muted-foreground text-sm">No RFMS order data fetched yet</p>
+                 <p className="text-muted-foreground text-xs mt-1">
                    {sale.invoice_number 
                      ? `Click "Fetch from RFMS" to retrieve order data for invoice #${sale.invoice_number}`
                      : 'Invoice number required to fetch RFMS data'}
@@ -1362,7 +1362,7 @@ export default function SaleDetail() {
             <Button
               onClick={handleEditSubmit}
               disabled={updateSaleMutation.isPending}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-primary text-primary-foreground hover:opacity-90"
             >
               {updateSaleMutation.isPending ? (
                 <>
@@ -1500,7 +1500,7 @@ export default function SaleDetail() {
                 <div className="space-y-2">
                   <Label htmlFor="new-amount">Sale Amount (optional)</Label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                     <Input
                       id="new-amount"
                       type="number"
@@ -1513,12 +1513,12 @@ export default function SaleDetail() {
                     />
                     {extractingNewAmount && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
                       </div>
                     )}
                   </div>
                   {extractingNewAmount && (
-                    <p className="text-xs text-indigo-600">Extracting amount from PDF...</p>
+                    <p className="text-xs text-primary">Extracting amount from PDF...</p>
                   )}
                 </div>
               </>

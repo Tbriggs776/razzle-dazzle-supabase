@@ -165,58 +165,58 @@ export default function Sales() {
   const sortedDates = Object.keys(salesByDate).sort((a, b) => b.localeCompare(a));
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Sales</h1>
-              <p className="text-slate-500 mt-1">Track and manage successful sales</p>
+              <h1 className="text-3xl font-bold text-foreground">Sales</h1>
+              <p className="text-muted-foreground mt-1">Track and manage successful sales</p>
             </div>
           </div>
 
           {/* Date-Based Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200">
-              <div className="text-sm text-indigo-600 font-medium mb-1">Sales Today</div>
-              <div className="text-2xl font-bold text-indigo-900 truncate">
+            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-500/10 dark:to-indigo-500/15 rounded-xl p-4 border border-indigo-200 dark:border-indigo-500/25">
+              <div className="text-sm text-indigo-600 dark:text-indigo-300 font-medium mb-1">Sales Today</div>
+              <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-200 truncate">
                 ${revenueToday.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-xs text-indigo-600 mt-1">{salesToday.length} sales</div>
+              <div className="text-xs text-indigo-600 dark:text-indigo-300 mt-1">{salesToday.length} sales</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
-              <div className="text-sm text-purple-600 font-medium mb-1">Yesterday</div>
-              <div className="text-2xl font-bold text-purple-900 truncate">
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-500/10 dark:to-purple-500/15 rounded-xl p-4 border border-purple-200 dark:border-purple-500/25">
+              <div className="text-sm text-purple-600 dark:text-purple-300 font-medium mb-1">Yesterday</div>
+              <div className="text-2xl font-bold text-purple-900 dark:text-purple-200 truncate">
                 ${revenueYesterday.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-xs text-purple-600 mt-1">{salesYesterday.length} sales</div>
+              <div className="text-xs text-purple-600 dark:text-purple-300 mt-1">{salesYesterday.length} sales</div>
             </div>
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
-              <div className="text-sm text-blue-600 font-medium mb-1">Last 7 Days</div>
-              <div className="text-2xl font-bold text-blue-900 truncate">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/15 rounded-xl p-4 border border-blue-200 dark:border-blue-500/25">
+              <div className="text-sm text-blue-600 dark:text-blue-300 font-medium mb-1">Last 7 Days</div>
+              <div className="text-2xl font-bold text-blue-900 dark:text-blue-200 truncate">
                 ${revenueLast7Days.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-xs text-blue-600 mt-1">{salesLast7Days.length} sales</div>
+              <div className="text-xs text-blue-600 dark:text-blue-300 mt-1">{salesLast7Days.length} sales</div>
             </div>
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 border border-emerald-200">
-              <div className="text-sm text-emerald-600 font-medium mb-1">MTD</div>
-              <div className="text-2xl font-bold text-emerald-900 truncate">
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-500/10 dark:to-emerald-500/15 rounded-xl p-4 border border-emerald-200 dark:border-emerald-500/25">
+              <div className="text-sm text-emerald-600 dark:text-emerald-300 font-medium mb-1">MTD</div>
+              <div className="text-2xl font-bold text-emerald-900 dark:text-emerald-200 truncate">
                 ${revenueThisMonth.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-xs text-emerald-600 mt-1">{deduplicatedSalesThisMonth.length} sales</div>
+              <div className="text-xs text-emerald-600 dark:text-emerald-300 mt-1">{deduplicatedSalesThisMonth.length} sales</div>
             </div>
           </div>
 
           {/* Filters */}
           <div className="flex flex-col md:flex-row gap-4 mt-6">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
                 placeholder="Search by customer, email, phone, consultant, or location..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 h-12 bg-white border-slate-200"
+                className="pl-11 h-12 bg-card border-border"
               />
             </div>
             <div className="flex gap-4">
@@ -224,14 +224,14 @@ export default function Sales() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="h-12 bg-white border-slate-200"
+                className="h-12 w-full sm:w-auto bg-card border-border"
                 placeholder="Start date"
               />
               <Input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="h-12 bg-white border-slate-200"
+                className="h-12 w-full sm:w-auto bg-card border-border"
                 placeholder="End date"
               />
             </div>
@@ -240,16 +240,16 @@ export default function Sales() {
       </div>
 
       {/* Sales List */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading || loadingCustomers ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : filteredSales.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
-            <DollarSign className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-800">No sales found</h3>
-            <p className="text-slate-500 mt-1">
+          <div className="text-center py-12 bg-card rounded-2xl border border-border">
+            <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground">No sales found</h3>
+            <p className="text-muted-foreground mt-1">
               {searchQuery || startDate || endDate
                 ? 'Try adjusting your filters'
                 : 'Sales will appear here when appointments are marked as sold'}
@@ -264,13 +264,13 @@ export default function Sales() {
               return (
                 <div key={dateKey}>
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-slate-800">
+                    <h2 className="text-lg font-semibold text-foreground">
                       {format(parseISO(dateKey), 'EEEE, MMMM d, yyyy')}
                     </h2>
-                    <div className="text-sm text-slate-600">
+                    <div className="text-sm text-muted-foreground">
                       <span className="font-medium">{dateSales.length} sales</span>
                       <span className="mx-2">•</span>
-                      <span className="font-semibold text-emerald-600">
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                         ${dateRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
@@ -291,46 +291,46 @@ export default function Sales() {
                         >
                           <Link
                             to={createPageUrl('SaleDetail') + `?id=${sale.id}`}
-                            className="block bg-white rounded-xl border border-slate-100 p-6 hover:shadow-lg hover:border-indigo-200 transition-all"
+                            className="block bg-card rounded-xl border border-border p-6 hover:shadow-lg hover:border-primary/30 transition-all"
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-slate-800">{customerName}</h3>
-                                <p className="text-sm text-slate-500 mt-1">
+                                <h3 className="text-lg font-semibold text-foreground">{customerName}</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
                                   Consultant: {consultantName}
                                 </p>
                                 {sale.location_address && (
-                                  <p className="text-sm text-slate-500 mt-1">{sale.location_address}</p>
+                                  <p className="text-sm text-muted-foreground mt-1">{sale.location_address}</p>
                                 )}
                                 {(sale.deposit_amount || sale.deposit_payment_method) && (
                                   <p className="text-sm mt-2">
                                     {sale.deposit_amount && (
                                       <>
-                                        <span className="text-slate-500">Deposit: </span>
-                                        <span className="text-slate-600 font-medium">
+                                        <span className="text-muted-foreground">Deposit: </span>
+                                        <span className="text-foreground font-medium">
                                           ${sale.deposit_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </span>
                                       </>
                                     )}
                                     {sale.deposit_amount && sale.deposit_payment_method && (
-                                      <span className="text-slate-400 mx-2">•</span>
+                                      <span className="text-muted-foreground mx-2">•</span>
                                     )}
                                     {sale.deposit_payment_method && (
-                                      <span className="text-indigo-600 font-medium">
+                                      <span className="text-primary font-medium">
                                         {sale.deposit_payment_method}
                                       </span>
                                     )}
                                   </p>
                                 )}
                                 {sale.invoice_number && (
-                                  <p className="text-sm text-slate-500 mt-1">
+                                  <p className="text-sm text-muted-foreground mt-1">
                                     Invoice #{sale.invoice_number}
                                   </p>
                                 )}
                               </div>
                               <div className="text-right">
                                 {getEffectiveSaleAmount(sale) > 0 && (
-                                  <p className="text-2xl font-bold text-emerald-600">
+                                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                                     ${getEffectiveSaleAmount(sale).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                   </p>
                                 )}
@@ -341,14 +341,14 @@ export default function Sales() {
                                       const financingLine = sale.rfms_order_data.result.lines.find(line => line.styleName && (line.styleName.includes('SYNCHRONY') || line.styleName.includes('MOMNT')));
                                       return (
                                         <>
-                                          <p className="text-sm text-blue-600 font-medium">
+                                          <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
                                             GP: ${grossProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                           </p>
-                                          <p className="text-xs text-blue-500">
+                                          <p className="text-xs text-blue-500 dark:text-blue-400">
                                             {grossProfitPercent.toFixed(1)}%
                                           </p>
                                           {financingLine && (
-                                            <p className="text-xs text-purple-600 font-medium">
+                                            <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">
                                               Financing charges: ${financingLine.total?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
                                             </p>
                                           )}
@@ -357,7 +357,7 @@ export default function Sales() {
                                     })()}
                                   </div>
                                 )}
-                                <p className="text-sm text-slate-500 mt-1">
+                                <p className="text-sm text-muted-foreground mt-1">
                                   {format(parseISO(sale.sale_date), 'h:mm a')}
                                 </p>
                               </div>

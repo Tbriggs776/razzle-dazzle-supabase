@@ -10,9 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Users, Loader2, Pencil, Trash2, Phone, Mail, UserPlus } from 'lucide-react';
 
 const statusColors = {
-  active: 'bg-green-100 text-green-800 border-green-200',
-  inactive: 'bg-slate-100 text-slate-700 border-slate-200',
-  on_leave: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+  active: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
+  inactive: 'bg-secondary text-secondary-foreground border-border',
+  on_leave: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25'
 };
 
 const EMPTY = { first_name: '', last_name: '', phone: '', email: '', license_number: '', status: 'active', notes: '' };
@@ -90,48 +90,48 @@ export default function FleetDrivers() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="min-h-screen bg-background">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Drivers</h1>
-            <p className="text-slate-500 mt-1">Master list of all fleet drivers</p>
+            <h1 className="text-3xl font-bold text-foreground">Drivers</h1>
+            <p className="text-muted-foreground mt-1">Master list of all fleet drivers</p>
           </div>
-          <div className="flex gap-2 self-start md:self-auto">
-          <Button variant="outline" onClick={() => { setImportForm(IMPORT_EMPTY); setShowImportDialog(true); }} className="border-indigo-200 text-indigo-600 hover:bg-indigo-50">
+          <div className="flex flex-wrap gap-2 self-start md:self-auto">
+          <Button variant="outline" onClick={() => { setImportForm(IMPORT_EMPTY); setShowImportDialog(true); }} className="border-primary/30 text-primary hover:bg-primary/10">
             <UserPlus className="w-4 h-4 mr-2" /> Import from Team
           </Button>
-          <Button onClick={openNew} className="bg-indigo-600 hover:bg-indigo-700">
+          <Button onClick={openNew} className="bg-primary text-primary-foreground hover:opacity-90">
             <Plus className="w-4 h-4 mr-2" /> Add Manually
           </Button>
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-6 pb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Search drivers..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isLoading ? (
-          <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 text-indigo-600 animate-spin" /></div>
+          <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 text-primary animate-spin" /></div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-100">
-            <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500">No drivers found</p>
+          <div className="text-center py-12 bg-card rounded-2xl border border-border">
+            <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground">No drivers found</p>
           </div>
         ) : (
           <div className="grid gap-3">
             {filtered.map(d => (
-              <div key={d.id} className="bg-white rounded-xl border border-slate-100 p-4 flex items-center gap-4 hover:shadow-md transition-all">
-                <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
-                  <Users className="w-5 h-5 text-indigo-600" />
+              <div key={d.id} className="bg-card rounded-xl border border-border p-4 flex items-center gap-4 hover:shadow-md transition-all">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-800">{d.first_name} {d.last_name}</p>
-                  <div className="flex gap-3 text-sm text-slate-500 flex-wrap">
+                  <p className="font-semibold text-foreground">{d.first_name} {d.last_name}</p>
+                  <div className="flex gap-3 text-sm text-muted-foreground flex-wrap">
                     {d.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{d.phone}</span>}
                     {d.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{d.email}</span>}
                     {d.license_number && <span>License: {d.license_number}</span>}
@@ -140,7 +140,7 @@ export default function FleetDrivers() {
                 <Badge className={`border ${statusColors[d.status] || statusColors.active}`}>{(d.status || 'active').replace('_', ' ')}</Badge>
                 <div className="flex gap-1">
                   <Button size="sm" variant="ghost" onClick={() => openEdit(d)}><Pencil className="w-4 h-4" /></Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleDelete(d.id)} className="text-red-500 hover:text-red-700"><Trash2 className="w-4 h-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => handleDelete(d.id)} className="text-destructive hover:opacity-80"><Trash2 className="w-4 h-4" /></Button>
                 </div>
               </div>
             ))}
@@ -177,7 +177,7 @@ export default function FleetDrivers() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground hover:opacity-90">
               {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}{editId ? 'Save' : 'Add Driver'}
             </Button>
           </DialogFooter>
@@ -199,7 +199,7 @@ export default function FleetDrivers() {
                   {availableTeamMembers.length === 0 && <SelectItem value="_none" disabled>All team members already added</SelectItem>}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-slate-400 mt-1">Name, phone, and email will be pulled from their team profile.</p>
+              <p className="text-xs text-muted-foreground mt-1">Name, phone, and email will be pulled from their team profile.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>License # (optional)</Label><Input value={importForm.license_number} onChange={e => setImportForm(f => ({...f, license_number: e.target.value}))} placeholder="License number" /></div>
@@ -218,7 +218,7 @@ export default function FleetDrivers() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-            <Button onClick={handleImport} disabled={importing || !importForm.team_member_id} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleImport} disabled={importing || !importForm.team_member_id} className="bg-primary text-primary-foreground hover:opacity-90">
               {importing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Import Driver
             </Button>
           </DialogFooter>

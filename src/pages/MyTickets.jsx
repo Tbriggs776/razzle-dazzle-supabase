@@ -156,29 +156,29 @@ export default function MyTickets() {
 
   if (!currentUser || !currentTeamMember) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="flex items-center justify-between">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                <ClipboardCheck className="w-7 h-7 text-white" />
+              <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
+                <ClipboardCheck className="w-7 h-7 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-slate-800 tracking-tight">My Tickets</h1>
-                <p className="text-slate-500 mt-1">Track your submitted order tickets</p>
+                <h1 className="text-3xl font-bold text-foreground tracking-tight">My Tickets</h1>
+                <p className="text-muted-foreground mt-1">Track your submitted order tickets</p>
               </div>
             </div>
             <Link to={createPageUrl('SubmitTicket')}>
-              <Button className="bg-indigo-600 hover:bg-indigo-700">
+              <Button className="bg-primary text-primary-foreground hover:opacity-90">
                 <Plus className="w-4 h-4 mr-2" />
                 Submit New Ticket
               </Button>
@@ -188,7 +188,7 @@ export default function MyTickets() {
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -196,19 +196,19 @@ export default function MyTickets() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ClipboardCheck className="w-5 h-5 text-indigo-600" />
+                <ClipboardCheck className="w-5 h-5 text-primary" />
                 Your Tickets
               </CardTitle>
             </CardHeader>
             <CardContent>
               {/* Filter Tabs and Sort */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <div className="flex items-center gap-2 flex-nowrap overflow-x-auto pb-1">
                   <Button
                     variant={filterStatus === 'all' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilterStatus('all')}
-                    className={filterStatus === 'all' ? 'bg-indigo-600' : ''}
+                    className={filterStatus === 'all' ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
                   >
                     All ({tickets.length})
                   </Button>
@@ -216,7 +216,7 @@ export default function MyTickets() {
                     variant={filterStatus === 'Open' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilterStatus('Open')}
-                    className={filterStatus === 'Open' ? 'bg-red-600 hover:bg-red-700' : ''}
+                    className={filterStatus === 'Open' ? 'bg-red-600 hover:bg-red-700 text-white' : ''}
                   >
                     Open ({tickets.filter(t => getTicketStatus(t) === 'Open').length})
                   </Button>
@@ -224,13 +224,13 @@ export default function MyTickets() {
                     variant={filterStatus === 'Resolved' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilterStatus('Resolved')}
-                    className={filterStatus === 'Resolved' ? 'bg-green-600 hover:bg-green-700' : ''}
+                    className={filterStatus === 'Resolved' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
                   >
                     Resolved ({tickets.filter(t => getTicketStatus(t) === 'Resolved').length})
                   </Button>
                 </div>
                 <Select value={sortOrder} onValueChange={setSortOrder}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -243,12 +243,12 @@ export default function MyTickets() {
               {/* Tickets List */}
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+                  <Loader2 className="w-6 h-6 text-primary animate-spin" />
                 </div>
               ) : filteredTickets.length === 0 ? (
                 <div className="text-center py-12">
-                  <ClipboardCheck className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-500 mb-4">
+                  <ClipboardCheck className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+                  <p className="text-muted-foreground mb-4">
                     {filterStatus === 'all' ? 'No tickets yet' : `No ${filterStatus.toLowerCase()} tickets`}
                   </p>
                   <Link to={createPageUrl('SubmitTicket')}>
@@ -273,29 +273,29 @@ export default function MyTickets() {
                         key={ticket.id}
                         className={cn(
                           "p-4 rounded-lg border transition-all",
-                          ticketStatus === 'Open' 
-                            ? "bg-red-50 border-red-200" 
-                            : "bg-green-50 border-green-200"
+                          ticketStatus === 'Open'
+                            ? "bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/20"
+                            : "bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/20"
                         )}
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2 flex-wrap">
-                              <Badge variant="secondary" className="bg-white border-slate-200">
+                              <Badge variant="secondary" className="bg-card border-border">
                                 Order #{ticket.order_number}
                               </Badge>
                               {ticket.customer_last_name && (
-                                <Badge variant="secondary" className="bg-slate-100 text-slate-700 border-slate-300">
+                                <Badge variant="secondary" className="bg-secondary text-secondary-foreground border-border">
                                   {ticket.customer_last_name}
                                 </Badge>
                               )}
-                              <Badge 
-                                variant="secondary" 
+                              <Badge
+                                variant="secondary"
                                 className={cn(
                                   "border",
-                                  ticketStatus === 'Open' 
-                                    ? "bg-red-100 text-red-800 border-red-300" 
-                                    : "bg-green-100 text-green-800 border-green-300"
+                                  ticketStatus === 'Open'
+                                    ? "bg-red-100 text-red-800 border-red-300 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25"
+                                    : "bg-green-100 text-green-800 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25"
                                 )}
                               >
                                 {ticketStatus === 'Open' ? (
@@ -306,7 +306,7 @@ export default function MyTickets() {
                                 {resolvedCount} of {totalCount} Resolved
                               </Badge>
                               {assignedDC && (
-                                <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                                <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25">
                                   Assigned: {assignedDC.first_name} {assignedDC.last_name}
                                 </Badge>
                               )}
@@ -317,39 +317,39 @@ export default function MyTickets() {
                                 ticket.categories.map((cat, idx) => (
                                   <div key={idx} className={cn(
                                     "flex items-center gap-2 p-2 rounded border",
-                                    cat.status === 'Resolved' 
-                                      ? "bg-green-50 border-green-200"
+                                    cat.status === 'Resolved'
+                                      ? "bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/20"
                                       : cat.status === 'Requested Resolve'
-                                      ? "bg-yellow-50 border-yellow-200"
-                                      : "bg-white border-slate-200"
+                                      ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/20"
+                                      : "bg-card border-border"
                                   )}>
                                     {cat.status === 'Resolved' ? (
-                                      <CheckCircle2 className="w-3 h-3 text-green-600" />
+                                      <CheckCircle2 className="w-3 h-3 text-green-600 dark:text-green-400" />
                                     ) : cat.status === 'Requested Resolve' ? (
-                                      <Clock className="w-3 h-3 text-yellow-600" />
+                                      <Clock className="w-3 h-3 text-yellow-600 dark:text-yellow-400" />
                                     ) : (
-                                      <AlertCircle className="w-3 h-3 text-red-600" />
+                                      <AlertCircle className="w-3 h-3 text-red-600 dark:text-red-400" />
                                     )}
                                     <span className={cn(
                                       "text-sm",
-                                      cat.status === 'Resolved' ? "text-green-900 line-through" : "text-slate-700"
+                                      cat.status === 'Resolved' ? "text-green-900 dark:text-green-300 line-through" : "text-foreground"
                                     )}>
                                       {cat.name}
                                     </span>
                                     {cat.status === 'Requested Resolve' && (
-                                      <Badge variant="secondary" className="ml-auto bg-yellow-100 text-yellow-800 border-yellow-200 text-xs">
+                                      <Badge variant="secondary" className="ml-auto bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25 text-xs">
                                         Pending Approval
                                       </Badge>
                                     )}
                                   </div>
                                 ))
                               ) : (
-                                <span className="text-sm text-slate-500">No categories</span>
+                                <span className="text-sm text-muted-foreground">No categories</span>
                               )}
                             </div>
 
-                            <p className="text-sm text-slate-600 mb-2">{ticket.description}</p>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-sm text-muted-foreground mb-2">{ticket.description}</p>
+                            <p className="text-xs text-muted-foreground">
                               Created {new Date(ticket.created_date).toLocaleDateString()} at{' '}
                               {new Date(ticket.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
@@ -357,7 +357,7 @@ export default function MyTickets() {
                             {/* Chat Messages */}
                             <Accordion type="single" collapsible className="mt-3" onValueChange={(value) => value === 'chat' && scrollToBottom(ticket.id)}>
                               <AccordionItem value="chat" className="border-none">
-                                <AccordionTrigger className="text-xs text-indigo-600 hover:no-underline py-2">
+                                <AccordionTrigger className="text-xs text-primary hover:no-underline py-2">
                                   <div className="flex items-center gap-2">
                                     💬 Chat ({ticketMessages.filter(m => m.ticket === ticket.id).length})
                                   </div>
@@ -379,13 +379,13 @@ export default function MyTickets() {
                                       return (
                                         <div key={msg.id} className={cn(
                                           "text-xs p-2 rounded border",
-                                          msg.sender_role === 'Requester' 
-                                            ? "bg-indigo-50 border-indigo-200 ml-8" 
-                                            : "bg-slate-50 border-slate-200 mr-8"
+                                          msg.sender_role === 'Requester'
+                                            ? "bg-primary/10 border-primary/20 ml-8"
+                                            : "bg-secondary border-border mr-8"
                                         )}>
-                                          <p className="font-medium text-slate-700">{msg.sender_name}</p>
+                                          <p className="font-medium text-foreground">{msg.sender_name}</p>
                                           {msg.message && msg.message !== '(attached files)' && (
-                                            <p className="text-slate-600 mt-1">{msg.message}</p>
+                                            <p className="text-muted-foreground mt-1">{msg.message}</p>
                                           )}
                                           {msg.file_urls && msg.file_urls.length > 0 && (
                                             <div className="flex flex-wrap gap-2 mt-2">
@@ -401,10 +401,10 @@ export default function MyTickets() {
                                                     }}
                                                     className="block"
                                                   >
-                                                    <img 
-                                                      src={url} 
+                                                    <img
+                                                      src={url}
                                                       alt={`Attachment ${idx + 1}`}
-                                                      className="max-w-[200px] max-h-[200px] rounded border border-slate-300 hover:opacity-90 cursor-pointer"
+                                                      className="max-w-[200px] max-h-[200px] rounded border border-border hover:opacity-90 cursor-pointer"
                                                     />
                                                   </button>
                                                 ) : (
@@ -413,7 +413,7 @@ export default function MyTickets() {
                                                     href={url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex items-center gap-1 px-2 py-1 bg-white border border-slate-300 rounded hover:bg-slate-50"
+                                                    className="flex items-center gap-1 px-2 py-1 bg-card border border-border rounded hover:bg-secondary"
                                                   >
                                                     <Paperclip className="w-3 h-3" />
                                                     <span className="text-xs">{getFileName(url)}</span>
@@ -422,7 +422,7 @@ export default function MyTickets() {
                                               ))}
                                             </div>
                                           )}
-                                          <p className="text-slate-400 mt-1">
+                                          <p className="text-muted-foreground mt-1">
                                             {new Date(msg.created_date).toLocaleDateString()} at{' '}
                                             {new Date(msg.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                           </p>
@@ -435,7 +435,7 @@ export default function MyTickets() {
                                     {uploadingFiles[ticket.id] && uploadingFiles[ticket.id].length > 0 && (
                                       <div className="flex flex-wrap gap-2">
                                         {uploadingFiles[ticket.id].map((file, idx) => (
-                                          <div key={idx} className="flex items-center gap-1 px-2 py-1 bg-slate-100 border border-slate-300 rounded text-xs">
+                                          <div key={idx} className="flex items-center gap-1 px-2 py-1 bg-secondary border border-border rounded text-xs">
                                             <ImageIcon className="w-3 h-3" />
                                             <span className="truncate max-w-[100px]">{file.name}</span>
                                             <button
@@ -445,7 +445,7 @@ export default function MyTickets() {
                                                   [ticket.id]: prev[ticket.id].filter((_, i) => i !== idx)
                                                 }));
                                               }}
-                                              className="ml-1 hover:text-red-600"
+                                              className="ml-1 hover:text-destructive"
                                             >
                                               <X className="w-3 h-3" />
                                             </button>
@@ -535,7 +535,7 @@ export default function MyTickets() {
                                           }
                                         }}
                                         disabled={(!messageText[ticket.id]?.trim() && !uploadingFiles[ticket.id]?.length) || sendMessageMutation.isPending}
-                                        className="bg-indigo-600 hover:bg-indigo-700"
+                                        className="bg-primary text-primary-foreground hover:opacity-90"
                                       >
                                         {sendMessageMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Send'}
                                       </Button>
@@ -549,18 +549,18 @@ export default function MyTickets() {
                             {ticketLogs.filter(log => log.ticket === ticket.id).length > 0 && (
                               <Accordion type="single" collapsible className="mt-2">
                                 <AccordionItem value="log" className="border-none">
-                                  <AccordionTrigger className="text-xs text-slate-500 hover:no-underline py-2">
+                                  <AccordionTrigger className="text-xs text-muted-foreground hover:no-underline py-2">
                                     Activity Log ({ticketLogs.filter(log => log.ticket === ticket.id).length})
                                   </AccordionTrigger>
                                   <AccordionContent>
                                     <div className="space-y-2 mt-2">
                                       {ticketLogs.filter(log => log.ticket === ticket.id).map((log) => (
-                                        <div key={log.id} className="text-xs p-2 bg-white rounded border border-slate-200">
+                                        <div key={log.id} className="text-xs p-2 bg-card rounded border border-border">
                                           <div className="flex items-start justify-between gap-2">
                                             <div className="flex-1">
-                                              <p className="font-medium text-slate-700">{log.action}</p>
-                                              {log.details && <p className="text-slate-500 mt-0.5">{log.details}</p>}
-                                              <p className="text-slate-400 mt-1">
+                                              <p className="font-medium text-foreground">{log.action}</p>
+                                              {log.details && <p className="text-muted-foreground mt-0.5">{log.details}</p>}
+                                              <p className="text-muted-foreground mt-1">
                                                 {log.user_name} • {new Date(log.created_date).toLocaleDateString()} at{' '}
                                                 {new Date(log.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                               </p>
