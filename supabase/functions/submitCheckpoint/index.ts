@@ -110,8 +110,18 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
 
   switch (action) {
     case 'submit': {
-      if (step_key === 'floor_prep_checklist' && checklist_data?.prep?.is_billable && !checklist_data?.change_order?.signed_and_paid)
-        return { status: 400, body: { error: 'Change order must be signed and paid before submitting' } };
+      // Billable floor-prep change order: the crew must have called it in for approval BEFORE
+      // doing the work and recorded the dollar amount that was called in. This is the compliance
+      // gate (belt-and-suspenders with the checklist's client-side validation). Submitting a
+      // chargeable prep then notifies Order Entry + the Install Coordinator (below) so they can
+      // create the actual customer change order — it does not block on customer signature/payment.
+      if (step_key === 'floor_prep_checklist' && checklist_data?.change_order?.is_chargeable) {
+        const co = checklist_data.change_order;
+        if (!co.called_in_before_work)
+          return { status: 400, body: { error: 'Chargeable prep must be called in for approval before the work is done. Confirm the call-in before submitting.' } };
+        if (!(Number(co.amount) > 0))
+          return { status: 400, body: { error: 'Enter the dollar amount that was called in for approval before submitting.' } };
+      }
       const fields = { checklist_data, status: 'SubmittedForApproval', submitted_by_name: userName, submitted_by_email: userEmail, submitted_date: nowIso };
       const checkpoint = await upsertCheckpoint(s, checkpoint_id, { project_id, step_key, ...fields }, fields);
 
@@ -145,16 +155,22 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
           await qEmail(s, cfg, m.email, '[Alert Team] ⚠️ Material Shortage / Discrepancy',
             `Material shortage reported on project ${project_id}.\n\nShortage count: ${cnt}\nDetails: ${notes}\n\nPlease review and coordinate.`);
       }
-      if (step_key === 'floor_prep_checklist' && checklist_data?.prep?.is_billable && region) {
-        const ids = [region.install_coordinator_id, region.order_entry_id].filter(Boolean);
-        if (ids.length) {
-          const { data: recs } = await s.from('team_member').select('*').in('id', ids);
-          const amt = checklist_data?.change_order?.amount || 'N/A';
-          const notes = checklist_data?.change_order?.notes || 'No details provided';
-          for (const m of recs || [])
-            await qEmail(s, cfg, m.email, `[Ops Team] Change Order — Billable Floor Prep — ${customerName}`,
-              `Hi ${m.first_name},\n\nA billable floor prep change order has been submitted for ${customerName}.\n\nAmount: $${amt}\nNotes: ${notes}\nRegion: ${region.region_name}\n\nProject: ${url}`);
-        }
+      if (step_key === 'floor_prep_checklist' && checklist_data?.change_order?.is_chargeable) {
+        const co = checklist_data.change_order;
+        const amt = co.amount || 'N/A';
+        const desc = co.what_prep || 'No details provided';
+        const calledIn = co.called_in_before_work ? 'Yes' : 'No';
+        const regionName = region?.region_name || 'Unassigned';
+        // Recipients: the region's Install Coordinator + Order Entry. If the customer's zip
+        // matches no region (so no recipient IDs), fall back to the 'change_order' alert group
+        // so the notification the UI promises always reaches someone once that group is set up.
+        const ids = [region?.install_coordinator_id, region?.order_entry_id].filter(Boolean);
+        let recs: any[] = [];
+        if (ids.length) { const { data } = await s.from('team_member').select('*').in('id', ids); recs = data || []; }
+        if (!recs.length) recs = await alertMembers(s, 'change_order');
+        for (const m of recs)
+          await qEmail(s, cfg, m.email, `[Ops Team] Change Order — Billable Floor Prep — ${customerName}`,
+            `Hi ${m.first_name},\n\nA billable floor prep change order has been submitted for ${customerName}.\n\nCalled in for approval before work: ${calledIn}\nAmount: $${amt}\nWhat prep: ${desc}\nRegion: ${regionName}\n\nProject: ${url}`);
       }
       return { status: 200, body: { success: true, checkpoint, asbestos_halt: asbestos } };
     }
