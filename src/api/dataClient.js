@@ -244,6 +244,21 @@ function makeEntity(entityName) {
 }
 
 // entities proxy: db.entities.Customer -> makeEntity('Customer'), memoized.
+// base44's `User` was the PLATFORM user (login/access) — a concept retired by the migration
+// (auth is Supabase; the app_user access-model row has no email/name/role to reconcile). Rather
+// than throw "Unknown entity" (which broke the Team Members roster), expose a graceful empty
+// entity so pages that overlaid platform users simply show none.
+const RETIRED_ENTITY = {
+  async list() { return []; },
+  async filter() { return []; },
+  async get() { return null; },
+  async create() { throw new Error('The base44 "User" concept is retired; manage access via Team Members instead.'); },
+  async update() { throw new Error('The base44 "User" concept is retired; manage access via Team Members instead.'); },
+  async delete() { return { id: null }; },
+  subscribe() { return () => {}; },
+};
+const RETIRED_ENTITIES = new Set(['User']);
+
 const entityCache = {};
 const entities = new Proxy(
   {},
@@ -251,6 +266,7 @@ const entities = new Proxy(
     get(_t, name) {
       if (name === 'Query') return makeEntity; // rarely used; expose factory
       if (typeof name !== 'string') return undefined;
+      if (RETIRED_ENTITIES.has(name)) return RETIRED_ENTITY;
       if (!entityCache[name]) entityCache[name] = makeEntity(name);
       return entityCache[name];
     },
@@ -498,8 +514,13 @@ const functions = {
       if (error) throw error;
       return { data, error: null };
     } catch (err) {
-      console.warn(`[dataClient] functions.invoke('${name}') failed — returning stub.`, err?.message || err);
-      return { data: null, error: null, stub: true };
+      // A DEPLOYED function that errors (non-2xx / network) is a REAL failure — surface it so
+      // callers that check `error` (and mutation onError) can react. Do NOT mask it as
+      // { stub:true }: that resurrected fake-success (e.g. "report sent!" when it wasn't).
+      // The genuine "not configured" path is the function returning 200 + { stub:true } in its
+      // body, which flows through the success branch above untouched.
+      console.warn(`[dataClient] functions.invoke('${name}') failed.`, err?.message || err);
+      return { data: null, error: err instanceof Error ? err : new Error(String(err?.message || err)) };
     }
   },
 };

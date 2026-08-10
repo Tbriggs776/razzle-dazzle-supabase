@@ -68,16 +68,6 @@ export default function QuoteDetail() {
   const [generatingReceipt, setGeneratingReceipt] = useState(false);
   const [savingDeposit, setSavingDeposit] = useState(false);
 
-  // Pre-populate deposit fields when quote loads
-  useEffect(() => {
-    if (quote) {
-      if (quote.deposit_amount) setQuoteDepositAmount(quote.deposit_amount.toString());
-      if (quote.deposit_payment_method) setQuoteDepositMethod(quote.deposit_payment_method);
-      if (quote.check_number) setQuoteCheckNumber(quote.check_number);
-      if (quote.check_date) setQuoteCheckDate(quote.check_date);
-    }
-  }, [quote?.id]);
-
   const { data: quote, isLoading } = useQuery({
     queryKey: ['quote', quoteId],
     queryFn: async () => {
@@ -86,6 +76,17 @@ export default function QuoteDetail() {
     },
     enabled: !!quoteId
   });
+
+  // Pre-populate deposit fields when quote loads (must come AFTER `quote` is declared —
+  // referencing it in the deps above would be a temporal-dead-zone ReferenceError).
+  useEffect(() => {
+    if (quote) {
+      if (quote.deposit_amount) setQuoteDepositAmount(quote.deposit_amount.toString());
+      if (quote.deposit_payment_method) setQuoteDepositMethod(quote.deposit_payment_method);
+      if (quote.check_number) setQuoteCheckNumber(quote.check_number);
+      if (quote.check_date) setQuoteCheckDate(quote.check_date);
+    }
+  }, [quote?.id]);
 
   const { data: lead } = useQuery({
     queryKey: ['lead', quote?.lead],

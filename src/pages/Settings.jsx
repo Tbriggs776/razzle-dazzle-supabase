@@ -517,8 +517,9 @@ export default function Settings() {
     const checkCronStatus = async () => {
       try {
         const { data } = await base44.functions.invoke('setupReminderCron', { action: 'list' });
-        setCronExists(data.reminderCronExists);
-        setCronJobId(data.reminderCronId);
+        // Reminders run on pg_cron now (not an external cron service), so this returns null/stub.
+        setCronExists(data?.reminderCronExists ?? false);
+        setCronJobId(data?.reminderCronId ?? null);
       } catch (error) {
         console.error('Failed to check cron status:', error);
       } finally {

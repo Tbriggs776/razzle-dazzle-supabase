@@ -267,14 +267,12 @@ export default function ChecklistDetail() {
               csrEmail: csrTeamMember?.email
             });
 
-            if (!syncResponse.data.success) {
-              // If calendar sync failed, delete the appointment and throw error
-              try {
-                await base44.entities.Appointment.delete(appointmentId);
-              } catch (deleteError) {
-                console.error('Failed to delete appointment after calendar sync error:', deleteError);
-              }
-              throw new Error(syncResponse.data.error || 'Calendar sync failed. Please try again.');
+            // Calendar sync is best-effort: Google may be unconfigured or degrade gracefully
+            // (returns {stub:true} / no success). Do NOT delete the just-created appointment or
+            // fail the whole conversion over it — the appointment is the source of truth; the
+            // calendar event is a convenience that can be re-synced later.
+            if (!syncResponse?.data?.success) {
+              console.warn('Calendar sync did not confirm success (Google may be unconfigured); appointment kept.', syncResponse?.data?.error);
             }
             console.timeEnd('⏱️ Sync Google Calendar');
 

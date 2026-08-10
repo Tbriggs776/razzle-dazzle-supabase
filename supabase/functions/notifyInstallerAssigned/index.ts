@@ -78,15 +78,15 @@ Deno.serve(async (req) => {
     if (!installer) return Response.json({ success: true, notified: false, skipped: 'installer not found' }, { headers: cors });
 
     const { data: customer } = project.customer
-      ? await s.from('customer').select('first_name, last_name, address, city, state').eq('id', project.customer).maybeSingle()
+      ? await s.from('customer').select('first_name, last_name, address_line1, city, state').eq('id', project.customer).maybeSingle()
       : { data: null };
     const { data: cfgRow } = await s.from('sms_settings').select('*').limit(1).maybeSingle();
     const cfg = cfgRow || {};
 
     const customerName = customer ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'a customer' : 'a customer';
-    const addr = [customer?.address, customer?.city, customer?.state].filter(Boolean).join(', ');
+    const addr = [customer?.address_line1, customer?.city, customer?.state].filter(Boolean).join(', ');
     const dateStr = fmtDate(project.installation_date);
-    const link = `${APP_URL}/JourneyProjectDetail?id=${project_id}`;
+    const link = `${APP_URL}/JourneyProjectDetail?project_id=${project_id}`;
 
     const smsBody = `Floor Daddy: You're assigned to install for ${customerName}`
       + (addr ? ` at ${addr}` : '') + (dateStr ? ` on ${dateStr}` : '') + `. Details: ${link}`;

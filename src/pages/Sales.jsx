@@ -156,7 +156,8 @@ export default function Sales() {
 
   // Group sales by date (using Arizona date)
   const salesByDate = filteredSales.reduce((groups, sale) => {
-    const dateKey = getSaleDateAZ(sale.sale_date) || format(parseISO(sale.sale_date), 'yyyy-MM-dd');
+    const dateKey = getSaleDateAZ(sale.sale_date)
+      || (sale.sale_date ? format(parseISO(sale.sale_date), 'yyyy-MM-dd') : 'No Date');
     if (!groups[dateKey]) groups[dateKey] = [];
     groups[dateKey].push(sale);
     return groups;

@@ -106,6 +106,7 @@ export default function SignDocument() {
 
   if (state.loading) return shell(<div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>);
   if (state.error) return shell(<div className={card + " text-center"}><h2 className="text-lg font-semibold">Unable to load</h2><p className="text-muted-foreground mt-1">{state.error}</p></div>);
+  if (!d) return shell(<div className={card + " text-center"}><h2 className="text-lg font-semibold">Unable to load</h2><p className="text-muted-foreground mt-1">This signing link couldn’t be loaded right now. Please try again, or contact us for a new link.</p></div>);
 
   if (d.status === 'signed') return shell(
     <div className={card + " text-center py-10"}>
