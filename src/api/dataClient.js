@@ -331,6 +331,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'googleSheets',
   'ghl',
   'submitCheckpoint',
+  'notifyInstallerAssigned',
 ]);
 
 // base44 email-sender names -> the single emailDispatch function with a `type`
@@ -380,6 +381,7 @@ const EDGE_ALIASES = {
   // integrations.Core.InvokeLLM (below); these server functions call the bridge + update a record.
   extractContractData:            (p) => ['invokeLLM', { task: 'extract_contract', contractUrl: p.contractUrl, saleId: p.saleId }],
   analyzeNotSoldReason:           (p) => ['invokeLLM', { task: 'analyze_not_sold', appointmentId: p.appointmentId, event: p.event }],
+  extractInvoiceTotal:            (p) => ['invokeLLM', { task: 'extract_invoice_total', pdfUrl: p.pdfUrl }],
   // Value-add compliance check on a call transcript (P7 recording pipeline). Also auto-run by
   // the assemblyAIWebhook -> analyze_value_adds job after transcription lands.
   analyzeValueAdds:               (p) => ['invokeLLM', { task: 'analyze_value_adds', appointmentId: p.appointmentId }],
@@ -464,8 +466,8 @@ function warnUnavailable(name) {
 // degrade-style unmapped calls still return { stub:true } gracefully. (submit* signing +
 // submitCheckpoint + post-conversion/installer notifications are the known unported writes.)
 const WRITE_STUBS = new Set([
-  'submitCheckpoint', 'submitDesignMod', 'submitManualSalesContract', 'submitPreInstallChecklist',
-  'handlePostConversion', 'notifyInstallerAssigned',
+  'submitDesignMod', 'submitManualSalesContract', 'submitPreInstallChecklist',
+  'handlePostConversion',
 ]);
 const isWriteStub = (name) =>
   WRITE_STUBS.has(name) || /^(submit|create|update|delete|save|approve|reject|assign)/i.test(name);

@@ -145,6 +145,26 @@ Preserve the exact text as it appears. Include warranties, discounts, products, 
       return { success: true, invoice_number: result.invoice_number || '', line_items: result.line_items || [] };
     }
 
+    // extractInvoiceTotal: pull the final grand total (a number) from a contract/invoice PDF,
+    // used to auto-fill the sale/quote amount after a contract upload.
+    case 'extract_invoice_total': {
+      const url = p.pdfUrl || p.contractUrl || p.url;
+      if (!url) return { error: 'pdfUrl is required', success: false };
+      const result = await llmInvoke(s, {
+        prompt: `This is a flooring contract/invoice PDF. Find the FINAL grand total the customer owes — the bottom-line amount, usually labeled "Invoice Total", "Total", "Grand Total", "Balance Due", or "Amount Due", after any discounts. Return it as a plain number with no currency symbol or commas. If several totals appear, choose the final bottom-line total. If none can be found, return 0.`,
+        file_urls: [url],
+        response_json_schema: {
+          type: 'object',
+          properties: { total: { type: 'number', description: 'The final grand total as a number, e.g. 8450.00' } },
+          required: ['total'],
+        },
+      });
+      if (result?.stub) return { stub: true, success: false };
+      const total = Number(result?.total);
+      if (!Number.isFinite(total) || total <= 0) return { success: false, error: 'Could not extract a total' };
+      return { success: true, total };
+    }
+
     // analyzeNotSoldReason: categorize a lost appointment's last note into one loss reason.
     case 'analyze_not_sold': {
       const appointmentId = p.appointmentId || p.event?.entity_id;
