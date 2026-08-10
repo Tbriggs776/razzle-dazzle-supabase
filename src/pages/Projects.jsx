@@ -470,7 +470,7 @@ export default function Projects() {
         // Build a map of project_id -> when it was logged as "Status Changed to Materials Ordered"
         const statusChangedMap = new Map();
         materialsOrderedLogs.forEach(log => {
-          const logTime = new Date(log.created_date?.includes('Z') ? log.created_date : (log.created_date + 'Z'));
+          const logTime = new Date(log.created_date);
           const existing = statusChangedMap.get(log.project);
           // Keep the most recent log for each project
           if (!existing || logTime > existing) {
@@ -511,7 +511,7 @@ export default function Projects() {
             const jobName = c ? `${c.first_name} ${c.last_name}` : 'Unknown';
             const cgNumber = s?.invoice_number || 'N/A';
             const createdDate = p.created_date
-              ? format(new Date(p.created_date.includes('Z') ? p.created_date : p.created_date + 'Z'), 'MM/dd/yyyy')
+              ? format(new Date(p.created_date), 'MM/dd/yyyy')
               : 'N/A';
             const status = p.installation_date_status || p.status;
             const installDate = p.installation_date ? format(new Date(p.installation_date + 'T00:00:00'), 'MM/dd/yyyy') : 'No Install Date';
@@ -568,7 +568,7 @@ export default function Projects() {
                       const jobName = c ? `${c.first_name} ${c.last_name}` : 'Unknown';
                       const cgNumber = s?.invoice_number || 'N/A';
                       const installDate = p.installation_date ? format(new Date(p.installation_date + 'T00:00:00'), 'MM/dd/yyyy') : 'No Install Date';
-                      const createdDate = p.created_date ? format(new Date(p.created_date.includes('Z') ? p.created_date : p.created_date + 'Z'), 'MM/dd/yyyy') : 'N/A';
+                      const createdDate = p.created_date ? format(new Date(p.created_date), 'MM/dd/yyyy') : 'N/A';
                       return (
                         <p key={i} className="text-xs font-mono text-foreground bg-card border border-amber-200 rounded px-3 py-1.5 dark:border-amber-500/25">
                           Job: {jobName} | CG#: {cgNumber} | Created: {createdDate} | Install: {installDate}
@@ -735,7 +735,7 @@ export default function Projects() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="w-4 h-4 text-muted-foreground" />
-                        <span>Created: {format(new Date(project.created_date + (project.created_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy h:mm a')}</span>
+                        <span>Created: {format(new Date(project.created_date), 'MMM d, yyyy h:mm a')}</span>
                         <Badge className="ml-2 bg-secondary text-secondary-foreground border-border">
                           {businessDays} business {businessDays === 1 ? 'day' : 'days'} since cleared
                         </Badge>

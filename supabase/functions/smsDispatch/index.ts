@@ -332,7 +332,7 @@ async function handleType(s: any, type: string, p: any, user: any): Promise<Reco
       const tStart = Date.UTC(nowAZ.getUTCFullYear(), nowAZ.getUTCMonth(), nowAZ.getUTCDate());
       const matCount = (from: number, to: number | null) => (projects || []).filter((pr: any) => {
         if (pr.status !== 'Materials Ordered' || !pr.updated_date) return false;
-        const u = new Date((pr.updated_date.includes('Z') ? pr.updated_date : pr.updated_date + 'Z')).getTime() - AZ_OFFSET_MS;
+        const u = new Date(pr.updated_date).getTime() - AZ_OFFSET_MS; // timestamptz parses directly (offset OR Z form)
         return to ? u >= from && u < to : u >= from;
       }).length;
       const matToday = matCount(tStart, null);

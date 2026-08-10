@@ -380,8 +380,8 @@ export default function DesignConsultantTicketView() {
             {/* Created Date */}
             <div className="pt-4 border-t border-border">
               <p className="text-xs text-muted-foreground">
-                Created {new Date(ticket.created_date + (ticket.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString()} at{' '}
-                {new Date(ticket.created_date + (ticket.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                Created {new Date(ticket.created_date).toLocaleDateString()} at{' '}
+                {new Date(ticket.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
 
@@ -458,8 +458,8 @@ export default function DesignConsultantTicketView() {
                               </div>
                             )}
                             <p className="text-muted-foreground text-xs mt-2">
-                              {new Date(msg.created_date + (msg.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString()} at{' '}
-                              {new Date(msg.created_date + (msg.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              {new Date(msg.created_date).toLocaleDateString()} at{' '}
+                              {new Date(msg.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
                         );
@@ -581,8 +581,8 @@ export default function DesignConsultantTicketView() {
                                 <p className="font-medium text-foreground text-sm">{log.action}</p>
                                 {log.details && <p className="text-muted-foreground text-sm mt-1">{log.details}</p>}
                                 <p className="text-muted-foreground text-xs mt-2">
-                                  {log.user_name} • {new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString()} at{' '}
-                                  {new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  {log.user_name} • {new Date(log.created_date).toLocaleDateString()} at{' '}
+                                  {new Date(log.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                               </div>
                             </div>

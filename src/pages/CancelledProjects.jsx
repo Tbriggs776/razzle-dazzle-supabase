@@ -476,7 +476,7 @@ export default function CancelledProjects() {
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Clock className="w-4 h-4 text-muted-foreground" />
-                        <span>Created: {project.created_date ? format(new Date(project.created_date + (project.created_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy') : 'N/A'}</span>
+                        <span>Created: {project.created_date ? format(new Date(project.created_date), 'MMM d, yyyy') : 'N/A'}</span>
                       </div>
                       {isPendingCancellation && !isCancelled && project.pending_cancellation_date && (
                         <div className="flex items-center gap-2 text-sm text-orange-600 font-medium dark:text-orange-400">

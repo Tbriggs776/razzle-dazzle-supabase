@@ -156,7 +156,7 @@ export default function AppointmentCard({ appointment, index, preloadedData }) {
             <div className="flex items-center gap-2 text-xs text-slate-400 pt-2 border-t border-slate-100">
               <Clock className="w-3.5 h-3.5" />
               <span>
-                {format(new Date(appointment.created_date + (appointment.created_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy')} at {format(new Date(appointment.created_date + (appointment.created_date.includes('Z') ? '' : 'Z')), 'h:mm a')}
+                {format(new Date(appointment.created_date), 'MMM d, yyyy')} at {format(new Date(appointment.created_date), 'h:mm a')}
               </span>
             </div>
           )}

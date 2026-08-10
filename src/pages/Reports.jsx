@@ -157,7 +157,7 @@ export default function Reports() {
 
   const avgTimeOnSite = completedWithTime.length > 0
     ? completedWithTime.reduce((sum, apt) => {
-        const completionTime = new Date(apt.updated_date + (apt.updated_date.includes('Z') ? '' : 'Z'));
+        const completionTime = new Date(apt.updated_date);
         const arrivedTime = new Date(apt.consultant_arrived_time);
         const durationMs = completionTime - arrivedTime;
         const minutes = Math.floor(durationMs / (1000 * 60));

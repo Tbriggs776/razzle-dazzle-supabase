@@ -82,7 +82,7 @@ export default function ProjectDetailView({
   const daysSinceCleared = React.useMemo(() => {
     const baseDate = project.hold_cleared_date || project.created_date;
     if (!baseDate) return 0;
-    const base = new Date(baseDate.includes('Z') ? baseDate : baseDate + 'Z');
+    const base = new Date(baseDate);
     return Math.floor((Date.now() - base.getTime()) / (1000 * 60 * 60 * 24));
   }, [project.hold_cleared_date, project.created_date]);
 
@@ -90,7 +90,7 @@ export default function ProjectDetailView({
     const jobName = customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown';
     const cgNumber = sale?.invoice_number || 'N/A';
     const createdDate = project.created_date
-      ? format(new Date(project.created_date.includes('Z') ? project.created_date : project.created_date + 'Z'), 'MM/dd/yyyy')
+      ? format(new Date(project.created_date), 'MM/dd/yyyy')
       : 'N/A';
     const status = project.installation_date_status || project.status;
     const text = `Job: ${jobName} | CG#: ${cgNumber} | Created: ${createdDate} | Status: ${status} | Days: ${daysSinceCleared}`;
@@ -305,7 +305,7 @@ export default function ProjectDetailView({
               <h1 className="text-3xl font-bold text-slate-800 tracking-tight">{customerName}</h1>
               {project.created_date && (
                 <p className="text-xs text-slate-400 mt-1">
-                  Project created: {format(new Date(project.created_date.includes('Z') ? project.created_date : project.created_date + 'Z'), 'MMMM d, yyyy h:mm a')}
+                  Project created: {format(new Date(project.created_date), 'MMMM d, yyyy h:mm a')}
                 </p>
               )}
               <div className="flex items-center gap-2 mt-3 flex-wrap">
@@ -420,7 +420,7 @@ export default function ProjectDetailView({
                   <div className="flex-1">
                     <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-1">Quick Copy — {daysSinceCleared} days in status</p>
                     <p className="text-sm font-mono text-slate-700 break-all">
-                      Job: {customerName} | CG#: {sale?.invoice_number || 'N/A'} | Created: {project.created_date ? format(new Date(project.created_date.includes('Z') ? project.created_date : project.created_date + 'Z'), 'MM/dd/yyyy') : 'N/A'} | Status: {project.installation_date_status || project.status} | Days: {daysSinceCleared}
+                      Job: {customerName} | CG#: {sale?.invoice_number || 'N/A'} | Created: {project.created_date ? format(new Date(project.created_date), 'MM/dd/yyyy') : 'N/A'} | Status: {project.installation_date_status || project.status} | Days: {daysSinceCleared}
                     </p>
                   </div>
                   <Button

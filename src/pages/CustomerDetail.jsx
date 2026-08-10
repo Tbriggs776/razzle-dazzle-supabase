@@ -309,7 +309,7 @@ export default function CustomerDetail() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Created</p>
                   <p className="text-sm text-foreground">
-                    {format(new Date(customer.created_date + (customer.created_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy h:mm a')}
+                    {format(new Date(customer.created_date), 'MMM d, yyyy h:mm a')}
                   </p>
                 </div>
               </div>
@@ -318,7 +318,7 @@ export default function CustomerDetail() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Last Updated</p>
                   <p className="text-sm text-foreground">
-                    {format(new Date(customer.updated_date + (customer.updated_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy h:mm a')}
+                    {format(new Date(customer.updated_date), 'MMM d, yyyy h:mm a')}
                   </p>
                 </div>
               </div>

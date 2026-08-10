@@ -55,7 +55,7 @@ export default function LeadCard({ lead, index }) {
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                   <Clock className="w-3.5 h-3.5" />
                   <span>
-                    {new Date(lead.created_date + (lead.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', {
+                    {new Date(lead.created_date).toLocaleString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',

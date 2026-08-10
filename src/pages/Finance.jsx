@@ -16,9 +16,17 @@ export default function Finance() {
 
   const handleSendReport = async () => {
     setSendingReport(true);
-    await base44.functions.invoke('sendFinanceReport', {});
-    setSendingReport(false);
-    toast.success('Finance report sent!');
+    try {
+      const { data, error } = await base44.functions.invoke('sendFinanceReport', {});
+      if (error) throw error;
+      if (data?.stub) toast.info('Email isn’t connected yet — report not sent.');
+      else if (data?.skipped) toast.info(`Report not sent: ${data.skipped}`);
+      else toast.success('Finance report sent!');
+    } catch (e) {
+      toast.error(e?.message || 'Failed to send the finance report.');
+    } finally {
+      setSendingReport(false);
+    }
   };
 
   const handleMarkFundsReceived = async (e, projectId) => {
@@ -53,7 +61,7 @@ export default function Finance() {
     const utcMinus7Offset = 7 * 60 * 60 * 1000;
     const nowAz = new Date(Date.now() - utcMinus7Offset);
     const todayAzStart = new Date(Date.UTC(nowAz.getUTCFullYear(), nowAz.getUTCMonth(), nowAz.getUTCDate()) + utcMinus7Offset);
-    const created = new Date(project.created_date.includes('Z') ? project.created_date : project.created_date + 'Z');
+    const created = new Date(project.created_date);
     return created >= todayAzStart;
   };
 
@@ -174,7 +182,7 @@ export default function Finance() {
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <div className="text-xs text-muted-foreground whitespace-nowrap">
-                        Created {format(new Date(project.created_date + (project.created_date.includes('Z') ? '' : 'Z')), 'MMM d, yyyy')}
+                        Created {format(new Date(project.created_date), 'MMM d, yyyy')}
                       </div>
                       <button
                         onClick={(e) => handleMarkFundsReceived(e, project.id)}

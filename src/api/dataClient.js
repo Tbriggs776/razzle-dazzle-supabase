@@ -114,7 +114,7 @@ function applyFilter(query, filters) {
 
 // PostgREST returns timestamptz with a numeric offset ("2026-06-26T12:00:00+00:00").
 // base44 returned naive-UTC ISO strings, and a lot of app code does
-// `new Date(v + (v.includes('Z') ? '' : 'Z'))`, which breaks on the offset form.
+// `new Date(v)`, which breaks on the offset form.
 // Normalize any offset-timestamp string to canonical "...Z" ISO so every date in
 // the app parses correctly. Plain dates ("2026-08-13") are left untouched.
 const TS_OFFSET_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?[+-]\d{2}:?\d{2}$/;

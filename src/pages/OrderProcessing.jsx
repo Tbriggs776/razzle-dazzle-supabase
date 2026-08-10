@@ -733,13 +733,13 @@ export default function OrderProcessing() {
                     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
                     const newMessages = messages.filter(msg => 
                       msg.sender_role === 'DC' && 
-                      new Date(msg.created_date + (msg.created_date.includes('Z') ? '' : 'Z')) > fiveMinutesAgo
+                      new Date(msg.created_date) > fiveMinutesAgo
                     );
 
                     // Check if ticket was recently updated (resolved in last 5 minutes)
                     const recentlyResolved = logs.some(log => 
                       log.action === 'Category Resolved' &&
-                      new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')) > fiveMinutesAgo
+                      new Date(log.created_date) > fiveMinutesAgo
                     );
 
                     return (
@@ -898,8 +898,8 @@ export default function OrderProcessing() {
                             </div>
                             <p className="text-sm text-muted-foreground mb-2">{ticket.description}</p>
                             <p className="text-xs text-muted-foreground">
-                              Created {new Date(ticket.created_date + (ticket.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString()} at{' '}
-                              {new Date(ticket.created_date + (ticket.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              Created {new Date(ticket.created_date).toLocaleDateString()} at{' '}
+                              {new Date(ticket.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
 
                             {/* Chat Messages */}
@@ -981,8 +981,8 @@ export default function OrderProcessing() {
                                             </div>
                                           )}
                                           <p className="text-muted-foreground mt-1">
-                                            {new Date(msg.created_date + (msg.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString()} at{' '}
-                                            {new Date(msg.created_date + (msg.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(msg.created_date).toLocaleDateString()} at{' '}
+                                            {new Date(msg.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                           </p>
                                         </div>
                                       );
@@ -1119,8 +1119,8 @@ export default function OrderProcessing() {
                                               <p className="font-medium text-foreground">{log.action}</p>
                                               {log.details && <p className="text-muted-foreground mt-0.5">{log.details}</p>}
                                               <p className="text-muted-foreground mt-1">
-                                                {log.user_name} • {new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString()} at{' '}
-                                                {new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                {log.user_name} • {new Date(log.created_date).toLocaleDateString()} at{' '}
+                                                {new Date(log.created_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                               </p>
                                             </div>
                                           </div>

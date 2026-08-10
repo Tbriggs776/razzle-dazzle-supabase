@@ -291,7 +291,7 @@ export default function LeadDetail() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Created</p>
                   <p className="text-sm text-foreground">
-                    {new Date(lead.created_date + (lead.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', { 
+                    {new Date(lead.created_date).toLocaleString('en-US', { 
                       month: 'short', 
                       day: 'numeric', 
                       year: 'numeric', 
@@ -307,7 +307,7 @@ export default function LeadDetail() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Last Updated</p>
                   <p className="text-sm text-foreground">
-                    {new Date(lead.updated_date + (lead.updated_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', { 
+                    {new Date(lead.updated_date).toLocaleString('en-US', { 
                       month: 'short', 
                       day: 'numeric', 
                       year: 'numeric', 

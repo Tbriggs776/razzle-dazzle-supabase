@@ -285,7 +285,7 @@ export default function TeamMemberDetail() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Created</p>
                   <p className="text-sm text-foreground">
-                    {new Date(teamMember.created_date + (teamMember.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', { 
+                    {new Date(teamMember.created_date).toLocaleString('en-US', { 
                       month: 'short', 
                       day: 'numeric', 
                       year: 'numeric', 
@@ -301,7 +301,7 @@ export default function TeamMemberDetail() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Last Updated</p>
                   <p className="text-sm text-foreground">
-                    {new Date(teamMember.updated_date + (teamMember.updated_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', { 
+                    {new Date(teamMember.updated_date).toLocaleString('en-US', { 
                       month: 'short', 
                       day: 'numeric', 
                       year: 'numeric', 

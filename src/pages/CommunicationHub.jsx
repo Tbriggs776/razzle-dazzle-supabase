@@ -440,7 +440,7 @@ export default function CommunicationHub() {
                             {lastMsg?.type}
                           </span>
                           <span className="text-[10px] text-muted-foreground">
-                            {lastMsg?.created_date && format(new Date(lastMsg.created_date + (lastMsg.created_date.includes('Z') ? '' : 'Z')), 'MMM d')}
+                            {lastMsg?.created_date && format(new Date(lastMsg.created_date), 'MMM d')}
                           </span>
                           <span className="text-[10px] text-muted-foreground">{conv.messages.length} msg{conv.messages.length !== 1 ? 's' : ''}</span>
                         </div>
@@ -547,7 +547,7 @@ export default function CommunicationHub() {
                           <div className={cn('flex items-center justify-between gap-4 text-[10px]', msg.direction === 'outbound' ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
                             <span>
                               {msg.created_date && format(
-                                new Date(msg.created_date + (msg.created_date.includes('Z') ? '' : 'Z')),
+                                new Date(msg.created_date),
                                 'MMM d, h:mm a'
                               )}
                             </span>

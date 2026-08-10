@@ -56,7 +56,7 @@ export default function CustomerCard({ customer }) {
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <Clock className="w-3.5 h-3.5" />
               <span>
-                {new Date(customer.created_date + (customer.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', {
+                {new Date(customer.created_date).toLocaleString('en-US', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric',

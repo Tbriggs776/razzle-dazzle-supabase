@@ -22,14 +22,14 @@ export default function ProjectProgressTracker({ project, projectLogs = [] }) {
   const getStatusTimestamp = (step) => {
     if (step === 'Accepted') {
       return project.created_date
-        ? new Date(project.created_date + (project.created_date.includes('Z') ? '' : 'Z'))
+        ? new Date(project.created_date)
         : null;
     }
     const log = projectLogs
       .filter(l => l.action && l.action.toLowerCase().includes(step.toLowerCase()))
       .sort((a, b) => new Date(a.created_date) - new Date(b.created_date))[0];
     return log?.created_date
-      ? new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z'))
+      ? new Date(log.created_date)
       : null;
   };
 

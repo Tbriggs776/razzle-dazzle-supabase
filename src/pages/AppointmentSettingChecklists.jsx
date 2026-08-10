@@ -143,8 +143,8 @@ export default function AppointmentSettingChecklists() {
       return null;
     }
 
-    const startTime = new Date(checklist.created_date + (checklist.created_date.includes('Z') ? '' : 'Z'));
-    const endTime = new Date(checklist.appointmentData.created_date + (checklist.appointmentData.created_date.includes('Z') ? '' : 'Z'));
+    const startTime = new Date(checklist.created_date);
+    const endTime = new Date(checklist.appointmentData.created_date);
     const diffMs = endTime - startTime;
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMins / 60);
@@ -426,7 +426,7 @@ export default function AppointmentSettingChecklists() {
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Clock className="w-3.5 h-3.5" />
                               <span>
-                                {new Date(checklist.created_date + (checklist.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', {
+                                {new Date(checklist.created_date).toLocaleString('en-US', {
                                   month: 'short',
                                   day: 'numeric',
                                   year: 'numeric',

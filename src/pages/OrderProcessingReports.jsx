@@ -18,7 +18,7 @@ const USER_COLORS = [
 ];
 
 const toAZDayStr = (dateStr) => {
-  const utc = new Date(dateStr?.includes('Z') ? dateStr : dateStr + 'Z');
+  const utc = new Date(dateStr);
   const az = new Date(utc.getTime() - AZ_OFFSET_MS);
   return format(az, 'yyyy-MM-dd');
 };
@@ -88,7 +88,7 @@ export default function OrderProcessingReports() {
     const map = new Map();
     projectLogs.forEach(log => {
       const existing = map.get(log.project);
-      const logTime = new Date(log.created_date?.includes('Z') ? log.created_date : log.created_date + 'Z');
+      const logTime = new Date(log.created_date);
       if (!existing || logTime > existing.time) {
         map.set(log.project, { time: logTime, log });
       }

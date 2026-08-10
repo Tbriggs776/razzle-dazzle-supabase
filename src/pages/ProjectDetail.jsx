@@ -378,23 +378,28 @@ export default function ProjectDetail() {
           .replace('{customer_first_name}', customer.first_name || '')
           .replace('{project_tracker_url}', project.project_tracker_url);
 
-        await base44.functions.invoke('sendSMS', {
+        const { data: smsRes, error: smsErr } = await base44.functions.invoke('sendSMS', {
           to: customer.phone,
           message
         });
+        if (smsErr) throw smsErr;
+        const sent = smsRes?.success === true; // legacy shape { success, messageSid, ... }
 
-        // Log the activity
+        // Log the attempt + its real outcome (not a blanket "sent")
         await base44.entities.ProjectLog.create({
           project: projectId,
-          action: 'SMS Sent',
-          details: `Project tracker SMS sent to ${customer.first_name} ${customer.last_name} (${customer.phone})`,
+          action: sent ? 'SMS Sent' : 'SMS Not Sent',
+          details: sent
+            ? `Project tracker SMS sent to ${customer.first_name} ${customer.last_name} (${customer.phone})`
+            : `Project tracker SMS could not be sent (SMS not connected) — ${customer.first_name} ${customer.last_name}`,
           user_email: currentUser?.email,
           user_name: currentUser?.full_name
         });
 
         queryClient.invalidateQueries({ queryKey: ['projectLogs', projectId] });
-        
-        toast.success('SMS sent successfully!');
+
+        if (sent) toast.success('SMS sent successfully!');
+        else toast.info('SMS isn’t connected yet — nothing was sent.');
       }
     } catch (error) {
       console.error('Failed to send SMS:', error);
@@ -1956,7 +1961,7 @@ export default function ProjectDetail() {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-xs text-muted-foreground">
-                            {new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', {
+                            {new Date(log.created_date).toLocaleString('en-US', {
                               month: 'short',
                               day: 'numeric',
                               hour: 'numeric',

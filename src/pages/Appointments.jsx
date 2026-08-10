@@ -275,7 +275,7 @@ export default function Appointments() {
     let dateKey;
     
     if (dateField === 'created_date') {
-      const createdDate = new Date(appointment.created_date + (appointment.created_date.includes('Z') ? '' : 'Z'));
+      const createdDate = new Date(appointment.created_date);
       dateKey = format(createdDate, 'yyyy-MM-dd');
     } else {
       dateKey = appointment.appointment_date || 'No Date';
@@ -312,7 +312,7 @@ export default function Appointments() {
   // For 7-day range: last 7 days NOT including today
   const last7StartAZStr = toAZDateStr(Date.now() - 7 * 86400000);
 
-  const getAZDateStr = (apt) => toAZDateStr(new Date(apt.created_date + (apt.created_date.includes('Z') ? '' : 'Z')).getTime());
+  const getAZDateStr = (apt) => toAZDateStr(new Date(apt.created_date).getTime());
 
   const bookedToday = appointments.filter(apt => getAZDateStr(apt) === todayAZStr).length;
   const bookedYesterday = appointments.filter(apt => getAZDateStr(apt) === yesterdayAZStr).length;
@@ -836,11 +836,11 @@ export default function Appointments() {
                             )}
                             {appointment.created_date && (
                               <span className="text-xs text-muted-foreground">
-                                • {new Date(appointment.created_date + (appointment.created_date.includes('Z') ? '' : 'Z')).toLocaleDateString('en-US', {
+                                • {new Date(appointment.created_date).toLocaleDateString('en-US', {
                                   month: 'short',
                                   day: 'numeric',
                                   year: 'numeric'
-                                })} at {new Date(appointment.created_date + (appointment.created_date.includes('Z') ? '' : 'Z')).toLocaleTimeString('en-US', {
+                                })} at {new Date(appointment.created_date).toLocaleTimeString('en-US', {
                                   hour: 'numeric',
                                   minute: '2-digit',
                                   hour12: true
@@ -848,7 +848,7 @@ export default function Appointments() {
                               </span>
                             )}
                             {appointment.consultant_arrived_time && ['Sold', 'Lost', 'Pitch and Miss', 'One-Leg', 'Completed'].includes(appointment.status) && (() => {
-                              const completionTime = new Date(appointment.updated_date + (appointment.updated_date.includes('Z') ? '' : 'Z'));
+                              const completionTime = new Date(appointment.updated_date);
                               const arrivedTime = new Date(appointment.consultant_arrived_time);
                               const durationMs = completionTime - arrivedTime;
                               const hours = Math.floor(durationMs / (1000 * 60 * 60));

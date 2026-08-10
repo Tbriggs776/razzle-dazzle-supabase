@@ -1412,7 +1412,7 @@ export default function AppointmentDetail() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Created</p>
                   <p className="text-sm text-foreground">
-                    {appointment.created_date && new Date(appointment.created_date + (appointment.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', { 
+                    {appointment.created_date && new Date(appointment.created_date).toLocaleString('en-US', { 
                       month: 'short', 
                       day: 'numeric', 
                       year: 'numeric', 
@@ -1428,7 +1428,7 @@ export default function AppointmentDetail() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Last Updated</p>
                   <p className="text-sm text-foreground">
-                    {appointment.updated_date && new Date(appointment.updated_date + (appointment.updated_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', { 
+                    {appointment.updated_date && new Date(appointment.updated_date).toLocaleString('en-US', { 
                       month: 'short', 
                       day: 'numeric', 
                       year: 'numeric', 
@@ -1458,9 +1458,9 @@ export default function AppointmentDetail() {
               COMPLETED_STATUSES.some(status => log.details?.includes(status))
             );
             const completionTime = completionLog && completionLog.created_date
-              ? new Date(completionLog.created_date + (completionLog.created_date.includes('Z') ? '' : 'Z'))
+              ? new Date(completionLog.created_date)
               : appointment.updated_date 
-                ? new Date(appointment.updated_date + (appointment.updated_date.includes('Z') ? '' : 'Z'))
+                ? new Date(appointment.updated_date)
                 : new Date();
             const arrivedTime = new Date(appointment.consultant_arrived_time);
             const durationMs = completionTime - arrivedTime;
@@ -1519,7 +1519,7 @@ export default function AppointmentDetail() {
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-xs text-muted-foreground">
-                            {log.created_date && new Date(log.created_date + (log.created_date.includes('Z') ? '' : 'Z')).toLocaleString('en-US', {
+                            {log.created_date && new Date(log.created_date).toLocaleString('en-US', {
                               month: 'short',
                               day: 'numeric',
                               hour: 'numeric',
