@@ -169,6 +169,9 @@ async function fetchAll(makeQuery, limit, context) {
   return normalize(rows);
 }
 
+// Monotonic id so each subscribe() gets a unique realtime channel name.
+let realtimeSubSeq = 0;
+
 function makeEntity(entityName) {
   const table = ENTITY_TABLE[entityName];
   if (!table) {
@@ -211,6 +214,31 @@ function makeEntity(entityName) {
       const res = await supabase.from(table).delete().eq('id', id);
       unwrap(res, `${entityName}.delete`);
       return { id };
+    },
+
+    // base44 SDK compatibility: real-time row updates. Backed by Supabase Realtime,
+    // translating postgres_changes into base44's { type, id, data } event shape.
+    // MUST NOT throw synchronously — callers invoke this inside a useEffect and use
+    // the return value as the cleanup fn, so any throw here white-screens the page.
+    // Wrapped defensively: if realtime is unavailable it degrades to a no-op and the
+    // page still works (pages also refetch / invalidate on their own mutations).
+    subscribe(callback) {
+      try {
+        const channel = supabase
+          .channel(`rt-${table}-${realtimeSubSeq++}`)
+          .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+            try {
+              const type = payload.eventType === 'INSERT' ? 'create'
+                : payload.eventType === 'DELETE' ? 'delete' : 'update';
+              const row = (payload.new && Object.keys(payload.new).length) ? payload.new : payload.old;
+              callback?.({ type, id: row?.id, data: row });
+            } catch (_) { /* ignore consumer callback errors */ }
+          })
+          .subscribe();
+        return () => { try { supabase.removeChannel(channel); } catch (_) { /* noop */ } };
+      } catch (_) {
+        return () => {}; // realtime unavailable — no-op unsubscribe, never crash the page
+      }
     },
   };
 }
