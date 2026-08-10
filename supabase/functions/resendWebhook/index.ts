@@ -1,8 +1,13 @@
 // Resend delivery/bounce webhook. Resend POSTs email events (delivered, bounced,
 // complained, delivery_delayed). We update the matching communication row and,
-// on bounce/complaint, add the address to the suppression list so we stop
-// emailing it. Gated by the ?s= secret query param (set on the Resend webhook URL).
+// on bounce/complaint, add the address to the suppression list so we stop emailing it.
+//
+// Auth: Resend signs webhooks with Svix. We verify svix-id / svix-timestamp /
+// svix-signature against RESEND_WEBHOOK_SECRET (the endpoint signing secret pasted at
+// /Integrations). Internal/test callers use the x-internal-secret header. No secret is
+// accepted in the URL query string.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { verifySvix } from '../_shared/svix.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -23,11 +28,22 @@ const STATUS: Record<string, string> = {
 };
 
 Deno.serve(async (req) => {
-  const url = new URL(req.url);
-  const secret = await getSecret('CRON_SECRET');
-  if (!secret || url.searchParams.get('s') !== secret) return new Response('forbidden', { status: 401 });
+  if (req.method === 'OPTIONS') return new Response('ok', { status: 200 });
 
-  const body = await req.json();
+  const raw = await req.text();
+
+  const webhookSecret = await getSecret('RESEND_WEBHOOK_SECRET');
+  const internal = await getSecret('CRON_SECRET');
+  const internalHdr = req.headers.get('x-internal-secret');
+  const svixOk = !!webhookSecret && await verifySvix(
+    webhookSecret,
+    { id: req.headers.get('svix-id'), timestamp: req.headers.get('svix-timestamp'), signature: req.headers.get('svix-signature') },
+    raw,
+  );
+  if (!svixOk && !(internal && internalHdr === internal)) return new Response('forbidden', { status: 401 });
+
+  let body: any = {};
+  try { body = JSON.parse(raw); } catch (_) { body = {}; }
   const type: string = body?.type || '';
   const data = body?.data || {};
   const emailId: string | undefined = data.email_id;

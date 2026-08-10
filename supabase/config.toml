@@ -1,0 +1,60 @@
+# Pins verify_jwt per Edge Function so a plain `supabase functions deploy` from this repo
+# reproduces the intended gateway posture (rather than silently applying the verify_jwt=true
+# default and breaking the webhook + anon-signing + pg_cron paths).
+#
+# Every function enforces its OWN auth in code — an authenticated user's JWT (currentUser),
+# the internal x-internal-secret (== CRON_SECRET) header for server/pg_cron/pg_net calls, or a
+# provider request signature (Twilio X-Twilio-Signature, Resend/Svix). Several are legitimately
+# invoked WITHOUT a Supabase JWT (provider webhooks, pg_cron/pg_net internal calls, the anon
+# e-sign signing page, getAppUrl), so JWT verification is disabled at the gateway and enforced
+# in-function instead. Keep this list in sync when adding a function.
+project_id = "zoyvqznftltlitspgdxn"
+
+[functions.analyzeRecording]
+verify_jwt = false
+[functions.assemblyAIWebhook]
+verify_jwt = false
+[functions.emailDispatch]
+verify_jwt = false
+[functions.esign]
+verify_jwt = false
+[functions.financeReport]
+verify_jwt = false
+[functions.getAppUrl]
+verify_jwt = false
+[functions.ghl]
+verify_jwt = false
+[functions.googleMaps]
+verify_jwt = false
+[functions.googleSheets]
+verify_jwt = false
+[functions.incomingSMS]
+verify_jwt = false
+[functions.invokeLLM]
+verify_jwt = false
+[functions.logAppointmentAction]
+verify_jwt = false
+[functions.notifyInstallerAssigned]
+verify_jwt = false
+[functions.pdfEmail]
+verify_jwt = false
+[functions.processJobs]
+verify_jwt = false
+[functions.resendWebhook]
+verify_jwt = false
+[functions.rfmsQuery]
+verify_jwt = false
+[functions.sendMessage]
+verify_jwt = false
+[functions.shortenUrl]
+verify_jwt = false
+[functions.smsDispatch]
+verify_jwt = false
+[functions.submitCheckpoint]
+verify_jwt = false
+[functions.syncCalendarEvent]
+verify_jwt = false
+[functions.testIntegration]
+verify_jwt = false
+[functions.twilioStatus]
+verify_jwt = false

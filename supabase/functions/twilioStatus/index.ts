@@ -1,8 +1,13 @@
 // Twilio message status callback. Twilio POSTs delivery updates (queued -> sent
 // -> delivered / undelivered / failed) here; we flip the matching communication
-// row's delivery_status. Gated by the ?s= secret on the callback URL (which
-// sendMessage sets to the internal CRON_SECRET).
+// row's delivery_status.
+//
+// Auth: a genuine Twilio callback carries X-Twilio-Signature (verified with
+// TWILIO_AUTH_TOKEN over the exact callback URL + POST params). Internal/test callers
+// use the x-internal-secret header. No secret is accepted in the URL query string
+// (Twilio stores/displays callback URLs, so a ?s= secret would be disclosed).
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { verifyTwilioSignature, twilioCandidateUrls } from '../_shared/twilio.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -15,11 +20,21 @@ async function getSecret(name: string): Promise<string | null> {
 }
 
 Deno.serve(async (req) => {
-  const url = new URL(req.url);
-  const secret = await getSecret('CRON_SECRET');
-  if (!secret || url.searchParams.get('s') !== secret) return new Response('forbidden', { status: 401 });
+  if (req.method === 'OPTIONS') return new Response('ok', { status: 200 });
 
-  const params = new URLSearchParams(await req.text());
+  const raw = await req.text();
+  const params = new URLSearchParams(raw);
+  const paramObj = Object.fromEntries(params.entries());
+
+  const sig = req.headers.get('X-Twilio-Signature');
+  const authToken = await getSecret('TWILIO_AUTH_TOKEN');
+  const internal = await getSecret('CRON_SECRET');
+  const internalHdr = req.headers.get('x-internal-secret');
+  const authed =
+    (!!sig && !!authToken && await verifyTwilioSignature(authToken, twilioCandidateUrls(SUPABASE_URL, req, 'twilioStatus'), paramObj, sig)) ||
+    (!!internal && internalHdr === internal);
+  if (!authed) return new Response('forbidden', { status: 401 });
+
   const sid = params.get('MessageSid');
   const status = params.get('MessageStatus'); // queued|sent|delivered|undelivered|failed
   const errorCode = params.get('ErrorCode');

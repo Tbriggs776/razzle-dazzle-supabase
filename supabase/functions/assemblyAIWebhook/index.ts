@@ -5,7 +5,8 @@
 // A missed webhook is caught by the reconcile_stuck_recordings cron (same shared builder).
 //
 // Auth: the X-Webhook-Secret header we registered at submit time (== ASSEMBLYAI_WEBHOOK_SECRET),
-// or ?s=<CRON_SECRET> for manual replay/testing (project's established webhook-gate pattern).
+// or the x-internal-secret header (== CRON_SECRET) for manual replay/testing. No secret is
+// accepted in the URL query string.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { fetchTranscript, shapeAnalysis } from '../_shared/recordingAnalysis.ts';
 
@@ -22,12 +23,11 @@ async function getSecret(name: string): Promise<string | null> {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { status: 200 });
 
-  const url = new URL(req.url);
   const webhookSecret = await getSecret('ASSEMBLYAI_WEBHOOK_SECRET');
   const cronSecret = await getSecret('CRON_SECRET');
   const headerSecret = req.headers.get('X-Webhook-Secret');
-  const querySecret = url.searchParams.get('s');
-  const ok = (webhookSecret && headerSecret === webhookSecret) || (cronSecret && querySecret === cronSecret);
+  const internalHdr = req.headers.get('x-internal-secret');
+  const ok = (webhookSecret && headerSecret === webhookSecret) || (cronSecret && internalHdr === cronSecret);
   if (!ok) return new Response('forbidden', { status: 401 });
 
   let body: any = {};

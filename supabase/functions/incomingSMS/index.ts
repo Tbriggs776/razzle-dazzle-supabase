@@ -4,11 +4,12 @@
 // table sendMessage checks before every outbound send), and queue a staff alert email
 // through the durable rail. Returns empty TwiML so Twilio doesn't retry.
 //
-// Gate: ?s=<CRON_SECRET> query param (same pattern as twilioStatus / resendWebhook). Point
-// the Twilio inbound webhook at .../incomingSMS?s=<CRON_SECRET>. (X-Twilio-Signature HMAC
-// validation is a possible future hardening; the shared-secret gate is what the rest of the
-// project uses and is deterministically testable.)
+// Auth: a genuine Twilio POST carries X-Twilio-Signature (verified with TWILIO_AUTH_TOKEN over
+// the exact webhook URL + POST params); internal/test callers use the x-internal-secret header.
+// No secret is accepted in the URL query string. Point the Twilio inbound webhook at
+// <SUPABASE_URL>/functions/v1/incomingSMS (no query string).
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { verifyTwilioSignature, twilioCandidateUrls } from '../_shared/twilio.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -31,23 +32,32 @@ const xml = () => new Response(TWIML, { status: 200, headers: { 'Content-Type': 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { status: 200 });
 
-  const url = new URL(req.url);
-  const secret = await getSecret('CRON_SECRET');
-  const provided = url.searchParams.get('s') || req.headers.get('x-internal-secret');
-  if (!secret || provided !== secret) return new Response('forbidden', { status: 403 });
-
   // Read the body ONCE as text, then parse by content-type. (Calling req.formData() first
   // and falling back to req.json() fails: the first read consumes/locks the body.) Twilio
   // sends application/x-www-form-urlencoded; JSON is accepted for testing.
   let From = '', Body = '', MessageSid = '';
+  let paramObj: Record<string, string> = {};
   const ct = (req.headers.get('content-type') || '').toLowerCase();
   const raw = await req.text().catch(() => '');
   if (ct.includes('application/json')) {
     try { const j = JSON.parse(raw); From = j.From || ''; Body = j.Body || ''; MessageSid = j.MessageSid || ''; } catch (_e) { /* empty */ }
   } else {
     const params = new URLSearchParams(raw);
+    paramObj = Object.fromEntries(params.entries());
     From = params.get('From') || ''; Body = params.get('Body') || ''; MessageSid = params.get('MessageSid') || '';
   }
+
+  // Gate AFTER parsing (the Twilio signature covers the POST params). A real Twilio POST is
+  // form-encoded + X-Twilio-Signature; internal/test callers present x-internal-secret.
+  const sig = req.headers.get('X-Twilio-Signature');
+  const authToken = await getSecret('TWILIO_AUTH_TOKEN');
+  const internal = await getSecret('CRON_SECRET');
+  const internalHdr = req.headers.get('x-internal-secret');
+  const authed =
+    (!!sig && !!authToken && await verifyTwilioSignature(authToken, twilioCandidateUrls(SUPABASE_URL, req, 'incomingSMS'), paramObj, sig)) ||
+    (!!internal && internalHdr === internal);
+  if (!authed) return new Response('forbidden', { status: 403 });
+
   if (!From) return xml();
 
   const s = svc();

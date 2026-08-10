@@ -24,6 +24,19 @@ async function insertComm(s: any, row: Record<string, unknown>) {
   return data?.id as string | undefined;
 }
 
+// Normalize a phone to E.164 (assume US when no country code). Applied to every SMS
+// destination here — the single choke point — so cron reminder/follow-up jobs that enqueue
+// raw lead phones like "(602) 555-0100" (which Twilio rejects) send successfully, and so the
+// suppression check keys on the same E.164 value that inbound STOP webhooks record.
+function normE164(p: unknown): string | null {
+  if (!p) return null;
+  const s = String(p).trim();
+  if (s.startsWith('+')) return s;
+  const digits = s.replace(/\D/g, '');
+  if (!digits) return null;
+  return digits.startsWith('1') ? `+${digits}` : `+1${digits}`;
+}
+
 Deno.serve(async (req) => {
   const internal = await getSecret('CRON_SECRET');
   if (!internal || req.headers.get('x-internal-secret') !== internal) {
@@ -33,8 +46,16 @@ Deno.serve(async (req) => {
   const s = svc();
   const p = await req.json();
   const channel: string = p.channel; // 'sms' | 'email'
-  const to: string = p.to;
+  let to: string = p.to;
   if (!channel || !to) return Response.json({ ok: false, error: 'channel and to required' }, { status: 400 });
+
+  // Normalize SMS destinations to E.164 before anything downstream (suppression check,
+  // stored contact_phone, Twilio 'To') uses `to`. Email addresses are left untouched.
+  if (channel === 'sms') {
+    const e164 = normE164(to);
+    if (!e164) return Response.json({ ok: false, error: 'invalid phone number', skipped: 'invalid_phone' }, { status: 400 });
+    to = e164;
+  }
 
   const providerKey = channel === 'sms' ? 'twilio' : 'resend';
   const type = channel === 'sms' ? 'SMS' : 'Email';
@@ -84,7 +105,9 @@ Deno.serve(async (req) => {
       if (cfg.messaging_service_sid) form.append('MessagingServiceSid', cfg.messaging_service_sid);
       else form.append('From', cfg.from_number);
       form.append('Body', p.body ?? '');
-      form.append('StatusCallback', `${FUNCTIONS_BASE}/twilioStatus?s=${internal}`);
+      // No secret in the callback URL — Twilio stores/displays it. twilioStatus authenticates
+      // the callback by verifying X-Twilio-Signature with TWILIO_AUTH_TOKEN instead.
+      form.append('StatusCallback', `${FUNCTIONS_BASE}/twilioStatus`);
       const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
         method: 'POST', headers: { Authorization: `Basic ${btoa(`${sid}:${token}`)}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: form.toString(),
       });
