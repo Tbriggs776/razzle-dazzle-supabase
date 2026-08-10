@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, CheckCircle2, Circle, Camera, X, Plus, ChevronDown, ChevronRight, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import * as Bytescale from "@bytescale/sdk";
 
 const CATEGORIES = ['Pre-Install', 'In Progress', 'Post-Install'];
 
@@ -86,9 +85,8 @@ export default function InstallationCheckpointsSection({ project, currentUser })
   const handlePhotoUpload = async (template, files) => {
     if (!files.length) return;
     setUploadingId(template.id);
-    const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
     const newUrls = await Promise.all(Array.from(files).map(async (file) => {
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       return fileUrl;
     }));
     const existing = getCheckpoint(template.id);

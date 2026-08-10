@@ -18,7 +18,6 @@ import {
 import { generateReceiptPDF } from '@/utils/generateReceiptPDF';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import * as Bytescale from "@bytescale/sdk";
 
 const STATUS_COLORS = {
   'Draft':     'bg-secondary text-secondary-foreground border-border',
@@ -136,8 +135,7 @@ export default function QuoteDetail() {
     if (!file) return;
     setUploadingQuotePdf(true);
     try {
-      const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       await updateMutation.mutateAsync({ quote_file_url: fileUrl });
     } catch (err) {
       toast.error('Failed to upload quote PDF');
@@ -152,8 +150,7 @@ export default function QuoteDetail() {
     if (!file) return;
     setUploadingContract(true);
     try {
-      const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       setContractFileUrl(fileUrl);
       // Try to extract amount from contract
       try {
@@ -336,8 +333,7 @@ export default function QuoteDetail() {
       // Convert to Blob and upload
       const pdfBlob = doc.output('blob');
       const file = new File([pdfBlob], `receipt-${quoteId.slice(-6)}.pdf`, { type: 'application/pdf' });
-      const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
 
       // Save receipt URL to quote
       await updateMutation.mutateAsync({ receipt_file_url: fileUrl });

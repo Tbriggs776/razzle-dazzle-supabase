@@ -9,7 +9,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, X, Plus, Upload } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import * as Bytescale from "@bytescale/sdk";
 import InstallersList from './InstallersList';
 
 const DEFAULT_EMAILS = [
@@ -104,8 +103,7 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingImage(true);
-    const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
-    const { fileUrl } = await uploadManager.upload({ data: file });
+    const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
     setImages(prev => [...prev, fileUrl]);
     setUploadingImage(false);
     e.target.value = '';

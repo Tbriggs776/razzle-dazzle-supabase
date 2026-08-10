@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Loader2, CheckCircle2, RotateCcw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from '@/lib/utils';
-import * as Bytescale from "@bytescale/sdk";
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -216,8 +215,7 @@ export default function PreInstallChecklistModal({ open, onClose, onComplete, le
       const dataUrl = canvas.toDataURL('image/png');
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], 'pre-install-signature.png', { type: 'image/png' });
-      const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       onComplete({ productInfo: productInfo.trim(), signatureUrl: fileUrl });
     } catch (err) {
       console.error('Signature upload failed:', err);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { signInPerson } from '@/lib/signInPerson';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
@@ -398,9 +399,9 @@ export default function ManualDesignMods() {
                           </a>
                         ) : (
                           <>
-                            <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
+                            <button type="button" onClick={() => signInPerson('design_mod', mod.id)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
                               <Pen className="w-3 h-3" />Sign in Person
-                            </a>
+                            </button>
                             {mod.short_url && (
                               <button onClick={() => window.open(mod.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
                                 <ExternalLink className="w-3 h-3" />Customer Link
@@ -449,9 +450,9 @@ export default function ManualDesignMods() {
                           </a>
                         ) : (
                           <>
-                            <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
+                            <button type="button" onClick={() => signInPerson('design_mod', mod.id)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
                               <Pen className="w-3 h-3" />Sign in Person
-                            </a>
+                            </button>
                             {mod.short_url && (
                               <button onClick={() => window.open(mod.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
                                 <ExternalLink className="w-3 h-3" />Customer Link
@@ -596,9 +597,9 @@ export default function ManualDesignMods() {
                           </a>
                         ) : (
                           <>
-                            <a href={`/PreInstallChecklistView?id=${record.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
+                            <button type="button" onClick={() => signInPerson('pre_install', record.id)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
                               <Pen className="w-3 h-3" />Sign in Person
-                            </a>
+                            </button>
                             {record.short_url && (
                               <button onClick={() => window.open(record.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
                                 <ExternalLink className="w-3 h-3" />Customer Link
@@ -746,9 +747,9 @@ export default function ManualDesignMods() {
                           </a>
                         ) : (
                           <>
-                            <a href={`/ManualSalesContractView?id=${contract.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
+                            <button type="button" onClick={() => signInPerson('manual_sales_contract', contract.id)} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-primary/40 rounded-lg hover:bg-primary/10 transition-colors text-primary">
                               <Pen className="w-3 h-3" />Sign in Person
-                            </a>
+                            </button>
                             {contract.short_url && (
                               <button onClick={() => window.open(contract.short_url, '_blank')} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-secondary transition-colors text-foreground">
                                 <ExternalLink className="w-3 h-3" />Customer Link

@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Eraser, X, Plus, Upload, Paperclip, Download } from 'lucide-react';
-import * as Bytescale from "@bytescale/sdk";
 import { Checkbox } from "@/components/ui/checkbox";
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -72,8 +71,10 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
     setUploadingImage(true);
-    const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
-    const newImages = await Promise.all(files.map(file => uploadManager.upload({ data: file }).then(r => ({ url: r.fileUrl, description: '' }))));
+    const newImages = await Promise.all(files.map(async (file) => {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      return { url: file_url, description: '' };
+    }));
     setImages(prev => [...prev, ...newImages]);
     setUploadingImage(false);
     e.target.value = '';
@@ -91,9 +92,8 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
     const selected = Array.from(e.target.files || []);
     if (!selected.length) return;
     setUploadingFile(true);
-    const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
     const uploaded = await Promise.all(selected.map(async (file) => {
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       return { url: fileUrl, name: file.name };
     }));
     setFiles(prev => [...prev, ...uploaded]);

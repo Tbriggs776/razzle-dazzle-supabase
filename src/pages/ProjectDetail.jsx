@@ -41,7 +41,6 @@ import {
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import * as Bytescale from "@bytescale/sdk";
 import TeamNotesSection from '@/components/projects/TeamNotesSection';
 import { generatePreInstallPDF } from '@/utils/generatePreInstallPDF';
 import ImageDescriptionInput from '@/components/projects/ImageDescriptionInput';
@@ -505,12 +504,9 @@ export default function ProjectDetail() {
 
     setUploadingImage(true);
     try {
-      const uploadManager = new Bytescale.UploadManager({
-        apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x"
-      });
 
       const newImages = await Promise.all(files.map(async (file) => {
-        const { fileUrl } = await uploadManager.upload({ data: file });
+        const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
         return {
           url: fileUrl,
           user_name: currentUser?.full_name || currentUser?.email,
@@ -556,9 +552,8 @@ export default function ProjectDetail() {
     if (!files.length) return;
     setUploadingFile(true);
     try {
-      const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
       const newFiles = await Promise.all(files.map(async (file) => {
-        const { fileUrl } = await uploadManager.upload({ data: file });
+        const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
         return {
           url: fileUrl,
           name: file.name,

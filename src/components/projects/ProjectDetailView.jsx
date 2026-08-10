@@ -34,7 +34,6 @@ import {
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import * as Bytescale from "@bytescale/sdk";
 import OrderProcessorTools from './OrderProcessorTools';
 import PhotoLightbox from '@/components/PhotoLightbox';
 
@@ -241,11 +240,8 @@ export default function ProjectDetailView({
 
     setUploadingImage(true);
     try {
-      const uploadManager = new Bytescale.UploadManager({
-        apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x"
-      });
 
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       
       const updatedImages = [
         ...(project.images || []),

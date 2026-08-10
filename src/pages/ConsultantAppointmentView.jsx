@@ -35,7 +35,6 @@ import {
 import { motion } from 'framer-motion';
 import { format, addWeeks, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
-import * as Bytescale from "@bytescale/sdk";
 import { CameraCapture } from '@/components/ui/camera-capture';
 import AudioRecorder from '@/components/AudioRecorder';
 import PreInstallChecklistModal from '@/components/PreInstallChecklistModal';
@@ -539,11 +538,8 @@ export default function ConsultantAppointmentView() {
 
     setUploadingContract(true);
     try {
-      const uploadManager = new Bytescale.UploadManager({
-        apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x"
-      });
 
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       setContractFileUrl(fileUrl);
       
       // Auto-extract invoice total from PDF
@@ -575,11 +571,8 @@ export default function ConsultantAppointmentView() {
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], 'folder-photo.jpg', { type: 'image/jpeg' });
       
-      const uploadManager = new Bytescale.UploadManager({
-        apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x"
-      });
 
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       setFolderPhotoUrl(fileUrl);
     } catch (error) {
       console.error('Upload failed:', error);
@@ -595,11 +588,8 @@ export default function ConsultantAppointmentView() {
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], 'yard-sign-photo.jpg', { type: 'image/jpeg' });
       
-      const uploadManager = new Bytescale.UploadManager({
-        apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x"
-      });
 
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       setYardSignPhotoUrl(fileUrl);
     } catch (error) {
       console.error('Upload failed:', error);
@@ -614,8 +604,7 @@ export default function ConsultantAppointmentView() {
     try {
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], `product-photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
-      const uploadManager = new Bytescale.UploadManager({ apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x" });
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       setProductPhotos(prev => [...prev, fileUrl]);
     } catch (error) {
       console.error('Upload failed:', error);
@@ -631,11 +620,8 @@ export default function ConsultantAppointmentView() {
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], 'driver-license-photo.jpg', { type: 'image/jpeg' });
       
-      const uploadManager = new Bytescale.UploadManager({
-        apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x"
-      });
 
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       setDriverLicensePhotoUrl(fileUrl);
     } catch (error) {
       console.error('Upload failed:', error);

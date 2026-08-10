@@ -36,7 +36,6 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format, parseISO } from 'date-fns';
-import * as Bytescale from "@bytescale/sdk";
 import CostBreakdownModal from '@/components/sales/CostBreakdownModal';
 import { buildCatalogCostMap, computeCatalogGP } from '@/lib/catalogCost';
 
@@ -405,11 +404,8 @@ export default function SaleDetail() {
 
     setUploadingNewContract(true);
     try {
-      const uploadManager = new Bytescale.UploadManager({
-        apiKey: "public_223k2X95KYxtnQTr5pfZZakKp58x"
-      });
 
-      const { fileUrl } = await uploadManager.upload({ data: file });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       setNewContractFileUrl(fileUrl);
       
       // Auto-extract invoice total from new PDF
