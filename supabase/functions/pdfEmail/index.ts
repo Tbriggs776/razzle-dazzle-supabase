@@ -53,11 +53,15 @@ async function recipientsFor(s: any, list: any): Promise<string[]> {
 }
 
 async function uploadPdf(s: any, bytes: Uint8Array, filename: string): Promise<string> {
-  const path = `receipts/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}-${filename}`;
-  const up = await s.storage.from('uploads').upload(path, bytes, { contentType: 'application/pdf', upsert: false });
+  const path = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}-${filename}`;
+  // PRIVATE bucket (migration 0025): PII PDFs are no longer world-readable. Return a signed
+  // URL — the send job fetches it within seconds to attach; the link also lets the customer
+  // open their copy. Unguessable + expiring, unlike the old permanent public URL.
+  const up = await s.storage.from('documents').upload(path, bytes, { contentType: 'application/pdf', upsert: false });
   if (up.error) throw new Error(`upload failed: ${up.error.message}`);
-  const { data } = s.storage.from('uploads').getPublicUrl(path);
-  return data.publicUrl;
+  const { data, error } = await s.storage.from('documents').createSignedUrl(path, 60 * 60 * 24 * 365);
+  if (error) throw new Error(`signed url failed: ${error.message}`);
+  return data.signedUrl;
 }
 
 // Fetch an image (URL or data-URI) to a jsPDF-ready { data, format }.
