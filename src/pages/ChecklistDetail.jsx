@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { runPostConversion } from '@/lib/postConversion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -283,11 +284,11 @@ export default function ChecklistDetail() {
       });
       console.timeEnd('⏱️ Clear Sync Status');
 
-      // Handle all post-conversion tasks in background
-      base44.functions.invoke('handlePostConversion', {
+      // Post-conversion notifications (non-blocking). Reimplements the unported
+      // handlePostConversion — tracking short URLs + lead/consultant SMS + internal email.
+      runPostConversion({
         appointmentId,
-        selectedDC,
-        selectedCSR
+        hasDC: !!(selectedDC && selectedDC !== 'unassigned'),
       }).catch(error => {
         console.error('Post-conversion tasks failed (non-blocking):', error);
       });

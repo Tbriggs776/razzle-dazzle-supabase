@@ -304,7 +304,14 @@ export default function SaleDetail() {
         saleId,
         appUrl: window.location.origin
       });
-      toast.success(`Email sent successfully to ${data.recipientCount} recipient(s)`);
+      if (data?.error) {
+        toast.error(`Failed to send email: ${data.error}`);
+      } else if (data?.skipped) {
+        toast.info(`Email not sent (${data.skipped}).`);
+      } else {
+        // emailDispatch returns `recipients`, not `recipientCount`.
+        toast.success(`Email sent to ${data?.recipients ?? 0} recipient(s)`);
+      }
     } catch (error) {
       toast.error(`Failed to send email: ${error.message}`);
     } finally {

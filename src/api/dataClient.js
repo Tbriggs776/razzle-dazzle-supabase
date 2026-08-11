@@ -489,11 +489,10 @@ function warnUnavailable(name) {
 // Unmapped functions whose whole purpose is to PERSIST data. Returning a fake-success stub for
 // these hides data loss — the caller's onSuccess runs and the UI advances (e.g. a "Signed!"
 // screen) though nothing was written. Throw instead so the mutation's onError fires. Read /
-// degrade-style unmapped calls still return { stub:true } gracefully. (submit* signing +
-// submitCheckpoint + post-conversion/installer notifications are the known unported writes.)
+// degrade-style unmapped calls still return { stub:true } gracefully. (The legacy submit* signing
+// handlers are the remaining known unported writes; e-sign is the ported signing path.)
 const WRITE_STUBS = new Set([
   'submitDesignMod', 'submitManualSalesContract', 'submitPreInstallChecklist',
-  'handlePostConversion',
 ]);
 const isWriteStub = (name) =>
   WRITE_STUBS.has(name) || /^(submit|create|update|delete|save|approve|reject|assign)/i.test(name);

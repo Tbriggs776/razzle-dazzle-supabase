@@ -638,9 +638,16 @@ export default function Settings() {
 
   const setupCronJob = async () => {
     try {
+      const res = await base44.functions.invoke('setupReminderCron', { action: cronExists && cronJobId ? 'delete' : 'create', cronJobId });
+      if (res?.stub || !res?.data) {
+        // Reminders now run on a database-managed daily schedule (pg_cron) — there is no manual
+        // cron to create/delete from the app.
+        toast.info('Appointment reminders already run automatically on a daily schedule (managed by the database). No manual cron setup is needed.');
+        setCronStatus(null);
+        return;
+      }
+      const data = res.data;
       if (cronExists && cronJobId) {
-        // Delete existing cron
-        const { data } = await base44.functions.invoke('setupReminderCron', { action: 'delete', cronJobId });
         if (data.success) {
           setCronExists(false);
           setCronJobId(null);
@@ -649,8 +656,6 @@ export default function Settings() {
           setCronStatus('error');
         }
       } else {
-        // Create new cron
-        const { data } = await base44.functions.invoke('setupReminderCron', { action: 'create' });
         if (data.success) {
           setCronExists(true);
           setCronJobId(data.cronJobId);
@@ -671,8 +676,13 @@ export default function Settings() {
     setTestingReminders(true);
     try {
       const payload = selectedTestAppointment !== 'all' ? { appointmentId: selectedTestAppointment } : {};
-      const { data } = await base44.functions.invoke('sendAppointmentReminders', payload);
-      toast.success(`Test complete!\n\nSent: ${data.sent || 0}\nFailed: ${data.failed || 0}\nSkipped: ${data.skipped || 0}`);
+      const res = await base44.functions.invoke('sendAppointmentReminders', payload);
+      if (res?.stub || !res?.data) {
+        toast.info('Appointment reminders send automatically on a daily schedule — there is no manual trigger.');
+      } else {
+        const data = res.data;
+        toast.success(`Test complete!\n\nSent: ${data.sent || 0}\nFailed: ${data.failed || 0}\nSkipped: ${data.skipped || 0}`);
+      }
     } catch (error) {
       toast.error('Test failed: ' + error.message);
     } finally {
@@ -684,8 +694,13 @@ export default function Settings() {
     setTestingFollowUpReminders(true);
     try {
       const payload = selectedTestDC !== 'all' ? { dcId: selectedTestDC } : {};
-      const { data } = await base44.functions.invoke('sendFollowUpReminders', payload);
-      toast.success(`Test complete!\n\nSent: ${data.sentCount || 0} reminders to ${data.totalDCs || 0} DCs`);
+      const res = await base44.functions.invoke('sendFollowUpReminders', payload);
+      if (res?.stub || !res?.data) {
+        toast.info('DC follow-up reminders send automatically on a daily schedule — there is no manual trigger.');
+      } else {
+        const data = res.data;
+        toast.success(`Test complete!\n\nSent: ${data.sentCount || 0} reminders to ${data.totalDCs || 0} DCs`);
+      }
     } catch (error) {
       toast.error('Test failed: ' + error.message);
     } finally {

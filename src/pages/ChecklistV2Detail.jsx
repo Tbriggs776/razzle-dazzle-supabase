@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { runPostConversion } from '@/lib/postConversion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -185,11 +186,11 @@ export default function ChecklistV2Detail() {
         csrEmail: csrMember?.email
       }).catch(e => console.error('Calendar sync failed:', e));
 
-      // Post-conversion tasks (non-blocking)
-      base44.functions.invoke('handlePostConversion', {
+      // Post-conversion notifications (non-blocking). Reimplements the unported
+      // handlePostConversion — tracking short URLs + lead/consultant SMS + internal email.
+      runPostConversion({
         appointmentId: newAppointment.id,
-        selectedDC,
-        selectedCSR
+        hasDC: !!(selectedDC && selectedDC !== 'unassigned'),
       }).catch(e => console.error('Post-conversion failed:', e));
 
       return newAppointment.id;
