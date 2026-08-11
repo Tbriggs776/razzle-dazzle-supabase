@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
-const GOOGLE_PLACES_API_KEY = 'AIzaSyA4XQHg_FTUCS5-By2Jn_q9TrRRKHrVzL4';
+// The owner's own HTTP-referrer-restricted Google Places/Maps-JS key, set in Vercel env.
+// When it's absent the field degrades to a plain manual-entry text input (no script loaded).
+const GOOGLE_PLACES_API_KEY = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
 
 export function AddressAutocomplete({ 
   value, 
@@ -20,6 +22,12 @@ export function AddressAutocomplete({
   const [internalValue, setInternalValue] = useState(value || '');
 
   useEffect(() => {
+    // No key configured -> degrade to a plain manual-entry text input (never stuck disabled).
+    if (!GOOGLE_PLACES_API_KEY) {
+      setScriptLoaded(false);
+      setIsLoading(false);
+      return;
+    }
     // Check if script is already loaded
     if (window.google?.maps?.places) {
       setScriptLoaded(true);
@@ -34,6 +42,12 @@ export function AddressAutocomplete({
     script.defer = true;
     script.onload = () => {
       setScriptLoaded(true);
+      setIsLoading(false);
+    };
+    // If the script fails to load (bad/blocked key), fall back to manual entry rather than
+    // leaving the input disabled forever.
+    script.onerror = () => {
+      setScriptLoaded(false);
       setIsLoading(false);
     };
     document.head.appendChild(script);

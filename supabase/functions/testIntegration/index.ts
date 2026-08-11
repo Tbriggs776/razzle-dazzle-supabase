@@ -47,20 +47,33 @@ async function testProvider(key: string, cfg: Record<string, any>): Promise<Resu
       return { ok: true, message: `Connected. Domains: ${doms}` };
     }
     case 'rfms': {
-      const token = await getSecret('RFMS_BEARER_TOKEN');
-      if (!token) return miss('Store Token');
-      const scheme = (cfg.auth_scheme || 'Bearer').trim();
-      const r = await fetch('https://api.rfms.online/v2/session/begin', {
-        method: 'POST', headers: { Authorization: `${scheme} ${token}`, 'Content-Type': 'application/json' },
+      // Mirror the runtime client (_shared/rfms.ts): HTTP Basic base64(storeQueue:apiToken)
+      // against POST {base}/session/begin. (The old test used a never-set RFMS_BEARER_TOKEN with
+      // Bearer auth, so it always reported "Store Token not set".)
+      const storeQueue = await getSecret('RFMS_STORE_QUEUE');
+      const apiToken = await getSecret('RFMS_API_TOKEN');
+      if (!storeQueue || !apiToken) return miss('Store Queue / API Token');
+      const base = cfg.base_url || 'https://api.rfms.online/v2';
+      const r = await fetch(`${base}/session/begin`, {
+        method: 'POST',
+        headers: { Authorization: 'Basic ' + btoa(`${storeQueue}:${apiToken}`), 'Content-Type': 'application/json' },
       });
-      if (!r.ok) return { ok: false, message: `RFMS session/begin failed with ${scheme} auth (HTTP ${r.status}) — try the other scheme` };
-      return { ok: true, message: `Session established using ${scheme} auth` };
+      const text = await r.text();
+      if (!r.ok) return { ok: false, message: `RFMS session/begin failed (HTTP ${r.status}): ${text.slice(0, 160)}` };
+      let d: any; try { d = JSON.parse(text); } catch { d = {}; }
+      const sessionToken = d.sessionToken ?? d.result?.sessionToken;
+      return sessionToken
+        ? { ok: true, message: 'RFMS session established (Basic auth)' }
+        : { ok: false, message: `session/begin returned no sessionToken: ${text.slice(0, 160)}` };
     }
     case 'ghl': {
       const token = await getSecret('GHL_PIT_TOKEN');
       if (!token) return miss('Private Integration Token');
-      if (!cfg.GHL_LOCATION_ID) return { ok: false, message: 'Location ID (config) not set' };
-      const r = await fetch(`https://services.leadconnectorhq.com/contacts/?locationId=${cfg.GHL_LOCATION_ID}&limit=1`, {
+      // Runtime + the seeded admin field use lowercase ghl_location_id (the old test read
+      // GHL_LOCATION_ID, so it reported "Location ID not set" even when GHL worked).
+      const locationId = cfg.ghl_location_id;
+      if (!locationId) return { ok: false, message: 'Location ID (config) not set' };
+      const r = await fetch(`https://services.leadconnectorhq.com/contacts/?locationId=${locationId}&limit=1`, {
         headers: { Authorization: `Bearer ${token}`, Version: '2021-07-28' },
       });
       if (!r.ok) return { ok: false, message: `GHL v2 auth failed (HTTP ${r.status})` };
