@@ -1,7 +1,7 @@
 import React, { useState, createContext, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Users, UserCog, CalendarDays, ClipboardCheck, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, FileText, Truck, Plug } from 'lucide-react';
+import { Users, UserCog, CalendarDays, ClipboardCheck, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, FileText, Truck, Plug, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -278,6 +278,7 @@ export default function Layout({ children, currentPageName }) {
   const navigation = [
     { name: 'Dashboard', icon: Activity, href: 'Dashboard', pages: ['Dashboard'], adminOnly: true, allowedEmails: ['user7@example.com'] },
     { name: 'My Appointments', icon: CalendarDays, href: 'MyAppointments', pages: ['MyAppointments', 'AppointmentDetail', 'ChecklistDetail'] },
+    { name: 'My Results', icon: BarChart3, href: 'MyAppointmentResults', pages: ['MyAppointmentResults'] },
     { name: 'My Tasks', icon: ClipboardCheck, href: 'MyTasks', pages: ['MyTasks'] },
     { name: 'My Sales', icon: DollarSign, href: 'MySales', pages: ['MySales'] },
     ...(appSettings?.quotes_enabled && (!appSettings?.quotes_admin_only || currentUser?.role === 'admin')

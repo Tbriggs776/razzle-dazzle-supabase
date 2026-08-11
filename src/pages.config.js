@@ -68,6 +68,7 @@ import LeadDetail from './pages/LeadDetail';
 import Leads from './pages/Leads';
 import Logs from './pages/Logs';
 import MyAppointments from './pages/MyAppointments';
+import MyAppointmentResults from './pages/MyAppointmentResults';
 import MyTasks from './pages/MyTasks';
 import MyTickets from './pages/MyTickets';
 import OrderProcessing from './pages/OrderProcessing';
@@ -112,6 +113,7 @@ export const PAGES = {
     "Leads": Leads,
     "Logs": Logs,
     "MyAppointments": MyAppointments,
+    "MyAppointmentResults": MyAppointmentResults,
     "MyTasks": MyTasks,
     "MyTickets": MyTickets,
     "OrderProcessing": OrderProcessing,

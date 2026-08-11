@@ -46,6 +46,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.rfmsQuery]
 verify_jwt = false
+[functions.sendLeadMessage]
+verify_jwt = false
 [functions.sendMessage]
 verify_jwt = false
 [functions.shortenUrl]

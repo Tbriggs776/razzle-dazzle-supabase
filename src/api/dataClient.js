@@ -334,6 +334,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'getAppUrl',
   'getPublicProjectSigned',
   'logAppointmentAction',
+  'sendLeadMessage',
   'shortenUrl',
   'emailDispatch',
   'pdfEmail',
