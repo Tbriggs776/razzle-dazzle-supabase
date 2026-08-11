@@ -37,6 +37,16 @@ async function mapsKey(): Promise<string | null> {
   return await getSecret('GOOGLE_MAPS_API_KEY');
 }
 
+// HMAC over a "lat,lng" string so the public Street View image proxy (GET below) only serves
+// locations WE minted a URL for — it can't be used as an open proxy for arbitrary coordinates
+// (which would burn our Maps quota). The signature never reveals the signing key.
+async function signLoc(loc: string): Promise<string> {
+  const secret = (await getSecret('CRON_SECRET')) || '';
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(loc));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 async function geocodeAddress(key: string, address: string): Promise<{ lat: number; lng: number } | null> {
   const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${key}`);
   const d = await r.json();
@@ -64,7 +74,10 @@ async function handle(type: string, p: any, key: string): Promise<Record<string,
       if (!loc) return { error: 'Address not found' };
       const meta = await (await fetch(`https://maps.googleapis.com/maps/api/streetview/metadata?location=${loc.lat},${loc.lng}&key=${key}`)).json();
       if (meta.status !== 'OK') return { error: 'Street View not available for this location' };
-      return { streetViewUrl: `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${loc.lat},${loc.lng}&key=${key}&fov=80&pitch=0`, lat: loc.lat, lng: loc.lng };
+      // Return a signed PROXY URL (below), NOT a Google URL with the key embedded — the key must
+      // never reach the browser DOM. The proxy serves the image bytes server-side.
+      const svLoc = `${loc.lat},${loc.lng}`;
+      return { streetViewUrl: `${SUPABASE_URL}/functions/v1/googleMaps?sv=${svLoc}&sig=${await signLoc(svLoc)}`, lat: loc.lat, lng: loc.lng };
     }
     case 'geocode': { // journeyGeocode
       if (!p.address) return { error: 'address required' };
@@ -100,6 +113,25 @@ async function handle(type: string, p: any, key: string): Promise<Record<string,
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+
+  // Street View image PROXY (GET). Serves the image bytes so the API key never reaches the browser
+  // (rendered via <img src>, which can't send auth headers — so this is unauthenticated but gated
+  // by the HMAC over the location, which only WE can produce).
+  if (req.method === 'GET') {
+    const url = new URL(req.url);
+    const sv = url.searchParams.get('sv');
+    const sig = url.searchParams.get('sig');
+    if (!sv || !sig) return new Response('bad request', { status: 400, headers: cors });
+    if (sig !== (await signLoc(sv))) return new Response('forbidden', { status: 403, headers: cors });
+    const key = await mapsKey();
+    if (!key) return new Response('not configured', { status: 503, headers: cors });
+    const g = await fetch(`https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${encodeURIComponent(sv)}&key=${key}&fov=80&pitch=0`);
+    if (!g.ok) return new Response('street view unavailable', { status: 502, headers: cors });
+    return new Response(g.body, {
+      status: 200,
+      headers: { ...cors, 'Content-Type': g.headers.get('Content-Type') || 'image/jpeg', 'Cache-Control': 'public, max-age=86400' },
+    });
+  }
 
   const internal = await getSecret('CRON_SECRET');
   const isInternal = !!internal && req.headers.get('x-internal-secret') === internal;

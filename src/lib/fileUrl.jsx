@@ -14,41 +14,43 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-const BUCKET = 'uploads';
 const PUBLIC_MARKER = '/storage/v1/object/public/uploads/';
 const SIGN_MARKER = '/storage/v1/object/sign/uploads/';
 
-// Pull the storage path out of a stored value, or null if the value is an external URL
-// (public-assets, Google, data:, blob:, …) that should be used as-is.
-function extractUploadsPath(value) {
+// Resolve a stored value to { external } (use as-is) or { bucket, path } (needs a signed URL).
+// Handles: an `esign:` -prefixed private path (e-sign signature images), a bare 'uploads' path, a
+// legacy public/sign 'uploads' URL, and external / data: / blob: URLs.
+function extractStorageRef(value) {
   if (value.startsWith('data:') || value.startsWith('blob:')) return { external: value };
+  if (value.startsWith('esign:')) return { bucket: 'esign', path: value.slice(6).replace(/^\/+/, '') };
   if (/^https?:\/\//i.test(value)) {
     const pub = value.indexOf(PUBLIC_MARKER);
-    if (pub !== -1) return { path: decodeURIComponent(value.slice(pub + PUBLIC_MARKER.length).split('?')[0]) };
+    if (pub !== -1) return { bucket: 'uploads', path: decodeURIComponent(value.slice(pub + PUBLIC_MARKER.length).split('?')[0]) };
     const sig = value.indexOf(SIGN_MARKER);
-    if (sig !== -1) return { path: decodeURIComponent(value.slice(sig + SIGN_MARKER.length).split('?')[0]) };
+    if (sig !== -1) return { bucket: 'uploads', path: decodeURIComponent(value.slice(sig + SIGN_MARKER.length).split('?')[0]) };
     return { external: value }; // some other absolute URL — leave it alone
   }
-  return { path: value.replace(/^\/+/, '') }; // a bare storage path
+  return { bucket: 'uploads', path: value.replace(/^\/+/, '') }; // a bare storage path
 }
 
-// The raw 'uploads' storage path for a stored value (a bare path or a legacy uploads URL), or
-// null if the value is external / empty. For delete/remove flows that need the path, not a URL.
+// The raw 'uploads' storage path for a stored value (a bare path or a legacy uploads URL), or null
+// if the value is external / esign / empty. For delete/remove flows that operate on the uploads
+// bucket and need the path, not a URL.
 export function storagePathOf(value) {
   if (!value || typeof value !== 'string') return null;
-  const { external, path } = extractUploadsPath(value);
-  if (external) return null;
-  return path || null;
+  const ref = extractStorageRef(value);
+  if (ref.external || ref.bucket !== 'uploads') return null;
+  return ref.path || null;
 }
 
 export async function resolveFileUrl(value, { expiresIn = 3600 } = {}) {
   if (!value || typeof value !== 'string') return null;
-  const { external, path } = extractUploadsPath(value);
+  const { external, bucket, path } = extractStorageRef(value);
   if (external) return external;
   if (!path) return null;
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, expiresIn);
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
   if (error || !data?.signedUrl) {
-    console.warn('[fileUrl] could not sign', path, error?.message || error);
+    console.warn('[fileUrl] could not sign', bucket, path, error?.message || error);
     return null;
   }
   return data.signedUrl;

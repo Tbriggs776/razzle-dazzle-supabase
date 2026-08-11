@@ -124,6 +124,15 @@ async function buildSealedPdf(s: any, request: any, config: any, events: any[]):
   y = secH(doc, 'Document', y, C);
   for (const [label, value] of Object.entries(request.document_snapshot || {})) { y = cbrk(doc, y, 16); y = lv(doc, label, value, 20, y, 170); }
 
+  // P11: embed the per-document agreement / terms the signer accepted, prominently on the document
+  // page (the audit certificate below also records it as the consent statement).
+  if (request.consent_text) {
+    y = cbrk(doc, y, 24); y = secH(doc, 'Agreement', y, C);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(60, 60, 60);
+    for (const ln of doc.splitTextToSize(String(request.consent_text), 170)) { y = cbrk(doc, y, 6); doc.text(ln, 20, y); y += 4.6; }
+    doc.setTextColor(30, 30, 30);
+  }
+
   y = cbrk(doc, y, 60); y = secH(doc, 'Signature', y, C);
   y = lv(doc, 'Electronically signed by', request.signer_printed_name || request.signer_name, 20, y, 170);
   // signature_image_url holds the private-bucket PATH; download the bytes server-side.
@@ -244,11 +253,12 @@ async function actSubmit(s: any, req: Request, p: any) {
   const sealedHash = await sha256hex(sealed);
   await s.from('signature_request').update({ sealed_pdf_url: sealedPath, sealed_pdf_hash: sealedHash }).eq('id', r.id);
 
-  // Signed URLs: short-lived for the client download + email attachment (the send job fetches
-  // within ~1 min); long-lived for the admin-facing record stamp so the signature still renders.
+  // Short-lived signed URL for the client download + email attachment (the send job fetches within
+  // ~1 min). ES3: the business-record signature thumbnail is stamped with the esign-bucket PATH
+  // (prefixed), NOT a 365-day bearer URL — it renders via a short-lived signed URL minted on demand
+  // (<SignedImage>/resolveFileUrl), backed by the signature-only authenticated read policy.
   const sealedDownloadUrl = await signedUrl(s, sealedPath, 3600);
-  const sigDisplayUrl = await signedUrl(s, sigPath, 60 * 60 * 24 * 365);
-  await s.from(map.table).update(map.stamp(sigDisplayUrl || sigPath, p.printed_name)).eq('id', r.document_id);
+  await s.from(map.table).update(map.stamp(`esign:${sigPath}`, p.printed_name)).eq('id', r.document_id);
 
   // email the signer their sealed copy + notify internal recipients
   const filename = `${r.document_type}-signed-${r.document_id}.pdf`;
