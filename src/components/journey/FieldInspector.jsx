@@ -4,6 +4,9 @@ import { isSameDay, parseISO, format, addDays, subDays } from 'date-fns';
 import { ChevronLeft, ChevronRight, MapPin, User, Hash, Navigation, Loader2, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/leaflet.css';
 import { base44 } from '@/api/base44Client';
 import { getProductCategoryName } from './productCodes';
@@ -48,12 +51,12 @@ function buildGoogleMapsUrl(routedOrders) {
   return url;
 }
 
-// Fix default marker icons
+// Fix default marker icons — bundle them from the leaflet package (no cdnjs runtime dependency).
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
 });
 
 function MapController({ myRegions }) {

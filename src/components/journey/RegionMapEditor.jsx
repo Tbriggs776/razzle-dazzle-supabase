@@ -3,6 +3,9 @@ import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-l
 import { ChevronDown, ChevronUp, CalendarDays } from 'lucide-react';
 import { format, isSameDay, parseISO } from 'date-fns';
 import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet-draw';
@@ -38,12 +41,12 @@ if (window.L && window.L.GeometryUtil) {
   };
 }
 
-// Fix default marker icons
+// Fix default marker icons — bundle them from the leaflet package (no cdnjs runtime dependency).
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
 });
 
 const REGION_COLORS = [
