@@ -466,6 +466,8 @@ const RPC_FUNCTIONS = {
   createAppointmentFromChecklist: (p) => ['create_appointment_from_checklist', {
     p_checklist_table: p.checklistTable, p_checklist_id: p.checklistId, p_appointment: p.appointment ?? {},
   }],
+  // AT4: atomic manual project create (customer + project + log) in one txn.
+  createManualProject: (p) => ['create_manual_project', { p_customer: p.customer ?? {}, p_project: p.project ?? {}, p_log: p.log ?? null }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
   adminSetEsignType: (p) => ['admin_set_esign_type', {

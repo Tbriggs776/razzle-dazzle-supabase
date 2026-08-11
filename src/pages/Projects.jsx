@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -91,39 +92,45 @@ export default function Projects() {
     if (!newProjectForm.first_name || !newProjectForm.last_name) return;
     setCreatingProject(true);
     try {
-      const customer = await base44.entities.Customer.create({
-        first_name: newProjectForm.first_name,
-        last_name: newProjectForm.last_name,
-        email: newProjectForm.email || 'temp@example.com',
-        phone: newProjectForm.phone || '0000000000',
-        address_line1: newProjectForm.address || ''
-      });
-      const projectData = {
-        customer: customer.id,
+      const projectPayload = {
         status: newProjectForm.status,
-        installation_date: newProjectForm.installation_date || undefined
+        installation_date: newProjectForm.installation_date || null,
       };
       if (newProjectForm.notes) {
-        projectData.notes = [{
+        projectPayload.notes = [{
           content: newProjectForm.notes,
           user_name: 'Manual Entry',
           user_email: 'system',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }];
       }
-      const newProject = await base44.entities.Project.create(projectData);
-      // Log who created the project manually
-      await base44.entities.ProjectLog.create({
-        project: newProject.id,
-        action: 'Project Created',
-        details: `Manually created via New Project button`,
-        user_email: currentUser?.email || 'Unknown',
-        user_name: currentUser?.full_name || currentUser?.email || 'Unknown'
+      // Atomic: customer + project + log in one transaction (a project failure no longer orphans
+      // the just-created customer).
+      const { data, error } = await base44.functions.invoke('createManualProject', {
+        customer: {
+          first_name: newProjectForm.first_name,
+          last_name: newProjectForm.last_name,
+          email: newProjectForm.email || 'temp@example.com',
+          phone: newProjectForm.phone || '0000000000',
+          address_line1: newProjectForm.address || '',
+        },
+        project: projectPayload,
+        log: {
+          action: 'Project Created',
+          details: 'Manually created via New Project button',
+          user_email: currentUser?.email || 'Unknown',
+          user_name: currentUser?.full_name || currentUser?.email || 'Unknown',
+        },
       });
+      if (error || !data?.project_id) {
+        throw new Error(data?.error || error?.message || 'Failed to create the project.');
+      }
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       setShowNewProject(false);
       setNewProjectForm({ first_name: '', last_name: '', email: '', phone: '', address: '', installation_date: '', status: 'Scheduled', notes: '' });
+    } catch (e) {
+      toast.error(e?.message || 'Failed to create the project. Please try again.');
     } finally {
       setCreatingProject(false);
     }

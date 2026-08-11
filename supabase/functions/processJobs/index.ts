@@ -28,6 +28,22 @@ function fmtApptDate(d: string): string {
   catch { return d; }
 }
 
+// Extract the private 'uploads' storage path from a stored value (a bare path or a legacy
+// public/sign uploads URL); null for an external URL. Used by the recording-retention purge.
+function uploadsPathOf(value: unknown): string | null {
+  if (!value || typeof value !== 'string') return null;
+  const PUB = '/object/public/uploads/';
+  const SIG = '/object/sign/uploads/';
+  if (/^https?:\/\//i.test(value)) {
+    const p = value.indexOf(PUB);
+    const g = value.indexOf(SIG);
+    if (p !== -1) return decodeURIComponent(value.slice(p + PUB.length).split('?')[0]);
+    if (g !== -1) return decodeURIComponent(value.slice(g + SIG.length).split('?')[0]);
+    return null;
+  }
+  return value.replace(/^\/+/, '');
+}
+
 // Lead-messaging template vars for an appointment + its lead. Hydrates the real
 // appointment/lead fields (base44 hardcoded most of these to the string 'N/A').
 function leadVars(appt: any, lead: any): Record<string, unknown> {
@@ -353,6 +369,51 @@ async function handle(job: any): Promise<Record<string, unknown>> {
         } catch (_) { /* skip a bad doc */ }
       }
       return { synced: jobs.length, cached };
+    }
+    case 'purge_old_recordings': {
+      // CR2b retention: remove the raw audio blob for recordings whose appointment is older than
+      // the window (default 365 days) — keep recording_analysis (the transcript is de-identified
+      // business data). Bounded per tick so the runner stays under the edge wall clock.
+      const days = Number(job.payload?.retention_days) || 365;
+      const cutoff = new Date(Date.now() - days * 24 * 3600 * 1000).toISOString();
+      const { data: old } = await s.from('appointment')
+        .select('id,recording_url')
+        .not('recording_url', 'is', null)
+        .lt('appointment_created_date', cutoff)
+        .limit(50);
+      let purged = 0;
+      for (const appt of old || []) {
+        const path = uploadsPathOf(appt.recording_url);
+        if (path) { try { await s.storage.from('uploads').remove([path]); } catch (_) { /* best effort */ } }
+        await s.from('appointment').update({ recording_url: null, recording_status: 'purged' }).eq('id', appt.id);
+        purged++;
+      }
+      return { purged, retention_days: days };
+    }
+    case 'cleanup_calendar_orphans': {
+      // CR3 safety net: an appointment Cancelled but whose Google Calendar event wasn't removed
+      // (the inline delete-on-cancel covers the normal path). Delete the stray event + clear the id.
+      const { data: integ } = await s.from('integration').select('is_enabled').eq('key', 'google').maybeSingle();
+      if (!integ?.is_enabled) return { skipped: 'google disabled' };
+      const { data: orphans } = await s.from('appointment')
+        .select('id,google_calendar_event_id')
+        .not('google_calendar_event_id', 'is', null)
+        .eq('status', 'Cancelled')
+        .limit(50);
+      const internal = await getSecret('CRON_SECRET');
+      let cleaned = 0;
+      for (const appt of orphans || []) {
+        try {
+          await fetch(`${FUNCTIONS_BASE}/syncCalendarEvent`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-internal-secret': internal || '' },
+            body: JSON.stringify({ appointmentId: appt.id, action: 'delete' }),
+          });
+          await s.from('appointment').update({ google_calendar_event_id: null }).eq('id', appt.id);
+          cleaned++;
+        } catch (_) { /* skip a stubborn event */ }
+      }
+      return { cleaned, found: (orphans || []).length };
     }
     default:
       throw new Error(`No handler for job type ${job.type}`);
