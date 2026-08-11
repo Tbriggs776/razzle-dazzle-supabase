@@ -332,6 +332,7 @@ const auth = {
 // ---------------------------------------------------------------------------
 const DEPLOYED_FUNCTIONS = new Set([
   'getAppUrl',
+  'getPublicProjectSigned',
   'logAppointmentAction',
   'shortenUrl',
   'emailDispatch',
@@ -550,8 +551,10 @@ const integrations = {
         contentType: file.type || undefined,
       });
       if (error) throw new Error(`[dataClient] UploadFile: ${error.message}`);
-      const { data } = supabase.storage.from('uploads').getPublicUrl(path);
-      return { file_url: data.publicUrl };
+      // The 'uploads' bucket is PRIVATE (ST1). Persist the storage PATH, not a permanent public
+      // URL — callers store this and render it via <SignedImage>/resolveFileUrl (@/lib/fileUrl),
+      // which mints a short-lived signed URL. file_url keeps the same key for call-site parity.
+      return { file_url: path, path };
     },
     async SendEmail(args) {
       console.warn('[dataClient] SendEmail stubbed.', args);

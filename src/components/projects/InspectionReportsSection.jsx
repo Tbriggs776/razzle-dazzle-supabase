@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import InspectionReportForm from './InspectionReportForm';
 import PhotoLightbox from '@/components/PhotoLightbox';
+import { SignedImage } from '@/lib/fileUrl';
 
 export default function InspectionReportsSection({ project, customer, sale, currentUser }) {
   const queryClient = useQueryClient();
@@ -194,7 +195,7 @@ export default function InspectionReportsSection({ project, customer, sale, curr
                                 setLightboxPhotos(urls);
                                 setLightboxIndex(i);
                               }} className="w-full">
-                                <img src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover cursor-pointer hover:opacity-90" />
+                                <SignedImage src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover cursor-pointer hover:opacity-90" />
                               </button>
                               {desc && <p className="text-xs text-slate-500 px-2 py-1 bg-white truncate">{desc}</p>}
                             </div>
@@ -206,7 +207,7 @@ export default function InspectionReportsSection({ project, customer, sale, curr
                   {report.customer_signature && (
                     <div>
                       <p className="text-xs text-slate-400 font-medium uppercase mb-1">Customer Signature</p>
-                      <img src={report.customer_signature} alt="Customer Signature" className="h-20 border border-slate-200 rounded-lg bg-white" />
+                      <SignedImage src={report.customer_signature} alt="Customer Signature" className="h-20 border border-slate-200 rounded-lg bg-white" />
                     </div>
                   )}
                 </div>

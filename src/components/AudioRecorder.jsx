@@ -110,23 +110,21 @@ export default function AudioRecorder({ appointmentId, onUploadComplete }) {
       const fileName = `recording-${Date.now()}.webm`;
       const file = new File([audioBlob], fileName, { type: 'audio/webm' });
 
-      // Upload to the public 'uploads' Storage bucket (AssemblyAI fetches this URL). Replaces
-      // base44's hardcoded Bytescale public key.
+      // Upload to the PRIVATE 'uploads' bucket and store the storage PATH (ST1). analyzeRecording
+      // signs it for AssemblyAI to fetch; playback signs it client-side (@/lib/fileUrl).
       const path = `appointment-recordings/${appointmentId}/${fileName}`;
       const { error: upErr } = await base44.supabase.storage.from('uploads').upload(path, file, { contentType: 'audio/webm', upsert: false });
       if (upErr) throw new Error(upErr.message);
-      const { data: pub } = base44.supabase.storage.from('uploads').getPublicUrl(path);
-      const fileUrl = pub.publicUrl;
 
-      // Update appointment with recording URL, duration, and set status to analyzing
+      // Update appointment with recording path, duration, and set status to analyzing
       await base44.entities.Appointment.update(appointmentId, {
-        recording_url: fileUrl,
+        recording_url: path,
         recording_status: 'analyzing',
         recording_duration: recordedTime
       });
-      
+
       if (onUploadComplete) {
-        await onUploadComplete(fileUrl);
+        await onUploadComplete(path);
       }
       
       // Trigger analysis in background (non-blocking)

@@ -10,8 +10,9 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { openSignedFile } from '@/lib/fileUrl';
 
-export default function OrderProcessorTools({ 
+export default function OrderProcessorTools({
   project, 
   projectId, 
   sale, 
@@ -69,7 +70,7 @@ export default function OrderProcessorTools({
       )}
       {sale?.contract_file_url && (
         <Button
-          onClick={() => window.open(sale.contract_file_url, '_blank')}
+          onClick={() => openSignedFile(sale.contract_file_url)}
           variant="outline"
           className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-50"
         >

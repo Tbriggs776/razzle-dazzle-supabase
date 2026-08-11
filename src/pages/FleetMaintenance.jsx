@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Wrench, Loader2, Pencil, Trash2, Car, Paperclip, X } from 'lucide-react';
+import { SignedFileLink } from '@/lib/fileUrl';
 import { base44 as base44Client } from '@/api/base44Client';
 
 const SERVICE_TYPES = [
@@ -167,9 +168,9 @@ export default function FleetMaintenance() {
                   {m.receipt_urls && m.receipt_urls.length > 0 && (
                     <div className="flex gap-1 mt-1 flex-wrap">
                       {m.receipt_urls.map((r, i) => (
-                        <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-primary hover:underline flex items-center gap-0.5 bg-primary/10 px-1.5 py-0.5 rounded">
+                        <SignedFileLink key={i} src={r.url} className="text-[10px] text-primary hover:underline flex items-center gap-0.5 bg-primary/10 px-1.5 py-0.5 rounded">
                           <Paperclip className="w-2.5 h-2.5" />{r.name || `Receipt ${i+1}`}
-                        </a>
+                        </SignedFileLink>
                       ))}
                     </div>
                   )}
@@ -244,7 +245,7 @@ export default function FleetMaintenance() {
                   {form.receipt_urls.map((r, i) => (
                     <div key={i} className="flex items-center gap-2 p-2 bg-secondary rounded-lg border border-border">
                       <Paperclip className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                      <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex-1 truncate">{r.name || 'Receipt'}</a>
+                      <SignedFileLink src={r.url} className="text-xs text-primary hover:underline flex-1 truncate text-left">{r.name || 'Receipt'}</SignedFileLink>
                       <button type="button" onClick={() => removeReceipt(i)} className="text-destructive hover:opacity-80"><X className="w-3 h-3" /></button>
                     </div>
                   ))}

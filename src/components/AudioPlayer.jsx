@@ -2,8 +2,11 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Loader2, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSignedUrl } from '@/lib/fileUrl';
 
 export default function AudioPlayer({ audioUrl, title = "Conversation Recording", sentimentData = null, utterances = null, speakerNames = null, recordingStatus = null, analysisData = null }) {
+  // uploads bucket is private — sign the stored recording path on the fly for playback/download
+  const signedAudioUrl = useSignedUrl(audioUrl);
   const audioRef = useRef(null);
   const progressBarRef = useRef(null);
   const graphRef = useRef(null);
@@ -17,7 +20,7 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
   const [currentUtterance, setCurrentUtterance] = useState(null);
 
   useEffect(() => {
-    if (!audioRef.current || !audioUrl) return;
+    if (!audioRef.current || !signedAudioUrl) return;
 
     const audio = audioRef.current;
     const hasAnalysisData = utterances && utterances.length > 0;
@@ -73,7 +76,7 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
       setError('Failed to load audio');
     };
 
-    audio.src = audioUrl;
+    audio.src = signedAudioUrl;
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
@@ -89,7 +92,7 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
     };
-  }, [audioUrl, recordingStatus, sentimentData, utterances, speakerNames]);
+  }, [signedAudioUrl, recordingStatus, sentimentData, utterances, speakerNames]);
 
   const togglePlayPause = () => {
     if (audioRef.current) {
@@ -110,7 +113,8 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
 
   const downloadRecording = async () => {
     try {
-      const response = await fetch(audioUrl);
+      if (!signedAudioUrl) return;
+      const response = await fetch(signedAudioUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');

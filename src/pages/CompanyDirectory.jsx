@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Search, Phone, Mail, User, Users } from 'lucide-react';
+import { SignedImage } from '@/lib/fileUrl';
 
 const ROLES = [
   "Admin",
@@ -221,7 +222,7 @@ function MemberCard({ member, roleColors }) {
       <div className="flex items-start gap-4">
         <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
           {member.profile_photo ? (
-            <img src={member.profile_photo} alt="" className="w-full h-full object-cover" />
+            <SignedImage src={member.profile_photo} alt="" className="w-full h-full object-cover" />
           ) : (
             <span className="text-lg font-bold text-primary">
               {member.first_name?.[0]}{member.last_name?.[0]}

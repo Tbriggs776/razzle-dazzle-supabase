@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Loader2, Trash2, Send, CheckCircle2, Clock, ExternalLink, Pen, FileText, Wrench, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
+import { SignedFileLink } from '@/lib/fileUrl';
 
 const STATUS_STYLES = {
   draft: 'bg-secondary text-muted-foreground border-border',
@@ -539,14 +540,12 @@ export default function ManualDesignMods() {
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
-                          <a
-                            href={appt.pre_install_checklist_signature_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <SignedFileLink
+                            src={appt.pre_install_checklist_signature_url}
                             className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10"
                           >
                             <CheckCircle2 className="w-3 h-3" />View Signature
-                          </a>
+                          </SignedFileLink>
                           <a
                             href={`/ConsultantAppointmentView?id=${appt.id}`}
                             target="_blank"

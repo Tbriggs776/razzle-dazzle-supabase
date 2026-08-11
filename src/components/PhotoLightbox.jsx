@@ -1,9 +1,13 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useSignedUrl } from '@/lib/fileUrl';
 
 
 export default function PhotoLightbox({ photos, lightboxIndex, onClose }) {
+  // Sign the currently-shown photo on the fly (uploads bucket is private).
+  const activeUrl = (lightboxIndex !== null && photos?.length) ? photos[lightboxIndex] : null;
+  const signedUrl = useSignedUrl(activeUrl);
   if (lightboxIndex === null || !photos?.length) return null;
 
   const prev = () => onClose((lightboxIndex - 1 + photos.length) % photos.length);
@@ -57,7 +61,7 @@ export default function PhotoLightbox({ photos, lightboxIndex, onClose }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            src={photos[lightboxIndex]}
+            src={signedUrl || undefined}
             alt={`Photo ${lightboxIndex + 1}`}
             className="max-h-[85vh] max-w-[85vw] object-contain rounded-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}

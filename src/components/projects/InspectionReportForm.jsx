@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import InstallersList from './InstallersList';
+import { SignedImage, openSignedFile } from '@/lib/fileUrl';
 
 const DEFAULT_EMAILS = [
   'user1@example.com',
@@ -411,7 +412,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
                 <div className="grid grid-cols-3 gap-2">
                   {images.map((url, i) => (
                     <div key={i} className="relative group rounded-lg overflow-hidden border border-slate-200">
-                      <img src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover cursor-pointer hover:opacity-90" onClick={() => window.open(url, '_blank')} />
+                      <SignedImage src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover cursor-pointer hover:opacity-90" onClick={() => openSignedFile(url)} />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
@@ -444,7 +445,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
                     <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200 group">
                       <Paperclip className="w-4 h-4 text-slate-400 flex-shrink-0" />
                       <span className="flex-1 text-sm text-slate-700 truncate">{file.name}</span>
-                      <Button type="button" size="sm" variant="ghost" onClick={() => window.open(file.url, '_blank')} className="h-7 px-2">
+                      <Button type="button" size="sm" variant="ghost" onClick={() => openSignedFile(file.url)} className="h-7 px-2">
                         <Download className="w-3 h-3" />
                       </Button>
                       <button type="button" onClick={() => removeFile(i)} className="text-red-400 hover:text-red-600 transition-colors">

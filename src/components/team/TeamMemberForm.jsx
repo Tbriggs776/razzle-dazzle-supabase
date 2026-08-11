@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, X, Palette } from "lucide-react";
 import { cn } from '@/lib/utils';
+import { SignedImage } from '@/lib/fileUrl';
 
 const ROLES = ["Admin", "Design Consultant", "Customer Service Rep", "Order Processor", "Sales Manager", "Finance Manager", "Operations", "Customer Experience Coordinator"];
 
@@ -120,9 +121,9 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
         <div className="space-y-4">
           {formData.profile_photo && (
             <div className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-slate-200">
-              <img 
-                src={formData.profile_photo} 
-                alt="Profile" 
+              <SignedImage
+                src={formData.profile_photo}
+                alt="Profile"
                 className="w-full h-full object-cover"
               />
               <button

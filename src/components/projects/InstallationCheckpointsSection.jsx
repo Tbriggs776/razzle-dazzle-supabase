@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, CheckCircle2, Circle, Camera, X, Plus, ChevronDown, ChevronRight, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { SignedImage, openSignedFile } from '@/lib/fileUrl';
 
 const CATEGORIES = ['Pre-Install', 'In Progress', 'Post-Install'];
 
@@ -258,11 +259,11 @@ export default function InstallationCheckpointsSection({ project, currentUser })
                               <div className="flex flex-wrap gap-2 mt-2">
                                 {cp.photo_urls.map((url, i) => (
                                   <div key={i} className="relative group">
-                                    <img
+                                    <SignedImage
                                       src={url}
                                       alt="checkpoint"
                                       className="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90"
-                                      onClick={() => window.open(url, '_blank')}
+                                      onClick={() => openSignedFile(url)}
                                     />
                                     <button
                                       onClick={() => handleDeletePhoto(template, i)}

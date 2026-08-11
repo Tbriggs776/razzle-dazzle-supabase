@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import FieldManagerNotificationBadge from './FieldManagerNotificationBadge';
 import PhotoLightboxModal from './PhotoLightboxModal';
+import { SignedImage } from '@/lib/fileUrl';
 import { toast } from 'sonner';
 
 function ChecklistRow({ label, checked, onChange, disabled, required, missing }) {
@@ -51,7 +52,7 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
       <div className="flex items-center gap-2 flex-wrap">
         {photos.map((url, i) => (
           <div key={i} className="relative group">
-            <img src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer" />
+            <SignedImage src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer" />
             {!disabled && (
               <button
                 onClick={() => onChange(photos.filter((_, idx) => idx !== i))}

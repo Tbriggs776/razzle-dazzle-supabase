@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Loader2, Save, Brain, User, Home, Wrench, Lightbulb, Heart, DollarSign, BarChart3, Calendar, Megaphone, CheckCircle2, Info, Camera, X, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SignedImage } from '@/lib/fileUrl';
 
 const VALUE_ADDS_1 = ["$35 room sale", "Basic floor prep included", "Painted baseboards", "Dustless tile demo"];
 const VALUE_ADDS_2 = ["Lifetime labor warranty", "Worry free flooring & install", "One time warranty transfer", "Field manager", "Half inch carpet pad"];
@@ -1023,7 +1024,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {formData.photos.map((url, idx) => (
                     <div key={idx} className="relative group aspect-square">
-                      <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover rounded-lg border border-slate-200" />
+                      <SignedImage src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover rounded-lg border border-slate-200" />
                       <button
                         onClick={() => handleRemovePhoto(idx)}
                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"

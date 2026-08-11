@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar, User, MapPin, Loader2, AlertCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { SignedImage } from '@/lib/fileUrl';
 import { format, parseISO, startOfWeek, addDays, isSameDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -686,7 +687,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                               <div key={consultant.id} className="grid grid-cols-[250px_repeat(4,minmax(200px,1fr))] border-b border-border hover:bg-muted">
                               <div className="p-4 flex items-center gap-3 sticky left-0 bg-white hover:bg-muted z-10">
                               {consultant.profile_photo ? (
-                              <img
+                              <SignedImage
                               src={consultant.profile_photo}
                               alt={consultant.first_name}
                               className="w-10 h-10 rounded-full object-cover"
@@ -916,7 +917,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                                     <div className="bg-muted sticky left-0 z-10" />
                                     <div className="p-3 flex items-center gap-2 border-l border-border sticky left-[80px] bg-white hover:bg-muted z-10">
                                     {consultant.profile_photo ? (
-                                    <img
+                                    <SignedImage
                                     src={consultant.profile_photo}
                                     alt={consultant.first_name}
                                     className="w-8 h-8 rounded-full object-cover"

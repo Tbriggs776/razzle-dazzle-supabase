@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2, Eraser } from 'lucide-react';
+import { SignedImage } from '@/lib/fileUrl';
 
 export default function DesignModView() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -182,7 +183,7 @@ export default function DesignModView() {
               <div className="border-b border-border pb-4">
                 <p className="text-sm text-muted-foreground mb-2">Customer Signature</p>
                 <div className="border border-border rounded-lg bg-card p-2">
-                  <img src={mod.customer_signature} alt="Customer Signature" className="max-h-32 w-auto" />
+                  <SignedImage src={mod.customer_signature} alt="Customer Signature" className="max-h-32 w-auto" />
                 </div>
               </div>
             )}

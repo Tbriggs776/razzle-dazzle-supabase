@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardCheck, Loader2, CheckCircle2, AlertCircle, Clock, ExternalLink, Plus, Paperclip, X, Image as ImageIcon, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
+import { SignedImage, SignedFileLink } from '@/lib/fileUrl';
 import { motion } from 'framer-motion';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -401,23 +402,21 @@ export default function MyTickets() {
                                                     }}
                                                     className="block"
                                                   >
-                                                    <img
+                                                    <SignedImage
                                                       src={url}
                                                       alt={`Attachment ${idx + 1}`}
                                                       className="max-w-[200px] max-h-[200px] rounded border border-border hover:opacity-90 cursor-pointer"
                                                     />
                                                   </button>
                                                 ) : (
-                                                  <a
+                                                  <SignedFileLink
                                                     key={idx}
-                                                    href={url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                    src={url}
                                                     className="flex items-center gap-1 px-2 py-1 bg-card border border-border rounded hover:bg-secondary"
                                                   >
                                                     <Paperclip className="w-3 h-3" />
                                                     <span className="text-xs">{getFileName(url)}</span>
-                                                  </a>
+                                                  </SignedFileLink>
                                                 )
                                               ))}
                                             </div>
@@ -627,7 +626,7 @@ export default function MyTickets() {
               </>
             )}
 
-            <img
+            <SignedImage
               src={viewerImages[currentImageIndex]}
               alt="Full size"
               className="w-full h-auto max-h-[90vh] object-contain"

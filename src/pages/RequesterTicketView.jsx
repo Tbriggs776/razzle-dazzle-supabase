@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Paperclip, X, Image as ImageIcon, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
+import { SignedImage, SignedFileLink } from '@/lib/fileUrl';
 
 export default function RequesterTicketView() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -597,23 +598,21 @@ export default function RequesterTicketView() {
                                       }}
                                       className="block"
                                     >
-                                      <img
+                                      <SignedImage
                                         src={url}
                                         alt={`Attachment ${idx + 1}`}
                                         className="max-w-[200px] max-h-[200px] rounded border border-border hover:opacity-90 cursor-pointer"
                                       />
                                     </button>
                                   ) : (
-                                    <a
+                                    <SignedFileLink
                                       key={idx}
-                                      href={url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
+                                      src={url}
                                       className="flex items-center gap-1 px-2 py-1 bg-card border border-border rounded hover:bg-secondary"
                                     >
                                       <Paperclip className="w-3 h-3" />
                                       <span className="text-xs">{getFileName(url)}</span>
-                                    </a>
+                                    </SignedFileLink>
                                   )
                                 ))}
                               </div>
@@ -792,7 +791,7 @@ export default function RequesterTicketView() {
               </>
             )}
 
-            <img
+            <SignedImage
               src={viewerImages[currentImageIndex]}
               alt="Full size"
               className="w-full h-auto max-h-[90vh] object-contain"

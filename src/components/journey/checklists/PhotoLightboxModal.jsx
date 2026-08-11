@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { SignedImage } from '@/lib/fileUrl';
 
 export default function PhotoLightboxModal({ urls, index, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(index);
@@ -74,7 +75,7 @@ export default function PhotoLightboxModal({ urls, index, onClose }) {
       )}
 
       {/* Image */}
-      <img
+      <SignedImage
         src={urls[currentIndex]}
         alt=""
         className="max-w-[95vw] max-h-[92vh] object-contain rounded-lg"

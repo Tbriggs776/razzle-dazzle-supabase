@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SignedImage } from '@/lib/fileUrl';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { 
   ArrowLeft, 
@@ -109,8 +110,8 @@ export default function TeamMemberDetail() {
             {/* Avatar */}
             <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
               {teamMember.profile_photo ? (
-                <img 
-                  src={teamMember.profile_photo} 
+                <SignedImage
+                  src={teamMember.profile_photo}
                   alt={fullName}
                   className="w-full h-full object-cover"
                 />

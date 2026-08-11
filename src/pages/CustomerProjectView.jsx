@@ -53,7 +53,9 @@ export default function CustomerProjectView() {
   const { data, isLoading } = useQuery({
     queryKey: ['publicProject', projectId],
     queryFn: async () => {
-      const { data } = await base44.functions.invoke('getPublicProject', { id: projectId });
+      // getPublicProjectSigned wraps the get_public_project projection and returns SIGNED URLs
+      // for the contract PDF + manager photos (the 'uploads' bucket is private; anon can't sign).
+      const { data } = await base44.functions.invoke('getPublicProjectSigned', { id: projectId });
       return data || null;
     },
     enabled: !!projectId,

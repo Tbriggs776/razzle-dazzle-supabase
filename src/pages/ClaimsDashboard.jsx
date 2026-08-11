@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, Loader2, FileText, ClipboardList, Pencil, Trash2, XCircle, CheckCircle2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { SignedImage, SignedFileLink } from '@/lib/fileUrl';
 import ProjectClaimForm from '@/components/projects/ProjectClaimForm';
 import InspectionReportForm from '@/components/projects/InspectionReportForm';
 
@@ -290,9 +291,9 @@ export default function ClaimsDashboard() {
                 <p className="text-muted-foreground font-medium mb-2">Images ({selectedItem.images.length})</p>
                 <div className="flex flex-wrap gap-2">
                   {selectedItem.images.map((url, i) => (
-                    <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                      <img src={url} alt={`Image ${i+1}`} className="w-20 h-20 object-cover rounded border border-border" />
-                    </a>
+                    <SignedFileLink key={i} src={url} className="block p-0 border-0 bg-transparent cursor-pointer">
+                      <SignedImage src={url} alt={`Image ${i+1}`} className="w-20 h-20 object-cover rounded border border-border" />
+                    </SignedFileLink>
                   ))}
                 </div>
               </div>

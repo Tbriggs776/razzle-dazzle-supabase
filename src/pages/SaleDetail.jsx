@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { SignedImage, resolveFileUrl } from '@/lib/fileUrl';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -208,8 +209,10 @@ export default function SaleDetail() {
 
   const handleDownloadContract = async () => {
     if (sale?.contract_file_url) {
+      const signedUrl = await resolveFileUrl(sale.contract_file_url);
+      if (!signedUrl) return;
       try {
-        const response = await fetch(sale.contract_file_url, {
+        const response = await fetch(signedUrl, {
           mode: 'cors'
         });
         const blob = await response.blob();
@@ -226,7 +229,7 @@ export default function SaleDetail() {
         }, 100);
       } catch (error) {
         console.error('Download failed:', error);
-        window.open(sale.contract_file_url, '_blank');
+        window.open(signedUrl, '_blank');
       }
     }
   };
@@ -908,7 +911,7 @@ export default function SaleDetail() {
                   <div key={idx}>
                     <p className="text-xs font-medium text-muted-foreground mb-1">Product {idx + 1}</p>
                     <div className="rounded-lg overflow-hidden border border-border">
-                      <img
+                      <SignedImage
                         src={url}
                         alt={`Product ${idx + 1}`}
                         className="w-full h-48 object-cover"
@@ -932,7 +935,7 @@ export default function SaleDetail() {
                 Driver's License
               </h2>
               <div className="rounded-lg overflow-hidden border border-border">
-                <img
+                <SignedImage
                   src={sale.driver_license_photo_url}
                   alt="Driver's License"
                   className="w-full h-auto"

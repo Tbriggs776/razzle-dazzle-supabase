@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Search, Mic, Calendar, User, MapPin, Loader2, Trash2, Clock, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import moment from 'moment';
+import { openSignedFile } from '@/lib/fileUrl';
 
 export default function Recordings() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -185,16 +186,14 @@ export default function Recordings() {
                         
                         {isAdmin && appointment.recording_url && (
                           <div className="mt-2">
-                            <a 
-                              href={appointment.recording_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-primary hover:underline block truncate max-w-md"
+                            <button
+                              type="button"
+                              className="text-xs text-primary hover:underline block truncate max-w-md text-left"
                               title={appointment.recording_url}
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={(e) => { e.stopPropagation(); openSignedFile(appointment.recording_url); }}
                             >
                               {appointment.recording_url}
-                            </a>
+                            </button>
                           </div>
                         )}
                       </div>

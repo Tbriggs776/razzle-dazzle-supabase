@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import PhotoLightbox from '@/components/PhotoLightbox';
+import { SignedImage } from '@/lib/fileUrl';
 
 export default function ChecklistDisplay({ checklist }) {
   const [lightboxIndex, setLightboxIndex] = useState(null);
@@ -224,7 +225,7 @@ export default function ChecklistDisplay({ checklist }) {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {photos.map((url, index) => (
               <button key={index} onClick={() => setLightboxIndex(index)} className="focus:outline-none">
-                <img
+                <SignedImage
                   src={url}
                   alt={`Checklist photo ${index + 1}`}
                   className="w-full h-32 object-cover rounded-lg border border-slate-200 hover:opacity-90 transition-opacity cursor-pointer"

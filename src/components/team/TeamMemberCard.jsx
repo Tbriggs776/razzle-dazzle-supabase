@@ -5,6 +5,7 @@ import { Mail, Phone, ChevronRight, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { SignedImage } from '@/lib/fileUrl';
 
 const roleColors = {
   'Admin': 'bg-purple-100 text-purple-800 border-purple-200',
@@ -30,8 +31,8 @@ export default function TeamMemberCard({ teamMember, index }) {
           {/* Avatar */}
           <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden shadow-lg shadow-indigo-200">
             {teamMember.profile_photo ? (
-              <img 
-                src={teamMember.profile_photo} 
+              <SignedImage
+                src={teamMember.profile_photo}
                 alt={fullName}
                 className="w-full h-full object-cover"
               />

@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { SignedImage, openSignedFile, resolveFileUrl } from '@/lib/fileUrl';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -833,9 +834,11 @@ export default function ProjectDetail() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => {
+                        onClick={async () => {
+                          const signedUrl = await resolveFileUrl(sale.folder_photo_url);
+                          if (!signedUrl) return;
                           const link = document.createElement('a');
-                          link.href = sale.folder_photo_url;
+                          link.href = signedUrl;
                           link.download = 'folder-photo.jpg';
                           link.click();
                         }}
@@ -844,11 +847,11 @@ export default function ProjectDetail() {
                         <Download className="w-3 h-3" />
                       </Button>
                     </div>
-                    <img 
-                      src={sale.folder_photo_url} 
-                      alt="RAZZLE DAZZLE Folder" 
+                    <SignedImage
+                      src={sale.folder_photo_url}
+                      alt="RAZZLE DAZZLE Folder"
                       className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => window.open(sale.folder_photo_url, '_blank')}
+                      onClick={() => openSignedFile(sale.folder_photo_url)}
                     />
                   </div>
                 )}
@@ -859,9 +862,11 @@ export default function ProjectDetail() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => {
+                        onClick={async () => {
+                          const signedUrl = await resolveFileUrl(sale.yard_sign_photo_url);
+                          if (!signedUrl) return;
                           const link = document.createElement('a');
-                          link.href = sale.yard_sign_photo_url;
+                          link.href = signedUrl;
                           link.download = 'yard-sign-photo.jpg';
                           link.click();
                         }}
@@ -870,11 +875,11 @@ export default function ProjectDetail() {
                         <Download className="w-3 h-3" />
                       </Button>
                     </div>
-                    <img 
-                      src={sale.yard_sign_photo_url} 
-                      alt="Yard Sign" 
+                    <SignedImage
+                      src={sale.yard_sign_photo_url}
+                      alt="Yard Sign"
                       className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => window.open(sale.yard_sign_photo_url, '_blank')}
+                      onClick={() => openSignedFile(sale.yard_sign_photo_url)}
                     />
                   </div>
                 )}
@@ -886,8 +891,10 @@ export default function ProjectDetail() {
                         size="sm"
                         variant="ghost"
                         onClick={async () => {
+                          const signedUrl = await resolveFileUrl(sale.driver_license_photo_url);
+                          if (!signedUrl) return;
                           try {
-                            const response = await fetch(sale.driver_license_photo_url, {
+                            const response = await fetch(signedUrl, {
                               mode: 'cors'
                             });
                             const blob = await response.blob();
@@ -904,7 +911,7 @@ export default function ProjectDetail() {
                             }, 100);
                           } catch (error) {
                             console.error('Download failed:', error);
-                            window.open(sale.driver_license_photo_url, '_blank');
+                            window.open(signedUrl, '_blank');
                           }
                         }}
                         className="h-7 px-2 text-xs"
@@ -912,11 +919,11 @@ export default function ProjectDetail() {
                         <Download className="w-3 h-3" />
                       </Button>
                     </div>
-                    <img 
-                      src={sale.driver_license_photo_url} 
-                      alt="Driver's License" 
+                    <SignedImage
+                      src={sale.driver_license_photo_url}
+                      alt="Driver's License"
                       className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => window.open(sale.driver_license_photo_url, '_blank')}
+                      onClick={() => openSignedFile(sale.driver_license_photo_url)}
                     />
                   </div>
                 )}
@@ -1063,7 +1070,7 @@ export default function ProjectDetail() {
                 </Button>
                 {sale.contract_file_url && (
                   <Button
-                    onClick={() => window.open(sale.contract_file_url, '_blank')}
+                    onClick={() => openSignedFile(sale.contract_file_url)}
                     variant="outline"
                     className="w-full border-primary/30 text-primary hover:bg-primary/10"
                   >
@@ -1113,7 +1120,7 @@ export default function ProjectDetail() {
                 )}
                 {sale?.contract_file_url && (
                   <Button
-                    onClick={() => window.open(sale.contract_file_url, '_blank')}
+                    onClick={() => openSignedFile(sale.contract_file_url)}
                     variant="outline"
                     className="w-full border-primary/30 text-primary hover:bg-primary/10"
                   >
@@ -1696,7 +1703,7 @@ export default function ProjectDetail() {
                 {project.pre_install_checklist_signature_url && (
                   <div>
                     <p className="text-xs text-green-700 dark:text-green-300 font-medium mb-2">Customer Signature:</p>
-                    <img src={project.pre_install_checklist_signature_url} alt="Customer signature" className="h-20 border border-green-200 dark:border-green-500/25 rounded-lg bg-white p-2" />
+                    <SignedImage src={project.pre_install_checklist_signature_url} alt="Customer signature" className="h-20 border border-green-200 dark:border-green-500/25 rounded-lg bg-white p-2" />
                   </div>
                 )}
               </div>
@@ -1783,7 +1790,7 @@ export default function ProjectDetail() {
                           onClick={() => setLightboxIndex(realIndex)}
                           className="w-full h-full"
                         >
-                          <img
+                          <SignedImage
                             src={image.url}
                             alt="Project"
                             className="w-full h-40 object-cover cursor-pointer hover:opacity-90 transition-opacity"
@@ -1793,7 +1800,7 @@ export default function ProjectDetail() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => window.open(image.url, '_blank')}
+                            onClick={() => openSignedFile(image.url)}
                             className="bg-card hover:bg-secondary"
                           >
                             <ExternalLink className="w-4 h-4" />
@@ -1876,7 +1883,7 @@ export default function ProjectDetail() {
                         <p className="text-xs text-muted-foreground">{file.user_name} · {new Date(file.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</p>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
-                        <Button size="sm" variant="ghost" onClick={() => window.open(file.url, '_blank')} className="h-8 px-2">
+                        <Button size="sm" variant="ghost" onClick={() => openSignedFile(file.url)} className="h-8 px-2">
                           <Download className="w-4 h-4" />
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => handleDeleteFile(project.files.length - 1 - index)} className="h-8 px-2 text-destructive hover:opacity-80 opacity-0 group-hover:opacity-100 transition-opacity">

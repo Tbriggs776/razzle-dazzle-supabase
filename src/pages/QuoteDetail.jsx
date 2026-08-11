@@ -18,6 +18,7 @@ import {
 import { generateReceiptPDF } from '@/utils/generateReceiptPDF';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useSignedUrl } from '@/lib/fileUrl';
 
 const STATUS_COLORS = {
   'Draft':     'bg-secondary text-secondary-foreground border-border',
@@ -122,6 +123,10 @@ export default function QuoteDetail() {
     },
     enabled: !!quote?.converted_sale_id
   });
+
+  // Signed URLs for uploaded PDFs (uploads bucket is private)
+  const signedQuoteFileUrl = useSignedUrl(quote?.quote_file_url);
+  const signedReceiptFileUrl = useSignedUrl(quote?.receipt_file_url);
 
   // Update quote status / fields
   const updateMutation = useMutation({
@@ -521,7 +526,7 @@ export default function QuoteDetail() {
                     <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">Sent on {format(new Date(quote.sent_at), 'MMM d, yyyy h:mm a')}</p>
                   )}
                 </div>
-                <a href={quote.quote_file_url} target="_blank" rel="noopener noreferrer">
+                <a href={signedQuoteFileUrl || undefined} target="_blank" rel="noopener noreferrer">
                   <Button variant="outline" size="sm" className="border-green-300 text-green-700 dark:border-green-500/30 dark:text-green-300">
                     <ExternalLink className="w-4 h-4 mr-1" /> View PDF
                   </Button>
@@ -557,7 +562,7 @@ export default function QuoteDetail() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Deposit & Receipt</h2>
               {quote.receipt_file_url && (
-                <a href={quote.receipt_file_url} target="_blank" rel="noopener noreferrer">
+                <a href={signedReceiptFileUrl || undefined} target="_blank" rel="noopener noreferrer">
                   <Button variant="outline" size="sm" className="border-primary/30 text-primary">
                     <ExternalLink className="w-4 h-4 mr-1" /> View Receipt PDF
                   </Button>
@@ -642,7 +647,7 @@ export default function QuoteDetail() {
                   <p className="text-sm font-medium text-primary">Receipt PDF Generated</p>
                   <p className="text-xs text-muted-foreground">Send this along with the quote PDF to the customer.</p>
                 </div>
-                <a href={quote.receipt_file_url} target="_blank" rel="noopener noreferrer">
+                <a href={signedReceiptFileUrl || undefined} target="_blank" rel="noopener noreferrer">
                   <Button size="sm" variant="outline" className="border-primary/30 text-primary">
                     <ExternalLink className="w-4 h-4 mr-1" /> Open
                   </Button>

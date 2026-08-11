@@ -22,6 +22,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.getAppUrl]
 verify_jwt = false
+[functions.getPublicProjectSigned]
+verify_jwt = false
 [functions.ghl]
 verify_jwt = false
 [functions.googleMaps]

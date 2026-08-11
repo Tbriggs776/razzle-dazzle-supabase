@@ -10,6 +10,7 @@ import { Loader2, X, Plus, Upload } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import InstallersList from './InstallersList';
+import { SignedImage, openSignedFile } from '@/lib/fileUrl';
 
 const DEFAULT_EMAILS = [
   'user1@example.com',
@@ -274,7 +275,7 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
                 <div className="grid grid-cols-3 gap-2">
                   {images.map((url, i) => (
                     <div key={i} className="relative group rounded-lg overflow-hidden border border-slate-200">
-                      <img src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover cursor-pointer hover:opacity-90" onClick={() => window.open(url, '_blank')} />
+                      <SignedImage src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover cursor-pointer hover:opacity-90" onClick={() => openSignedFile(url)} />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}

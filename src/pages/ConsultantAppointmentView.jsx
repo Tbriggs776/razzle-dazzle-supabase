@@ -42,6 +42,7 @@ import ChecklistDisplay from '@/components/appointments/ChecklistDisplay';
 import ChecklistV2Display from '@/components/appointments/ChecklistV2Display';
 import CreateQuoteDialog from '@/components/appointments/CreateQuoteDialog';
 import { toast } from 'sonner';
+import { SignedImage } from '@/lib/fileUrl';
 
 const statusColors = {
   'Lead': 'bg-secondary text-secondary-foreground border-border',
@@ -1333,9 +1334,9 @@ export default function ConsultantAppointmentView() {
                 {sale.folder_photo_url && (
                   <div>
                     <p className="text-sm font-medium text-foreground mb-2">RAZZLE DAZZLE Folder</p>
-                    <img 
-                      src={sale.folder_photo_url} 
-                      alt="RAZZLE DAZZLE Folder" 
+                    <SignedImage
+                      src={sale.folder_photo_url}
+                      alt="RAZZLE DAZZLE Folder"
                       className="w-full h-64 object-cover rounded-lg border border-border"
                     />
                   </div>
@@ -1343,9 +1344,9 @@ export default function ConsultantAppointmentView() {
                 {sale.yard_sign_photo_url && (
                   <div>
                     <p className="text-sm font-medium text-foreground mb-2">Yard Sign</p>
-                    <img 
-                      src={sale.yard_sign_photo_url} 
-                      alt="Yard Sign" 
+                    <SignedImage
+                      src={sale.yard_sign_photo_url}
+                      alt="Yard Sign"
                       className="w-full h-64 object-cover rounded-lg border border-border"
                     />
                   </div>
@@ -1637,7 +1638,7 @@ export default function ConsultantAppointmentView() {
                   </div>
                 ) : folderPhotoUrl ? (
                   <div>
-                    <img src={folderPhotoUrl} alt="Folder" className="w-full h-48 object-cover rounded-lg border border-border" />
+                    <SignedImage src={folderPhotoUrl} alt="Folder" className="w-full h-48 object-cover rounded-lg border border-border" />
                     <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
                       <CheckCircle2 className="w-4 h-4" />
                       Folder photo uploaded
@@ -1673,7 +1674,7 @@ export default function ConsultantAppointmentView() {
                       </div>
                     ) : yardSignPhotoUrl ? (
                       <div>
-                        <img src={yardSignPhotoUrl} alt="Yard Sign" className="w-full h-48 object-cover rounded-lg border border-border" />
+                        <SignedImage src={yardSignPhotoUrl} alt="Yard Sign" className="w-full h-48 object-cover rounded-lg border border-border" />
                         <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
                           <CheckCircle2 className="w-4 h-4" />
                           Yard sign photo uploaded
@@ -1723,7 +1724,7 @@ export default function ConsultantAppointmentView() {
                   <div className="grid grid-cols-2 gap-2">
                     {productPhotos.map((url, idx) => (
                       <div key={idx} className="relative">
-                        <img src={url} alt={`Product ${idx + 1}`} className="w-full h-32 object-cover rounded-lg border border-border" />
+                        <SignedImage src={url} alt={`Product ${idx + 1}`} className="w-full h-32 object-cover rounded-lg border border-border" />
                         <button
                           type="button"
                           onClick={() => setProductPhotos(prev => prev.filter((_, i) => i !== idx))}
@@ -1758,7 +1759,7 @@ export default function ConsultantAppointmentView() {
                   </div>
                 ) : driverLicensePhotoUrl ? (
                   <div>
-                    <img src={driverLicensePhotoUrl} alt="Driver's License" className="w-full h-48 object-cover rounded-lg border border-border" />
+                    <SignedImage src={driverLicensePhotoUrl} alt="Driver's License" className="w-full h-48 object-cover rounded-lg border border-border" />
                     <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
                       <CheckCircle2 className="w-4 h-4" />
                       Driver's license photo uploaded

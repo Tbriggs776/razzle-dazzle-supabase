@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2, Eraser } from 'lucide-react';
 import { format } from 'date-fns';
+import { SignedImage } from '@/lib/fileUrl';
 
 const CHECKLIST_ITEMS = [
   { id: 'est_dates', title: 'Estimated Installation & Completion Dates', text: "Customer acknowledges that flooring installation is a construction project and that all installation dates, start dates, and completion dates, whether stated in this Agreement or communicated verbally or in writing by Floor Daddy, LLC, are estimates only and are not guaranteed. Customer further acknowledges and agrees that unforeseen circumstances, including but not limited to product availability, manufacturer delays, weather, site conditions, change orders, labor availability, or other events beyond Floor Daddy, LLC's reasonable control, may affect the project schedule. Accordingly, Floor Daddy, LLC's inability to meet any estimated installation or completion date shall not constitute a breach of this Agreement and shall not entitle Customer to cancel this Agreement, withhold payment, demand a price reduction, assess penalties, or seek monetary damages. Customer agrees that all payments required under this Agreement remain due in accordance with the payment terms, regardless of any scheduling delays. Floor Daddy, LLC does not guarantee completion of the Work within any estimated timeframe." },
@@ -199,7 +200,7 @@ export default function PreInstallChecklistView() {
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Customer Signature:</p>
                 <div className="border border-border rounded-lg p-2 bg-card inline-block">
-                  <img src={checklist.signature_url} alt="Signature" className="max-h-24" />
+                  <SignedImage src={checklist.signature_url} alt="Signature" className="max-h-24" />
                 </div>
               </div>
             )}

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Download } from 'lucide-react';
+import { SignedImage, openSignedFile, resolveFileUrl } from '@/lib/fileUrl';
 
 export default function SalePhotosSection({ sale, lead }) {
   if (!sale || (!sale.folder_photo_url && !sale.yard_sign_photo_url && !sale.driver_license_photo_url && (!sale.product_photos || sale.product_photos.length === 0))) {
@@ -9,7 +10,9 @@ export default function SalePhotosSection({ sale, lead }) {
   }
 
   const downloadPhoto = async (url, filename) => {
-    const response = await fetch(url);
+    const signedUrl = await resolveFileUrl(url);
+    if (!signedUrl) return;
+    const response = await fetch(signedUrl);
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -43,11 +46,11 @@ export default function SalePhotosSection({ sale, lead }) {
                 <Download className="w-3 h-3" />
               </Button>
             </div>
-            <img 
-              src={sale.folder_photo_url} 
-              alt="RAZZLE DAZZLE Folder" 
+            <SignedImage
+              src={sale.folder_photo_url}
+              alt="RAZZLE DAZZLE Folder"
               className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => window.open(sale.folder_photo_url, '_blank')}
+              onClick={() => openSignedFile(sale.folder_photo_url)}
             />
           </div>
         )}
@@ -64,11 +67,11 @@ export default function SalePhotosSection({ sale, lead }) {
                 <Download className="w-3 h-3" />
               </Button>
             </div>
-            <img 
-              src={sale.yard_sign_photo_url} 
-              alt="Yard Sign" 
+            <SignedImage
+              src={sale.yard_sign_photo_url}
+              alt="Yard Sign"
               className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => window.open(sale.yard_sign_photo_url, '_blank')}
+              onClick={() => openSignedFile(sale.yard_sign_photo_url)}
             />
           </div>
         )}
@@ -85,11 +88,11 @@ export default function SalePhotosSection({ sale, lead }) {
                 <Download className="w-3 h-3" />
               </Button>
             </div>
-            <img 
-              src={sale.driver_license_photo_url} 
-              alt="Driver's License" 
+            <SignedImage
+              src={sale.driver_license_photo_url}
+              alt="Driver's License"
               className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => window.open(sale.driver_license_photo_url, '_blank')}
+              onClick={() => openSignedFile(sale.driver_license_photo_url)}
             />
           </div>
         )}
@@ -111,11 +114,11 @@ export default function SalePhotosSection({ sale, lead }) {
                 <Download className="w-3 h-3" />
               </Button>
             </div>
-            <img
+            <SignedImage
               src={url}
               alt={`Final Product ${idx + 1}`}
               className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => window.open(url, '_blank')}
+              onClick={() => openSignedFile(url)}
             />
           </div>
         ))}

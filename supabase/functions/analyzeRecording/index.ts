@@ -69,8 +69,25 @@ Deno.serve(async (req) => {
     const dc = await one(s, 'team_member', appt.assigned_dc);
     const knownNames = [lead?.first_name, dc?.first_name].filter(Boolean);
 
+    // The 'uploads' bucket is private (ST1) — AssemblyAI is an EXTERNAL fetcher and can't read a
+    // private path, so mint a short-lived SIGNED URL for it (it downloads the audio at submit
+    // time). Tolerates a stored path OR a legacy public/sign uploads URL.
+    const PUB = '/object/public/uploads/';
+    const SIG = '/object/sign/uploads/';
+    let recPath = appt.recording_url as string;
+    if (/^https?:\/\//i.test(recPath)) {
+      const p = recPath.indexOf(PUB);
+      const g = recPath.indexOf(SIG);
+      if (p !== -1) recPath = decodeURIComponent(recPath.slice(p + PUB.length).split('?')[0]);
+      else if (g !== -1) recPath = decodeURIComponent(recPath.slice(g + SIG.length).split('?')[0]);
+    } else {
+      recPath = recPath.replace(/^\/+/, '');
+    }
+    const { data: signedRec } = await s.storage.from('uploads').createSignedUrl(recPath, 60 * 60 * 6);
+    if (!signedRec?.signedUrl) return Response.json({ error: 'Could not sign the recording for analysis', success: false }, { status: 500, headers: cors });
+
     const submitBody: any = {
-      audio_url: appt.recording_url,
+      audio_url: signedRec.signedUrl,
       ...AAI_ANALYSIS_FLAGS,
     };
     // Register the completion webhook only when a secret is configured; otherwise the
