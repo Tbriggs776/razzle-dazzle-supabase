@@ -450,6 +450,15 @@ const RPC_FUNCTIONS = {
   // anon-reachable surface for these tables (RLS denies direct anon reads).
   getPublicAppointment: (p) => ['get_public_appointment', { p_id: p.id }],
   getPublicProject:     (p) => ['get_public_project', { p_id: p.id }],
+  // AT1: one atomic + idempotent txn for the appointment "Sold" and quote "Convert" flows
+  // (customer + sale + project + appointment/quote flip). Returns { sale_id, project_id,
+  // customer_id, idempotent }. Post-commit notifications/tracker URL stay best-effort in the UI.
+  convertToSale: (p) => ['convert_to_sale', {
+    p_customer: p.customer ?? {}, p_sale: p.sale ?? {}, p_project: p.project ?? {},
+    p_appointment_id: p.appointmentId ?? null,
+    p_appointment_update: p.appointmentUpdate ?? {},
+    p_quote_id: p.quoteId ?? null,
+  }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
   adminSetEsignType: (p) => ['admin_set_esign_type', {

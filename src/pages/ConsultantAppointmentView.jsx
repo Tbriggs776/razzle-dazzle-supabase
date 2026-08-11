@@ -299,7 +299,12 @@ export default function ConsultantAppointmentView() {
           }
         ];
       }
-      await base44.entities.Appointment.update(appointmentId, updateData);
+      // For 'Sold', the appointment status + notes are flipped LAST, atomically, inside the
+      // convert_to_sale RPC below — so a failed conversion never leaves a 'Sold' appointment
+      // with no Sale/Project. Every other status updates the appointment directly here.
+      if (status !== 'Sold') {
+        await base44.entities.Appointment.update(appointmentId, updateData);
+      }
 
       // Send SMS and email if marked as Lost, Pitch and Miss, One-Leg, Credit Decline, or Follow-Up
       const notSoldStatuses = ['Lost', 'Pitch and Miss', 'One-Leg', 'Credit Decline', 'Follow-Up'];
@@ -354,64 +359,61 @@ export default function ConsultantAppointmentView() {
         if (!lead) {
           throw new Error('Customer/Lead data could not be loaded for this appointment. Please refresh and try again.');
         }
-        // Convert Lead to Customer
-        const customer = await base44.entities.Customer.create({
-          first_name: lead.first_name,
-          last_name: lead.last_name,
-          email: lead.email,
-          phone: lead.phone,
-          address_line1: lead.address_line1,
-          address_line2: lead.address_line2,
-          city: lead.city,
-          state: lead.state,
-          zip: lead.zip,
-          notes: lead.notes,
-          converted_from_lead: appointment.customer
+        // Atomic + idempotent: customer + sale + project created and the appointment flipped to
+        // 'Sold' in ONE transaction (convert_to_sale RPC). A retry after a partial failure returns
+        // the existing sale instead of double-creating the whole chain.
+        const { data: conv, error: convErr } = await base44.functions.invoke('convertToSale', {
+          appointmentId,
+          appointmentUpdate: updateData.notes ? { notes: updateData.notes } : {},
+          customer: {
+            first_name: lead.first_name, last_name: lead.last_name, email: lead.email, phone: lead.phone,
+            address_line1: lead.address_line1, address_line2: lead.address_line2, city: lead.city,
+            state: lead.state, zip: lead.zip, notes: lead.notes, converted_from_lead: appointment.customer,
+          },
+          sale: {
+            appointment: appointmentId,
+            lead: appointment.customer,
+            assigned_dc: appointment.assigned_dc,
+            sale_date: new Date().toISOString(),
+            contract_file_url: contractFileUrl,
+            appointment_date: appointment.appointment_date,
+            appointment_block: appointment.appointment_block,
+            location_address: appointment.location_address,
+            sale_amount: amount ? parseFloat(amount) : null,
+            deposit_amount: depositAmount ? parseFloat(depositAmount) : null,
+            notes: notes || null,
+            folder_photo_url: folderPhotoUrl,
+            yard_sign_photo_url: yardSignPhotoUrl || null,
+            yard_sign_opted_out: yardSignOptedOut,
+            pre_install_checklist_signature_url: preInstallData?.signatureUrl || null,
+            pre_install_product_info: preInstallData?.productInfo || null,
+            driver_license_photo_url: driverLicensePhotoUrl || null,
+            product_photos: productPhotos.length > 0 ? productPhotos : null,
+            deposit_payment_method: depositPaymentMethod || null,
+            check_number: (depositPaymentMethod === 'Check' || depositPaymentMethod === 'Post-Dated Check') ? checkNumber : null,
+            check_date: depositPaymentMethod === 'Post-Dated Check' ? checkDate : null,
+          },
+          project: {
+            status: appointment.installation_date ? 'Scheduled' : 'Accepted',
+            installation_date: appointment.installation_date,
+            pre_install_checklist_signature_url: preInstallData?.signatureUrl || null,
+            pre_install_product_info: preInstallData?.productInfo || null,
+          },
         });
+        if (convErr || !conv?.sale_id) {
+          throw new Error(convErr?.message || 'Failed to record the sale. Nothing was saved — please try again.');
+        }
+        const saleId = conv.sale_id;
+        const newProjectId = conv.project_id;
+        const customerId = conv.customer_id;
 
-        const sale = await base44.entities.Sale.create({
-          appointment: appointmentId,
-          customer: customer.id,
-          lead: appointment.customer,
-          assigned_dc: appointment.assigned_dc,
-          sale_date: new Date().toISOString(),
-          contract_file_url: contractFileUrl,
-          appointment_date: appointment.appointment_date,
-          appointment_block: appointment.appointment_block,
-          location_address: appointment.location_address,
-          sale_amount: amount ? parseFloat(amount) : undefined,
-          deposit_amount: depositAmount ? parseFloat(depositAmount) : undefined,
-          notes: notes || undefined,
-          folder_photo_url: folderPhotoUrl,
-          yard_sign_photo_url: yardSignPhotoUrl || undefined,
-          yard_sign_opted_out: yardSignOptedOut,
-          pre_install_checklist_signature_url: preInstallData?.signatureUrl || undefined,
-          pre_install_product_info: preInstallData?.productInfo || undefined,
-          driver_license_photo_url: driverLicensePhotoUrl || undefined,
-          product_photos: productPhotos.length > 0 ? productPhotos : undefined,
-          deposit_payment_method: depositPaymentMethod || undefined,
-          check_number: (depositPaymentMethod === 'Check' || depositPaymentMethod === 'Post-Dated Check') ? checkNumber : undefined,
-          check_date: depositPaymentMethod === 'Post-Dated Check' ? checkDate : undefined
-        });
-
-        // Create project for this sale
-        const projectStatus = appointment.installation_date ? 'Scheduled' : 'Accepted';
-        const newProject = await base44.entities.Project.create({
-          sale: sale.id,
-          customer: customer.id,
-          status: projectStatus,
-          installation_date: appointment.installation_date,
-          pre_install_checklist_signature_url: preInstallData?.signatureUrl || undefined,
-          pre_install_product_info: preInstallData?.productInfo || undefined
-        });
-
+        // Everything below is best-effort AFTER the sale is durably committed.
         // Generate and save project tracker URL
         try {
           const appUrl = await base44.functions.invoke('getAppUrl');
           const baseUrl = appUrl.data.url;
-          const fullUrl = `${baseUrl}/CustomerProjectView?id=${newProject.id}`;
+          const fullUrl = `${baseUrl}/CustomerProjectView?id=${newProjectId}`;
           let trackerUrl = fullUrl;
-          
           try {
             const { data } = await base44.functions.invoke('shortenUrl', { originalURL: fullUrl });
             if (data?.shortURL) {
@@ -420,8 +422,7 @@ export default function ConsultantAppointmentView() {
           } catch (error) {
             console.error('Failed to shorten URL, using full URL:', error);
           }
-          
-          await base44.entities.Project.update(newProject.id, { project_tracker_url: trackerUrl });
+          await base44.entities.Project.update(newProjectId, { project_tracker_url: trackerUrl });
         } catch (error) {
           console.error('Failed to generate tracker URL:', error);
         }
@@ -430,7 +431,7 @@ export default function ConsultantAppointmentView() {
         try {
           await base44.functions.invoke('sendAppointmentSMS', {
             appointmentId,
-            customerId: customer.id,
+            customerId,
             type: 'customer_sale_confirmation'
           });
         } catch (error) {
@@ -441,7 +442,7 @@ export default function ConsultantAppointmentView() {
         try {
           await base44.functions.invoke('sendNotificationEmail', {
             type: 'sale_confirmed',
-            entityId: sale.id,
+            entityId: saleId,
             appUrl: window.location.origin
           });
         } catch (error) {
@@ -453,7 +454,7 @@ export default function ConsultantAppointmentView() {
           await base44.functions.invoke('sendAppointmentSMS', {
             appointmentId,
             type: 'customer_project_created',
-            customerId: customer.id
+            customerId
           });
         } catch (error) {
           console.error('Failed to send project SMS:', error);
@@ -462,7 +463,7 @@ export default function ConsultantAppointmentView() {
         try {
           await base44.functions.invoke('sendNotificationEmail', {
             type: 'project_created',
-            entityId: newProject.id,
+            entityId: newProjectId,
             appUrl: window.location.origin
           });
         } catch (error) {

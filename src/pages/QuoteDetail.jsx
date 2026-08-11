@@ -181,53 +181,50 @@ export default function QuoteDetail() {
     mutationFn: async () => {
       if (!lead) throw new Error('Lead data not loaded');
 
-      // Convert Lead → Customer
-      const customer = await base44.entities.Customer.create({
-        first_name: lead.first_name,
-        last_name: lead.last_name,
-        email: lead.email,
-        phone: lead.phone,
-        address_line1: lead.address_line1,
-        address_line2: lead.address_line2,
-        city: lead.city,
-        state: lead.state,
-        zip: lead.zip,
-        notes: lead.notes,
-        converted_from_lead: quote.lead
+      // Atomic + idempotent conversion: customer + sale + project created, the linked
+      // appointment flipped to 'Sold', and the quote marked Converted in ONE transaction
+      // (convert_to_sale RPC). A retry returns the existing sale instead of double-creating.
+      const { data: conv, error: convErr } = await base44.functions.invoke('convertToSale', {
+        quoteId,
+        appointmentId: quote.appointment || null,
+        customer: {
+          first_name: lead.first_name, last_name: lead.last_name, email: lead.email, phone: lead.phone,
+          address_line1: lead.address_line1, address_line2: lead.address_line2, city: lead.city,
+          state: lead.state, zip: lead.zip, notes: lead.notes, converted_from_lead: quote.lead,
+        },
+        sale: {
+          appointment: quote.appointment,
+          lead: quote.lead,
+          assigned_dc: quote.assigned_dc,
+          sale_date: new Date().toISOString(),
+          contract_file_url: contractFileUrl,
+          appointment_date: quote.appointment_date,
+          appointment_block: quote.appointment_block,
+          location_address: quote.location_address,
+          sale_amount: convertAmount ? parseFloat(convertAmount) : null,
+          deposit_amount: depositAmount ? parseFloat(depositAmount) : null,
+          notes: convertNotes || null,
+          deposit_payment_method: depositPaymentMethod || null,
+          check_number: (depositPaymentMethod === 'Check' || depositPaymentMethod === 'Post-Dated Check') ? checkNumber : null,
+          check_date: depositPaymentMethod === 'Post-Dated Check' ? checkDate : null,
+          folder_photo_url: quote.folder_photo_url || null,
+          yard_sign_photo_url: quote.yard_sign_photo_url || null,
+          driver_license_photo_url: quote.driver_license_photo_url || null,
+        },
+        project: {
+          status: installationDate ? 'Scheduled' : 'Accepted',
+          installation_date: installationDate || null,
+        },
       });
+      if (convErr || !conv?.sale_id) {
+        throw new Error(convErr?.message || 'Failed to convert the quote. Nothing was saved — please try again.');
+      }
+      // Light id-holders so the best-effort steps below read unchanged.
+      const sale = { id: conv.sale_id };
+      const newProject = { id: conv.project_id };
+      const customer = { id: conv.customer_id };
 
-      // Create Sale
-      const sale = await base44.entities.Sale.create({
-        appointment: quote.appointment,
-        customer: customer.id,
-        lead: quote.lead,
-        assigned_dc: quote.assigned_dc,
-        sale_date: new Date().toISOString(),
-        contract_file_url: contractFileUrl,
-        appointment_date: quote.appointment_date,
-        appointment_block: quote.appointment_block,
-        location_address: quote.location_address,
-        sale_amount: convertAmount ? parseFloat(convertAmount) : undefined,
-        deposit_amount: depositAmount ? parseFloat(depositAmount) : undefined,
-        notes: convertNotes || undefined,
-        deposit_payment_method: depositPaymentMethod || undefined,
-        check_number: (depositPaymentMethod === 'Check' || depositPaymentMethod === 'Post-Dated Check') ? checkNumber : undefined,
-        check_date: depositPaymentMethod === 'Post-Dated Check' ? checkDate : undefined,
-        folder_photo_url: quote.folder_photo_url || undefined,
-        yard_sign_photo_url: quote.yard_sign_photo_url || undefined,
-        driver_license_photo_url: quote.driver_license_photo_url || undefined
-      });
-
-      // Create Project
-      const projectStatus = installationDate ? 'Scheduled' : 'Accepted';
-      const newProject = await base44.entities.Project.create({
-        sale: sale.id,
-        customer: customer.id,
-        status: projectStatus,
-        installation_date: installationDate || undefined
-      });
-
-      // Generate tracker URL
+      // Generate tracker URL (best-effort, after the sale is committed)
       try {
         const appUrl = await base44.functions.invoke('getAppUrl');
         const baseUrl = appUrl.data.url;
@@ -239,17 +236,6 @@ export default function QuoteDetail() {
         } catch {}
         await base44.entities.Project.update(newProject.id, { project_tracker_url: trackerUrl });
       } catch {}
-
-      // Update appointment to Sold if linked
-      if (quote.appointment) {
-        await base44.entities.Appointment.update(quote.appointment, { status: 'Sold' });
-      }
-
-      // Mark quote as converted
-      await base44.entities.Quote.update(quoteId, {
-        status: 'Converted',
-        converted_sale_id: sale.id
-      });
 
       // Send confirmation notifications (non-blocking)
       try {
