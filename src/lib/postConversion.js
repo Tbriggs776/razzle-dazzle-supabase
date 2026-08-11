@@ -19,8 +19,11 @@ export async function runPostConversion({ appointmentId, hasDC }) {
     const appUrl = await base44.functions.invoke('getAppUrl');
     const baseUrl = appUrl?.data?.url;
     if (baseUrl) {
+      // LeadAppointmentView is anon → link by the unguessable public_token (NO4).
+      const appt = await base44.entities.Appointment.get(appointmentId);
+      const leadKey = appt?.public_token || appointmentId;
       const [leadShort, consultantShort] = await Promise.all([
-        base44.functions.invoke('shortenUrl', { originalURL: `${baseUrl}/LeadAppointmentView?id=${appointmentId}` }),
+        base44.functions.invoke('shortenUrl', { originalURL: `${baseUrl}/LeadAppointmentView?id=${leadKey}` }),
         base44.functions.invoke('shortenUrl', { originalURL: `${baseUrl}/ConsultantAppointmentView?id=${appointmentId}` }),
       ]);
       const update = {};

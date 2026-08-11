@@ -233,7 +233,9 @@ export default function QuoteDetail() {
       try {
         const appUrl = await base44.functions.invoke('getAppUrl');
         const baseUrl = appUrl.data.url;
-        const fullUrl = `${baseUrl}/CustomerProjectView?id=${newProject.id}`;
+        // CustomerProjectView is anon → link by the unguessable public_token (NO4).
+        const proj = await base44.entities.Project.get(newProject.id);
+        const fullUrl = `${baseUrl}/CustomerProjectView?id=${proj?.public_token || newProject.id}`;
         let trackerUrl = fullUrl;
         try {
           const { data } = await base44.functions.invoke('shortenUrl', { originalURL: fullUrl });

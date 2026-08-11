@@ -413,7 +413,9 @@ export default function ConsultantAppointmentView() {
         try {
           const appUrl = await base44.functions.invoke('getAppUrl');
           const baseUrl = appUrl.data.url;
-          const fullUrl = `${baseUrl}/CustomerProjectView?id=${newProjectId}`;
+          // CustomerProjectView is anon → link by the unguessable public_token (NO4).
+          const proj = await base44.entities.Project.get(newProjectId);
+          const fullUrl = `${baseUrl}/CustomerProjectView?id=${proj?.public_token || newProjectId}`;
           let trackerUrl = fullUrl;
           try {
             const { data } = await base44.functions.invoke('shortenUrl', { originalURL: fullUrl });

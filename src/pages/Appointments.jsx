@@ -103,7 +103,9 @@ export default function Appointments() {
       try {
         const appUrl = await base44.functions.invoke('getAppUrl');
         const baseUrl = appUrl.data.url;
-        const leadViewUrl = `${baseUrl}/LeadAppointmentView?id=${appointment.id}`;
+        // LeadAppointmentView is anon → link by the unguessable public_token (NO4);
+        // ConsultantAppointmentView is staff-only, so it stays keyed by id.
+        const leadViewUrl = `${baseUrl}/LeadAppointmentView?id=${appointment.public_token}`;
         const consultantViewUrl = `${baseUrl}/ConsultantAppointmentView?id=${appointment.id}`;
         
         const [leadShortUrl, consultantShortUrl] = await Promise.all([

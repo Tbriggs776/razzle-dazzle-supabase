@@ -134,7 +134,9 @@ function apptVars(appt: any, lead: any, dc: any, customer: any, project: any): R
     v.appointment_time = appt.appointment_block || 'N/A';
     v.appointment_block = appt.appointment_block || 'N/A';
     v.appointment_address = appt.location_address || 'N/A';
-    v.lead_tracking_url = appt.lead_short_url || `${APP_URL}/LeadAppointmentView?id=${appt.id}`;
+    // LeadAppointmentView is anon — link by the unguessable public_token (NO4). ConsultantAppointmentView
+    // is staff-only (authenticated RLS), so its link stays keyed by id.
+    v.lead_tracking_url = appt.lead_short_url || `${APP_URL}/LeadAppointmentView?id=${appt.public_token}`;
     v.consultant_tracking_url = appt.consultant_short_url || `${APP_URL}/ConsultantAppointmentView?id=${appt.id}`;
   }
   if (dc) {
@@ -147,8 +149,8 @@ function apptVars(appt: any, lead: any, dc: any, customer: any, project: any): R
     v.customer_name = `${customer.first_name || ''} ${customer.last_name || ''}`.trim();
   }
   if (project) {
-    v.project_tracker_url = project.project_tracker_url || `${APP_URL}/CustomerProjectView?id=${project.id}`;
-    v.project_tracker_with_video_url = `${APP_URL}/CustomerProjectView?id=${project.id}&showCeoVideo=true`;
+    v.project_tracker_url = project.project_tracker_url || `${APP_URL}/CustomerProjectView?id=${project.public_token}`;
+    v.project_tracker_with_video_url = `${APP_URL}/CustomerProjectView?id=${project.public_token}&showCeoVideo=true`;
   }
   return v;
 }
