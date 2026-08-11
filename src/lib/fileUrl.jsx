@@ -32,6 +32,15 @@ function extractUploadsPath(value) {
   return { path: value.replace(/^\/+/, '') }; // a bare storage path
 }
 
+// The raw 'uploads' storage path for a stored value (a bare path or a legacy uploads URL), or
+// null if the value is external / empty. For delete/remove flows that need the path, not a URL.
+export function storagePathOf(value) {
+  if (!value || typeof value !== 'string') return null;
+  const { external, path } = extractUploadsPath(value);
+  if (external) return null;
+  return path || null;
+}
+
 export async function resolveFileUrl(value, { expiresIn = 3600 } = {}) {
   if (!value || typeof value !== 'string') return null;
   const { external, path } = extractUploadsPath(value);

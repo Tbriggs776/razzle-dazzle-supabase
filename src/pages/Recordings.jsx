@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Search, Mic, Calendar, User, MapPin, Loader2, Trash2, Clock, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import moment from 'moment';
-import { openSignedFile } from '@/lib/fileUrl';
+import { openSignedFile, storagePathOf } from '@/lib/fileUrl';
 
 export default function Recordings() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,6 +70,16 @@ export default function Recordings() {
 
   const deleteRecordingMutation = useMutation({
     mutationFn: async (appointmentId) => {
+      // Remove the actual audio blob from private storage before clearing the row — otherwise
+      // the customer-consultation recording persists despite "cannot be undone". Best-effort: a
+      // missing/legacy object must not block clearing the row. (recording_url holds the path.)
+      try {
+        const appt = await base44.entities.Appointment.get(appointmentId);
+        const path = storagePathOf(appt?.recording_url);
+        if (path) await base44.supabase.storage.from('uploads').remove([path]);
+      } catch (e) {
+        console.error('Failed to remove recording blob (continuing):', e);
+      }
       await base44.entities.Appointment.update(appointmentId, {
         recording_url: null,
         recording_status: null,

@@ -460,6 +460,8 @@ const RPC_FUNCTIONS = {
     p_appointment_update: p.appointmentUpdate ?? {},
     p_quote_id: p.quoteId ?? null,
   }],
+  // AT3: atomic sale cancel (delete project(s) + sale, revert appointment) in one txn.
+  cancelSale: (p) => ['cancel_sale', { p_sale_id: p.saleId }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
   adminSetEsignType: (p) => ['admin_set_esign_type', {

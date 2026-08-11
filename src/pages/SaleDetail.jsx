@@ -109,9 +109,15 @@ export default function SaleDetail() {
     }
   });
 
+  // Both routes undo the sale atomically via cancel_sale (deletes the project(s) created from the
+  // sale + the sale, and reverts the linked appointment to 'Completed') so nothing is left
+  // half-cancelled or orphaned with a dangling sale reference.
   const deleteSaleMutation = useMutation({
     mutationFn: async () => {
-      await base44.entities.Sale.delete(saleId);
+      const { data, error } = await base44.functions.invoke('cancelSale', { saleId });
+      if (error || data?.error || data?.success !== true) {
+        throw new Error(data?.error || error?.message || 'Failed to delete the sale.');
+      }
     },
     onSuccess: () => {
       navigate(createPageUrl('Sales'));
@@ -120,10 +126,10 @@ export default function SaleDetail() {
 
   const cancelSaleMutation = useMutation({
     mutationFn: async () => {
-      // Revert appointment status back to Completed
-      await base44.entities.Appointment.update(sale.appointment, { status: 'Completed' });
-      // Delete the sale record
-      await base44.entities.Sale.delete(saleId);
+      const { data, error } = await base44.functions.invoke('cancelSale', { saleId });
+      if (error || data?.error || data?.success !== true) {
+        throw new Error(data?.error || error?.message || 'Failed to cancel the sale.');
+      }
     },
     onSuccess: () => {
       navigate(createPageUrl('Sales'));
