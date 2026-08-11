@@ -275,7 +275,24 @@ Deno.serve(async (req) => {
     if (action === 'create') {
       const internal = await getSecret('CRON_SECRET');
       const isInternal = !!internal && req.headers.get('x-internal-secret') === internal;
-      if (!isInternal && !(await currentUser(req))) return json({ error: 'Unauthorized' }, 401);
+      if (!isInternal) {
+        const user = await currentUser(req);
+        if (!user) return json({ error: 'Unauthorized' }, 401);
+        // Creating a signature request reads the target doc via the service role and fires a
+        // customer-facing email/SMS on a legally-framed document — so a pure VIEW-ONLY staffer
+        // who knows a doc UUID must NOT be able to mint one. Require edit on some module in the
+        // sales/ops flow (covers DCs who sign in person via appointments:edit, sales staff,
+        // PMs/ops via projects) or org-admin. Internal (server) callers are trusted above.
+        const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+        const asUser = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: `Bearer ${jwt}` } }, auth: { persistSession: false } });
+        const [{ data: eSales }, { data: eAppts }, { data: eProjects }, { data: isAdmin }] = await Promise.all([
+          asUser.rpc('can_edit', { m: 'sales' }),
+          asUser.rpc('can_edit', { m: 'appointments' }),
+          asUser.rpc('can_edit', { m: 'projects' }),
+          asUser.rpc('is_org_admin'),
+        ]);
+        if (!eSales && !eAppts && !eProjects && !isAdmin) return json({ error: 'Not authorized to send this document for signature' }, 403);
+      }
       return await actCreate(s, req, p);
     }
     if (action === 'get') return await actGet(s, req, p);

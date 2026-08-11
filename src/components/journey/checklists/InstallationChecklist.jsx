@@ -145,13 +145,19 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
     }
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'submit_install',
         checkpoint_id: checkpoint?.id,
         project_id: projectId,
         step_key: 'installation_checklist',
         checklist_data: data,
       });
+      // invoke() returns { data, error } (no throw for deployed fns) — surface backend errors.
+      if (res.error || res.data?.error) {
+        toast.error(res.data?.error || 'Failed to submit. Please try again.');
+        setSaving(false);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
     } catch (e) {
       console.error('Submit failed', e);

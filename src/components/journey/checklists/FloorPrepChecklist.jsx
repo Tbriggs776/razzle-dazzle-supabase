@@ -173,13 +173,20 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
     }
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'submit',
         checkpoint_id: checkpoint?.id,
         project_id: projectId,
         step_key: 'floor_prep_checklist',
         checklist_data: { prep: data.prep, change_order: data.change_order },
       });
+      // invoke() returns { data, error } (no throw for deployed fns) — surface the billable
+      // change-order gate + any backend error instead of silently re-fetching.
+      if (res.error || res.data?.error) {
+        toast.error(res.data?.error || 'Failed to submit. Please try again.');
+        setSaving(false);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
     } catch (e) {
       console.error('Submit failed', e);

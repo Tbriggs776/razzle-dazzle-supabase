@@ -203,61 +203,23 @@ async function handleType(s: any, type: string, p: any): Promise<Record<string, 
     case 'design_mod': {
       const es = await maybeEsign(s, 'design_mod', p.designModId);
       if (es) return es;
-      // Legacy sign-link email (e-sign off). Stamp the record, then email the sign link.
-      const mod = await one(s, 'design_mod', p.designModId);
-      if (!mod) return { error: 'Design mod not found' };
-      const shortUrl = await shorten(`${APP_URL}/DesignModView?id=${mod.id}`);
-      await s.from('design_mod').update({ status: 'sent', short_url: shortUrl, email_sent_at: new Date().toISOString() }).eq('id', mod.id);
-      if (!mod.customer_email) return { updated: true, queued: false, skipped: 'no customer email', short_url: shortUrl };
-      const customerName = `${mod.customer_first_name || ''} ${mod.customer_last_name || ''}`.trim();
-      const html =
-        `<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'>` +
-        `<h2 style='color:#2563eb;'>Design Modification Request</h2>` +
-        `<p>Hi ${mod.customer_first_name},</p>` +
-        `<p>We have prepared a design modification for your project. Please review and sign off using the link below:</p>` +
-        `<p><a href='${shortUrl}' style='background:#2563eb;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;'>Review &amp; Sign Design Modification</a></p>` +
-        (mod.products_or_changes ? `<p><strong>Changes:</strong> ${mod.products_or_changes}</p>` : '') +
-        (mod.value_added_costs ? `<p><strong>Value Added Costs:</strong> ${money(mod.value_added_costs)}</p>` : '') +
-        `<p>If the button does not work, copy and paste this link: ${shortUrl}</p><p>Thank you,<br/>Floor Daddy Team</p></div>`;
-      await enqueueEmail(s, [mod.customer_email], `Design Modification for ${customerName} - Please Review & Sign`, html, { customer_id: mod.customer_id });
-      return { queued: true, type, recipients: 1, short_url: shortUrl };
+      // E-sign is the ONLY ported signing path — the legacy /DesignModView signing page is
+      // unported (its submit handler throws), so refuse rather than email a dead link.
+      return { error: 'E-sign is disabled for Design Modifications. Enable it in E-Sign settings to send this for signature.' };
     }
 
     case 'pre_install': {
       const es = await maybeEsign(s, 'pre_install', p.checklistId);
       if (es) return es;
-      const cl = await one(s, 'standalone_pre_install_checklist', p.checklistId);
-      if (!cl) return { error: 'Checklist not found' };
-      const shortUrl = await shorten(`${APP_URL}/PreInstallChecklistView?id=${cl.id}`);
-      await s.from('standalone_pre_install_checklist').update({ status: 'sent', short_url: shortUrl, email_sent_at: new Date().toISOString() }).eq('id', cl.id);
-      if (!cl.customer_email) return { updated: true, queued: false, skipped: 'no customer email', short_url: shortUrl };
-      const html =
-        `<div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'>` +
-        `<h2 style='color:#2563eb;'>Pre-Installation Checklist</h2>` +
-        `<p>Hi ${cl.customer_first_name},</p>` +
-        `<p>Please review and sign your Pre-Installation Checklist before your installation begins.</p>` +
-        `<p><a href='${shortUrl}' style='background:#2563eb;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;'>Review &amp; Sign Pre-Install Checklist</a></p>` +
-        (cl.product_info ? `<p><strong>Product:</strong> ${cl.product_info}</p>` : '') +
-        `<p>If the button does not work, copy and paste this link: ${shortUrl}</p><p>Thank you,<br/>Floor Daddy Team</p></div>`;
-      await enqueueEmail(s, [cl.customer_email], `Pre-Installation Checklist - Please Review & Sign`, html, {});
-      return { queued: true, type, recipients: 1, short_url: shortUrl };
+      // See design_mod: legacy /PreInstallChecklistView signing is unported; refuse cleanly.
+      return { error: 'E-sign is disabled for the Pre-Install Checklist. Enable it in E-Sign settings to send this for signature.' };
     }
 
     case 'manual_sales_contract': {
       const es = await maybeEsign(s, 'manual_sales_contract', p.contractId);
       if (es) return es;
-      const c = await one(s, 'manual_sales_contract', p.contractId);
-      if (!c) return { error: 'Contract not found' };
-      const shortUrl = await shorten(`${APP_URL}/ManualSalesContractView?id=${c.id}`);
-      await s.from('manual_sales_contract').update({ status: 'sent', short_url: shortUrl, email_sent_at: new Date().toISOString() }).eq('id', c.id);
-      if (!c.customer_email) return { updated: true, queued: false, skipped: 'no customer email', short_url: shortUrl };
-      const html =
-        `<p>Hi ${c.customer_first_name},</p>` +
-        `<p>Thank you for your commitment to Floor Daddy! Please click the link below to review and sign your sales contract.</p>` +
-        `<p><a href='${shortUrl}' style='background:#4F46E5;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;'>Review &amp; Sign Contract</a></p>` +
-        `<p>Or copy this link: ${shortUrl}</p><p>Thank you,<br/>Floor Daddy Team</p>`;
-      await enqueueEmail(s, [c.customer_email], 'Your Sales Contract - Please Sign', html, {});
-      return { queued: true, type, recipients: 1, short_url: shortUrl };
+      // See design_mod: legacy /ManualSalesContractView signing is unported; refuse cleanly.
+      return { error: 'E-sign is disabled for the Sales Contract. Enable it in E-Sign settings to send this for signature.' };
     }
 
     case 'notification': {

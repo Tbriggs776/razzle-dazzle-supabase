@@ -197,13 +197,19 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
     }
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'submit',
         checkpoint_id: checkpoint?.id,
         project_id: projectId,
         step_key: 'final_walkthrough_checklist',
         checklist_data: data,
       });
+      // invoke() returns { data, error } (no throw for deployed fns) — surface backend errors.
+      if (res.error || res.data?.error) {
+        toast.error(res.data?.error || 'Failed to submit. Please try again.');
+        setSaving(false);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
       onSubmitted?.();
     } catch (e) {
@@ -256,13 +262,19 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
   const handleSubmitForPayment = async () => {
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'submit_for_payment',
         checkpoint_id: checkpoint.id,
         project_id: projectId,
         step_key: 'final_walkthrough_checklist',
         checklist_data: data,
       });
+      // invoke() returns { data, error } (no throw for deployed fns) — surface backend errors.
+      if (res.error || res.data?.error) {
+        toast.error(res.data?.error || 'Failed to submit for payment. Please try again.');
+        setSaving(false);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
       onSubmitted?.();
     } catch (e) {

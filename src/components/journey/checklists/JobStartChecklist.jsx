@@ -183,6 +183,13 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
         step_key: 'job_start_checklist',
         checklist_data: data,
       });
+      // invoke() returns { data, error } and does NOT throw for a deployed function, so the
+      // catch below never sees a backend error — check the result before advancing.
+      if (res.error || res.data?.error) {
+        toast.error(res.data?.error || 'Failed to submit checklist. Please try again.');
+        setSaving(false);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
       if (res.data?.asbestos_halt) {
         toast('⚠️ HARD STOP: Asbestos suspected. Installation halted. Field Manager, Zone Manager, and Ops have been alerted.');
