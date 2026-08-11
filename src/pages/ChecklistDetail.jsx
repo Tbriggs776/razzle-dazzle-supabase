@@ -200,28 +200,28 @@ export default function ChecklistDetail() {
          });
        }
        
-       const newAppointment = await base44.entities.Appointment.create({
-         status: 'Scheduled',
-         customer: leadId,
-         location_address: `${checklist.customer_street || ''}, ${checklist.city || ''}, ${checklist.state || ''} ${checklist.postal_code || ''}`.trim(),
-         appointment_date: checklist.preferred_appointment_date,
-         appointment_block: convertTimeBlock(checklist.preferred_appointment_block),
-         notes: notes,
-         assigned_dc: (selectedDC && selectedDC !== 'unassigned') ? selectedDC : undefined,
-         assigned_csr: selectedCSR || csrId || undefined,
-         appointment_created_date: new Date().toISOString()
+       // Atomic + idempotent: create the appointment AND link it to the checklist in one txn — a
+       // retry returns the existing linked appointment instead of orphaning/duplicating.
+       const convRes = await base44.functions.invoke('createAppointmentFromChecklist', {
+         checklistTable: 'appointment_setting_checklist',
+         checklistId: id,
+         appointment: {
+           status: 'Scheduled',
+           customer: leadId,
+           location_address: `${checklist.customer_street || ''}, ${checklist.city || ''}, ${checklist.state || ''} ${checklist.postal_code || ''}`.trim(),
+           appointment_date: checklist.preferred_appointment_date,
+           appointment_block: convertTimeBlock(checklist.preferred_appointment_block),
+           notes: notes,
+           assigned_dc: (selectedDC && selectedDC !== 'unassigned') ? selectedDC : null,
+           assigned_csr: selectedCSR || csrId || null,
+           appointment_created_date: new Date().toISOString(),
+         },
        });
-        appointmentId = newAppointment.id;
-        console.timeEnd('⏱️ Create Appointment');
-
-
-
-        // Link checklist to the new appointment
-        console.time('⏱️ Link Checklist');
-        await base44.entities.AppointmentSettingChecklist.update(id, {
-          appointment: appointmentId
-        });
-        console.timeEnd('⏱️ Link Checklist');
+       if (convRes.error || !convRes.data?.appointment_id) {
+         throw new Error(convRes.data?.error || convRes.error?.message || 'Failed to create the appointment.');
+       }
+       appointmentId = convRes.data.appointment_id;
+       console.timeEnd('⏱️ Create Appointment');
       } else {
        // Update existing appointment
        console.time('⏱️ Update Existing Appointment');

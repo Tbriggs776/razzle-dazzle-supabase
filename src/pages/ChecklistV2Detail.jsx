@@ -162,20 +162,27 @@ export default function ChecklistV2Detail() {
         });
       }
 
-      const newAppointment = await base44.entities.Appointment.create({
-        status: selectedDC && selectedDC !== 'unassigned' ? 'Scheduled' : 'Awaiting Assignment',
-        customer: leadId,
-        location_address: [formData.customer_street, formData.city, formData.state, formData.postal_code].filter(Boolean).join(', '),
-        appointment_date: formData.preferred_appointment_date,
-        appointment_block: convertTimeBlock(formData.preferred_appointment_block),
-        notes,
-        assigned_dc: (selectedDC && selectedDC !== 'unassigned') ? selectedDC : undefined,
-        assigned_csr: selectedCSR || undefined,
-        appointment_created_date: new Date().toISOString()
+      // Atomic + idempotent: create the appointment AND link it to the checklist in one txn — a
+      // retry returns the existing linked appointment instead of orphaning/duplicating.
+      const convRes = await base44.functions.invoke('createAppointmentFromChecklist', {
+        checklistTable: 'checklist_v2',
+        checklistId,
+        appointment: {
+          status: selectedDC && selectedDC !== 'unassigned' ? 'Scheduled' : 'Awaiting Assignment',
+          customer: leadId,
+          location_address: [formData.customer_street, formData.city, formData.state, formData.postal_code].filter(Boolean).join(', '),
+          appointment_date: formData.preferred_appointment_date,
+          appointment_block: convertTimeBlock(formData.preferred_appointment_block),
+          notes,
+          assigned_dc: (selectedDC && selectedDC !== 'unassigned') ? selectedDC : null,
+          assigned_csr: selectedCSR || null,
+          appointment_created_date: new Date().toISOString(),
+        },
       });
-
-      // Link checklist to appointment
-      await base44.entities.ChecklistV2.update(checklistId, { appointment: newAppointment.id });
+      if (convRes.error || !convRes.data?.appointment_id) {
+        throw new Error(convRes.data?.error || convRes.error?.message || 'Failed to create the appointment.');
+      }
+      const newAppointment = { id: convRes.data.appointment_id };
 
       // Sync calendar (non-blocking)
       const csrMember = csrMembers.find(m => m.id === selectedCSR);

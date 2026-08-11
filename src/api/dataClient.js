@@ -462,6 +462,10 @@ const RPC_FUNCTIONS = {
   }],
   // AT3: atomic sale cancel (delete project(s) + sale, revert appointment) in one txn.
   cancelSale: (p) => ['cancel_sale', { p_sale_id: p.saleId }],
+  // AT2: atomic + idempotent appointment create + checklist link (returns { appointment_id }).
+  createAppointmentFromChecklist: (p) => ['create_appointment_from_checklist', {
+    p_checklist_table: p.checklistTable, p_checklist_id: p.checklistId, p_appointment: p.appointment ?? {},
+  }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
   adminSetEsignType: (p) => ['admin_set_esign_type', {
