@@ -12,7 +12,7 @@ import { googleContext, googleToken, svcClient, getSecret, CALENDAR_SCOPE } from
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-const APP_URL = 'https://razzle-dazzle-supabase.vercel.app';
+const APP_URL = Deno.env.get('APP_URL') || 'https://razzle-dazzle-supabase.vercel.app';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',

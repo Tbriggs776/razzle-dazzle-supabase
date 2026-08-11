@@ -22,10 +22,13 @@ import BrandLogo from '@/components/BrandLogo';
 // themed via app tokens (dark-mode aware), mobile-first. Data comes from the
 // token-scoped get_public_appointment RPC (anon has no direct table access).
 
+// Self-hosted in this project's public 'public-assets' bucket (rehosted off Bytescale/upcdn.io
+// so they survive base44 decommissioning).
+const ASSET_BASE = "https://zoyvqznftltlitspgdxn.supabase.co/storage/v1/object/public/public-assets/marketing";
 const VIDEOS = [
-  "https://upcdn.io/223k2X9/raw/videos/r3.mov",
-  "https://upcdn.io/223k2X9/raw/videos/r1.MP4",
-  "https://upcdn.io/223k2X9/raw/videos/r0.mov"
+  `${ASSET_BASE}/r3.mov`,
+  `${ASSET_BASE}/r1.MP4`,
+  `${ASSET_BASE}/r0.mov`
 ];
 
 const card = "bg-card rounded-2xl border border-border shadow-sm";
@@ -459,7 +462,7 @@ export default function LeadAppointmentView() {
           className="mt-6 sm:mt-8"
         >
           <img
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69402063235e76365e0f0fdd/381808dd5_comparison-img-fd.jpg"
+            src={`${ASSET_BASE}/comparison-img-fd.jpg`}
             alt="Floor Daddy Comparison Chart"
             className="w-full rounded-2xl shadow-sm"
           />

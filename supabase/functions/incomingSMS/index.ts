@@ -13,7 +13,7 @@ import { verifyTwilioSignature, twilioCandidateUrls } from '../_shared/twilio.ts
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const APP_URL = 'https://razzle-dazzle-supabase.vercel.app';
+const APP_URL = Deno.env.get('APP_URL') || 'https://razzle-dazzle-supabase.vercel.app';
 const svc = () => createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
 const STOP_WORDS = ['STOP', 'STOPALL', 'UNSUBSCRIBE', 'CANCEL', 'END', 'QUIT'];

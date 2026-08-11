@@ -17,7 +17,7 @@ async function getSecret(name: string): Promise<string | null> {
   return Deno.env.get(name) ?? null;
 }
 
-const APP_URL = 'https://razzle-dazzle-supabase.vercel.app';
+const APP_URL = Deno.env.get('APP_URL') || 'https://razzle-dazzle-supabase.vercel.app';
 function render(tpl: string, vars: Record<string, unknown>): string {
   let r = tpl || '';
   for (const [k, v] of Object.entries(vars)) r = r.replaceAll(`{${k}}`, (v as string) ?? 'N/A');

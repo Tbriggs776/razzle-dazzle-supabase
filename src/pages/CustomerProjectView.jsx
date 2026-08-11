@@ -493,7 +493,7 @@ export default function CustomerProjectView() {
               controls
               autoPlay={showCeoVideo}
               className="w-full"
-              src="https://upcdn.io/223k2X9/raw/videos/csp.mp4"
+              src="https://zoyvqznftltlitspgdxn.supabase.co/storage/v1/object/public/public-assets/marketing/csp.mp4"
             >
               Your browser does not support the video tag.
             </video>
