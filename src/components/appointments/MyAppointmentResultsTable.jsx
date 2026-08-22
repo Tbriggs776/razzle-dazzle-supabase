@@ -1,66 +1,24 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
-import { Loader2, Calendar, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, MessageSquare } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { createPageUrl } from '@/utils';
+import { Loader2, Calendar, ArrowUpDown, MessageSquare, Phone, Mail, MessageCircle, Clock, Circle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format, startOfWeek, parseISO, isValid } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import ContactCustomerDialog from './ContactCustomerDialog';
+import FollowUpDialog from './FollowUpDialog';
+import StatCard from './StatCard';
 
-const STATUS_COLORS = {
-  'Sold': 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25',
-  'Completed': 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  'Cancelled': 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'Lost': 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/25',
-  'Pitch and Miss': 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
-  'One-Leg': 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
-  'Credit Decline': 'bg-pink-100 text-pink-700 border-pink-200 dark:bg-pink-500/15 dark:text-pink-300 dark:border-pink-500/25',
-  'Follow-Up': 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
-  'Scheduled': 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/25',
-  'Rescheduled': 'bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/25',
-  'In Route': 'bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/25',
-  'On Site': 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-500/15 dark:text-teal-300 dark:border-teal-500/25',
-  'Lead': 'bg-secondary text-secondary-foreground border-border',
-  'Awaiting Assignment': 'bg-secondary text-secondary-foreground border-border',
-};
-
-const GROUP_OPTIONS = [
-  { value: 'day', label: 'Day' },
-  { value: 'week', label: 'Week' },
-  { value: 'month', label: 'Month' },
-  { value: 'year', label: 'Year' },
-  { value: 'custom', label: 'Custom' },
-];
-
-function getGroupKey(date, groupBy) {
-  const d = parseISO(date);
-  if (!isValid(d)) return null;
-  switch (groupBy) {
-    case 'day': return format(d, 'yyyy-MM-dd');
-    case 'week': return format(startOfWeek(d, { weekStartsOn: 1 }), 'yyyy-MM-dd');
-    case 'month': return format(d, 'yyyy-MM');
-    case 'year': return format(d, 'yyyy');
-    default: return format(d, 'yyyy-MM-dd');
-  }
-}
-
-function formatGroupLabel(key, groupBy) {
-  switch (groupBy) {
-    case 'day': return format(parseISO(key), 'EEEE, MMM d, yyyy');
-    case 'week': return `Week of ${format(parseISO(key), 'MMM d, yyyy')}`;
-    case 'month': return format(parseISO(`${key}-01`), 'MMMM yyyy');
-    case 'year': return key;
-    default: return format(parseISO(key), 'EEEE, MMM d, yyyy');
-  }
-}
-
-const COLUMNS = [
-  { key: 'appointment_date', label: 'Date', sortable: true },
-  { key: 'customer_name', label: 'Customer', sortable: true },
-  { key: 'location_address', label: 'Address', sortable: true },
-  { key: 'appointment_block', label: 'Block', sortable: true },
-  { key: 'status', label: 'Status', sortable: true },
-  { key: 'contact', label: 'Contact', sortable: false },
+// Status list drives the filter chips (order preserved). The row pill uses a plain
+// secondary Badge, so only the keys matter here.
+const STATUSES = [
+  'Sold', 'Completed', 'Cancelled', 'Lost', 'Pitch and Miss', 'One-Leg',
+  'Credit Decline', 'Follow-Up', 'Scheduled', 'Rescheduled', 'In Route',
+  'On Site', 'Lead', 'Awaiting Assignment',
 ];
 
 function normalizePhone(phone) {
@@ -71,14 +29,10 @@ function normalizePhone(phone) {
 
 export default function MyAppointmentResultsTable({ currentUser }) {
   const queryClient = useQueryClient();
-  const [groupBy, setGroupBy] = useState('month');
-  const [customStart, setCustomStart] = useState('');
-  const [customEnd, setCustomEnd] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('Pitch and Miss');
-  const [collapsedGroups, setCollapsedGroups] = useState({});
   const [contactApt, setContactApt] = useState(null);
-  const [sortKey, setSortKey] = useState('appointment_date');
+  const [followUpApt, setFollowUpApt] = useState(null);
   const [sortDir, setSortDir] = useState('desc');
 
   const { data: aptData, isLoading } = useQuery({
@@ -89,20 +43,42 @@ export default function MyAppointmentResultsTable({ currentUser }) {
       if (!teamMembers.length) return { appointments: [], leads: [] };
       const teamMemberId = teamMembers[0].id;
       const appointments = await base44.entities.Appointment.filter({ assigned_dc: teamMemberId });
+      const sales = await base44.entities.Sale.filter({ assigned_dc: teamMemberId });
       const leadIds = [...new Set(appointments.map(a => a.customer).filter(Boolean))];
       const leads = leadIds.length
         ? await base44.entities.Lead.filter({ id: { $in: leadIds } }, '-created_date', leadIds.length).catch(() => [])
         : [];
-      return { appointments, leads };
+      return { appointments, leads, sales, teamMemberId };
     },
     enabled: !!currentUser?.email,
-    staleTime: 30000,
+    staleTime: 30000
   });
 
   const appointments = aptData?.appointments || [];
   const leads = aptData?.leads || [];
+  const sales = aptData?.sales || [];
+  const teamMemberId = aptData?.teamMemberId;
 
-  // Recent inbound messages (last 7 days) for the unread indicators.
+  // Fetch pending tasks for this user, mapped by appointment ID
+  const { data: pendingTasks = [] } = useQuery({
+    queryKey: ['myResultsTasks', teamMemberId],
+    queryFn: async () => {
+      if (!teamMemberId) return [];
+      return base44.entities.Task.filter({ assigned_to: teamMemberId, status: 'pending' });
+    },
+    enabled: !!teamMemberId,
+    staleTime: 30000
+  });
+
+  const tasksByAppointment = useMemo(() => {
+    const map = {};
+    pendingTasks.forEach(t => {
+      if (t.appointment) map[t.appointment] = t;
+    });
+    return map;
+  }, [pendingTasks]);
+
+  // Recent inbound messages (last 7 days) for unread indicators
   const { data: inboundComms = [] } = useQuery({
     queryKey: ['inboundComms', currentUser?.email],
     queryFn: async () => {
@@ -111,10 +87,10 @@ export default function MyAppointmentResultsTable({ currentUser }) {
       return all.filter(m => m.direction === 'inbound' && new Date(m.created_date).getTime() >= since);
     },
     enabled: !!currentUser?.email,
-    staleTime: 30000,
+    staleTime: 30000
   });
 
-  // Realtime: refresh when new communications arrive.
+  // Realtime: refresh when new communications arrive
   useEffect(() => {
     const unsubscribe = base44.entities.Communication.subscribe((event) => {
       if (event?.type === 'create') {
@@ -125,26 +101,26 @@ export default function MyAppointmentResultsTable({ currentUser }) {
     return unsubscribe;
   }, [queryClient]);
 
-  // Track last-seen timestamp per lead so unread inbound messages show a red badge.
+  // Track last-seen timestamp per lead so unread inbound messages show a red badge
   const [lastSeenMap, setLastSeenMap] = useState(() => {
     try { return JSON.parse(localStorage.getItem('rd_convo_seen') || '{}'); } catch { return {}; }
   });
 
   const markLeadSeen = (lead) => {
     if (!lead) return;
-    const key = lead.id ? `lead:${lead.id}` : (lead.phone ? `phone:${normalizePhone(lead.phone)}` : null);
-    if (!key) return;
     const now = Date.now();
+    const keys = [];
+    if (lead.id) keys.push(`lead:${lead.id}`);
+    if (lead.phone) keys.push(`phone:${normalizePhone(lead.phone)}`);
+    if (!keys.length) return;
     setLastSeenMap(prev => {
-      const next = { ...prev, [key]: now };
-      // Also stamp the phone key so both matching paths are cleared.
-      if (lead.phone) next[`phone:${normalizePhone(lead.phone)}`] = now;
-      try { localStorage.setItem('rd_convo_seen', JSON.stringify(next)); } catch { /* ignore */ }
+      const next = { ...prev };
+      keys.forEach(k => { next[k] = now; });
+      try { localStorage.setItem('rd_convo_seen', JSON.stringify(next)); } catch {}
       return next;
     });
   };
 
-  // Count unread inbound messages per lead key (created after the last-seen timestamp).
   const unreadByLeadKey = useMemo(() => {
     const counts = {};
     inboundComms.forEach(m => {
@@ -178,21 +154,23 @@ export default function MyAppointmentResultsTable({ currentUser }) {
     return 0;
   };
 
+  const isTaskOverdue = (dueDate) => {
+    const d = parseISO(dueDate);
+    if (!isValid(d)) return false;
+    return d < new Date() && d.toDateString() !== new Date().toDateString();
+  };
+
   const enriched = useMemo(() => appointments.map(a => ({
     ...a,
-    customer_name: getCustomerName(a),
+    customer_name: getCustomerName(a)
   })), [appointments, leads]);
 
+  // All appointments with a date (no status/search filter) — used for the summary stats.
+  const dateFiltered = useMemo(() => enriched.filter(a => a.appointment_date), [enriched]);
+
+  // Display set: status filter + search
   const filtered = useMemo(() => {
-    let list = enriched.filter(a => a.appointment_date);
-    if (groupBy === 'custom' && customStart && customEnd) {
-      const s = parseISO(customStart);
-      const e = parseISO(customEnd);
-      list = list.filter(a => {
-        const d = parseISO(a.appointment_date);
-        return isValid(d) && d >= s && d <= e;
-      });
-    }
+    let list = dateFiltered;
     if (statusFilter) {
       list = list.filter(a => a.status === statusFilter);
     }
@@ -205,43 +183,55 @@ export default function MyAppointmentResultsTable({ currentUser }) {
       );
     }
     return list;
-  }, [enriched, groupBy, customStart, customEnd, searchQuery, statusFilter]);
+  }, [dateFiltered, searchQuery, statusFilter]);
 
-  const grouped = useMemo(() => {
-    const map = {};
-    filtered.forEach(a => {
-      const key = getGroupKey(a.appointment_date, groupBy);
-      if (!key) return;
-      (map[key] = map[key] || []).push(a);
-    });
-    return Object.entries(map).sort((a, b) => sortDir === 'desc' ? b[0].localeCompare(a[0]) : a[0].localeCompare(b[0]));
-  }, [filtered, groupBy, sortDir]);
+  // Matches Sales Reports → Consultant Performance:
+  //   sold   = Sale records (sale_date in range, not cancelled)
+  //   total  = sold + not-won appointments (Lost, Pitch and Miss, One-Leg,
+  //            Credit Decline, Follow-Up, Completed) — excludes Cancelled & pending
+  //   close  = sold / total
+  const NOT_WON_STATUSES = ['Lost', 'Pitch and Miss', 'One-Leg', 'Credit Decline', 'Follow-Up', 'Completed'];
 
-  const sortAppointments = (list) => {
-    return [...list].sort((a, b) => {
-      const av = String(a[sortKey] || '');
-      const bv = String(b[sortKey] || '');
-      const cmp = av.localeCompare(bv, undefined, { numeric: true });
-      return sortDir === 'desc' ? -cmp : cmp;
-    });
+  const saleInRange = (sale, range) => {
+    if (!sale.sale_date || sale.is_cancelled) return false;
+    const d = format(parseISO(sale.sale_date), 'yyyy-MM-dd');
+    return d >= range.start && d <= range.end;
   };
 
-  const toggleSort = (key) => {
-    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    else { setSortKey(key); setSortDir('desc'); }
-  };
+  const inRange = (a, { start, end }) => a.appointment_date && a.appointment_date >= start && a.appointment_date <= end;
 
-  const toggleGroup = (key) => setCollapsedGroups(prev => ({ ...prev, [key]: !prev[key] }));
-
-  const groupStats = (list) => {
-    const total = list.length;
-    const sold = list.filter(a => a.status === 'Sold').length;
-    const cancelled = list.filter(a => a.status === 'Cancelled').length;
+  const computeStats = (range) => {
+    const rangeAppts = enriched.filter(a => inRange(a, range));
+    const sold = sales.filter(s => saleInRange(s, range)).length;
+    const notWon = rangeAppts.filter(a => NOT_WON_STATUSES.includes(a.status)).length;
+    const cancelled = rangeAppts.filter(a => a.status === 'Cancelled').length;
+    const total = sold + notWon;
     const closeRate = total > 0 ? Math.round((sold / total) * 100) : 0;
     return { total, sold, cancelled, closeRate };
   };
 
-  const overallStats = useMemo(() => groupStats(filtered), [filtered]);
+  // Month-to-date range (current month day 1 → today) and the equivalent prior-period
+  // range (same day-of-month window in the previous month) for vs-previous comparison.
+  const { mtdRange, prevRange } = useMemo(() => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth(); // 0-indexed
+    const mm = String(m + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const prevMonthLastDay = new Date(y, m, 0).getDate();
+    const prevDay = Math.min(now.getDate(), prevMonthLastDay);
+    const prevDate = new Date(y, m - 1, prevDay);
+    const py = prevDate.getFullYear();
+    const pm = String(prevDate.getMonth() + 1).padStart(2, '0');
+    const pd = String(prevDate.getDate()).padStart(2, '0');
+    return {
+      mtdRange: { start: `${y}-${mm}-01`, end: `${y}-${mm}-${dd}` },
+      prevRange: { start: `${py}-${pm}-01`, end: `${py}-${pm}-${pd}` }
+    };
+  }, []);
+
+  const overallStats = useMemo(() => computeStats(mtdRange), [enriched, sales, mtdRange]);
+  const prevStats = useMemo(() => computeStats(prevRange), [enriched, sales, prevRange]);
 
   if (isLoading) {
     return (
@@ -254,22 +244,28 @@ export default function MyAppointmentResultsTable({ currentUser }) {
   return (
     <div className="space-y-5">
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-card rounded-xl border border-border p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total</p>
-          <p className="text-2xl font-bold text-foreground">{overallStats.total}</p>
+      <div>
+        <div className="flex items-end justify-between mb-3">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Month to Date Performance</h2>
+            <p className="text-xs text-muted-foreground">
+              {format(parseISO(mtdRange.start), 'MMM d')} – {format(parseISO(mtdRange.end), 'MMM d, yyyy')} · vs {format(parseISO(prevRange.start), 'MMM d')} – {format(parseISO(prevRange.end), 'MMM d')}
+            </p>
+          </div>
+          <p className="text-[11px] text-muted-foreground/70">Total = sold + not-won outcomes</p>
         </div>
-        <div className="bg-card rounded-xl border border-border p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Sold</p>
-          <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{overallStats.sold}</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Cancelled</p>
-          <p className="text-2xl font-bold text-red-600 dark:text-red-400">{overallStats.cancelled}</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Close Rate</p>
-          <p className="text-2xl font-bold text-primary">{overallStats.closeRate}%</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <StatCard label="Total" value={overallStats.total} prev={prevStats.total} color="text-foreground" />
+          <StatCard label="Sold" value={overallStats.sold} prev={prevStats.sold} color="text-emerald-600 dark:text-emerald-400" />
+          <StatCard label="Cancelled" value={overallStats.cancelled} prev={prevStats.cancelled} color="text-red-600 dark:text-red-400" invertTrend />
+          <StatCard
+            label="Close Rate"
+            value={`${overallStats.closeRate}%`}
+            prev={prevStats.closeRate}
+            prevSuffix="%"
+            color="text-indigo-600 dark:text-indigo-400"
+            sub={`${overallStats.sold} sold / ${overallStats.total} total`}
+          />
         </div>
       </div>
 
@@ -280,19 +276,23 @@ export default function MyAppointmentResultsTable({ currentUser }) {
           <button
             onClick={() => setStatusFilter(null)}
             className={cn(
-              'px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors',
-              !statusFilter ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:bg-muted'
+              "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
+              !statusFilter
+                ? "bg-indigo-600 text-white border-indigo-600"
+                : "bg-card text-muted-foreground border-border hover:bg-muted"
             )}
           >
             All
           </button>
-          {Object.keys(STATUS_COLORS).map(status => (
+          {STATUSES.map(status => (
             <button
               key={status}
               onClick={() => setStatusFilter(statusFilter === status ? null : status)}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors',
-                statusFilter === status ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:bg-muted'
+                "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
+                statusFilter === status
+                  ? "bg-indigo-600 text-white border-indigo-600"
+                  : "bg-card text-muted-foreground border-border hover:bg-muted"
               )}
             >
               {status}
@@ -301,38 +301,14 @@ export default function MyAppointmentResultsTable({ currentUser }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-muted-foreground mr-1">Group by:</span>
-          {GROUP_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => setGroupBy(opt.value)}
-              className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors',
-                groupBy === opt.value ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:bg-muted'
-              )}
-            >
-              {opt.label}
-            </button>
-          ))}
+          <button
+            onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
+            className="ml-auto px-3 py-1.5 rounded-lg text-sm font-medium border bg-card text-muted-foreground border-border hover:bg-muted flex items-center gap-1.5"
+          >
+            <ArrowUpDown className="w-3.5 h-3.5" />
+            {sortDir === 'desc' ? 'Newest' : 'Oldest'}
+          </button>
         </div>
-
-        {groupBy === 'custom' && (
-          <div className="flex items-center gap-3">
-            <input
-              type="date"
-              value={customStart}
-              onChange={e => setCustomStart(e.target.value)}
-              className="border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground"
-            />
-            <span className="text-muted-foreground text-sm">to</span>
-            <input
-              type="date"
-              value={customEnd}
-              onChange={e => setCustomEnd(e.target.value)}
-              className="border border-border rounded-lg px-3 py-2 text-sm bg-background text-foreground"
-            />
-          </div>
-        )}
 
         <div className="relative max-w-md">
           <Input
@@ -343,110 +319,147 @@ export default function MyAppointmentResultsTable({ currentUser }) {
         </div>
       </div>
 
-      {/* Grouped collapsible tables */}
-      {grouped.length === 0 ? (
+      {/* Flat list */}
+      {filtered.length === 0 ? (
         <div className="text-center py-12 bg-card rounded-2xl border border-border">
-          <Calendar className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
+          <Calendar className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">No appointments found</h3>
           <p className="text-muted-foreground">Adjust your filters or date range</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {grouped.map(([groupKey, list]) => {
-            const stats = groupStats(list);
-            const collapsed = collapsedGroups[groupKey];
-            const sortedList = sortAppointments(list);
-            return (
-              <div key={groupKey} className="bg-card rounded-xl border border-border overflow-hidden">
-                <button
-                  onClick={() => toggleGroup(groupKey)}
-                  className="w-full flex items-center justify-between px-4 sm:px-5 py-4 hover:bg-muted transition-colors"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {collapsed ? <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" /> : <ChevronDown className="w-5 h-5 text-muted-foreground shrink-0" />}
-                    <h3 className="font-semibold text-foreground truncate">{formatGroupLabel(groupKey, groupBy)}</h3>
-                    <span className="text-xs text-muted-foreground shrink-0">({list.length})</span>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-4 text-xs shrink-0">
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">{stats.sold} sold</span>
-                    <span className="text-red-600 dark:text-red-400 font-medium">{stats.cancelled} cancelled</span>
-                    <span className="text-primary font-medium">{stats.closeRate}% close</span>
-                  </div>
-                </button>
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
+          <div className="divide-y divide-border">
+            {[...filtered].sort((a, b) => {
+              const cmp = String(a.appointment_date || '').localeCompare(String(b.appointment_date || ''));
+              return sortDir === 'desc' ? -cmp : cmp;
+            }).map(apt => {
+              const lead = getLead(apt.customer);
+              const unread = getUnreadCount(apt);
+              const task = tasksByAppointment[apt.id];
+              const taskOverdue = task ? isTaskOverdue(task.due_date) : false;
 
-                {!collapsed && (
-                  <div className="overflow-x-auto border-t border-border">
-                    <table className="w-full text-sm">
-                      <thead className="bg-muted/50 text-muted-foreground">
-                        <tr>
-                          {COLUMNS.map(col => (
-                            <th
-                              key={col.key}
-                              onClick={() => col.sortable && toggleSort(col.key)}
-                              className={cn('px-4 py-3 text-left font-medium select-none', col.sortable && 'cursor-pointer hover:text-foreground')}
-                            >
-                              <div className="flex items-center gap-1">
-                                {col.label}
-                                {col.sortable && (sortKey === col.key ? (
-                                  sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
-                                ) : (
-                                  <ArrowUpDown className="w-3 h-3 opacity-40" />
-                                ))}
-                              </div>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {sortedList.map(apt => {
-                          const unread = getUnreadCount(apt);
-                          const lead = getLead(apt.customer);
-                          return (
-                            <tr key={apt.id} className="hover:bg-muted/50">
-                              <td className="px-4 py-3 text-foreground whitespace-nowrap">
-                                {apt.appointment_date ? format(parseISO(apt.appointment_date), 'MMM d, yyyy') : '—'}
-                              </td>
-                              <td className="px-4 py-3 text-foreground font-medium">{apt.customer_name}</td>
-                              <td className="px-4 py-3 text-muted-foreground max-w-xs truncate">{apt.location_address || '—'}</td>
-                              <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{apt.appointment_block || '—'}</td>
-                              <td className="px-4 py-3">
-                                <span className={cn(
-                                  'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border',
-                                  STATUS_COLORS[apt.status] || 'bg-secondary text-secondary-foreground border-border'
-                                )}>
-                                  {apt.status || '—'}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3">
-                                <button
-                                  onClick={() => { markLeadSeen(lead); setContactApt(apt); }}
-                                  disabled={!lead?.phone && !lead?.email}
-                                  className={cn(
-                                    'relative p-1.5 rounded-lg border transition-colors disabled:opacity-30 disabled:cursor-not-allowed',
-                                    unread > 0
-                                      ? 'border-red-300 bg-red-50 text-red-600 hover:bg-red-100 dark:border-red-500/40 dark:bg-red-500/15 dark:text-red-300'
-                                      : 'border-border text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/30'
-                                  )}
-                                  title={unread > 0 ? `${unread} unread message${unread > 1 ? 's' : ''} — click to view & reply` : 'Text / Email customer'}
-                                >
-                                  <MessageSquare className="w-3.5 h-3.5" />
-                                  {unread > 0 && (
-                                    <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
-                                      {unread > 9 ? '9+' : unread}
-                                    </span>
-                                  )}
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+              return (
+                <div key={apt.id} className="p-5 hover:bg-muted/50 transition-colors">
+                  {/* Header row */}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        to={createPageUrl('AppointmentDetail') + `?id=${apt.id}`}
+                        className="font-semibold text-lg text-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                      >
+                        {apt.customer_name}
+                      </Link>
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        Follow up with customer regarding this appointment
+                      </p>
+                    </div>
+
+                    {/* Pending task badge */}
+                    {task && (
+                      <div className={cn(
+                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap",
+                        taskOverdue
+                          ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25"
+                          : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25"
+                      )}>
+                        {taskOverdue ? <AlertCircle className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                        <Clock className="w-3 h-3" />
+                        {task.due_date ? format(parseISO(task.due_date), 'MMM d, yyyy') : 'No date'}
+                        {taskOverdue && ' · Overdue'}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            );
-          })}
+
+                  {/* Badges row */}
+                  <div className="flex items-center gap-2 flex-wrap mt-3">
+                    <Badge variant="secondary" className="text-xs">
+                      {apt.status || '—'}
+                    </Badge>
+                    {apt.appointment_date && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {format(parseISO(apt.appointment_date), 'MMM d')}
+                      </span>
+                    )}
+                    {apt.not_sold_deal_size > 0 && (
+                      <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25">
+                        Deal Size: ${Number(apt.not_sold_deal_size).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Contact info + actions */}
+                  <div className="flex items-center gap-3 flex-wrap mt-3">
+                    {lead?.phone && (
+                      <a href={`tel:${lead.phone}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <Phone className="w-3.5 h-3.5" />
+                        {lead.phone}
+                      </a>
+                    )}
+                    {lead?.email && (
+                      <a href={`mailto:${lead.email}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                        <Mail className="w-3.5 h-3.5" />
+                        {lead.email}
+                      </a>
+                    )}
+                    <Button
+                      size="sm"
+                      onClick={() => setFollowUpApt(apt)}
+                      className="h-7 text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
+                    >
+                      <MessageCircle className="w-3 h-3 mr-1" />
+                      Log Follow-Up
+                    </Button>
+                    <button
+                      onClick={() => { markLeadSeen(lead); setContactApt(apt); }}
+                      disabled={!lead?.phone && !lead?.email}
+                      className={cn(
+                        "relative p-1.5 rounded-lg border transition-colors disabled:opacity-30 disabled:cursor-not-allowed",
+                        unread > 0
+                          ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25"
+                          : "border-border text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-400 dark:hover:border-indigo-500/25"
+                      )}
+                      title={unread > 0 ? `${unread} unread message${unread > 1 ? 's' : ''}` : "Text / Email customer"}
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      {unread > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
+                          {unread > 9 ? '9+' : unread}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Appointment Notes */}
+                  {apt.notes && apt.notes.length > 0 && (
+                    <div className="mt-3 border-t border-border pt-3">
+                      <p className="text-xs font-semibold text-muted-foreground mb-2">Appointment Notes</p>
+                      <div className="max-h-32 overflow-y-auto space-y-2 pr-2">
+                        {[...apt.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, idx) => (
+                          <div key={idx} className="bg-muted rounded-lg p-2.5 border border-border break-words">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <p className="text-xs font-semibold text-foreground">{note.user_name}</p>
+                              {note.context && (
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
+                                  {note.context}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{note.content}</p>
+                            {note.timestamp && (
+                              <p className="text-[10px] text-muted-foreground/70 mt-1">
+                                {format(new Date(note.timestamp), 'MMM d, yyyy h:mm a')}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -456,6 +469,16 @@ export default function MyAppointmentResultsTable({ currentUser }) {
           onClose={() => setContactApt(null)}
           lead={getLead(contactApt.customer)}
           appointmentId={contactApt.id}
+        />
+      )}
+
+      {followUpApt && (
+        <FollowUpDialog
+          open={!!followUpApt}
+          onClose={() => setFollowUpApt(null)}
+          appointment={followUpApt}
+          lead={getLead(followUpApt.customer)}
+          currentUser={currentUser}
         />
       )}
     </div>

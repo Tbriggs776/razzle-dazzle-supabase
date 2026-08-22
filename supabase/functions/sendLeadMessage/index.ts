@@ -10,6 +10,10 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
 const FUNCTIONS_BASE = `${SUPABASE_URL}/functions/v1`;
+// Inbound-reply domain: outbound lead emails set Reply-To to reply+{leadId}@<this>, so the
+// customer's reply carries the lead id and incomingEmail threads it back. Configure Resend
+// inbound for this domain (or override via REPLY_EMAIL_DOMAIN) at cutover.
+const REPLY_DOMAIN = Deno.env.get('REPLY_EMAIL_DOMAIN') || 'reply.floordaddy.com';
 const svc = () => createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
 
 const cors = {
@@ -58,6 +62,8 @@ Deno.serve(async (req) => {
         channel: channel === 'email' ? 'email' : 'sms',
         to,
         subject: channel === 'email' ? (subject || '') : undefined,
+        // Route the customer's reply back to this lead's thread via incomingEmail.
+        reply_to: (channel === 'email' && leadId) ? `reply+${leadId}@${REPLY_DOMAIN}` : undefined,
         body,
         lead_id: leadId || null,
         customer_id: customerId || null,

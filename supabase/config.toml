@@ -40,6 +40,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.pdfEmail]
 verify_jwt = false
+[functions.incomingEmail]
+verify_jwt = false
 [functions.processJobs]
 verify_jwt = false
 [functions.resendWebhook]
