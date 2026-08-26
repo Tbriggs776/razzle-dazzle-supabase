@@ -349,7 +349,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Team Members', icon: UserCog, href: 'TeamMembers', pages: ['TeamMembers', 'TeamMemberDetail', 'DesignConsultants', 'CustomerServiceReps'] },
     { name: 'System Logs', icon: Activity, href: 'Logs', pages: ['Logs'] },
     { name: 'Company Directory', icon: Users, href: 'CompanyDirectory', pages: ['CompanyDirectory'] },
-    { name: 'Installer Applications', icon: HardHat, href: 'InstallerApplications', pages: ['InstallerApplications'], adminOnly: true },
+    { name: 'Installer Applications', icon: HardHat, href: 'InstallerApplications', pages: ['InstallerApplications'] },
     {
       name: 'Fleet',
       icon: Truck,
