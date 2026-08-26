@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Loader2, HardHat, BadgeCheck, AlertTriangle, FileText, Building2, User,
-  ShieldAlert, Banknote, Check, X, ExternalLink, Clock,
+  ShieldAlert, Banknote, Check, X, ExternalLink, Clock, FileSignature, UserPlus, Send,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO, isValid } from 'date-fns';
@@ -66,6 +66,44 @@ export default function InstallerApplications() {
       });
       toast.success(status === 'approved' ? 'Application approved' : status === 'rejected' ? 'Application rejected' : 'Updated');
       setNotes('');
+      qc.invalidateQueries({ queryKey: ['installerApplications'] });
+    } catch (e) { toast.error(e.message); }
+    setBusy(false);
+  };
+
+  // e-sign: email the applicant a signing link for one agreement (create a signature request).
+  const sendSig = async (document_type, label) => {
+    if (!selected) return;
+    setBusy(true);
+    try {
+      const res = await base44.functions.invoke('esign', { action: 'create', document_type, document_id: selected.id });
+      const d = res?.data ?? res;
+      if (d?.error) throw new Error(d.error);
+      toast.success(`${label} sent to ${selected.contact_email || 'the applicant'}`);
+    } catch (e) { toast.error(`Could not send: ${e.message}`); }
+    setBusy(false);
+  };
+
+  const sendAll = async () => {
+    await sendSig('installer_master', 'Master Agreement');
+    await sendSig('installer_claims', 'Claims & Warranty');
+    if (selected?.elect_direct_deposit) await sendSig('installer_ach', 'ACH Authorization');
+  };
+
+  // Phase 4: turn an approved, fully-signed applicant into an active installer crew.
+  const promote = async () => {
+    if (!selected) return;
+    setBusy(true);
+    try {
+      const crew = await base44.entities.Installer.create({
+        crew_name: selected.legal_business_name || selected.roc_business_name,
+        email: selected.contact_email, phone: selected.contact_phone, is_active: true,
+      });
+      await base44.entities.InstallerApplication.update(selected.id, {
+        installer_id: crew.id, status: 'approved',
+        reviewed_by: currentUser?.full_name || currentUser?.email || 'Staff', reviewed_at: new Date().toISOString(),
+      });
+      toast.success('Promoted to an active installer crew');
       qc.invalidateQueries({ queryKey: ['installerApplications'] });
     } catch (e) { toast.error(e.message); }
     setBusy(false);
@@ -193,6 +231,52 @@ export default function InstallerApplications() {
                     </section>
                   )}
 
+                  {/* Agreements & e-sign */}
+                  <section className="bg-card rounded-xl border border-border p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] flex items-center gap-2"><FileSignature className="w-4 h-4 text-primary" /> Agreements</h3>
+                      <button onClick={sendAll} disabled={busy} className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline disabled:opacity-50"><Send className="w-3.5 h-3.5" /> Send all</button>
+                    </div>
+                    {[
+                      ['installer_master', 'Master Agreement', selected.master_packet_signed_at],
+                      ['installer_claims', 'Claims & Warranty', selected.claims_signed_at],
+                      ...(selected.elect_direct_deposit ? [['installer_ach', 'Direct Deposit / ACH', selected.ach_signed_at]] : []),
+                    ].map(([dt, label, signedAt]) => (
+                      <div key={dt} className="flex items-center justify-between py-2 text-sm border-b border-border last:border-0">
+                        <div>
+                          <p className="font-medium">{label}</p>
+                          {signedAt
+                            ? <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><Check className="w-3 h-3" /> Signed {fmtDate(signedAt)}</p>
+                            : <p className="text-[11px] text-muted-foreground">Not signed yet</p>}
+                        </div>
+                        {!signedAt && (
+                          <button onClick={() => sendSig(dt, label)} disabled={busy || !selected.contact_email}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-input text-xs font-medium hover:bg-muted disabled:opacity-50">
+                            <Send className="w-3.5 h-3.5" /> Send
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <p className="text-[11px] text-muted-foreground mt-2">Emails the applicant a secure signing link (SMS code required before signing). The signed PDF is sealed and stored.</p>
+                  </section>
+
+                  {/* Promote to crew */}
+                  {selected.master_packet_signed_at && selected.claims_signed_at && !selected.installer_id && (
+                    <section className="bg-card rounded-xl border border-border p-5">
+                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-2 flex items-center gap-2"><UserPlus className="w-4 h-4 text-primary" /> Onboard</h3>
+                      <p className="text-sm text-muted-foreground mb-3">Master and Claims agreements are signed. Add this subcontractor as an active installer crew.</p>
+                      <button onClick={promote} disabled={busy}
+                        className="inline-flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 hover:opacity-90">
+                        {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />} Promote to installer crew
+                      </button>
+                    </section>
+                  )}
+                  {selected.installer_id && (
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-500/25 dark:bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                      <BadgeCheck className="w-4 h-4" /> Onboarded as an active installer crew.
+                    </div>
+                  )}
+
                   {/* Review actions */}
                   <section className="bg-card rounded-xl border border-border p-5">
                     <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-3 flex items-center gap-2"><User className="w-4 h-4 text-primary" /> Review</h3>
@@ -215,7 +299,6 @@ export default function InstallerApplications() {
                         </button>
                       )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-3">Next: once approved, send the FD-01 / FD-02 (and optional ACH) agreements for e-signature, then promote to an installer crew.</p>
                   </section>
                 </div>
               )}

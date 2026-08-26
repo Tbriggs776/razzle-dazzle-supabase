@@ -74,6 +74,40 @@ const DOC_MAP: Record<string, any> = {
     snapshot: (r: any) => ({ Customer: fullName(r), Email: r.customer_email, 'Job #': r.job_number, Product: r.product_info }),
     stamp: (url: string, name: string) => ({ status: 'signed', signed_at: new Date().toISOString(), customer_printed_name: name, signature_url: url }),
   },
+  // Installer onboarding agreements. All three sign against the installer_application record; the
+  // signer is the subcontractor's authorized signatory. Each stamps its own *_signed_at column
+  // (the drawn signature + sealed PDF live on the signature_request, not the profile record).
+  installer_master: {
+    table: 'installer_application',
+    signer: async (_s: any, r: any) => ({ name: r.signatory_name || r.contact_name, email: r.contact_email, phone: r.contact_phone }),
+    snapshot: (r: any) => ({
+      Subcontractor: r.legal_business_name, 'Doing business as': r.dba || null,
+      'Entity type': r.entity_type, 'State of organization': r.state_of_org,
+      'ROC license': r.roc_license_no,
+      'ROC classifications': Array.isArray(r.roc_classes) ? r.roc_classes.map((c: any) => c.class).join(', ') : null,
+      Signer: r.signatory_name, Title: r.signatory_title || null, 'Contact email': r.contact_email,
+    }),
+    stamp: (_url: string, _name: string) => ({ master_packet_signed_at: new Date().toISOString() }),
+  },
+  installer_claims: {
+    table: 'installer_application',
+    signer: async (_s: any, r: any) => ({ name: r.signatory_name || r.contact_name, email: r.contact_email, phone: r.contact_phone }),
+    snapshot: (r: any) => ({
+      Subcontractor: r.legal_business_name, 'ROC license': r.roc_license_no,
+      Signer: r.signatory_name, Title: r.signatory_title || null,
+    }),
+    stamp: (_url: string, _name: string) => ({ claims_signed_at: new Date().toISOString() }),
+  },
+  installer_ach: {
+    table: 'installer_application',
+    signer: async (_s: any, r: any) => ({ name: r.signatory_name || r.contact_name, email: r.contact_email, phone: r.contact_phone }),
+    snapshot: (r: any) => ({
+      'Payee / legal name': r.payee_name || r.legal_business_name, Bank: r.bank_name || null,
+      'Account type': r.account_type || null, 'Name on account': r.account_name || null,
+      'Account (last 4)': r.account_last4 ? '****' + r.account_last4 : null,
+    }),
+    stamp: (_url: string, _name: string) => ({ ach_signed_at: new Date().toISOString() }),
+  },
 };
 
 async function logEvent(s: any, requestId: string, event: string, req: Request, meta: any = null) {
