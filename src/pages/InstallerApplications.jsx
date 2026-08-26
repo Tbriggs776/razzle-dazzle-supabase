@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Loader2, HardHat, BadgeCheck, AlertTriangle, FileText, Building2, User,
-  ShieldAlert, Banknote, Check, X, ExternalLink, Clock, FileSignature, UserPlus, Send,
+  ShieldAlert, Banknote, Check, X, ExternalLink, Clock, FileSignature, UserPlus, Send, Copy, Link2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, parseISO, isValid } from 'date-fns';
@@ -44,6 +44,7 @@ export default function InstallerApplications() {
   const [selectedId, setSelectedId] = useState(null);
   const [notes, setNotes] = useState('');
   const [busy, setBusy] = useState(false);
+  const [links, setLinks] = useState({}); // document_type -> signing URL (to copy/paste)
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), retry: false });
   const { data: apps = [], isLoading } = useQuery({
@@ -72,6 +73,7 @@ export default function InstallerApplications() {
           const res = await base44.functions.invoke('installerApproved', { application_id: selected.id });
           const d = res?.data ?? res;
           if (d?.error) throw new Error(d.error);
+          if (Array.isArray(d?.links)) setLinks((prev) => ({ ...prev, ...Object.fromEntries(d.links.map((l) => [l.type, l.url])) }));
           if ((d?.agreements_sent ?? 0) > 0) {
             toast.success(`${d.agreements_sent} agreement${d.agreements_sent === 1 ? '' : 's'} emailed to ${selected.contact_email || 'the applicant'} to sign`);
           }
@@ -87,6 +89,11 @@ export default function InstallerApplications() {
     setBusy(false);
   };
 
+  const copyText = async (text) => {
+    try { await navigator.clipboard.writeText(text); toast.success('Signing link copied — paste it into your email'); }
+    catch { toast.error('Copy failed — select the link and copy it manually'); }
+  };
+
   // e-sign: email the applicant a signing link for one agreement (create a signature request).
   const sendSig = async (document_type, label) => {
     if (!selected) return;
@@ -95,8 +102,24 @@ export default function InstallerApplications() {
       const res = await base44.functions.invoke('esign', { action: 'create', document_type, document_id: selected.id });
       const d = res?.data ?? res;
       if (d?.error) throw new Error(d.error);
+      if (d?.sign_url) setLinks((prev) => ({ ...prev, [document_type]: d.sign_url }));
       toast.success(`${label} sent to ${selected.contact_email || 'the applicant'}`);
     } catch (e) { toast.error(`Could not send: ${e.message}`); }
+    setBusy(false);
+  };
+
+  // Generate (without emailing) a signing link for one agreement and copy it — for pasting into
+  // your own email while Resend is off. Reuses a link already fetched this session.
+  const copyLink = async (document_type) => {
+    if (links[document_type]) { copyText(links[document_type]); return; }
+    if (!selected) return;
+    setBusy(true);
+    try {
+      const res = await base44.functions.invoke('esign', { action: 'create', document_type, document_id: selected.id, suppress_email: true });
+      const d = res?.data ?? res;
+      if (d?.error) throw new Error(d.error);
+      if (d?.sign_url) { setLinks((prev) => ({ ...prev, [document_type]: d.sign_url })); copyText(d.sign_url); }
+    } catch (e) { toast.error(`Could not get link: ${e.message}`); }
     setBusy(false);
   };
 
@@ -154,7 +177,7 @@ export default function InstallerApplications() {
             <div className="space-y-2">
               {visible.length === 0 && <div className="text-center py-12 bg-card rounded-xl border border-border text-muted-foreground">No applications</div>}
               {visible.map((a) => (
-                <button key={a.id} onClick={() => { setSelectedId(a.id); setNotes(''); }}
+                <button key={a.id} onClick={() => { setSelectedId(a.id); setNotes(''); setLinks({}); }}
                   className={cn('w-full text-left bg-card rounded-xl border p-4 transition-colors',
                     selectedId === a.id ? 'border-primary ring-1 ring-primary' : 'border-border hover:bg-muted/50')}>
                   <div className="flex items-start justify-between gap-2">
@@ -258,22 +281,39 @@ export default function InstallerApplications() {
                       ['installer_claims', 'Claims & Warranty', selected.claims_signed_at],
                       ...(selected.elect_direct_deposit ? [['installer_ach', 'Direct Deposit / ACH', selected.ach_signed_at]] : []),
                     ].map(([dt, label, signedAt]) => (
-                      <div key={dt} className="flex items-center justify-between py-2 text-sm border-b border-border last:border-0">
-                        <div>
-                          <p className="font-medium">{label}</p>
-                          {signedAt
-                            ? <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><Check className="w-3 h-3" /> Signed {fmtDate(signedAt)}</p>
-                            : <p className="text-[11px] text-muted-foreground">Not signed yet</p>}
+                      <div key={dt} className="py-2.5 text-sm border-b border-border last:border-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <p className="font-medium">{label}</p>
+                            {signedAt
+                              ? <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><Check className="w-3 h-3" /> Signed {fmtDate(signedAt)}</p>
+                              : <p className="text-[11px] text-muted-foreground">Not signed yet</p>}
+                          </div>
+                          {!signedAt && (
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button onClick={() => copyLink(dt)} disabled={busy}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-input text-xs font-medium hover:bg-muted disabled:opacity-50" title="Generate a signing link and copy it (no email sent)">
+                                <Link2 className="w-3.5 h-3.5" /> Copy link
+                              </button>
+                              <button onClick={() => sendSig(dt, label)} disabled={busy || !selected.contact_email}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-input text-xs font-medium hover:bg-muted disabled:opacity-50" title="Email the applicant this signing link">
+                                <Send className="w-3.5 h-3.5" /> Send
+                              </button>
+                            </div>
+                          )}
                         </div>
-                        {!signedAt && (
-                          <button onClick={() => sendSig(dt, label)} disabled={busy || !selected.contact_email}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-input text-xs font-medium hover:bg-muted disabled:opacity-50">
-                            <Send className="w-3.5 h-3.5" /> Send
-                          </button>
+                        {!signedAt && links[dt] && (
+                          <div className="mt-2 flex items-center gap-2 bg-muted rounded-lg border border-border pl-2.5 pr-1.5 py-1">
+                            <input readOnly value={links[dt]} onFocus={(e) => e.target.select()}
+                              className="flex-1 bg-transparent text-[11px] text-muted-foreground font-mono outline-none truncate" />
+                            <button onClick={() => copyText(links[dt])} className="shrink-0 p-1 rounded text-primary hover:bg-background" title="Copy link">
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         )}
                       </div>
                     ))}
-                    <p className="text-[11px] text-muted-foreground mt-2">Emails the applicant a secure signing link (SMS code required before signing). The signed PDF is sealed and stored.</p>
+                    <p className="text-[11px] text-muted-foreground mt-2"><strong>Send</strong> emails the applicant the signing link; <strong>Copy link</strong> gives you the link to paste into your own email (handy while email delivery is off). A signer verifies by SMS code; the signed PDF is sealed and stored.</p>
                   </section>
 
                   {/* Promote to crew */}

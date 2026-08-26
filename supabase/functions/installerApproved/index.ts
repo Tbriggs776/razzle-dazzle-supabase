@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
     if (app.elect_direct_deposit && !app.ach_signed_at) docs.push({ type: 'installer_ach', label: 'Direct Deposit / ACH Authorization' });
 
     // Create each e-sign request (suppressing its own email — we send one combined email below).
-    const links: { label: string; url: string }[] = [];
+    const links: { type: string; label: string; url: string }[] = [];
     for (const d of docs) {
       const r = await fetch(`${FUNCTIONS_BASE}/esign`, {
         method: 'POST',
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({ action: 'create', document_type: d.type, document_id: application_id, suppress_email: true }),
       });
       const j = await r.json().catch(() => ({} as any));
-      if (j?.sign_url) links.push({ label: d.label, url: j.sign_url });
+      if (j?.sign_url) links.push({ type: d.type, label: d.label, url: j.sign_url });
     }
 
     // 1) Applicant email.
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
       await s.rpc('enqueue_job', { p_type: 'send_email', p_payload: { to: staff[0], bcc: staff.slice(1), subject: `Installer approved: ${app.legal_business_name || app.roc_business_name || ''}`.trim(), body, sent_by: 'System' } });
     }
 
-    return Response.json({ ok: true, agreements_sent: links.length, applicant_emailed: !!to, team_notified: staff.length > 0 }, { headers: cors });
+    return Response.json({ ok: true, agreements_sent: links.length, applicant_emailed: !!to, team_notified: staff.length > 0, links }, { headers: cors });
   } catch (e) {
     return Response.json({ error: (e as Error).message }, { status: 500, headers: cors });
   }
