@@ -32,3 +32,4 @@ base44/.app.jsonc
 
 .vercel
 supabase/.temp/
+.tmp_roc/
