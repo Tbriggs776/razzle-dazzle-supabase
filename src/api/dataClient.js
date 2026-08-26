@@ -27,6 +27,7 @@ const ENTITY_TABLE = {
   Communication: 'communication',
   Customer: 'customer',
   CustomerProjectSettings: 'customer_project_settings',
+  InstallerApplication: 'installer_application',
   DesignMod: 'design_mod',
   EmailSettings: 'email_settings',
   FleetDriver: 'fleet_driver',
@@ -475,6 +476,13 @@ const RPC_FUNCTIONS = {
     p_document_type: p.document_type, p_esign_enabled: p.esign_enabled ?? null, p_require_sms_otp: p.require_sms_otp ?? null,
     p_consent_text: p.consent_text ?? null, p_expiry_days: p.expiry_days ?? null, p_notify_emails: p.notify_emails ?? null,
   }],
+  // Installer onboarding — AZ ROC license validation (public data) + the pre-login apply page's
+  // token-scoped read/write of its Subcontractor Profile (anon; the token is the capability).
+  rocLookup:                  (p) => ['roc_lookup', { p_license: p.license }],
+  createInstallerApplication: (p) => ['create_installer_application', { p_payload: p.payload ?? {} }],
+  saveInstallerApplication:   (p) => ['save_installer_application', { p_token: p.token, p_payload: p.payload ?? {} }],
+  getInstallerApplication:    (p) => ['get_installer_application', { p_token: p.token }],
+  submitInstallerApplication: (p) => ['submit_installer_application', { p_token: p.token }],
 };
 
 // Is a serverless function actually wired (Edge Function or RPC)? UI can use this

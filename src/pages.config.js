@@ -66,6 +66,7 @@ import InvoiceCalculator from './pages/InvoiceCalculator';
 import LeadAppointmentView from './pages/LeadAppointmentView';
 import LeadDetail from './pages/LeadDetail';
 import Leads from './pages/Leads';
+import InstallerApplications from './pages/InstallerApplications';
 import Logs from './pages/Logs';
 import MyAppointments from './pages/MyAppointments';
 import MyAppointmentResults from './pages/MyAppointmentResults';
@@ -110,6 +111,7 @@ export const PAGES = {
     "InvoiceCalculator": InvoiceCalculator,
     "LeadAppointmentView": LeadAppointmentView,
     "LeadDetail": LeadDetail,
+    "InstallerApplications": InstallerApplications,
     "Leads": Leads,
     "Logs": Logs,
     "MyAppointments": MyAppointments,

@@ -11,6 +11,7 @@ import PageNotFound from './lib/PageNotFound';
 import SignDocumentPage from './pages/SignDocument';
 import LeadAppointmentViewPage from './pages/LeadAppointmentView';
 import CustomerProjectViewPage from './pages/CustomerProjectView';
+import InstallerApplyPage from './pages/InstallerApply';
 import Login from '@/components/Login';
 import IntegrationsPage from './pages/Integrations';
 import ClaimsDashboardPage from './pages/ClaimsDashboard';
@@ -61,13 +62,14 @@ const AuthenticatedApp = () => {
   // anon-safe projection — SignDocument via its e-sign token; the appointment/project
   // trackers via the get_public_appointment / get_public_project RPCs (RLS denies direct
   // anon table reads). Rendered without the admin Layout so customers see a clean page.
-  const PUBLIC_PREFIXES = ['/SignDocument', '/LeadAppointmentView', '/CustomerProjectView'];
+  const PUBLIC_PREFIXES = ['/SignDocument', '/LeadAppointmentView', '/CustomerProjectView', '/InstallerApply'];
   if (PUBLIC_PREFIXES.some((p) => location.pathname.startsWith(p))) {
     return (
       <Routes>
         <Route path="/SignDocument" element={<SignDocumentPage />} />
         <Route path="/LeadAppointmentView" element={<LeadAppointmentViewPage />} />
         <Route path="/CustomerProjectView" element={<CustomerProjectViewPage />} />
+        <Route path="/InstallerApply" element={<InstallerApplyPage />} />
       </Routes>
     );
   }
