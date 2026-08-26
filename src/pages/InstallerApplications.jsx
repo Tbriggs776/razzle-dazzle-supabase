@@ -64,7 +64,23 @@ export default function InstallerApplications() {
         reviewed_at: new Date().toISOString(),
         review_notes: notes || selected.review_notes || null,
       });
-      toast.success(status === 'approved' ? 'Application approved' : status === 'rejected' ? 'Application rejected' : 'Updated');
+      if (status === 'approved') {
+        toast.success('Application approved');
+        // Fire the approval notifications: create the e-sign requests + email the applicant one
+        // "you're approved, sign here" message + ping the team.
+        try {
+          const res = await base44.functions.invoke('installerApproved', { application_id: selected.id });
+          const d = res?.data ?? res;
+          if (d?.error) throw new Error(d.error);
+          if ((d?.agreements_sent ?? 0) > 0) {
+            toast.success(`${d.agreements_sent} agreement${d.agreements_sent === 1 ? '' : 's'} emailed to ${selected.contact_email || 'the applicant'} to sign`);
+          }
+        } catch (e) {
+          toast.error(`Approved, but couldn't send agreements: ${e.message}`);
+        }
+      } else {
+        toast.success(status === 'rejected' ? 'Application rejected' : 'Updated');
+      }
       setNotes('');
       qc.invalidateQueries({ queryKey: ['installerApplications'] });
     } catch (e) { toast.error(e.message); }

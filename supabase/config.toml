@@ -44,6 +44,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.ingestRocPostingList]
 verify_jwt = false
+[functions.installerApproved]
+verify_jwt = false
 [functions.installerUpload]
 verify_jwt = false
 [functions.processJobs]

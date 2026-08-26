@@ -211,7 +211,9 @@ async function actCreate(s: any, req: Request, p: any) {
   const { id, token } = ins.data;
   const signUrl = `${APP_URL}/SignDocument?token=${token}`;
   await logEvent(s, id, 'sent', req, { signer_email: signer.email });
-  if (signer.email) {
+  // Callers that send their own consolidated notification (e.g. installer approval) pass
+  // suppress_email so the signer doesn't also get a separate per-document email.
+  if (signer.email && !p.suppress_email) {
     const body = `<p>Hi ${signer.name || 'there'},</p><p>Please review and sign your ${config.label} using the secure link below:</p>` +
       `<p><a href='${signUrl}' style='background:#4F46E5;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;'>Review &amp; Sign</a></p>` +
       `<p>Or copy this link: ${signUrl}</p><p style='color:#888;font-size:12px;'>- Floor Daddy Team</p>`;

@@ -336,6 +336,7 @@ const DEPLOYED_FUNCTIONS = new Set([
   'getPublicProjectSigned',
   'logAppointmentAction',
   'sendLeadMessage',
+  'installerApproved',
   'shortenUrl',
   'emailDispatch',
   'pdfEmail',
