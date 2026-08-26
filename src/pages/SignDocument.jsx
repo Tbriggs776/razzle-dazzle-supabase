@@ -15,6 +15,22 @@ async function esign(action, payload) {
   return data;
 }
 
+// Render a full agreement (consent_text) as a readable contract — headings bold, sub-sections indented.
+function AgreementBody({ text }) {
+  return (
+    <div>
+      {String(text || '').split('\n').map((raw, i) => {
+        const t = raw.trim();
+        if (!t) return <div key={i} className="h-2" />;
+        const isHeading = /^\d+\.\s+[A-Z]/.test(t) || (t === t.toUpperCase() && t.length > 3 && t.length < 70 && /[A-Za-z]/.test(t));
+        const isSub = /^\d+\.\d+/.test(t);
+        if (isHeading) return <p key={i} className="font-semibold text-foreground text-[13px] mt-3 first:mt-0 mb-1">{t}</p>;
+        return <p key={i} className={`text-[12.5px] leading-relaxed text-muted-foreground mb-1.5 ${isSub ? 'pl-3' : ''}`}>{t}</p>;
+      })}
+    </div>
+  );
+}
+
 function SignaturePad({ onChange }) {
   const canvasRef = useRef(null);
   const drawing = useRef(false);
@@ -122,9 +138,9 @@ export default function SignDocument() {
 
   return shell(
     <div className="space-y-4 sm:space-y-5 pb-24 sm:pb-0">
-      {/* Document */}
+      {/* Summary */}
       <section className={card}>
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-4 flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> {d.label}</h2>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-4 flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> {d.label} — Summary</h2>
         <dl className="divide-y divide-border">
           {Object.entries(d.document || {}).filter(([, v]) => v != null && v !== '').map(([k, v]) => (
             <div key={k} className="py-2.5 flex flex-col sm:flex-row sm:justify-between sm:gap-6 gap-0.5 text-sm">
@@ -154,12 +170,15 @@ export default function SignDocument() {
         </section>
       )}
 
-      {/* Consent + signature (locked until identity verified when required) */}
+      {/* Full agreement + consent + signature (locked until identity verified when required) */}
       <section className={card + (needsOtp ? " opacity-50 pointer-events-none select-none" : "")}>
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-4">Consent &amp; Signature</h2>
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-3 flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /> Agreement</h2>
+        <div className="max-h-[52vh] sm:max-h-[440px] overflow-y-auto rounded-xl border border-border bg-background px-4 py-3.5 mb-5">
+          <AgreementBody text={d.consent_text} />
+        </div>
         <label className="flex items-start gap-3 mb-5 cursor-pointer">
           <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 w-5 h-5 rounded accent-[hsl(var(--primary))] shrink-0" />
-          <span className="text-sm text-muted-foreground leading-relaxed">{d.consent_text}</span>
+          <span className="text-sm text-foreground leading-relaxed">I have read and agree to the <strong>{d.label}</strong> above, and I consent to signing it electronically. I understand my electronic signature is legally binding.</span>
         </label>
         <div className="mb-4">
           <label className="block text-xs text-muted-foreground mb-1.5">Type your full legal name</label>

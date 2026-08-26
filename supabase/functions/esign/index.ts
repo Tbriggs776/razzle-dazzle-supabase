@@ -46,6 +46,31 @@ async function sha256hex(input: string | Uint8Array): Promise<string> {
 const clientIp = (req: Request) => (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || req.headers.get('cf-connecting-ip') || null;
 const fullName = (r: any) => `${r.customer_first_name || ''} ${r.customer_last_name || ''}`.trim();
 
+// Fill {{placeholder}} tokens in an installer agreement's consent_text from the application record,
+// so the signer sees a completed contract (names, entity type, state, effective date, bank) rather
+// than blank lines.
+function installerFill(r: any): Record<string, string> {
+  const entity: Record<string, string> = { 'LLC': 'limited liability company', 'Corporation': 'corporation', 'S-Corporation': 'S corporation', 'Partnership': 'partnership', 'Sole Proprietorship': 'sole proprietorship' };
+  const state: Record<string, string> = { AZ: 'Arizona' };
+  const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  return {
+    effective_date: today,
+    subcontractor_name: r.legal_business_name || r.roc_business_name || '',
+    entity_type: entity[r.entity_type] || (r.entity_type ? String(r.entity_type).toLowerCase() : 'business entity'),
+    state_of_org: state[r.state_of_org] || r.state_of_org || 'Arizona',
+    dba: r.dba || 'N/A',
+    contact_name: r.contact_name || '',
+    contact_phone: r.contact_phone || '',
+    contact_email: r.contact_email || '',
+    bank_name: r.bank_name || 'N/A',
+    account_type: r.account_type || 'N/A',
+    account_name: r.account_name || r.legal_business_name || '',
+    account_last4: r.account_last4 || '----',
+  };
+}
+const applyFill = (text: string, vals: Record<string, string>): string =>
+  String(text || '').replace(/\{\{(\w+)\}\}/g, (_m, k) => (vals[k] != null && vals[k] !== '' ? vals[k] : '________'));
+
 // Per-type field mapping (code-level; the on/off + consent + OTP toggles live in DB config).
 const DOC_MAP: Record<string, any> = {
   manual_sales_contract: {
@@ -87,6 +112,7 @@ const DOC_MAP: Record<string, any> = {
       'ROC classifications': Array.isArray(r.roc_classes) ? r.roc_classes.map((c: any) => c.class).join(', ') : null,
       Signer: r.signatory_name, Title: r.signatory_title || null, 'Contact email': r.contact_email,
     }),
+    fill: installerFill,
     stamp: (_url: string, _name: string) => ({ master_packet_signed_at: new Date().toISOString() }),
   },
   installer_claims: {
@@ -96,6 +122,7 @@ const DOC_MAP: Record<string, any> = {
       Subcontractor: r.legal_business_name, 'ROC license': r.roc_license_no,
       Signer: r.signatory_name, Title: r.signatory_title || null,
     }),
+    fill: installerFill,
     stamp: (_url: string, _name: string) => ({ claims_signed_at: new Date().toISOString() }),
   },
   installer_ach: {
@@ -106,6 +133,7 @@ const DOC_MAP: Record<string, any> = {
       'Account type': r.account_type || null, 'Name on account': r.account_name || null,
       'Account (last 4)': r.account_last4 ? '****' + r.account_last4 : null,
     }),
+    fill: installerFill,
     stamp: (_url: string, _name: string) => ({ ach_signed_at: new Date().toISOString() }),
   },
 };
@@ -162,8 +190,18 @@ async function buildSealedPdf(s: any, request: any, config: any, events: any[]):
   // page (the audit certificate below also records it as the consent statement).
   if (request.consent_text) {
     y = cbrk(doc, y, 24); y = secH(doc, 'Agreement', y, C);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(60, 60, 60);
-    for (const ln of doc.splitTextToSize(String(request.consent_text), 170)) { y = cbrk(doc, y, 6); doc.text(ln, 20, y); y += 4.6; }
+    for (const para of String(request.consent_text).split('\n')) {
+      const t = para.trim();
+      if (!t) { y += 2; continue; }
+      const isHeading = /^\d+\.\s+[A-Z]/.test(t) || (t === t.toUpperCase() && t.length > 3 && t.length < 70 && /[A-Z]/.test(t));
+      const isSub = /^\d+\.\d+/.test(t);
+      doc.setFont('helvetica', isHeading ? 'bold' : 'normal');
+      doc.setFontSize(isHeading ? 9.5 : 8.6);
+      const g = isHeading ? 20 : 55; doc.setTextColor(g, g, g);
+      if (isHeading) { y = cbrk(doc, y, 10); y += 1.5; }
+      for (const ln of doc.splitTextToSize(t, isSub ? 166 : 170)) { y = cbrk(doc, y, 6); doc.text(ln, isSub ? 24 : 20, y); y += 4.4; }
+      y += isHeading ? 1.2 : 0.6;
+    }
     doc.setTextColor(30, 30, 30);
   }
 
@@ -181,7 +219,7 @@ async function buildSealedPdf(s: any, request: any, config: any, events: any[]):
   y = lv(doc, 'Consent agreed', request.consent_agreed ? 'Yes' : 'No', 20, y, 170);
   if (request.otp_verified_at) y = lv(doc, 'Identity (SMS code) verified at', request.otp_verified_at, 20, y, 170);
   y = lv(doc, 'Document integrity (SHA-256)', request.document_hash, 20, y, 170);
-  y = lv(doc, 'Consent statement', request.consent_text, 20, y, 170);
+  y = lv(doc, 'Consent statement', `Signer agreed to the full ${config.label} reproduced on the preceding page(s). Integrity is recorded by the document hash above.`, 20, y, 170);
   y = cbrk(doc, y, 30); y = secH(doc, 'Audit Trail', y, C);
   for (const e of events) { y = cbrk(doc, y, 10); y = lv(doc, `${e.event}`, `${e.at}  |  IP ${e.ip || '-'}  |  ${(e.user_agent || '-').slice(0, 60)}`, 20, y, 170); }
   return new Uint8Array(doc.output('arraybuffer'));
@@ -199,12 +237,14 @@ async function actCreate(s: any, req: Request, p: any) {
 
   const signer = await map.signer(s, rec);
   const snapshot = map.snapshot(rec);
+  // Fill {{placeholders}} in the agreement so the signer sees a completed contract.
+  const consentText = map.fill ? applyFill(config.consent_text, map.fill(rec)) : config.consent_text;
   const document_hash = await sha256hex(JSON.stringify(snapshot));
   const expires = new Date(Date.now() + (config.expiry_days || 14) * 86400000).toISOString();
   const ins = await s.from('signature_request').insert({
     document_type: p.document_type, document_id: p.document_id,
     signer_name: signer.name, signer_email: signer.email, signer_phone: signer.phone,
-    document_hash, document_snapshot: snapshot, consent_text: config.consent_text,
+    document_hash, document_snapshot: snapshot, consent_text: consentText,
     require_sms_otp: config.require_sms_otp, expires_at: expires,
   }).select('id, token').single();
   if (ins.error) return json({ error: ins.error.message }, 500);
