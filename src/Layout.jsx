@@ -1,7 +1,7 @@
 import React, { useState, createContext, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Users, UserCog, CalendarDays, ClipboardCheck, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, FileText, Truck, Plug, BarChart3, HardHat } from 'lucide-react';
+import { Users, UserCog, CalendarDays, ClipboardCheck, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, FileText, Truck, Plug, BarChart3, HardHat, Briefcase, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -275,66 +275,83 @@ export default function Layout({ children, currentPageName }) {
 
 
 
+  // Modular nav: a small set of top-level MODULES, each tucking its pages into
+  // an expandable sub-navigation. Order = daily-use first, back-office last.
   const navigation = [
-    { name: 'Dashboard', icon: Activity, href: 'Dashboard', pages: ['Dashboard'], adminOnly: true, allowedEmails: ['user7@example.com'] },
-    { name: 'My Appointments', icon: CalendarDays, href: 'MyAppointments', pages: ['MyAppointments', 'AppointmentDetail', 'ChecklistDetail'] },
-    { name: 'My Results', icon: BarChart3, href: 'MyAppointmentResults', pages: ['MyAppointmentResults'] },
-    { name: 'My Tasks', icon: ClipboardCheck, href: 'MyTasks', pages: ['MyTasks'] },
-    { name: 'My Sales', icon: DollarSign, href: 'MySales', pages: ['MySales'] },
-    ...(appSettings?.quotes_enabled && (!appSettings?.quotes_admin_only || currentUser?.role === 'admin')
-      ? [{ name: 'My Quotes', icon: FileText, href: 'MyQuotes', pages: ['MyQuotes', 'QuoteDetail'] }]
-      : []),
-    { name: 'My Tickets', icon: ClipboardCheck, href: 'MyTickets', pages: ['MyTickets'] },
-    { name: 'Leads', icon: Users, href: 'Leads', pages: ['Leads', 'LeadDetail'] },
-    { name: 'Customers', icon: Users, href: 'Customers', pages: ['Customers', 'CustomerDetail'] },
-    { name: 'Checklists', icon: ClipboardCheck, href: 'AppointmentSettingChecklists', pages: ['AppointmentSettingChecklists', 'ChecklistDetail'] },
-    { 
-      name: 'Appointments', 
-      icon: CalendarDays, 
-      pages: ['Appointments', 'Recordings', 'RecordingDetail'],
+    {
+      name: 'My Work', icon: Briefcase,
       subItems: [
-        { name: 'All Appointments', href: 'Appointments', pages: ['Appointments'] },
-        { name: 'Recordings', href: 'Recordings', pages: ['Recordings', 'RecordingDetail'] }
-      ]
+        { name: 'My Appointments', href: 'MyAppointments', pages: ['MyAppointments', 'AppointmentDetail', 'ChecklistDetail'] },
+        { name: 'My Results', href: 'MyAppointmentResults', pages: ['MyAppointmentResults'] },
+        { name: 'My Tasks', href: 'MyTasks', pages: ['MyTasks'] },
+        { name: 'My Sales', href: 'MySales', pages: ['MySales'] },
+        { name: 'My Quotes', href: 'MyQuotes', pages: ['MyQuotes', 'QuoteDetail'],
+          hiddenWhen: () => !(appSettings?.quotes_enabled && (!appSettings?.quotes_admin_only || currentUser?.role === 'admin')) },
+        { name: 'My Tickets', href: 'MyTickets', pages: ['MyTickets'] },
+      ],
     },
-    { name: 'Communication Hub', icon: MessageSquare, href: 'CommunicationHub', pages: ['CommunicationHub'] },
-    { name: 'Schedule Assistant', icon: CalendarDays, href: 'ScheduleAssistant', pages: ['ScheduleAssistant'] },
-    { name: 'Sales', icon: DollarSign, href: 'Sales', pages: ['Sales', 'SaleDetail'] },
-    { 
-      name: 'Projects', 
-      icon: ClipboardCheck, 
-      pages: ['Projects', 'ProjectDetail', 'CancelledProjects'],
+    {
+      name: 'CRM', icon: Users,
       subItems: [
-        { name: 'All Projects', href: 'Projects', pages: ['Projects', 'ProjectDetail'] },
-        { name: 'Cancellations', href: 'CancelledProjects', pages: ['CancelledProjects'] }
-      ]
+        { name: 'Leads', href: 'Leads', pages: ['Leads', 'LeadDetail'] },
+        { name: 'Customers', href: 'Customers', pages: ['Customers', 'CustomerDetail'] },
+        { name: 'Appointments', href: 'Appointments', pages: ['Appointments'] },
+        { name: 'Recordings', href: 'Recordings', pages: ['Recordings', 'RecordingDetail'] },
+        { name: 'Schedule Assistant', href: 'ScheduleAssistant', pages: ['ScheduleAssistant'] },
+        { name: 'Setting Checklists', href: 'AppointmentSettingChecklists', pages: ['AppointmentSettingChecklists', 'ChecklistDetail'] },
+        { name: 'Communication Hub', href: 'CommunicationHub', pages: ['CommunicationHub'] },
+      ],
     },
-    { name: 'Claims & Inspections', icon: ClipboardCheck, href: 'ClaimsDashboard', pages: ['ClaimsDashboard'] },
-    { 
-      name: 'Order Processing', 
-      icon: ClipboardCheck,
-      pages: ['OrderProcessing', 'Calculators', 'Finance'],
+    {
+      name: 'Sales', icon: DollarSign,
+      subItems: [
+        { name: 'Sales', href: 'Sales', pages: ['Sales', 'SaleDetail'] },
+        { name: 'Invoice Calculations', href: 'InvoiceCalculator', pages: ['InvoiceCalculator'] },
+        { name: 'Document Center', href: 'ManualDesignMods', pages: ['ManualDesignMods'] },
+      ],
+    },
+    {
+      name: 'Order Processing', icon: Package,
       subItems: [
         { name: 'Order Processing', href: 'OrderProcessing', pages: ['OrderProcessing', 'Calculators'] },
-        { name: 'Finance', href: 'Finance', pages: ['Finance'] }
-      ]
+        { name: 'Finance', href: 'Finance', pages: ['Finance'] },
+      ],
     },
-    { 
-      name: 'Tickets', 
-      icon: ClipboardCheck, 
-      pages: ['SubmitTicket', 'MyTickets'],
+    {
+      name: 'Installations', icon: HardHat,
+      subItems: [
+        { name: 'Install Journey', href: 'Journey', pages: ['Journey', 'JourneyProjectDetail'] },
+        { name: 'Projects', href: 'Projects', pages: ['Projects', 'ProjectDetail'] },
+        { name: 'Cancellations', href: 'CancelledProjects', pages: ['CancelledProjects'] },
+        { name: 'Installer Applications', href: 'InstallerApplications', pages: ['InstallerApplications'] },
+      ],
+    },
+    {
+      name: 'Claims', icon: ShieldCheck,
+      subItems: [
+        { name: 'Claims & Inspections', href: 'ClaimsDashboard', pages: ['ClaimsDashboard'] },
+      ],
+    },
+    {
+      name: 'Tickets', icon: MessageSquare,
       subItems: [
         { name: 'Submit Ticket', href: 'SubmitTicket', pages: ['SubmitTicket'] },
-        { name: 'My Tickets', href: 'MyTickets', pages: ['MyTickets'] }
-      ]
+        { name: 'My Tickets', href: 'MyTickets', pages: ['MyTickets'] },
+      ],
     },
-    { name: 'Invoice Calculations', icon: DollarSign, href: 'InvoiceCalculator', pages: ['InvoiceCalculator'] },
-    { name: 'Document Center', icon: FileText, href: 'ManualDesignMods', pages: ['ManualDesignMods'] },
-    { 
-      name: 'Reports', 
-      icon: Activity, 
-      pages: ['AppointmentReports', 'SalesReports', 'Reports', 'OrderProcessingReports', 'CashFlowProjection', 'ContractDiscrepancy', 'GrossProfitReport', 'AppointmentRehashReport'],
+    {
+      name: 'Fleet', icon: Truck,
       subItems: [
+        { name: 'Fleet Dashboard', href: 'Fleet', pages: ['Fleet'] },
+        { name: 'Vehicles', href: 'FleetVehicles', pages: ['FleetVehicles'] },
+        { name: 'Drivers', href: 'FleetDrivers', pages: ['FleetDrivers'] },
+        { name: 'Maintenance', href: 'FleetMaintenance', pages: ['FleetMaintenance'] },
+      ],
+    },
+    {
+      name: 'Reports', icon: BarChart3,
+      subItems: [
+        { name: 'Scoreboard', href: 'Dashboard', pages: ['Dashboard'] },
         { name: 'Appointments', href: 'AppointmentReports', pages: ['AppointmentReports'] },
         { name: 'Sales', href: 'SalesReports', pages: ['SalesReports'] },
         { name: 'Order Processing', href: 'OrderProcessingReports', pages: ['OrderProcessingReports'] },
@@ -343,58 +360,46 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Gross Profit', href: 'GrossProfitReport', pages: ['GrossProfitReport'] },
         { name: 'Sales Manager Dashboard', href: 'AppointmentRehashReport', pages: ['AppointmentRehashReport'] },
         { name: 'Marketing Performance', href: 'MarketingPerformance', pages: ['MarketingPerformance'] },
-        { name: 'DC Performance Matrix', href: 'DCPerformanceMatrix', pages: ['DCPerformanceMatrix'] }
-      ]
+        { name: 'DC Performance Matrix', href: 'DCPerformanceMatrix', pages: ['DCPerformanceMatrix'] },
+      ],
     },
-    { name: 'Team Members', icon: UserCog, href: 'TeamMembers', pages: ['TeamMembers', 'TeamMemberDetail', 'DesignConsultants', 'CustomerServiceReps'] },
-    { name: 'System Logs', icon: Activity, href: 'Logs', pages: ['Logs'] },
-    { name: 'Company Directory', icon: Users, href: 'CompanyDirectory', pages: ['CompanyDirectory'] },
-    { name: 'Installer Applications', icon: HardHat, href: 'InstallerApplications', pages: ['InstallerApplications'] },
     {
-      name: 'Fleet',
-      icon: Truck,
-      pages: ['Fleet', 'FleetVehicles', 'FleetDrivers', 'FleetMaintenance'],
+      name: 'Team', icon: UserCog,
       subItems: [
-        { name: 'Fleet Dashboard', href: 'Fleet', pages: ['Fleet'] },
-        { name: 'Vehicles', href: 'FleetVehicles', pages: ['FleetVehicles'] },
-        { name: 'Drivers', href: 'FleetDrivers', pages: ['FleetDrivers'] },
-        { name: 'Maintenance', href: 'FleetMaintenance', pages: ['FleetMaintenance'] }
-      ]
+        { name: 'Team Members', href: 'TeamMembers', pages: ['TeamMembers', 'TeamMemberDetail', 'DesignConsultants', 'CustomerServiceReps'] },
+        { name: 'Company Directory', href: 'CompanyDirectory', pages: ['CompanyDirectory'] },
+      ],
     },
-    { name: 'Settings', icon: SettingsIcon, href: 'Settings', pages: ['Settings'] },
-    { name: 'Integrations', icon: Plug, href: 'Integrations', pages: ['Integrations'], adminOnly: true },
     {
-      name: 'Development',
-      icon: Activity,
-      pages: ['RFMSCustomers'],
-      adminOnly: true,
+      name: 'System', icon: SettingsIcon,
       subItems: [
-        { name: 'RFMS Customers', href: 'RFMSCustomers', pages: ['RFMSCustomers'] }
-      ]
+        { name: 'Settings', href: 'Settings', pages: ['Settings'] },
+        { name: 'Integrations', href: 'Integrations', pages: ['Integrations'] },
+        { name: 'System Logs', href: 'Logs', pages: ['Logs'] },
+        { name: 'RFMS Customers', href: 'RFMSCustomers', pages: ['RFMSCustomers'] },
+      ],
     },
-    { name: 'Journey', icon: Activity, href: 'Journey', pages: ['Journey'], adminOnly: true }
   ];
 
-  const isActive = (navItem) => {
-    return navItem.pages.includes(currentPageName);
-  };
+  const pageInItem = (it) => it.href === currentPageName || (it.pages || []).includes(currentPageName);
+  const moduleHasActive = (mod) => (mod.subItems || []).some(pageInItem);
 
-  // Data-driven nav: show items whose target/pages are in the user's allowed
-  // module pages (from the access model). RLS + the route guard are the real
-  // enforcement; this just shapes the menu to what the user can reach.
+  // Data-driven modular nav: keep modules that have at least one sub-item the
+  // user can reach, and filter the visible sub-items per-user. RLS + the route
+  // guard are the real enforcement; this just shapes the menu.
   const getFilteredNavigation = () => {
     if (!access) return [];
     const isAdmin = currentUser?.role === 'admin';
-    return navigation.filter((item) => {
-      if (item.hiddenWhen?.()) return false;
+    const canReach = (sub) => {
+      if (sub.hiddenWhen?.()) return false;
       if (isAdmin) return true; // org admins see the full menu
-      const keys = [
-        item.href,
-        ...(item.pages || []),
-        ...((item.subItems || []).flatMap((s) => [s.href, ...(s.pages || [])])),
-      ].filter(Boolean);
+      const keys = [sub.href, ...(sub.pages || [])].filter(Boolean);
       return keys.some((k) => allowedPageKeys.has(k));
-    });
+    };
+    return navigation
+      .filter((mod) => !mod.hiddenWhen?.())
+      .map((mod) => ({ ...mod, subItems: (mod.subItems || []).filter(canReach) }))
+      .filter((mod) => mod.subItems.length > 0);
   };
 
   // eslint-disable-next-line no-unused-vars
@@ -509,80 +514,68 @@ export default function Layout({ children, currentPageName }) {
             </button>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          {/* Navigation — modules with tucked-in sub-nav */}
+          <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
             {filteredNavigation.map((item) => {
               const Icon = item.icon;
-              const active = isActive(item);
-              const hasSubItems = item.subItems && item.subItems.length > 0;
-              const isExpanded = expandedMenuItems[item.name];
-
-              if (hasSubItems) {
-                return (
-                  <div key={item.name}>
-                    <button
-                      onClick={() => setExpandedMenuItems(prev => ({ ...prev, [item.name]: !prev[item.name] }))}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
-                        active
-                          ? "bg-sidebar-accent text-sidebar-primary font-semibold"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      )}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium flex-1 text-left">{item.name}</span>
-                      {isExpanded ? (
-                        <ChevronDown className="w-4 h-4" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4" />
-                      )}
-                    </button>
-                    {isExpanded && (
-                      <div className="ml-8 mt-1 space-y-1">
-                        {item.subItems.map((subItem) => {
-                          const subActive = subItem.pages.includes(currentPageName);
-                          return (
-                            <Link
-                              key={subItem.name}
-                              to={createPageUrl(subItem.href)}
-                              onClick={() => setSidebarOpen(false)}
-                              className={cn(
-                                "flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm",
-                                subActive
-                                  ? "bg-sidebar-accent text-sidebar-primary font-medium"
-                                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                              )}
-                            >
-                              {subItem.name}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
+              const active = moduleHasActive(item);
+              const isExpanded = expandedMenuItems[item.name] ?? active;
+              const moduleUnread = item.subItems.some(s => s.href === 'MyTasks') && pendingTasksCount > 0;
 
               return (
-                <Link
-                  key={item.name}
-                  to={createPageUrl(item.href)}
-                  onClick={() => setSidebarOpen(false)}
-                  className={cn(
-                    "relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
-                    active
-                      ? "bg-sidebar-accent text-sidebar-primary font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r-full before:bg-sidebar-primary"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  )}
+                <div key={item.name}>
+                  <button
+                    onClick={() => setExpandedMenuItems(prev => ({ ...prev, [item.name]: !(prev[item.name] ?? active) }))}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors",
+                      active
+                        ? "text-sidebar-primary font-semibold"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    )}
                   >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.name}</span>
-                  {item.name === 'My Tasks' && pendingTasksCount > 0 && (
-                    <span className="ml-auto bg-crit text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {pendingTasksCount}
-                    </span>
+                    <Icon className="w-[18px] h-[18px] shrink-0" />
+                    <span className="flex-1 text-left text-[13.5px] font-medium">{item.name}</span>
+                    {!isExpanded && moduleUnread && (
+                      <span className="min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-white text-[10px] font-bold">
+                        {pendingTasksCount}
+                      </span>
+                    )}
+                    {isExpanded ? (
+                      <ChevronDown className="w-4 h-4 opacity-70" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 opacity-60" />
+                    )}
+                  </button>
+
+                  {isExpanded && (
+                    <div className="mb-1 ml-[26px] mt-0.5 space-y-0.5 border-l border-sidebar-border pl-3">
+                      {item.subItems.map((subItem) => {
+                        const subActive = pageInItem(subItem);
+                        const showBadge = subItem.href === 'MyTasks' && pendingTasksCount > 0;
+                        return (
+                          <Link
+                            key={subItem.name}
+                            to={createPageUrl(subItem.href)}
+                            onClick={() => setSidebarOpen(false)}
+                            className={cn(
+                              "relative flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors",
+                              subActive
+                                ? "bg-sidebar-accent text-sidebar-primary font-medium before:absolute before:-left-[13px] before:top-1.5 before:bottom-1.5 before:w-[2px] before:rounded-r-full before:bg-sidebar-primary"
+                                : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                            )}
+                          >
+                            <span className="flex-1 truncate">{subItem.name}</span>
+                            {showBadge && (
+                              <span className="ml-auto min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-white text-[10px] font-bold">
+                                {pendingTasksCount}
+                              </span>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
                   )}
-                  </Link>
+                </div>
               );
             })}
           </nav>
