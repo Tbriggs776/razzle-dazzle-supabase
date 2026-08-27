@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, X, Menu, Map, LayoutGrid, Layers, LogOut, User, ChevronDown, ChevronRight, Navigation, Bell, HardHat } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import StatusPill from '@/components/common/StatusPill';
 import RegionMapEditor from '@/components/journey/RegionMapEditor';
 import RegionSidebar from '@/components/journey/RegionSidebar';
 import JourneyCalendar from '@/components/journey/JourneyCalendar';
@@ -188,7 +189,7 @@ function JourneyInner() {
         {/* Logo */}
         <div className="h-14 flex items-center px-5 border-b border-border shrink-0">
           <div>
-            <h1 className="text-base font-bold text-primary leading-none">
+            <h1 className="font-display text-base font-extrabold tracking-tight text-primary leading-none">
               Journey
             </h1>
             <p className="text-[9px] font-sans tracking-wider text-muted-foreground uppercase mt-0.5">
@@ -380,12 +381,12 @@ function JourneyInner() {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <span className="text-sm font-bold text-primary">Journey</span>
+          <span className="font-display text-sm font-extrabold tracking-tight text-primary">Journey</span>
         </div>
         {/* Drawing banner */}
         {drawingRegion && (
           <div className="h-10 bg-primary/10 border-b border-primary/20 flex items-center px-4 gap-2 shrink-0">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: drawingRegion.color || '#4F46E5' }} />
+            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: drawingRegion.color || 'hsl(var(--primary))' }} />
             <span className="text-xs font-medium text-primary">{t('drawing')}: {drawingRegion.region_name}</span>
             <button onClick={() => setDrawingRegion(null)} className="text-primary/70 hover:text-primary ml-1">
               <X className="w-3.5 h-3.5" />
@@ -416,7 +417,7 @@ function JourneyInner() {
                   <Layers className="w-3.5 h-3.5 text-primary" />
                   {t('regionsButton')}
                   {!regionsOverlayOpen && (
-                    <span className="bg-primary/10 text-primary rounded px-1 ml-0.5">{regions.length}</span>
+                    <StatusPill tone="info" className="ml-0.5">{regions.length}</StatusPill>
                   )}
                 </button>
 

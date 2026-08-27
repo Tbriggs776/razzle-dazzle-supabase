@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Users, Plus, Search, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import CustomerCard from '@/components/customers/CustomerCard';
+import { format, startOfMonth, subDays } from 'date-fns';
+import PageHeader from '@/components/common/PageHeader';
+import KpiTile from '@/components/dashboard/KpiTile';
+import StatusPill from '@/components/common/StatusPill';
+import DataTable from '@/components/common/DataTable';
 import CustomerForm from '@/components/customers/CustomerForm';
 
 export default function Customers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: customers, isLoading } = useQuery({
     queryKey: ['customers'],
@@ -37,99 +43,169 @@ export default function Customers() {
     );
   });
 
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Customers</h1>
-              <p className="text-muted-foreground mt-1">Manage your customers</p>
+  // Presentational KPI rollups over the full book (display-only; no effect on fetch/filter).
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+  const weekAgo = subDays(now, 7);
+  const totalCustomers = customers.length;
+  const newThisMonth = customers.filter(
+    (c) => c.created_date && new Date(c.created_date) >= monthStart
+  ).length;
+  const newThisWeek = customers.filter(
+    (c) => c.created_date && new Date(c.created_date) >= weekAgo
+  ).length;
+
+  const columns = [
+    {
+      key: 'name',
+      header: 'Customer',
+      render: (customer) => {
+        const initials = `${customer.first_name?.[0] || ''}${customer.last_name?.[0] || ''}`.toUpperCase();
+        const isNew = customer.created_date && new Date(customer.created_date) >= weekAgo;
+        return (
+          <div className="flex items-center gap-3">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-brand-blue/10 text-[12px] font-bold text-brand-blue">
+              {initials || <Users className="h-4 w-4" />}
             </div>
-            <Button
-              onClick={() => setShowCreateDialog(true)}
-              className="bg-primary text-primary-foreground hover:opacity-90 h-11 px-5"
-            >
-              <Plus className="w-5 h-5 mr-2" />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="truncate font-semibold text-foreground">
+                  {`${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Unnamed Customer'}
+                </span>
+                {isNew && <StatusPill tone="info">New</StatusPill>}
+              </div>
+              <div className="truncate text-xs text-muted-foreground">
+                {customer.email || 'No email on file'}
+              </div>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'phone',
+      header: 'Phone',
+      render: (customer) =>
+        customer.phone ? (
+          <span className="tabular-nums">{customer.phone}</span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
+    {
+      key: 'location',
+      header: 'Location',
+      render: (customer) => {
+        const location = [customer.city, customer.state].filter(Boolean).join(', ');
+        return location ? location : <span className="text-muted-foreground">—</span>;
+      },
+    },
+    {
+      key: 'created_date',
+      header: 'Added',
+      align: 'right',
+      render: (customer) =>
+        customer.created_date ? (
+          format(new Date(customer.created_date), 'MMM d, yyyy')
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const emptyState = (
+    <div className="py-6">
+      <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-muted">
+        <Users className="h-7 w-7 text-muted-foreground" />
+      </div>
+      <h3 className="text-sm font-semibold text-foreground">
+        {searchQuery ? 'No customers found' : 'No customers yet'}
+      </h3>
+      <p className="mx-auto mt-1 max-w-md text-xs text-muted-foreground">
+        {searchQuery
+          ? 'Try adjusting your search terms.'
+          : 'Customers will appear here when appointments are marked as sold.'}
+      </p>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <PageHeader
+          eyebrow="Directory"
+          title="Customers"
+          subtitle="Your full customer directory."
+          actions={
+            <Button variant="accent" onClick={() => setShowCreateDialog(true)}>
+              <Plus className="h-4 w-4" />
               Add Customer
             </Button>
-          </div>
+          }
+        />
 
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder="Search customers by name, email, or phone..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 border-border"
-            />
-          </div>
-        </motion.div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiTile
+            label="Total Customers"
+            value={totalCustomers}
+            hero
+            foot="All customers on record"
+          />
+          <KpiTile
+            label="New This Month"
+            value={newThisMonth}
+            foot={`Added since ${format(monthStart, 'MMMM 1')}`}
+          />
+          <KpiTile
+            label="New This Week"
+            value={newThisWeek}
+            foot="Added in the last 7 days"
+          />
+        </div>
 
-        {/* Customers Grid */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          </div>
-        ) : filteredCustomers.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-secondary flex items-center justify-center mb-6">
-              <Users className="w-10 h-10 text-muted-foreground" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              {searchQuery ? 'No customers found' : 'No customers yet'}
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              {searchQuery 
-                ? 'Try adjusting your search terms'
-                : 'Customers will appear here when appointments are marked as sold'}
-            </p>
-          </motion.div>
-        ) : (
-          <>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-sm text-muted-foreground mb-4"
-            >
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-sm text-muted-foreground">
               Showing {filteredCustomers.length} customer{filteredCustomers.length !== 1 ? 's' : ''}
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-            >
-              {filteredCustomers.map((customer, index) => (
-                <motion.div
-                  key={customer.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <CustomerCard customer={customer} />
-                </motion.div>
-              ))}
-            </motion.div>
-          </>
-        )}
+            </div>
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, email, or phone…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 border-border bg-card pl-9"
+              />
+            </div>
+          </div>
+
+          <DataTable
+            columns={columns}
+            data={filteredCustomers}
+            rowKey={(customer) => customer.id}
+            onRowClick={(customer) =>
+              navigate(createPageUrl('CustomerDetail') + `?id=${customer.id}`)
+            }
+            empty={emptyState}
+          />
+        </div>
       </div>
 
       {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-foreground">Add New Customer</DialogTitle>
+            <DialogTitle className="font-display text-xl font-extrabold text-foreground">
+              Add New Customer
+            </DialogTitle>
           </DialogHeader>
           <CustomerForm
             onSubmit={(data) => createMutation.mutate(data)}

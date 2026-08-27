@@ -6,32 +6,34 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Search, 
+import {
+  Search,
   Loader2,
   ClipboardCheck,
   Calendar as CalendarIcon,
   MapPin,
   Clock,
-  Smile,
   Copy,
   Plus,
   List,
-  LayoutGrid,
-  Tag
+  Tag,
+  Layers,
 } from 'lucide-react';
 import NoteReactions from '@/components/projects/NoteReactions';
 import TagBadge from '@/components/tags/TagBadge';
 import ProjectsCalendarView from '@/components/projects/ProjectsCalendarView';
-import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import PageHeader from '@/components/common/PageHeader';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import PipelineBar from '@/components/dashboard/PipelineBar';
+import StatusPill from '@/components/common/StatusPill';
 
 const HOLD_STATUSES = ['pending payment', 'pending contract', 'on hold', 'pending cancellation'];
 
@@ -60,14 +62,35 @@ const calculateBusinessDays = (startDate, installationDateStatus, holdClearedDat
   return count;
 };
 
-const statusColors = {
-  'Accepted': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  'Materials Ordered': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
-  'Scheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
-  'In Progress': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
-  'Quality Checks': 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/25',
-  'Completed': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
+// Domain project status → StatusPill tone. Same six stages, semantic colors instead of
+// the old bg-*-100 lookups: progress reads info, review reads warn, done reads good.
+const STATUS_TONE = {
+  'Accepted': 'info',
+  'Materials Ordered': 'info',
+  'Scheduled': 'info',
+  'In Progress': 'info',
+  'Quality Checks': 'warn',
+  'Completed': 'good',
 };
+const PROJECT_STATUSES = Object.keys(STATUS_TONE);
+
+const money = (n) => '$' + Math.round(n || 0).toLocaleString();
+
+const pillCls = (active) =>
+  cn(
+    'whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
+    active
+      ? 'border-primary bg-primary text-primary-foreground'
+      : 'border-border bg-card text-muted-foreground hover:border-primary/40'
+  );
+
+const subPillCls = (active) =>
+  cn(
+    'whitespace-nowrap rounded-lg border px-3 py-1 text-xs font-medium transition-colors',
+    active
+      ? 'border-primary bg-primary text-primary-foreground'
+      : 'border-border bg-card text-muted-foreground hover:border-primary/40'
+  );
 
 export default function Projects() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -198,9 +221,9 @@ export default function Projects() {
   const materialsToOrderProjects = projects
     .filter(p => {
       const isCorrectStatus = p.status === 'Accepted' || p.status === 'Scheduled';
-      const isNotOnHold = !p.installation_date_status || 
-        (p.installation_date_status !== 'pending payment' && 
-         p.installation_date_status !== 'pending contract' && 
+      const isNotOnHold = !p.installation_date_status ||
+        (p.installation_date_status !== 'pending payment' &&
+         p.installation_date_status !== 'pending contract' &&
          p.installation_date_status !== 'on hold' &&
          p.installation_date_status !== 'pending cancellation');
       return isCorrectStatus && isNotOnHold;
@@ -233,7 +256,7 @@ export default function Projects() {
 
   const materialsToOrder3Plus = materialsToOrderProjects.filter(p => calculateBusinessDays(p.created_date, p.installation_date_status, p.hold_cleared_date) >= 3);
   const materialsToOrderUnder3 = materialsToOrderProjects.filter(p => calculateBusinessDays(p.created_date, p.installation_date_status, p.hold_cleared_date) < 3);
-  
+
   const needsAttentionProjects = projects.filter(p => p.installation_date_status && HOLD_STATUSES.includes(p.installation_date_status));
   const needsWelcomeCall = projects.filter(p => !p.welcome_call_completed_date);
   const needsCheckIn = projects.filter(p => p.welcome_call_completed_date && !p.check_in_completed_date);
@@ -269,7 +292,7 @@ export default function Projects() {
     }
 
     if (!searchQuery) return filtered;
-    
+
     const normalize = (str) => str.toLowerCase().replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
     const query = normalize(searchQuery);
     const queryTokens = query.split(' ').filter(Boolean);
@@ -308,244 +331,258 @@ export default function Projects() {
     'Completed': projects.filter(p => p.status === 'Completed').length
   };
 
+  // Presentational rollups over the already-fetched sets (no new fetch logic).
+  const activeCount = projects.filter(p => p.status !== 'Completed').length;
+  const projectValue = projects.reduce((sum, p) => {
+    const s = sales.find(sa => sa.id === p.sale);
+    return sum + (s?.sale_amount || 0);
+  }, 0);
+  const materialsActive =
+    statusFilter === 'materials_to_order' ||
+    statusFilter === 'materials_to_order_3plus' ||
+    statusFilter === 'materials_to_order_under3';
+
+  const pipelineStages = PROJECT_STATUSES.map((name) => ({ name, count: statusCounts[name] }));
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Projects</h1>
-              <p className="text-muted-foreground mt-1">Track installation projects from start to completion</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
-              <div className="flex border border-border rounded-lg overflow-hidden">
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <PageHeader
+          eyebrow="Install Ops"
+          title="Projects"
+          subtitle="Track installation projects from start to completion."
+          actions={
+            <>
+              <div className="flex overflow-hidden rounded-lg border border-border">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={cn('px-3 py-2 text-sm flex items-center gap-1.5 transition-colors', viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-secondary')}
+                  className={cn('flex items-center gap-1.5 px-3 py-2 text-sm transition-colors', viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-muted')}
                 >
-                  <List className="w-4 h-4" /> List
+                  <List className="h-4 w-4" /> List
                 </button>
                 <button
                   onClick={() => setViewMode('calendar')}
-                  className={cn('px-3 py-2 text-sm flex items-center gap-1.5 transition-colors', viewMode === 'calendar' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-secondary')}
+                  className={cn('flex items-center gap-1.5 px-3 py-2 text-sm transition-colors', viewMode === 'calendar' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-muted')}
                 >
-                  <CalendarIcon className="w-4 h-4" /> Calendar
+                  <CalendarIcon className="h-4 w-4" /> Calendar
                 </button>
               </div>
-            <Button onClick={() => setShowNewProject(true)} className="bg-primary text-primary-foreground hover:opacity-90">
-              <Plus className="w-4 h-4 mr-2" />New Project
-            </Button>
-            </div>
+              <Button variant="accent" onClick={() => setShowNewProject(true)}>
+                <Plus className="mr-2 h-4 w-4" />New Project
+              </Button>
+            </>
+          }
+        />
+
+        {/* Headline metrics */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <KpiTile
+            label="Active Projects"
+            value={activeCount}
+            hero
+            foot="Open across every install stage"
+          />
+          <KpiTile
+            label="Materials to Order"
+            value={materialsToOrderProjects.length}
+            foot={`${materialsToOrder3Plus.length} at 3+ business days`}
+            onClick={() => setStatusFilter('materials_to_order')}
+          />
+          <KpiTile
+            label="Needs Attention"
+            value={needsAttentionProjects.length}
+            foot="On hold or pending"
+            onClick={() => setStatusFilter('needs_attention')}
+          />
+          <KpiTile
+            label="Total Value"
+            value={money(projectValue)}
+            foot="Across all projects"
+          />
+        </div>
+
+        {/* Lifecycle funnel */}
+        <ModuleCard
+          title="Pipeline by Stage"
+          subtitle="Projects across the install lifecycle"
+          icon={Layers}
+        >
+          <div className="p-4">
+            <PipelineBar stages={pipelineStages} />
           </div>
+        </ModuleCard>
 
-          {/* Search */}
-          <div className="relative mt-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder="Search by customer name or invoice number..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-11 h-12 bg-card border-border"
-            />
-          </div>
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search by customer name or invoice number..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-11 border-border bg-card pl-10"
+          />
+        </div>
 
-          {/* Tag Filters */}
-          {allTags.length > 0 && (
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                <Tag className="w-3.5 h-3.5" /> Filter by Tag
-              </span>
-              {allTags.map(tag => (
-                <label key={tag.id} className="flex items-center gap-1.5 cursor-pointer">
-                  <Checkbox
-                    checked={selectedTagIds.includes(tag.id)}
-                    onCheckedChange={(checked) => {
-                      setSelectedTagIds(prev =>
-                        checked ? [...prev, tag.id] : prev.filter(id => id !== tag.id)
-                      );
-                    }}
-                  />
-                  <span className="text-sm text-foreground">
-                    {tag.color && <span className="inline-block w-2 h-2 rounded-full mr-1" style={{ backgroundColor: tag.color }} />}
-                    {tag.emoji && <span className="mr-0.5">{tag.emoji}</span>}
-                    {tag.name}
-                  </span>
-                </label>
-              ))}
-              {selectedTagIds.length > 0 && (
-                <button
-                  onClick={() => setSelectedTagIds([])}
-                  className="text-xs text-muted-foreground hover:text-foreground underline"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Status Tabs */}
-          <div className="space-y-2 mt-6">
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              <Button
-                variant={statusFilter === 'all' ? 'default' : 'outline'}
-                onClick={() => setStatusFilter('all')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'all' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
+        {/* Tag Filters */}
+        {allTags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <Tag className="h-3.5 w-3.5" /> Filter by Tag
+            </span>
+            {allTags.map(tag => (
+              <label key={tag.id} className="flex cursor-pointer items-center gap-1.5">
+                <Checkbox
+                  checked={selectedTagIds.includes(tag.id)}
+                  onCheckedChange={(checked) => {
+                    setSelectedTagIds(prev =>
+                      checked ? [...prev, tag.id] : prev.filter(id => id !== tag.id)
+                    );
+                  }}
+                />
+                <span className="text-sm text-foreground">
+                  {tag.color && <span className="mr-1 inline-block h-2 w-2 rounded-full" style={{ backgroundColor: tag.color }} />}
+                  {tag.emoji && <span className="mr-0.5">{tag.emoji}</span>}
+                  {tag.name}
+                </span>
+              </label>
+            ))}
+            {selectedTagIds.length > 0 && (
+              <button
+                onClick={() => setSelectedTagIds([])}
+                className="text-xs text-muted-foreground underline hover:text-foreground"
               >
-                All ({statusCounts.all})
-              </Button>
-              <Button
-                variant={statusFilter === 'materials_to_order' || statusFilter === 'materials_to_order_3plus' || statusFilter === 'materials_to_order_under3' ? 'default' : 'outline'}
-                onClick={() => setStatusFilter('materials_to_order')}
-                className={cn("h-10 whitespace-nowrap", (statusFilter === 'materials_to_order' || statusFilter === 'materials_to_order_3plus' || statusFilter === 'materials_to_order_under3') ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
-              >
-                📦 All Materials to Order ({statusCounts.materials_to_order})
-              </Button>
-              <Button
-                variant={statusFilter === 'needs_attention' ? 'default' : 'outline'}
-                onClick={() => setStatusFilter('needs_attention')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'needs_attention' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
-              >
-                ⚠️ Needs Attention ({needsAttentionProjects.length})
-              </Button>
-              <Button
-                variant={statusFilter === 'needs_welcome_call' ? 'default' : 'outline'}
-                onClick={() => setStatusFilter('needs_welcome_call')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'needs_welcome_call' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
-              >
-                📞 Needs Welcome Call ({statusCounts.needs_welcome_call})
-              </Button>
-              <Button
-                variant={statusFilter === 'needs_check_in' ? 'default' : 'outline'}
-                onClick={() => setStatusFilter('needs_check_in')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'needs_check_in' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
-              >
-                ✅ Needs Check-In ({statusCounts.needs_check_in})
-              </Button>
-              <Button
-                variant={statusFilter === 'glue_down' ? 'default' : 'outline'}
-                onClick={() => setStatusFilter('glue_down')}
-                className={cn("h-10 whitespace-nowrap", statusFilter === 'glue_down' ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/10')}
-              >
-                🔧 Glue Down ({statusCounts.glue_down})
-              </Button>
-              {Object.keys(statusColors).map(status => (
-                <Button
-                  key={status}
-                  variant={statusFilter === status ? 'default' : 'outline'}
-                  onClick={() => setStatusFilter(status)}
-                  className={cn("h-10 whitespace-nowrap", statusFilter === status ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
-                >
-                  {status} ({statusCounts[status]})
-                </Button>
-              ))}
-            </div>
-            
-            {(statusFilter === 'materials_to_order' || statusFilter === 'materials_to_order_3plus' || statusFilter === 'materials_to_order_under3') && (
-              <div className="flex gap-2 ml-4 overflow-x-auto pb-2">
-                <Button
-                  variant={statusFilter === 'materials_to_order_3plus' ? 'default' : 'outline'}
-                  onClick={() => setStatusFilter('materials_to_order_3plus')}
-                  size="sm"
-                  className={cn("h-8 whitespace-nowrap", statusFilter === 'materials_to_order_3plus' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
-                >
-                  3+ Business Days ({statusCounts.materials_to_order_3plus})
-                </Button>
-                <Button
-                  variant={statusFilter === 'materials_to_order_under3' ? 'default' : 'outline'}
-                  onClick={() => setStatusFilter('materials_to_order_under3')}
-                  size="sm"
-                  className={cn("h-8 whitespace-nowrap", statusFilter === 'materials_to_order_under3' ? 'bg-primary text-primary-foreground hover:opacity-90' : '')}
-                >
-                  Under 3 Business Days ({statusCounts.materials_to_order_under3})
-                </Button>
-              </div>
+                Clear
+              </button>
             )}
           </div>
+        )}
+
+        {/* Status Tabs */}
+        <div className="space-y-2">
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            <button onClick={() => setStatusFilter('all')} className={pillCls(statusFilter === 'all')}>
+              All ({statusCounts.all})
+            </button>
+            <button onClick={() => setStatusFilter('materials_to_order')} className={pillCls(materialsActive)}>
+              📦 All Materials to Order ({statusCounts.materials_to_order})
+            </button>
+            <button onClick={() => setStatusFilter('needs_attention')} className={pillCls(statusFilter === 'needs_attention')}>
+              ⚠️ Needs Attention ({needsAttentionProjects.length})
+            </button>
+            <button onClick={() => setStatusFilter('needs_welcome_call')} className={pillCls(statusFilter === 'needs_welcome_call')}>
+              📞 Needs Welcome Call ({statusCounts.needs_welcome_call})
+            </button>
+            <button onClick={() => setStatusFilter('needs_check_in')} className={pillCls(statusFilter === 'needs_check_in')}>
+              ✅ Needs Check-In ({statusCounts.needs_check_in})
+            </button>
+            <button onClick={() => setStatusFilter('glue_down')} className={pillCls(statusFilter === 'glue_down')}>
+              🔧 Glue Down ({statusCounts.glue_down})
+            </button>
+            {PROJECT_STATUSES.map(status => (
+              <button key={status} onClick={() => setStatusFilter(status)} className={pillCls(statusFilter === status)}>
+                {status} ({statusCounts[status]})
+              </button>
+            ))}
+          </div>
+
+          {materialsActive && (
+            <div className="ml-4 flex gap-2 overflow-x-auto pb-1">
+              <button
+                onClick={() => setStatusFilter('materials_to_order_3plus')}
+                className={subPillCls(statusFilter === 'materials_to_order_3plus')}
+              >
+                3+ Business Days ({statusCounts.materials_to_order_3plus})
+              </button>
+              <button
+                onClick={() => setStatusFilter('materials_to_order_under3')}
+                className={subPillCls(statusFilter === 'materials_to_order_under3')}
+              >
+                Under 3 Business Days ({statusCounts.materials_to_order_under3})
+              </button>
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Admin Past Due Copy Panel */}
-      {currentUser?.role === 'admin' && (() => {
-        const AZ_OFFSET_MS = 7 * 60 * 60 * 1000;
-        const nowAZ = new Date(Date.now() - AZ_OFFSET_MS);
-        // Midnight AZ time = midnight UTC + 7 hours (since AZ is UTC-7)
-        const todayAZStart = new Date(Date.UTC(nowAZ.getUTCFullYear(), nowAZ.getUTCMonth(), nowAZ.getUTCDate()) + AZ_OFFSET_MS);
-        const yesterdayAZStart = new Date(todayAZStart.getTime() - 24 * 60 * 60 * 1000);
-        const yesterdayAZEnd = todayAZStart;
+        {/* Admin Past Due Copy Panel */}
+        {currentUser?.role === 'admin' && (() => {
+          const AZ_OFFSET_MS = 7 * 60 * 60 * 1000;
+          const nowAZ = new Date(Date.now() - AZ_OFFSET_MS);
+          // Midnight AZ time = midnight UTC + 7 hours (since AZ is UTC-7)
+          const todayAZStart = new Date(Date.UTC(nowAZ.getUTCFullYear(), nowAZ.getUTCMonth(), nowAZ.getUTCDate()) + AZ_OFFSET_MS);
+          const yesterdayAZStart = new Date(todayAZStart.getTime() - 24 * 60 * 60 * 1000);
+          const yesterdayAZEnd = todayAZStart;
 
-        // Build a map of project_id -> when it was logged as "Status Changed to Materials Ordered"
-        const statusChangedMap = new Map();
-        materialsOrderedLogs.forEach(log => {
-          const logTime = new Date(log.created_date);
-          const existing = statusChangedMap.get(log.project);
-          // Keep the most recent log for each project
-          if (!existing || logTime > existing) {
-            statusChangedMap.set(log.project, logTime);
-          }
-        });
-
-        const materialsOrderedYesterdayProjects = projects.filter(p => {
-          if (p.status !== 'Materials Ordered') return false;
-          const logTime = statusChangedMap.get(p.id);
-          if (!logTime) return false;
-          const logAZ = new Date(logTime.getTime() - AZ_OFFSET_MS);
-          return logAZ >= yesterdayAZStart && logAZ < yesterdayAZEnd;
-        });
-
-        const materialsOrderedTodayProjects = projects.filter(p => {
-          if (p.status !== 'Materials Ordered') return false;
-          const logTime = statusChangedMap.get(p.id);
-          if (!logTime) return false;
-          const logAZ = new Date(logTime.getTime() - AZ_OFFSET_MS);
-          return logAZ >= todayAZStart;
-        });
-
-        const materialsOrderedYesterday = materialsOrderedYesterdayProjects.length;
-        const materialsOrderedToday = materialsOrderedTodayProjects.length;
-
-        const pastDueLines = projects
-          .filter(p => {
-            const bd = calculateBusinessDays(p.created_date, p.installation_date_status, p.hold_cleared_date);
-            const onHold = p.installation_date_status && HOLD_STATUSES.includes(p.installation_date_status);
-            return !onHold && bd >= 3 && (p.status === 'Accepted' || p.status === 'Scheduled');
-          })
-          .sort((a, b) => new Date(a.created_date) - new Date(b.created_date))
-          .map(p => {
-            const c = customers.find(cu => cu.id === p.customer);
-            const s = sales.find(sa => sa.id === p.sale);
-            const bd = calculateBusinessDays(p.created_date, p.installation_date_status, p.hold_cleared_date);
-            const jobName = c ? `${c.first_name} ${c.last_name}` : 'Unknown';
-            const cgNumber = s?.invoice_number || 'N/A';
-            const createdDate = p.created_date
-              ? format(new Date(p.created_date), 'MM/dd/yyyy')
-              : 'N/A';
-            const status = p.installation_date_status || p.status;
-            const installDate = p.installation_date ? format(new Date(p.installation_date + 'T00:00:00'), 'MM/dd/yyyy') : 'No Install Date';
-            return `Job: ${jobName} | CG#: ${cgNumber} | Created: ${createdDate} | Install: ${installDate} | Status: ${status} | Days: ${bd}`;
+          // Build a map of project_id -> when it was logged as "Status Changed to Materials Ordered"
+          const statusChangedMap = new Map();
+          materialsOrderedLogs.forEach(log => {
+            const logTime = new Date(log.created_date);
+            const existing = statusChangedMap.get(log.project);
+            // Keep the most recent log for each project
+            if (!existing || logTime > existing) {
+              statusChangedMap.set(log.project, logTime);
+            }
           });
 
-        if (pastDueLines.length === 0 && materialsOrderedYesterday === 0) return null;
+          const materialsOrderedYesterdayProjects = projects.filter(p => {
+            if (p.status !== 'Materials Ordered') return false;
+            const logTime = statusChangedMap.get(p.id);
+            if (!logTime) return false;
+            const logAZ = new Date(logTime.getTime() - AZ_OFFSET_MS);
+            return logAZ >= yesterdayAZStart && logAZ < yesterdayAZEnd;
+          });
 
-        return (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 dark:bg-amber-500/10 dark:border-amber-500/25">
-              <div className="flex items-center justify-between mb-3">
+          const materialsOrderedTodayProjects = projects.filter(p => {
+            if (p.status !== 'Materials Ordered') return false;
+            const logTime = statusChangedMap.get(p.id);
+            if (!logTime) return false;
+            const logAZ = new Date(logTime.getTime() - AZ_OFFSET_MS);
+            return logAZ >= todayAZStart;
+          });
+
+          const materialsOrderedYesterday = materialsOrderedYesterdayProjects.length;
+          const materialsOrderedToday = materialsOrderedTodayProjects.length;
+
+          const pastDueLines = projects
+            .filter(p => {
+              const bd = calculateBusinessDays(p.created_date, p.installation_date_status, p.hold_cleared_date);
+              const onHold = p.installation_date_status && HOLD_STATUSES.includes(p.installation_date_status);
+              return !onHold && bd >= 3 && (p.status === 'Accepted' || p.status === 'Scheduled');
+            })
+            .sort((a, b) => new Date(a.created_date) - new Date(b.created_date))
+            .map(p => {
+              const c = customers.find(cu => cu.id === p.customer);
+              const s = sales.find(sa => sa.id === p.sale);
+              const bd = calculateBusinessDays(p.created_date, p.installation_date_status, p.hold_cleared_date);
+              const jobName = c ? `${c.first_name} ${c.last_name}` : 'Unknown';
+              const cgNumber = s?.invoice_number || 'N/A';
+              const createdDate = p.created_date
+                ? format(new Date(p.created_date), 'MM/dd/yyyy')
+                : 'N/A';
+              const status = p.installation_date_status || p.status;
+              const installDate = p.installation_date ? format(new Date(p.installation_date + 'T00:00:00'), 'MM/dd/yyyy') : 'No Install Date';
+              return `Job: ${jobName} | CG#: ${cgNumber} | Created: ${createdDate} | Install: ${installDate} | Status: ${status} | Days: ${bd}`;
+            });
+
+          if (pastDueLines.length === 0 && materialsOrderedYesterday === 0) return null;
+
+          return (
+            <div className="rounded-xl border border-warn/30 bg-warn/[0.07] p-4">
+              <div className="mb-3 flex items-center justify-between">
                 <div className="flex flex-col gap-0.5">
-                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">⚠️ {pastDueLines.length} Jobs — 3+ Business Days Past Due</p>
+                  <p className="text-sm font-semibold text-warn">⚠️ {pastDueLines.length} Jobs — 3+ Business Days Past Due</p>
                   <button
                     onClick={() => setOrderedView(v => v === 'today' ? null : 'today')}
-                    className="text-xs text-amber-700 hover:text-amber-900 text-left transition-colors dark:text-amber-300 dark:hover:text-amber-200"
+                    className="text-left text-xs text-warn/90 transition-colors hover:text-warn"
                   >
                     📦 Jobs Ordered Material Today: <strong>{materialsOrderedToday}</strong>
-                    <span className="ml-1 text-amber-500 dark:text-amber-400">{orderedView === 'today' ? '▲' : '▼'}</span>
+                    <span className="ml-1 text-warn/60">{orderedView === 'today' ? '▲' : '▼'}</span>
                   </button>
                   <button
                     onClick={() => setOrderedView(v => v === 'yesterday' ? null : 'yesterday')}
-                    className="text-xs text-amber-700 hover:text-amber-900 text-left transition-colors dark:text-amber-300 dark:hover:text-amber-200"
+                    className="text-left text-xs text-warn/90 transition-colors hover:text-warn"
                   >
                     📦 Jobs Ordered Material Yesterday: <strong>{materialsOrderedYesterday}</strong>
-                    <span className="ml-1 text-amber-500 dark:text-amber-400">{orderedView === 'yesterday' ? '▲' : '▼'}</span>
+                    <span className="ml-1 text-warn/60">{orderedView === 'yesterday' ? '▲' : '▼'}</span>
                   </button>
                 </div>
                 <button
@@ -555,19 +592,19 @@ export default function Projects() {
                     setPastDueCopied(true);
                     setTimeout(() => setPastDueCopied(false), 2000);
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200 transition-colors font-medium dark:bg-amber-500/15 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/25"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-warn/30 bg-warn/15 px-3 py-1.5 text-xs font-medium text-warn transition-colors hover:bg-warn/25"
                 >
-                  <Copy className="w-3.5 h-3.5" />
+                  <Copy className="h-3.5 w-3.5" />
                   {pastDueCopied ? 'Copied!' : 'Copy All'}
                 </button>
               </div>
               {orderedView && (
                 <div className="mb-3 space-y-1">
-                  <p className="text-xs font-semibold text-amber-800 mb-1 dark:text-amber-300">
+                  <p className="mb-1 text-xs font-semibold text-warn">
                     {orderedView === 'today' ? '📦 Ordered Material Today' : '📦 Ordered Material Yesterday'}
                   </p>
                   {(orderedView === 'today' ? materialsOrderedTodayProjects : materialsOrderedYesterdayProjects).length === 0 ? (
-                    <p className="text-xs text-amber-600 italic dark:text-amber-400">No jobs found.</p>
+                    <p className="text-xs italic text-muted-foreground">No jobs found.</p>
                   ) : (
                     (orderedView === 'today' ? materialsOrderedTodayProjects : materialsOrderedYesterdayProjects).map((p, i) => {
                       const c = customers.find(cu => cu.id === p.customer);
@@ -577,7 +614,7 @@ export default function Projects() {
                       const installDate = p.installation_date ? format(new Date(p.installation_date + 'T00:00:00'), 'MM/dd/yyyy') : 'No Install Date';
                       const createdDate = p.created_date ? format(new Date(p.created_date), 'MM/dd/yyyy') : 'N/A';
                       return (
-                        <p key={i} className="text-xs font-mono text-foreground bg-card border border-amber-200 rounded px-3 py-1.5 dark:border-amber-500/25">
+                        <p key={i} className="rounded border border-border bg-card px-3 py-1.5 font-mono text-xs text-foreground">
                           Job: {jobName} | CG#: {cgNumber} | Created: {createdDate} | Install: {installDate}
                         </p>
                       );
@@ -587,16 +624,14 @@ export default function Projects() {
               )}
               <div className="space-y-1">
                 {pastDueLines.map((line, i) => (
-                  <p key={i} className="text-xs font-mono text-foreground bg-card border border-amber-100 rounded px-3 py-1.5 dark:border-amber-500/20">{line}</p>
+                  <p key={i} className="rounded border border-border bg-card px-3 py-1.5 font-mono text-xs text-foreground">{line}</p>
                 ))}
               </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
 
-      {/* Projects List / Calendar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Projects List / Calendar */}
         <div className={viewMode === 'calendar' ? '' : 'hidden'}>
           <ProjectsCalendarView
             projects={filteredProjects}
@@ -608,26 +643,26 @@ export default function Projects() {
         {viewMode === 'list' && (
           isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="text-center py-12 bg-card rounded-2xl border border-border">
-            <ClipboardCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground">No projects found</h3>
-            <p className="text-muted-foreground mt-1">
+          <div className="rounded-xl border border-border bg-card py-14 text-center">
+            <ClipboardCheck className="mx-auto mb-3 h-10 w-10 text-muted-foreground/60" />
+            <h3 className="text-sm font-semibold text-foreground">No projects found</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
               {searchQuery || statusFilter !== 'all'
-                ? 'Try adjusting your filters'
-                : 'Projects will appear here when sales are converted to projects'}
+                ? 'Try adjusting your filters.'
+                : 'Projects will appear here when sales are converted to projects.'}
             </p>
           </div>
         ) : (
           <div className="grid gap-4">
             {statusFilter === 'materials_to_order' && materialsNext3Days.length > 0 && (
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 bg-red-100 border border-red-300 text-red-800 text-xs font-bold px-3 py-1 rounded-full dark:bg-red-500/15 dark:border-red-500/30 dark:text-red-300">
+                <div className="flex-shrink-0 rounded-full border border-crit/30 bg-crit/15 px-3 py-1 text-xs font-bold text-crit">
                   🔥 Next 3 Days ({materialsNext3Days.length})
                 </div>
-                <div className="flex-1 h-px bg-red-200 dark:bg-red-500/25" />
+                <div className="h-px flex-1 bg-crit/25" />
               </div>
             )}
             {filteredProjects.map((project, index) => {
@@ -640,12 +675,12 @@ export default function Projects() {
 
               const getLatestCustomerExperience = () => {
                 const actions = [
-                  { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25' },
-                  { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', color: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25' },
-                  { date: project.check_in_attempted_date, label: 'Check-In Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25' },
-                  { date: project.check_in_completed_date, label: 'Check-In Completed', color: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25' },
-                  { date: project.final_call_attempted_date, label: 'Final Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25' },
-                  { date: project.final_call_completed_date, label: 'Final Call Completed', color: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25' }
+                  { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', tone: 'info' },
+                  { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', tone: 'good' },
+                  { date: project.check_in_attempted_date, label: 'Check-In Attempted', tone: 'info' },
+                  { date: project.check_in_completed_date, label: 'Check-In Completed', tone: 'good' },
+                  { date: project.final_call_attempted_date, label: 'Final Call Attempted', tone: 'info' },
+                  { date: project.final_call_completed_date, label: 'Final Call Completed', tone: 'good' }
                 ].filter(a => a.date);
                 if (actions.length === 0) return null;
                 return actions.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
@@ -671,65 +706,36 @@ export default function Projects() {
               return (
                 <React.Fragment key={project.id}>
                 {isFirst3DaysItem && (
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="flex-shrink-0 bg-secondary border border-border text-muted-foreground text-xs font-bold px-3 py-1 rounded-full">
+                  <div className="mt-2 flex items-center gap-3">
+                    <div className="flex-shrink-0 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-bold text-muted-foreground">
                       📅 Later ({materialsAfter3Days.length})
                     </div>
-                    <div className="flex-1 h-px bg-border" />
+                    <div className="h-px flex-1 bg-border" />
                   </div>
                 )}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="bg-card rounded-xl border border-border hover:shadow-lg hover:border-primary/30 transition-all"
-                >
-                  <Link to={createPageUrl('ProjectDetail') + `?id=${project.id}`} className="block p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-foreground">{customerName}</h3>
-                        <div className="flex items-center gap-2 mt-2 flex-wrap">
-                          <Badge variant="secondary" className={cn('border', statusColors[project.status])}>
-                            {project.status}
-                          </Badge>
-                          {isGlueDown && (
-                            <Badge className="border bg-amber-100 text-amber-800 border-amber-300 font-semibold dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30">
-                              🔧 Glue Down
-                            </Badge>
-                          )}
-                          {isPreConstruction1978 && (
-                            <Badge className="border bg-red-100 text-red-800 border-red-300 font-semibold dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/30">
-                              ⚠️ Pre-1978 Home
-                            </Badge>
-                          )}
-                          {isPastDue && (
-                            <Badge className="border bg-red-100 text-red-800 border-red-200 font-semibold dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
-                              Past Due
-                            </Badge>
-                          )}
-                          {welcomeCallPastDue && (
-                            <Badge className="border bg-orange-100 text-orange-800 border-orange-200 font-semibold dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25">
-                              ⚠️ Welcome Call Past Due
-                            </Badge>
-                          )}
+                <div className="rounded-xl border border-border bg-card transition-all hover:border-brand-pink/30 hover:shadow-md">
+                  <Link to={createPageUrl('ProjectDetail') + `?id=${project.id}`} className="block p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-display text-base font-bold tracking-tight text-foreground">{customerName}</h3>
+                        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                          <StatusPill tone={STATUS_TONE[project.status] || 'neutral'}>{project.status}</StatusPill>
+                          {isGlueDown && <StatusPill tone="warn">🔧 Glue Down</StatusPill>}
+                          {isPreConstruction1978 && <StatusPill tone="crit">⚠️ Pre-1978 Home</StatusPill>}
+                          {isPastDue && <StatusPill tone="crit">Past Due</StatusPill>}
+                          {welcomeCallPastDue && <StatusPill tone="warn">⚠️ Welcome Call Past Due</StatusPill>}
                           {project.welcome_call_attempted_date && !project.welcome_call_completed_date && (
-                            <Badge className="border bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25">
-                              📞 Welcome Call Attempted - Needs Completion
-                            </Badge>
+                            <StatusPill tone="info">📞 Welcome Call Attempted - Needs Completion</StatusPill>
                           )}
                           {project.installation_date_status && (
-                            <Badge className="border bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
-                              {project.installation_date_status}
-                            </Badge>
+                            <StatusPill tone="warn">{project.installation_date_status}</StatusPill>
                           )}
                           {latestCustomerExperience && (
-                            <Badge variant="secondary" className={cn('border text-xs', latestCustomerExperience.color)}>
-                              {latestCustomerExperience.label}
-                            </Badge>
+                            <StatusPill tone={latestCustomerExperience.tone}>{latestCustomerExperience.label}</StatusPill>
                           )}
                         </div>
                         {project.tags && project.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
+                          <div className="mt-2 flex flex-wrap gap-1">
                             {project.tags.map(tagId => {
                               const tag = allTags.find(t => t.id === tagId);
                               return tag ? <TagBadge key={tagId} tag={tag} /> : null;
@@ -739,23 +745,23 @@ export default function Projects() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="mt-4 space-y-1.5">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        <Clock className="h-4 w-4" />
                         <span>Created: {format(new Date(project.created_date), 'MMM d, yyyy h:mm a')}</span>
-                        <Badge className="ml-2 bg-secondary text-secondary-foreground border-border">
+                        <span className="ml-1 inline-flex items-center rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-medium text-foreground">
                           {businessDays} business {businessDays === 1 ? 'day' : 'days'} since cleared
-                        </Badge>
+                        </span>
                       </div>
                       {project.installation_date && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                          <CalendarIcon className="h-4 w-4" />
                           <span>Install: {format(new Date(project.installation_date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                         </div>
                       )}
                       {(project.scheduled_start_date || project.scheduled_end_date) && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                          <CalendarIcon className="h-4 w-4" />
                           {project.scheduled_start_date && (
                             <span>{format(new Date(project.scheduled_start_date + 'T00:00:00'), 'MMM d, yyyy')}</span>
                           )}
@@ -767,13 +773,13 @@ export default function Projects() {
                       )}
                       {sale?.location_address && (
                         <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
                           <span className="line-clamp-1">{sale.location_address}</span>
                         </div>
                       )}
                       {sale?.invoice_number && (
                         <div className="text-sm text-muted-foreground">
-                          <span className="text-muted-foreground">Invoice: </span>
+                          <span>Invoice: </span>
                           <span className="font-medium text-foreground">#{sale.invoice_number}</span>
                         </div>
                       )}
@@ -781,22 +787,22 @@ export default function Projects() {
                     </div>
 
                     {project.notes && project.notes.length > 0 && (
-                      <div className="border-t border-border pt-3 mt-3">
-                        <p className="text-xs font-semibold text-muted-foreground mb-2">Project Notes</p>
-                        <div className="max-h-48 overflow-y-auto space-y-2 pr-2 overscroll-contain overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
+                      <div className="mt-3 border-t border-border pt-3">
+                        <p className="mb-2 text-xs font-semibold text-muted-foreground">Project Notes</p>
+                        <div className="max-h-48 space-y-2 overflow-y-auto overflow-x-hidden overscroll-contain pr-2" style={{ WebkitOverflowScrolling: 'touch' }}>
                           {[...project.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, idx) => {
                             const originalIndex = project.notes.findIndex(n => n === note || (n.timestamp === note.timestamp && n.user_email === note.user_email));
                             return (
-                              <div key={idx} className="bg-secondary rounded-lg p-2.5 border border-border break-words" onClick={e => e.preventDefault()}>
-                                <div className="flex items-start justify-between gap-2 mb-1">
+                              <div key={idx} className="break-words rounded-lg border border-border bg-secondary p-2.5" onClick={e => e.preventDefault()}>
+                                <div className="mb-1 flex items-start justify-between gap-2">
                                   <p className="text-xs font-semibold text-foreground">{note.user_name}</p>
                                   {note.timestamp && (
-                                    <p className="text-[10px] text-muted-foreground flex-shrink-0">
+                                    <p className="flex-shrink-0 text-[10px] text-muted-foreground">
                                       {format(new Date(note.timestamp), 'MMM d, yyyy h:mm a')}
                                     </p>
                                   )}
                                 </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed">{note.content}</p>
+                                <p className="text-xs leading-relaxed text-muted-foreground">{note.content}</p>
                                 <div onClick={e => { e.preventDefault(); e.stopPropagation(); }}>
                                   <NoteReactions
                                     note={note}
@@ -811,7 +817,7 @@ export default function Projects() {
                       </div>
                     )}
                   </Link>
-                </motion.div>
+                </div>
                 </React.Fragment>
               );
             })}
@@ -856,7 +862,7 @@ export default function Projects() {
                 <Select value={newProjectForm.status} onValueChange={v => setNewProjectForm(f => ({ ...f, status: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {Object.keys(statusColors).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    {PROJECT_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -873,7 +879,7 @@ export default function Projects() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewProject(false)}>Cancel</Button>
             <Button onClick={handleCreateProject} disabled={creatingProject || !newProjectForm.first_name || !newProjectForm.last_name} className="bg-primary text-primary-foreground hover:opacity-90">
-              {creatingProject ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : 'Create Project'}
+              {creatingProject ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</> : 'Create Project'}
             </Button>
           </DialogFooter>
         </DialogContent>

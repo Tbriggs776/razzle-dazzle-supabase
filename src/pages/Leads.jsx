@@ -1,19 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Search, Plus, Users, Loader2, ArrowUpDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import LeadCard from '@/components/leads/LeadCard';
+import { format } from 'date-fns';
+import PageHeader from '@/components/common/PageHeader';
+import StatusPill from '@/components/common/StatusPill';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import WorkRow from '@/components/dashboard/WorkRow';
 import LeadForm from '@/components/leads/LeadForm';
+
+const DAY = 24 * 60 * 60 * 1000;
 
 export default function Leads() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [sortOrder, setSortOrder] = useState('desc');
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ['leads', sortOrder],
@@ -40,104 +49,155 @@ export default function Leads() {
     );
   });
 
-  return (
-    <div className="bg-background text-foreground">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground tracking-tight">Leads</h1>
-              <p className="text-muted-foreground mt-1">Manage your lead database</p>
-            </div>
-            <Button
-              onClick={() => setShowCreateDialog(true)}
-              className="bg-primary text-primary-foreground hover:opacity-90 h-12 px-6 rounded-xl shadow-lg transition-all"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Add Lead
-            </Button>
-          </div>
+  // Presentational KPI rollups over the full lead book (not the filtered view).
+  const now = Date.now();
+  const newThisWeek = leads.filter(l => l.created_date && now - new Date(l.created_date).getTime() <= 7 * DAY).length;
+  const newThisMonth = leads.filter(l => l.created_date && now - new Date(l.created_date).getTime() <= 30 * DAY).length;
 
-          {/* Search and Sort */}
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                placeholder="Search by name, email, or phone..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-14 bg-secondary border-border rounded-xl text-base focus:bg-card focus:border-ring focus:ring-ring transition-all"
-              />
-            </div>
-            <Button
-              onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-              variant="outline"
-              className="h-14 px-4 border-border rounded-xl"
-            >
-              <ArrowUpDown className="w-5 h-5 mr-2" />
-              {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
-            </Button>
-          </div>
-        </div>
+  // Chronological sparkline of lead-count buckets for the hero tile.
+  const spark = useMemo(() => {
+    const asc = leads
+      .filter(l => l.created_date)
+      .slice()
+      .sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+    if (asc.length < 2) return [];
+    const n = Math.min(8, asc.length);
+    const size = Math.ceil(asc.length / n);
+    const out = [];
+    for (let i = 0; i < asc.length; i += size) {
+      out.push(asc.slice(i, i + size).length);
+    }
+    return out;
+  }, [leads]);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
+    );
+  }
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          </div>
-        ) : filteredLeads.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-secondary flex items-center justify-center mb-6">
-              <Users className="w-10 h-10 text-muted-foreground" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              {searchQuery ? 'No leads found' : 'No leads yet'}
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              {searchQuery
-                ? 'Try adjusting your search query'
-                : 'Get started by adding your first lead'}
-            </p>
-            {!searchQuery && (
+  return (
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <PageHeader
+          eyebrow="Pipeline"
+          title="Leads"
+          subtitle="Manage your lead database."
+          actions={
+            <>
               <Button
-                onClick={() => setShowCreateDialog(true)}
-                className="bg-primary text-primary-foreground hover:opacity-90"
+                variant="outline"
+                onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+                className="h-9"
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <ArrowUpDown className="mr-2 h-4 w-4" />
+                {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
+              </Button>
+              <Button variant="accent" onClick={() => setShowCreateDialog(true)} className="h-9">
+                <Plus className="mr-2 h-4 w-4" />
                 Add Lead
               </Button>
-            )}
-          </motion.div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <AnimatePresence>
-              {filteredLeads.map((lead, index) => (
-                <LeadCard key={lead.id} lead={lead} index={index} />
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+            </>
+          }
+        />
 
-        {/* Results count */}
-        {!isLoading && filteredLeads.length > 0 && (
-          <p className="text-center text-sm text-muted-foreground mt-8">
-            Showing {filteredLeads.length} of {leads.length} leads
-          </p>
-        )}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiTile
+            label="Total Leads"
+            value={leads.length}
+            hero
+            foot="In your database"
+            spark={spark}
+          />
+          <KpiTile
+            label="New This Week"
+            value={newThisWeek}
+            foot="Added in the last 7 days"
+          />
+          <KpiTile
+            label="New This Month"
+            value={newThisMonth}
+            foot="Added in the last 30 days"
+          />
+        </div>
+
+        <ModuleCard
+          title="Lead Directory"
+          subtitle={`${filteredLeads.length} ${filteredLeads.length === 1 ? 'lead' : 'leads'}${searchQuery ? ` · filtered from ${leads.length}` : ''}`}
+          icon={Users}
+          action={
+            <div className="relative w-52">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search name, email, phone…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 border-border bg-card pl-9"
+              />
+            </div>
+          }
+          footer={
+            filteredLeads.length > 0 ? (
+              <span className="text-muted-foreground">
+                Showing {filteredLeads.length} of {leads.length} leads
+              </span>
+            ) : undefined
+          }
+        >
+          {filteredLeads.length === 0 ? (
+            <div className="px-4 py-14 text-center">
+              <Users className="mx-auto mb-3 h-10 w-10 text-muted-foreground/60" />
+              <h3 className="text-sm font-semibold text-foreground">
+                {searchQuery ? 'No leads found' : 'No leads yet'}
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {searchQuery ? 'Try adjusting your search query.' : 'Get started by adding your first lead.'}
+              </p>
+              {!searchQuery && (
+                <Button className="mt-4" onClick={() => setShowCreateDialog(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Lead
+                </Button>
+              )}
+            </div>
+          ) : (
+            filteredLeads.map((lead) => {
+              const initials = `${lead.first_name?.[0] || ''}${lead.last_name?.[0] || ''}`.toUpperCase();
+              const fullName = `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unnamed Lead';
+              const location = [lead.city, lead.state].filter(Boolean).join(', ');
+              const isNew = lead.created_date && now - new Date(lead.created_date).getTime() <= 7 * DAY;
+              const meta = [
+                lead.email,
+                lead.phone,
+                location,
+                lead.created_date && format(new Date(lead.created_date), 'MMM d, yyyy'),
+              ].filter(Boolean).join('  ·  ');
+              return (
+                <WorkRow
+                  key={lead.id}
+                  lead={
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-blue/10 text-[12px] font-bold text-brand-blue">
+                      {initials}
+                    </span>
+                  }
+                  primary={fullName}
+                  meta={meta}
+                  trailing={isNew ? <StatusPill tone="info" dot>New</StatusPill> : null}
+                  onClick={() => navigate(createPageUrl('LeadDetail') + `?id=${lead.id}`)}
+                />
+              );
+            })
+          )}
+        </ModuleCard>
       </div>
 
       {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-foreground">New Lead</DialogTitle>
+            <DialogTitle className="font-display text-xl font-extrabold">New Lead</DialogTitle>
           </DialogHeader>
           <LeadForm
             onSubmit={(data) => createMutation.mutate(data)}

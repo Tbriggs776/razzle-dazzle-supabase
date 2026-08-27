@@ -3,10 +3,12 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Search, Send, MessageSquare, Loader2, Phone, RefreshCw, Calendar, DollarSign, ClipboardCheck, ExternalLink, ArrowLeft, Info, X } from 'lucide-react';
+import { Search, Send, MessageSquare, Loader2, Phone, RefreshCw, Calendar, DollarSign, ClipboardCheck, ExternalLink, ArrowLeft, Info, X, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import PageHeader from '@/components/common/PageHeader';
+import StatusPill from '@/components/common/StatusPill';
+import CommsRow from '@/components/dashboard/CommsRow';
 
 function normalizePhone(phone) {
   if (!phone) return '';
@@ -230,24 +232,22 @@ export default function CommunicationHub() {
 
   const RelatedRecordsPanel = () => (
     <div className="space-y-3">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Related Records</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Related Records</p>
 
       {relatedData?.appointments?.length > 0 ? relatedData.appointments.slice(0, 3).map(apt => {
         const dc = relatedData.teamMembers?.find(tm => tm.id === apt.assigned_dc);
+        const aptTone = apt.status === 'Sold' ? 'good'
+          : (apt.status === 'Scheduled' || apt.status === 'Rescheduled') ? 'info'
+          : apt.status === 'Cancelled' ? 'crit' : 'neutral';
         return (
-          <a key={apt.id} href={`/AppointmentDetail?id=${apt.id}`} className="block p-3 rounded-lg border border-border hover:border-primary/40 hover:bg-primary/5 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <Calendar className="w-3.5 h-3.5 text-primary" />
+          <a key={apt.id} href={`/AppointmentDetail?id=${apt.id}`} className="block rounded-lg border border-border p-3 transition-colors hover:border-primary/40 hover:bg-muted/50">
+            <div className="mb-2 flex items-center gap-2">
+              <Calendar className="h-3.5 w-3.5 text-info" />
               <span className="text-xs font-semibold text-foreground">Appointment</span>
-              <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
+              <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground" />
             </div>
-            <div className="space-y-1">
-              <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0',
-                apt.status === 'Sold' ? 'border-emerald-200 text-emerald-700 bg-emerald-50 dark:border-emerald-500/25 dark:text-emerald-300 dark:bg-emerald-500/15' :
-                apt.status === 'Scheduled' || apt.status === 'Rescheduled' ? 'border-blue-200 text-blue-700 bg-blue-50 dark:border-blue-500/25 dark:text-blue-300 dark:bg-blue-500/15' :
-                apt.status === 'Cancelled' ? 'border-red-200 text-red-700 bg-red-50 dark:border-red-500/25 dark:text-red-300 dark:bg-red-500/15' :
-                'border-border text-muted-foreground'
-              )}>{apt.status}</Badge>
+            <div className="space-y-1.5">
+              <StatusPill tone={aptTone}>{apt.status}</StatusPill>
               {apt.appointment_date && (
                 <p className="text-xs text-muted-foreground">{new Date(apt.appointment_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
               )}
@@ -257,49 +257,49 @@ export default function CommunicationHub() {
           </a>
         );
       }) : (
-        <div className="p-3 rounded-lg border border-dashed border-border text-center">
-          <Calendar className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+        <div className="rounded-lg border border-dashed border-border p-3 text-center">
+          <Calendar className="mx-auto mb-1 h-4 w-4 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">No appointments</p>
         </div>
       )}
 
       {relatedData?.sales?.length > 0 ? relatedData.sales.slice(0, 2).map(sale => (
-        <a key={sale.id} href={`/SaleDetail?id=${sale.id}`} className="block p-3 rounded-lg border border-border hover:border-emerald-300 dark:hover:border-emerald-500/40 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-3.5 h-3.5 text-emerald-500" />
+        <a key={sale.id} href={`/SaleDetail?id=${sale.id}`} className="block rounded-lg border border-border p-3 transition-colors hover:border-good/40 hover:bg-good/5">
+          <div className="mb-2 flex items-center gap-2">
+            <DollarSign className="h-3.5 w-3.5 text-good" />
             <span className="text-xs font-semibold text-foreground">Sale</span>
-            <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
+            <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            {sale.sale_amount && <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">${sale.sale_amount.toLocaleString()}</p>}
+            {sale.sale_amount && <p className="text-sm font-bold text-good">${sale.sale_amount.toLocaleString()}</p>}
             {sale.sale_date && <p className="text-xs text-muted-foreground">{new Date(sale.sale_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>}
             {sale.deposit_amount && <p className="text-xs text-muted-foreground">Deposit: ${sale.deposit_amount.toLocaleString()}</p>}
             {sale.deposit_payment_method && <p className="text-xs text-muted-foreground">{sale.deposit_payment_method}</p>}
           </div>
         </a>
       )) : (
-        <div className="p-3 rounded-lg border border-dashed border-border text-center">
-          <DollarSign className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+        <div className="rounded-lg border border-dashed border-border p-3 text-center">
+          <DollarSign className="mx-auto mb-1 h-4 w-4 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">No sales</p>
         </div>
       )}
 
       {relatedData?.projects?.length > 0 ? relatedData.projects.slice(0, 2).map(proj => (
-        <a key={proj.id} href={`/ProjectDetail?id=${proj.id}`} className="block p-3 rounded-lg border border-border hover:border-purple-300 dark:hover:border-purple-500/40 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <ClipboardCheck className="w-3.5 h-3.5 text-purple-500" />
+        <a key={proj.id} href={`/ProjectDetail?id=${proj.id}`} className="block rounded-lg border border-border p-3 transition-colors hover:border-primary/40 hover:bg-muted/50">
+          <div className="mb-2 flex items-center gap-2">
+            <ClipboardCheck className="h-3.5 w-3.5 text-info" />
             <span className="text-xs font-semibold text-foreground">Project</span>
-            <ExternalLink className="w-3 h-3 text-muted-foreground ml-auto" />
+            <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-purple-200 text-purple-700 bg-purple-50 dark:border-purple-500/25 dark:text-purple-300 dark:bg-purple-500/15">{proj.status}</Badge>
+            <StatusPill tone="neutral">{proj.status}</StatusPill>
             {proj.installation_date && <p className="text-xs text-muted-foreground">Install: {new Date(proj.installation_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>}
             {proj.scheduled_start_date && <p className="text-xs text-muted-foreground">Start: {new Date(proj.scheduled_start_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>}
           </div>
         </a>
       )) : (
-        <div className="p-3 rounded-lg border border-dashed border-border text-center">
-          <ClipboardCheck className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
+        <div className="rounded-lg border border-dashed border-border p-3 text-center">
+          <ClipboardCheck className="mx-auto mb-1 h-4 w-4 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">No projects</p>
         </div>
       )}
@@ -307,51 +307,54 @@ export default function CommunicationHub() {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Header */}
-      <div className="bg-card border-b border-border px-4 py-3 flex-shrink-0">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <MessageSquare className="w-5 h-5 text-primary flex-shrink-0" />
-            <h1 className="text-lg font-bold text-foreground truncate">Communication Hub</h1>
-            {unreadCount > 0 && (
-              <Badge className="bg-destructive text-destructive-foreground flex-shrink-0 text-xs">{unreadCount}</Badge>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['communications'] })}
-            className="flex-shrink-0"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </Button>
-        </div>
+    <div className="flex h-screen flex-col overflow-hidden bg-background">
+      <div className="mx-auto flex h-full w-full max-w-7xl flex-col overflow-hidden px-4 pt-4 sm:px-6 lg:px-8">
+        <PageHeader
+          eyebrow="Communications"
+          title="Communication Hub"
+          subtitle="Two-way SMS and email with customers and your team."
+          actions={
+            <>
+              {unreadCount > 0 && (
+                <StatusPill tone="info" dot>{unreadCount} inbound</StatusPill>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['communications'] })}
+                aria-label="Refresh conversations"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </>
+          }
+        />
 
-        {/* Filters row */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+        {/* Filters */}
+        <div className="flex flex-shrink-0 items-center gap-1.5 overflow-x-auto py-3 scrollbar-hide">
           <button
             onClick={() => setHideAutomated(v => !v)}
             className={cn(
-              'text-xs px-2 py-1 rounded-lg border font-medium transition-colors whitespace-nowrap flex-shrink-0',
+              'flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors',
               hideAutomated
-                ? 'bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-500/15 dark:border-amber-500/30 dark:text-amber-300'
-                : 'bg-card border-border text-muted-foreground'
+                ? 'border-warn/30 bg-warn/15 text-warn'
+                : 'border-border bg-card text-muted-foreground hover:border-primary/40'
             )}
           >
-            {hideAutomated ? '🚫 Auto' : '👁 Auto'}
+            {hideAutomated ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            {hideAutomated ? 'Hiding automated' : 'Showing automated'}
           </button>
 
-          <div className="flex items-center gap-0.5 border border-border rounded-lg p-0.5 bg-card flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
             {[['all', 'All'], ['external', 'Customers'], ['internal', 'Team']].map(([val, label]) => (
               <button
                 key={val}
                 onClick={() => setInternalFilter(val)}
                 className={cn(
-                  'text-xs px-2 py-1 rounded font-medium transition-colors whitespace-nowrap',
+                  'whitespace-nowrap rounded px-2.5 py-1 text-xs font-medium transition-colors',
                   internalFilter === val
-                    ? val === 'internal' ? 'bg-violet-600 text-white' : 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-secondary'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted'
                 )}
               >
                 {label}
@@ -359,256 +362,251 @@ export default function CommunicationHub() {
             ))}
           </div>
 
-          <div className="flex items-center gap-0.5 border border-border rounded-lg p-0.5 bg-card flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
             {['all', 'SMS', 'Email'].map(t => (
               <button
                 key={t}
                 onClick={() => setTypeFilter(t)}
                 className={cn(
-                  'text-xs px-2 py-1 rounded font-medium transition-colors',
-                  typeFilter === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-secondary'
+                  'whitespace-nowrap rounded px-2.5 py-1 text-xs font-medium transition-colors',
+                  typeFilter === t
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted'
                 )}
               >
-                {t}
+                {t === 'all' ? 'All' : t}
               </button>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Body */}
-      <div className="flex flex-1 overflow-hidden">
+        {/* Body */}
+        <div className="flex min-h-0 flex-1 overflow-hidden rounded-xl border border-border bg-card">
 
-        {/* Conversation List — always visible on desktop, hidden on mobile when thread is open */}
-        <div className={cn(
-          "flex flex-col bg-card border-r border-border",
-          "w-full md:w-80 md:flex-shrink-0",
-          showMobileThread ? "hidden md:flex" : "flex"
-        )}>
-          <div className="p-3 border-b border-border flex-shrink-0">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search conversations..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 text-sm"
-              />
+          {/* Conversation List — always visible on desktop, hidden on mobile when thread is open */}
+          <div className={cn(
+            "flex flex-col bg-card",
+            "w-full border-r border-border md:w-80 md:flex-shrink-0",
+            showMobileThread ? "hidden md:flex" : "flex"
+          )}>
+            <div className="flex-shrink-0 border-b border-border p-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search conversations..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="h-9 pl-9 text-sm"
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-5 h-5 animate-spin text-primary" />
-              </div>
-            ) : sortedFilteredConversations.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground text-sm">No conversations yet</div>
-            ) : (
-              sortedFilteredConversations.map(conv => {
-                const lastMsg = conv.messages[conv.messages.length - 1];
-                const isSelected = (selectedKey || sortedFilteredConversations[0]?.key) === conv.key;
-                return (
-                  <div key={conv.key} className="relative group">
-                    <button
-                      onClick={() => handleSelectConversation(conv)}
-                      className={cn(
-                        "w-full text-left px-4 py-3 border-b border-border hover:bg-secondary transition-colors",
-                        isSelected && "bg-primary/10 border-l-2 border-l-primary",
-                        isUnread(conv) && !isSelected && "bg-blue-50 dark:bg-blue-500/10"
-                      )}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={cn("text-sm truncate", isUnread(conv) ? "font-bold text-foreground" : "font-semibold text-foreground")}>
-                              {conv.contact_name}
-                            </span>
-                            {conv.is_internal && (
-                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300 font-semibold flex-shrink-0">TEAM</span>
-                            )}
-                            {isUnread(conv) && (
-                              <span className="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0" />
-                            )}
-                          </div>
-                          <p className={cn("text-xs mt-1 truncate", isUnread(conv) ? "text-foreground font-medium" : "text-muted-foreground")}>
-                            {lastMsg?.direction === 'inbound' ? '← ' : '→ '}
-                            {lastMsg?.body?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}
-                          </p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                          <span className={cn('text-xs px-1.5 py-0.5 rounded font-medium', lastMsg?.type === 'SMS' ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300' : 'bg-purple-50 text-purple-600 dark:bg-purple-500/15 dark:text-purple-300')}>
-                            {lastMsg?.type}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {lastMsg?.created_date && format(new Date(lastMsg.created_date), 'MMM d')}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">{conv.messages.length} msg{conv.messages.length !== 1 ? 's' : ''}</span>
-                        </div>
+            <div className="flex-1 overflow-y-auto">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                </div>
+              ) : sortedFilteredConversations.length === 0 ? (
+                <div className="py-12 text-center text-sm text-muted-foreground">No conversations yet</div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {sortedFilteredConversations.map((conv, idx) => {
+                    const lastMsg = conv.messages[conv.messages.length - 1];
+                    const isSelected = (selectedKey || sortedFilteredConversations[0]?.key) === conv.key;
+                    const unread = isUnread(conv);
+                    const preview = (lastMsg?.body?.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || '').slice(0, 60);
+                    const dateStr = lastMsg?.created_date ? format(new Date(lastMsg.created_date), 'MMM d') : '';
+                    return (
+                      <div key={conv.key} className="group relative">
+                        <button
+                          onClick={() => handleSelectConversation(conv)}
+                          className={cn(
+                            "block w-full border-l-2 border-transparent text-left transition-colors hover:bg-muted/50",
+                            isSelected && "border-l-primary bg-primary/10",
+                            unread && !isSelected && "bg-info/10"
+                          )}
+                        >
+                          <CommsRow
+                            who={conv.contact_name}
+                            channel={lastMsg?.type === 'SMS' ? 'sms' : 'email'}
+                            text={`${lastMsg?.direction === 'inbound' ? '← ' : '→ '}${preview}`}
+                            when={dateStr ? `${dateStr} · ${conv.messages.length}` : `${conv.messages.length} msg`}
+                            inbound={unread}
+                            index={idx}
+                          />
+                        </button>
+                        {conv.is_internal && (
+                          <StatusPill
+                            tone="info"
+                            className="pointer-events-none absolute bottom-2 right-3 !px-1.5 !text-[9px]"
+                          >
+                            Team
+                          </StatusPill>
+                        )}
+                        {currentUser?.role === 'admin' && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteThread(conv); }}
+                            disabled={deletingKey === conv.key}
+                            className="absolute right-2 top-2 rounded p-1 text-xs leading-none text-crit opacity-0 transition-opacity hover:bg-crit/15 group-hover:opacity-100"
+                            title="Delete thread"
+                          >
+                            {deletingKey === conv.key ? '…' : '🗑'}
+                          </button>
+                        )}
                       </div>
-                    </button>
-                    {currentUser?.role === 'admin' && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteThread(conv); }}
-                        disabled={deletingKey === conv.key}
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive/10 hover:bg-destructive/20 text-destructive rounded p-1 text-xs leading-none"
-                        title="Delete thread"
-                      >
-                        {deletingKey === conv.key ? '…' : '🗑'}
-                      </button>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Thread View — full-screen on mobile when active */}
-        <div className={cn(
-          "flex-1 flex flex-col min-w-0 overflow-hidden",
-          !showMobileThread && "hidden md:flex"
-        )}>
-          {selectedConversation ? (
-            <>
-              {/* Thread Header */}
-              <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 flex-shrink-0">
-                {/* Back button — mobile only */}
-                <button
-                  className="md:hidden flex-shrink-0 p-1 rounded-lg hover:bg-secondary"
-                  onClick={() => setShowMobileThread(false)}
-                >
-                  <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-                </button>
-
-                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary font-bold text-sm">
-                    {selectedConversation.contact_name?.charAt(0)?.toUpperCase() || '?'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-foreground truncate">{selectedConversation.contact_name}</p>
-                    {selectedConversation.is_internal && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300 font-semibold flex-shrink-0">TEAM</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-                    {selectedConversation.contact_phone && (
-                      <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{selectedConversation.contact_phone}</span>
-                    )}
-                    {selectedConversation.lead_id && (
-                      <a href={`/LeadDetail?id=${selectedConversation.lead_id}`} className="text-primary hover:underline">Lead →</a>
-                    )}
-                    {selectedConversation.customer_id && (
-                      <a href={`/CustomerDetail?id=${selectedConversation.customer_id}`} className="text-primary hover:underline">Customer →</a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Info button — mobile only, shows related records panel */}
-                <button
-                  className="md:hidden flex-shrink-0 p-2 rounded-lg hover:bg-secondary"
-                  onClick={() => setShowRelatedPanel(v => !v)}
-                >
-                  <Info className="w-5 h-5 text-muted-foreground" />
-                </button>
-              </div>
-
-              {/* Mobile Related Records overlay */}
-              {showRelatedPanel && (
-                <div className="md:hidden absolute inset-0 z-50 bg-card overflow-y-auto p-4" style={{top: 0}}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-semibold text-foreground">Related Records</h2>
-                    <button onClick={() => setShowRelatedPanel(false)} className="p-1 rounded-lg hover:bg-secondary">
-                      <X className="w-5 h-5 text-muted-foreground" />
-                    </button>
-                  </div>
-                  <RelatedRecordsPanel />
+                    );
+                  })}
                 </div>
               )}
+            </div>
+          </div>
 
-              <div className="flex flex-1 overflow-hidden">
-                {/* Messages */}
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                    {threadMessages.map(msg => (
-                      <div key={msg.id} className={cn('flex', msg.direction === 'outbound' ? 'justify-end' : 'justify-start')}>
-                        <div className={cn(
-                          'max-w-[80%] md:max-w-sm rounded-2xl px-4 py-2.5 space-y-1',
-                          msg.direction === 'outbound'
-                            ? 'bg-primary text-primary-foreground rounded-br-sm'
-                            : 'bg-card border border-border text-foreground rounded-bl-sm'
-                        )}>
-                          {msg.body && msg.body.trim().startsWith('<') ? (
-                            <div className="text-sm leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: msg.body }} />
-                          ) : (
-                            <p className="text-sm leading-relaxed">{msg.body}</p>
-                          )}
-                          <div className={cn('flex items-center justify-between gap-4 text-[10px]', msg.direction === 'outbound' ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
-                            <span>
-                              {msg.created_date && format(
-                                new Date(msg.created_date),
-                                'MMM d, h:mm a'
-                              )}
-                            </span>
-                            <div className="flex items-center gap-1">
-                              {msg.sent_by && <span>{msg.sent_by}</span>}
-                              <span className={cn('px-1.5 py-0.5 rounded', msg.direction === 'outbound' ? 'bg-primary-foreground/20' : 'bg-secondary text-muted-foreground')}>{msg.type}</span>
-                              {msg.status && (
-                                <span className={cn('px-1.5 py-0.5 rounded', msg.direction === 'outbound' ? 'bg-primary-foreground/20' : 'bg-secondary text-muted-foreground')}>{msg.status}</span>
-                              )}
+          {/* Thread View — full-screen on mobile when active */}
+          <div className={cn(
+            "relative flex min-w-0 flex-1 flex-col overflow-hidden",
+            !showMobileThread && "hidden md:flex"
+          )}>
+            {selectedConversation ? (
+              <>
+                {/* Thread Header */}
+                <div className="flex flex-shrink-0 items-center gap-3 border-b border-border bg-card px-4 py-3">
+                  {/* Back button — mobile only */}
+                  <button
+                    className="flex-shrink-0 rounded-lg p-1 hover:bg-muted md:hidden"
+                    onClick={() => setShowMobileThread(false)}
+                  >
+                    <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+                  </button>
+
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <span className="text-sm font-bold text-primary">
+                      {selectedConversation.contact_name?.charAt(0)?.toUpperCase() || '?'}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate font-semibold text-foreground">{selectedConversation.contact_name}</p>
+                      {selectedConversation.is_internal && (
+                        <StatusPill tone="info">Team</StatusPill>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      {selectedConversation.contact_phone && (
+                        <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{selectedConversation.contact_phone}</span>
+                      )}
+                      {selectedConversation.lead_id && (
+                        <a href={`/LeadDetail?id=${selectedConversation.lead_id}`} className="text-primary hover:underline">Lead →</a>
+                      )}
+                      {selectedConversation.customer_id && (
+                        <a href={`/CustomerDetail?id=${selectedConversation.customer_id}`} className="text-primary hover:underline">Customer →</a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Info button — mobile only, shows related records panel */}
+                  <button
+                    className="flex-shrink-0 rounded-lg p-2 hover:bg-muted md:hidden"
+                    onClick={() => setShowRelatedPanel(v => !v)}
+                  >
+                    <Info className="h-5 w-5 text-muted-foreground" />
+                  </button>
+                </div>
+
+                {/* Mobile Related Records overlay */}
+                {showRelatedPanel && (
+                  <div className="absolute inset-0 z-50 overflow-y-auto bg-card p-4 md:hidden">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h2 className="font-display font-semibold text-foreground">Related Records</h2>
+                      <button onClick={() => setShowRelatedPanel(false)} className="rounded-lg p-1 hover:bg-muted">
+                        <X className="h-5 w-5 text-muted-foreground" />
+                      </button>
+                    </div>
+                    <RelatedRecordsPanel />
+                  </div>
+                )}
+
+                <div className="flex flex-1 overflow-hidden">
+                  {/* Messages */}
+                  <div className="flex flex-1 flex-col overflow-hidden">
+                    <div className="flex-1 space-y-3 overflow-y-auto p-4">
+                      {threadMessages.map(msg => (
+                        <div key={msg.id} className={cn('flex', msg.direction === 'outbound' ? 'justify-end' : 'justify-start')}>
+                          <div className={cn(
+                            'max-w-[80%] space-y-1 rounded-2xl px-4 py-2.5 md:max-w-sm',
+                            msg.direction === 'outbound'
+                              ? 'rounded-br-sm bg-primary text-primary-foreground'
+                              : 'rounded-bl-sm border border-border bg-card text-foreground'
+                          )}>
+                            {msg.body && msg.body.trim().startsWith('<') ? (
+                              <div className="prose prose-sm max-w-none text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: msg.body }} />
+                            ) : (
+                              <p className="text-sm leading-relaxed">{msg.body}</p>
+                            )}
+                            <div className={cn('flex items-center justify-between gap-4 text-[10px]', msg.direction === 'outbound' ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
+                              <span>
+                                {msg.created_date && format(
+                                  new Date(msg.created_date),
+                                  'MMM d, h:mm a'
+                                )}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                {msg.sent_by && <span>{msg.sent_by}</span>}
+                                <span className={cn('rounded px-1.5 py-0.5', msg.direction === 'outbound' ? 'bg-primary-foreground/20' : 'bg-muted text-muted-foreground')}>{msg.type}</span>
+                                {msg.status && (
+                                  <span className={cn('rounded px-1.5 py-0.5', msg.direction === 'outbound' ? 'bg-primary-foreground/20' : 'bg-muted text-muted-foreground')}>{msg.status}</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
+                      ))}
+                      <div ref={bottomRef} />
+                    </div>
+
+                    {/* Reply Box */}
+                    {selectedConversation.contact_phone && (
+                      <div className="flex-shrink-0 border-t border-border bg-card p-3">
+                        <div className="flex items-end gap-2">
+                          <textarea
+                            value={replyText}
+                            onChange={e => setReplyText(e.target.value)}
+                            placeholder="Type a reply SMS..."
+                            rows={2}
+                            className="flex-1 resize-none rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-ring"
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSend();
+                              }
+                            }}
+                          />
+                          <Button
+                            onClick={handleSend}
+                            disabled={sending || !replyText.trim()}
+                            className="h-11 flex-shrink-0 px-4"
+                          >
+                            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                        <p className="mt-1.5 hidden text-xs text-muted-foreground md:block">Press Enter to send · Shift+Enter for new line</p>
                       </div>
-                    ))}
-                    <div ref={bottomRef} />
+                    )}
                   </div>
 
-                  {/* Reply Box */}
-                  {selectedConversation.contact_phone && (
-                    <div className="bg-card border-t border-border p-3 flex-shrink-0">
-                      <div className="flex items-end gap-2">
-                        <textarea
-                          value={replyText}
-                          onChange={e => setReplyText(e.target.value)}
-                          placeholder="Type a reply SMS..."
-                          rows={2}
-                          className="flex-1 border border-border bg-background text-foreground rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              handleSend();
-                            }
-                          }}
-                        />
-                        <Button
-                          onClick={handleSend}
-                          disabled={sending || !replyText.trim()}
-                          className="bg-primary text-primary-foreground hover:opacity-90 h-11 px-4 flex-shrink-0"
-                        >
-                          {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                        </Button>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1.5 hidden md:block">Press Enter to send · Shift+Enter for new line</p>
-                    </div>
-                  )}
+                  {/* Right Panel — desktop only */}
+                  <div className="hidden w-72 flex-shrink-0 overflow-y-auto border-l border-border bg-card p-4 md:block">
+                    <RelatedRecordsPanel />
+                  </div>
                 </div>
-
-                {/* Right Panel — desktop only */}
-                <div className="hidden md:block w-72 flex-shrink-0 bg-card border-l border-border overflow-y-auto p-4">
-                  <RelatedRecordsPanel />
+              </>
+            ) : (
+              <div className="flex flex-1 items-center justify-center text-muted-foreground">
+                <div className="text-center">
+                  <MessageSquare className="mx-auto mb-3 h-12 w-12 opacity-30" />
+                  <p>Select a conversation to view messages</p>
                 </div>
               </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>Select a conversation to view messages</p>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
