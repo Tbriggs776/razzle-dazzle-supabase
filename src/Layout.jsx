@@ -481,7 +481,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <RecordingContext.Provider value={recordingContextValue}>
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -493,19 +493,19 @@ export default function Layout({ children, currentPageName }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 bottom-0 w-64 bg-white border-r border-slate-200 z-50 transition-transform duration-300 lg:translate-x-0",
+          "fixed top-0 left-0 bottom-0 w-64 bg-sidebar border-r border-sidebar-border z-50 transition-transform duration-300 lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="h-16 flex items-center justify-between px-6 border-b border-slate-200">
-            <BrandLogo imgClassName="h-8" />
+          <div className="h-16 flex items-center justify-between px-6 border-b border-sidebar-border">
+            <BrandLogo imgClassName="h-8" onDark />
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="lg:hidden p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
             >
-              <X className="w-5 h-5 text-slate-600" />
+              <X className="w-5 h-5 text-sidebar-foreground" />
             </button>
           </div>
 
@@ -525,8 +525,8 @@ export default function Layout({ children, currentPageName }) {
                       className={cn(
                         "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                         active
-                          ? "bg-primary/10 text-primary shadow-sm"
-                          : "text-slate-600 hover:bg-slate-50"
+                          ? "bg-sidebar-accent text-sidebar-primary font-semibold"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                       )}
                     >
                       <Icon className="w-5 h-5" />
@@ -549,8 +549,8 @@ export default function Layout({ children, currentPageName }) {
                               className={cn(
                                 "flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm",
                                 subActive
-                                  ? "bg-primary/10 text-primary"
-                                  : "text-slate-600 hover:bg-slate-50"
+                                  ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                               )}
                             >
                               {subItem.name}
@@ -569,16 +569,16 @@ export default function Layout({ children, currentPageName }) {
                   to={createPageUrl(item.href)}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                    "relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                     active
-                      ? "bg-primary/10 text-primary shadow-sm"
-                      : "text-slate-600 hover:bg-slate-50"
+                      ? "bg-sidebar-accent text-sidebar-primary font-semibold before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r-full before:bg-sidebar-primary"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                   >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium">{item.name}</span>
                   {item.name === 'My Tasks' && pendingTasksCount > 0 && (
-                    <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="ml-auto bg-crit text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                       {pendingTasksCount}
                     </span>
                   )}
@@ -588,28 +588,28 @@ export default function Layout({ children, currentPageName }) {
           </nav>
 
           {/* Footer */}
-          <div className="p-6 border-t border-slate-200 space-y-4">
+          <div className="p-6 border-t border-sidebar-border space-y-4">
             {currentUser ? (
               <>
-                <div className="flex items-center gap-3 px-3 py-2 bg-slate-50 rounded-lg">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-primary" />
+                <div className="flex items-center gap-3 px-3 py-2 bg-sidebar-accent rounded-lg">
+                  <div className="w-8 h-8 rounded-lg bg-sidebar-primary/20 flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-sidebar-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-700 truncate">
+                    <p className="text-sm font-medium text-sidebar-foreground truncate">
                       {currentUser.full_name}
                     </p>
-                    <p className="text-xs text-slate-500 truncate">
+                    <p className="text-xs text-sidebar-foreground/70 truncate">
                       {currentUser.email}
                     </p>
-                    <p className="text-xs text-slate-400 truncate">
+                    <p className="text-xs text-sidebar-foreground/50 truncate">
                       Role: {currentUser.role}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => base44.auth.logout()}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white rounded-lg transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   Logout
@@ -624,7 +624,7 @@ export default function Layout({ children, currentPageName }) {
                 Login
               </button>
             )}
-            <p className="text-xs text-slate-400 text-center">
+            <p className="text-xs text-sidebar-foreground/40 text-center">
               v1.7.7
             </p>
           </div>
@@ -634,15 +634,15 @@ export default function Layout({ children, currentPageName }) {
       {/* Main content */}
       <div className="lg:pl-64 h-screen flex flex-col overflow-hidden">
         {/* Mobile header */}
-        <div className="lg:hidden h-16 bg-white border-b border-slate-200 flex items-center px-6 flex-shrink-0">
+        <div className="lg:hidden h-16 bg-sidebar border-b border-sidebar-border flex items-center px-6 flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
           >
-            <Menu className="w-6 h-6 text-slate-600" />
+            <Menu className="w-6 h-6 text-sidebar-foreground" />
           </button>
           <div className="ml-4">
-            <BrandLogo imgClassName="h-7 sm:h-8" />
+            <BrandLogo imgClassName="h-7 sm:h-8" onDark />
           </div>
         </div>
 

@@ -7,12 +7,15 @@ import logoUrl from '@/assets/floordaddy-logo.webp';
 // "FLOOR" is brand navy, so on a dark surface it needs a light backing: dark mode gets a
 // subtle white plate; light mode shows the mark natively on the (white) header. Size via
 // `imgClassName` (height), align/space the plate via `className`.
-export default function BrandLogo({ className, imgClassName = 'h-10', plate = true }) {
+// `onDark`: force the white plate regardless of theme (e.g. the always-navy nav rail).
+export default function BrandLogo({ className, imgClassName = 'h-10', plate = true, onDark = false }) {
   return (
     <span
       className={cn(
         'inline-flex items-center',
-        plate && 'dark:bg-white dark:rounded-lg dark:px-2.5 dark:py-1.5 dark:shadow-sm',
+        plate && (onDark
+          ? 'bg-white rounded-lg px-2.5 py-1.5 shadow-sm'
+          : 'dark:bg-white dark:rounded-lg dark:px-2.5 dark:py-1.5 dark:shadow-sm'),
         className
       )}
     >

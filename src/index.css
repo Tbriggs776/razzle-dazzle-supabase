@@ -5,8 +5,9 @@
 /* ── Floor Daddy identity ──────────────────────────────────────────────────────────────
    Mirrors floordaddy.com: deep navy anchor (#1c244b), hot-pink "razzle dazzle" pop
    (#e40770/#ff1478), gold starburst sparkle (#efba1f), bright-blue support (#0879e8), on
-   white. Type is Poppins (400–900), loaded in index.html. Tokens are HSL triplets consumed
-   by tailwind.config's hsl(var()). Semantic red stays distinct from the pink accent. */
+   white. Type is Archivo (display / tabular numbers) + IBM Plex Sans (UI/body), self-hosted
+   via index.html. Tokens are HSL triplets consumed by tailwind.config's hsl(var()). Semantic
+   status tokens (--good/--warn/--crit/--info) stay distinct from the pink brand accent. */
 @layer base {
   :root {
     --background: 216 33% 99%;
@@ -43,6 +44,13 @@
     --brand-gold-light: 48 89% 67%;
     --brand-blue: 210 88% 47%;
     --brand-sky: 200 96% 63%;
+
+    /* Semantic status tokens — good/warn/crit/info. Deliberately separate from the
+       pink brand accent; drive status pills, KPI deltas, and alert severities. */
+    --good: 152 55% 38%;
+    --warn: 38 92% 45%;
+    --crit: 352 74% 48%;
+    --info: 210 93% 47%;
 
     --sidebar-background: 230 44% 14%;
     --sidebar-foreground: 220 30% 82%;
@@ -87,6 +95,12 @@
     --brand-blue: 210 90% 60%;
     --brand-sky: 200 92% 66%;
 
+    /* Semantic status tokens (dark) — ~higher lightness so soft fills stay legible. */
+    --good: 152 52% 54%;
+    --warn: 40 90% 60%;
+    --crit: 352 84% 68%;
+    --info: 210 90% 66%;
+
     --sidebar-background: 230 40% 9%;
     --sidebar-foreground: 220 26% 80%;
     --sidebar-primary: 335 88% 60%;
@@ -104,7 +118,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

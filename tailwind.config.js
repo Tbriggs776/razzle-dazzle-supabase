@@ -5,7 +5,8 @@ module.exports = {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: ['Poppins', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+  			sans: ['IBM Plex Sans', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+  			display: ['Archivo', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif']
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -52,6 +53,10 @@ module.exports = {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
+  			good: 'hsl(var(--good))',
+  			warn: 'hsl(var(--warn))',
+  			crit: 'hsl(var(--crit))',
+  			info: 'hsl(var(--info))',
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',

@@ -15,6 +15,12 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
+        // Semantic soft fills — status color, kept separate from the pink brand accent.
+        good: "border-transparent bg-good/12 text-good",
+        warn: "border-transparent bg-warn/15 text-warn",
+        crit: "border-transparent bg-crit/12 text-crit",
+        info: "border-transparent bg-info/12 text-info",
+        neutral: "border-transparent bg-muted text-muted-foreground",
       },
     },
     defaultVariants: {
