@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, FileText, DollarSign, Calendar, MapPin, ArrowRight } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { Input } from '@/components/ui/input';
+import { Loader2, Search, FileText } from 'lucide-react';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import PageHeader from '@/components/common/PageHeader';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import WorkRow from '@/components/dashboard/WorkRow';
 
-const STATUS_COLORS = {
-  'Draft':             'bg-secondary text-secondary-foreground border-border',
-  'Sent':              'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  'Accepted':          'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
-  'Rejected':          'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'Converted':         'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25',
-  'Expired':           'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+// Domain quote status → StatusPill tone.
+const STATUS_TONE = {
+  Draft: 'neutral',
+  Sent: 'info',
+  Accepted: 'good',
+  Converted: 'good',
+  Rejected: 'crit',
+  Expired: 'crit',
 };
 
 function formatCurrency(val) {
@@ -25,9 +27,12 @@ function formatCurrency(val) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
 }
 
+const money = (n) => '$' + Math.round(n || 0).toLocaleString();
+
 export default function MyQuotes() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const navigate = useNavigate();
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -86,129 +91,138 @@ export default function MyQuotes() {
     Converted: quotes.filter(q => q.status === 'Converted').length,
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">My Quotes</h1>
-              <p className="text-muted-foreground mt-1">Manage and convert your pending quotes</p>
-            </div>
-          </div>
+  // Presentational KPI rollups over the DC's full book (not the filtered view).
+  const openQuotes = quotes.filter(q => q.status === 'Draft' || q.status === 'Sent');
+  const openPipeline = openQuotes.reduce((sum, q) => sum + (q.quote_amount || 0), 0);
+  const openCount = openQuotes.length;
+  const wonCount = quotes.filter(q => q.status === 'Accepted' || q.status === 'Converted').length;
+  const lostCount = quotes.filter(q => q.status === 'Rejected' || q.status === 'Expired').length;
+  const decidedCount = wonCount + lostCount;
+  const winRate = decidedCount > 0 ? Math.round((wonCount / decidedCount) * 100) : 0;
 
-          <div className="relative mb-5">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder="Search by customer name..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="pl-11 h-11 bg-card border-border"
-            />
-          </div>
+  // Chronological sparkline of quoted value for the hero tile.
+  const spark = useMemo(() => {
+    const asc = quotes
+      .filter(q => q.quote_date)
+      .slice()
+      .sort((a, b) => new Date(a.quote_date) - new Date(b.quote_date));
+    if (asc.length < 2) return [];
+    const n = Math.min(8, asc.length);
+    const size = Math.ceil(asc.length / n);
+    const out = [];
+    for (let i = 0; i < asc.length; i += size) {
+      const chunk = asc.slice(i, i + size);
+      out.push(chunk.reduce((s, x) => s + (x.quote_amount || 0), 0));
+    }
+    return out;
+  }, [quotes]);
 
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {Object.entries(statusCounts).map(([status, count]) => (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={cn(
-                  'px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors whitespace-nowrap',
-                  statusFilter === status
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-card text-muted-foreground border-border hover:border-primary/40'
-                )}
-              >
-                {status === 'all' ? 'All' : status} ({count})
-              </button>
-            ))}
-          </div>
-        </div>
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
+    );
+  }
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-16 bg-card rounded-2xl border border-border">
-            <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground">No quotes found</h3>
-            <p className="text-muted-foreground mt-1">Quotes are created from appointment results</p>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((quote, i) => {
+  return (
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <PageHeader
+          eyebrow="Sales"
+          title="My Quotes"
+          subtitle="Manage and convert your pending quotes."
+        />
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiTile
+            label="Open Pipeline"
+            value={money(openPipeline)}
+            hero
+            foot={`${openCount} open ${openCount === 1 ? 'quote' : 'quotes'} · Draft + Sent`}
+            spark={spark}
+          />
+          <KpiTile
+            label="Open Quotes"
+            value={openCount}
+            foot="Awaiting a decision"
+          />
+          <KpiTile
+            label="Win Rate"
+            value={`${winRate}%`}
+            foot={`${wonCount} won · ${lostCount} lost`}
+          />
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {Object.entries(statusCounts).map(([status, count]) => (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              className={cn(
+                'whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
+                statusFilter === status
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-card text-muted-foreground hover:border-primary/40'
+              )}
+            >
+              {status === 'all' ? 'All' : status} ({count})
+            </button>
+          ))}
+        </div>
+
+        <ModuleCard
+          title="Quotes"
+          subtitle={`${filtered.length} ${filtered.length === 1 ? 'quote' : 'quotes'}${statusFilter !== 'all' ? ` · ${statusFilter}` : ''}`}
+          icon={FileText}
+          action={
+            <div className="relative w-52">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by customer name…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="h-9 border-border bg-card pl-9"
+              />
+            </div>
+          }
+        >
+          {filtered.length === 0 ? (
+            <div className="px-4 py-14 text-center">
+              <FileText className="mx-auto mb-3 h-10 w-10 text-muted-foreground/60" />
+              <h3 className="text-sm font-semibold text-foreground">
+                {search || statusFilter !== 'all' ? 'No matching quotes' : 'No quotes found'}
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {search || statusFilter !== 'all'
+                  ? 'Try adjusting your search or status filter.'
+                  : 'Quotes are created from appointment results.'}
+              </p>
+            </div>
+          ) : (
+            filtered.map((quote) => {
               const lead = getLead(quote.lead);
               const dc = getDC(quote.assigned_dc);
               const leadName = lead ? `${lead.first_name} ${lead.last_name}` : 'Unknown Customer';
-
+              const meta = [
+                quote.quote_date && format(new Date(quote.quote_date), 'MMM d, yyyy'),
+                quote.location_address,
+                dc && `DC ${dc.first_name} ${dc.last_name}`,
+              ].filter(Boolean).join('  ·  ');
               return (
-                <motion.div
+                <WorkRow
                   key={quote.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                >
-                  <Link
-                    to={createPageUrl('QuoteDetail') + `?id=${quote.id}`}
-                    className="block bg-card rounded-xl border border-border hover:shadow-lg hover:border-primary/30 transition-all p-6"
-                  >
-                    <div className="flex items-start justify-between gap-4 mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground">{leadName}</h3>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          <Badge variant="secondary" className={cn('border', STATUS_COLORS[quote.status])}>
-                            {quote.status}
-                          </Badge>
-                          {quote.status !== 'Converted' && (
-                            <Badge variant="secondary" className="border bg-primary/10 text-primary border-primary/20">
-                              Quote
-                            </Badge>
-                          )}
-                          {quote.status === 'Converted' && (
-                            <Badge variant="secondary" className="border bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25">
-                              ✓ Converted to Sale
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-1" />
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <DollarSign className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-semibold">{formatCurrency(quote.quote_amount)}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span>
-                          {quote.quote_date
-                            ? format(new Date(quote.quote_date), 'MMM d, yyyy')
-                            : '—'}
-                        </span>
-                      </div>
-                      {quote.location_address && (
-                        <div className="flex items-center gap-2 text-muted-foreground md:col-span-2">
-                          <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <span className="truncate">{quote.location_address}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {dc && (
-                      <div className="mt-3 text-xs text-muted-foreground">
-                        DC: {dc.first_name} {dc.last_name}
-                      </div>
-                    )}
-                  </Link>
-                </motion.div>
+                  lead={formatCurrency(quote.quote_amount)}
+                  primary={leadName}
+                  meta={meta}
+                  status={quote.status}
+                  tone={STATUS_TONE[quote.status] || 'neutral'}
+                  onClick={() => navigate(createPageUrl('QuoteDetail') + `?id=${quote.id}`)}
+                />
               );
-            })}
-          </div>
-        )}
+            })
+          )}
+        </ModuleCard>
       </div>
     </div>
   );

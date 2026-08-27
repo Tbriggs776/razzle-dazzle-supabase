@@ -4,17 +4,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar as CalendarIcon, CheckCircle2, Circle, Loader2, Clock, Phone, Mail, MessageCircle, Trophy, X, Trash2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { CheckCircle2, Loader2, Phone, Mail, MessageCircle, Trophy, X, Trash2, ArrowUpDown, ListChecks } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ArrowUpDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import PageHeader from '@/components/common/PageHeader';
+import StatusPill from '@/components/common/StatusPill';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import WorkRow from '@/components/dashboard/WorkRow';
 
 export default function MyTasks() {
   const [showCompleted, setShowCompleted] = useState(false);
@@ -52,9 +53,9 @@ export default function MyTasks() {
   // Get all design consultants (for admin view)
   const { data: allDCs = [] } = useQuery({
     queryKey: ['allDesignConsultants'],
-    queryFn: () => base44.entities.TeamMember.filter({ 
+    queryFn: () => base44.entities.TeamMember.filter({
       role: { $in: ['Design Consultant', 'Sales Manager'] },
-      is_active: true 
+      is_active: true
     }),
     enabled: currentUser?.role === 'admin'
   });
@@ -182,7 +183,7 @@ export default function MyTasks() {
       const timestamp = new Date().toISOString();
       const userName = currentUser?.full_name || 'Unknown User';
       const userEmail = currentUser?.email || '';
-      
+
       const newNote = {
         content: notes,
         user_name: userName,
@@ -193,12 +194,12 @@ export default function MyTasks() {
 
       const updatedNotes = [...(appointment.notes || []), newNote];
       const updateData = { notes: updatedNotes };
-      
+
       // Mark as lost if requested
       if (markLost) {
         updateData.status = 'Lost';
       }
-      
+
       await base44.entities.Appointment.update(appointmentId, updateData);
 
       // Mark current task as completed
@@ -206,8 +207,8 @@ export default function MyTasks() {
 
       // Always create new task unless marked as lost
       if (!markLost && dueDate && currentUser?.email) {
-        const teamMembers = await base44.entities.TeamMember.filter({ 
-          email: currentUser.email 
+        const teamMembers = await base44.entities.TeamMember.filter({
+          email: currentUser.email
         });
         if (teamMembers.length) {
           await base44.entities.Task.create({
@@ -245,367 +246,298 @@ export default function MyTasks() {
     return new Date(dueDate) < new Date() && new Date(dueDate).toDateString() !== new Date().toDateString();
   };
 
+  const overdueCount = pendingTasks.filter((t) => isOverdue(t.due_date)).length;
+
   if (isCheckingAuth || userLoading || (tasksLoading && pendingTasks.length === 0)) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-foreground mb-2">Please log in</h2>
+          <h2 className="mb-2 text-xl font-semibold text-foreground">Please log in</h2>
           <p className="text-muted-foreground">You need to be logged in to view your tasks</p>
         </div>
       </div>
     );
   }
 
+  const isAdmin = currentUser?.role === 'admin';
+
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground tracking-tight">My Tasks</h1>
-              <p className="text-muted-foreground mt-1">Follow-up reminders for your appointments</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <PageHeader
+          eyebrow="Tasks"
+          title="My Tasks"
+          subtitle="Follow-up reminders for your appointments."
+          actions={isAdmin ? (
+            <Select value={selectedDC} onValueChange={setSelectedDC}>
+              <SelectTrigger className="h-9 w-56 bg-card">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="my">My Tasks</SelectItem>
+                <SelectItem value="all">All Design Consultants</SelectItem>
+                {allDCs.map((dc) => (
+                  <SelectItem key={dc.id} value={dc.id}>
+                    {dc.first_name} {dc.last_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : undefined}
+        />
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-amber-50 dark:bg-amber-500/10 rounded-xl p-4 border border-amber-100 dark:border-amber-500/20">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
-                  <Circle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-amber-900 dark:text-amber-200">{pendingCount}</p>
-                  <p className="text-sm text-amber-700 dark:text-amber-300">Pending Tasks</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-green-50 dark:bg-green-500/10 rounded-xl p-4 border border-green-100 dark:border-green-500/20">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-200">{completedCount}</p>
-                  <p className="text-sm text-green-700 dark:text-green-300">Completed Tasks</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* DC Task Summary (Admin Only) */}
-          {currentUser?.role === 'admin' && allDCs.length > 0 && (
-            <div className="mt-6">
-              <Label className="text-sm text-foreground mb-3 block">Task Summary by Design Consultant</Label>
-              <div className="overflow-x-auto -mx-4 px-4">
-                <div className="flex gap-3 pb-2 min-w-max">
-                  {allDCs
-                    .map(dc => {
-                      const dcPending = allTasksForSummary.filter(t => t.assigned_to === dc.id).length;
-                      return { dc, dcPending };
-                    })
-                    .sort((a, b) => b.dcPending - a.dcPending)
-                    .map(({ dc, dcPending }) => (
-                      <div
-                        key={dc.id}
-                        onClick={() => setSelectedDC(dc.id)}
-                        className={cn(
-                          "flex-shrink-0 w-44 bg-card rounded-xl border border-border p-4 cursor-pointer transition-all hover:shadow-lg",
-                          selectedDC === dc.id && "border-primary bg-primary/10"
-                        )}
-                      >
-                        <p className="font-semibold text-foreground mb-3 truncate">
-                          {dc.first_name} {dc.last_name}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">Pending</span>
-                          <span className="text-lg font-bold text-amber-600 dark:text-amber-400">{dcPending}</span>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* DC Filter (Admin Only) */}
-          {currentUser?.role === 'admin' && (
-            <div className="mt-6">
-              <Label className="text-sm text-foreground mb-2 block">View Tasks For</Label>
-              <Select value={selectedDC} onValueChange={setSelectedDC}>
-                <SelectTrigger className="w-full md:w-64">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="my">My Tasks</SelectItem>
-                  <SelectItem value="all">All Design Consultants</SelectItem>
-                  {allDCs.map(dc => (
-                    <SelectItem key={dc.id} value={dc.id}>
-                      {dc.first_name} {dc.last_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Filter Tabs and Sort */}
-          <div className="flex gap-2 mt-6 items-center justify-between overflow-x-auto pb-2">
-            <div className="flex gap-2 flex-shrink-0">
-              <Button
-                variant={!showCompleted ? 'default' : 'outline'}
-                onClick={() => setShowCompleted(false)}
-                className={!showCompleted ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
-              >
-                Pending ({pendingCount})
-              </Button>
-              <Button
-                variant={showCompleted ? 'default' : 'outline'}
-                onClick={() => setShowCompleted(true)}
-                className={showCompleted ? 'bg-primary text-primary-foreground hover:opacity-90' : ''}
-              >
-                {completedLoading && showCompleted ? (
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                ) : null}
-                Show Completed {showCompleted && completedCount > 0 ? `(${completedCount})` : ''}
-              </Button>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSortNewest(!sortNewest)}
-              className="flex items-center gap-2"
-            >
-              <ArrowUpDown className="w-4 h-4" />
-              {sortNewest ? 'Newest' : 'Oldest'}
-            </Button>
-          </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiTile
+            label="Open Tasks"
+            value={pendingCount}
+            hero
+            foot="Pending follow-ups"
+          />
+          <KpiTile
+            label="Overdue"
+            value={overdueCount}
+            dir="up"
+            deltaTone="bad"
+            delta={overdueCount > 0 ? 'Past due' : undefined}
+            foot="Pending tasks past their due date"
+          />
+          <KpiTile
+            label="Completed"
+            value={completedCount}
+            foot={showCompleted ? 'Marked done' : 'Toggle "Completed" to load'}
+          />
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {filteredTasks.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20"
-          >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-secondary flex items-center justify-center mb-6">
-              <CheckCircle2 className="w-10 h-10 text-muted-foreground" />
+        {/* DC Task Summary (Admin Only) */}
+        {isAdmin && allDCs.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Task Load by Consultant
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              {showCompleted ? 'No completed tasks' : 'No pending tasks'}
-            </h3>
-            <p className="text-muted-foreground">
-              {showCompleted
-                ? 'Complete some tasks to see them here' 
-                : 'Tasks will appear here when appointments need follow-up'}
-            </p>
-          </motion.div>
-        ) : (
-          <div className="space-y-3">
-            {filteredTasks.map((task, index) => {
-              const appointment = appointments.find(a => a.id === task.appointment);
-              const lead = leads.find(l => l.id === appointment?.customer);
+            <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
+              {allDCs
+                .map((dc) => {
+                  const dcPending = allTasksForSummary.filter((t) => t.assigned_to === dc.id).length;
+                  return { dc, dcPending };
+                })
+                .sort((a, b) => b.dcPending - a.dcPending)
+                .map(({ dc, dcPending }) => (
+                  <div key={dc.id} className="w-44 shrink-0">
+                    <KpiTile
+                      label={`${dc.first_name} ${dc.last_name}`}
+                      value={dcPending}
+                      foot="Pending tasks"
+                      onClick={() => setSelectedDC(dc.id)}
+                      className={cn(selectedDC === dc.id && 'border-brand-pink/50 ring-1 ring-brand-pink/30')}
+                    />
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        <ModuleCard
+          title="Tasks"
+          subtitle={`${filteredTasks.length} ${filteredTasks.length === 1 ? 'task' : 'tasks'} · ${showCompleted ? 'Pending + completed' : 'Pending only'} · ${sortNewest ? 'Newest first' : 'Oldest first'}`}
+          icon={ListChecks}
+          action={
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <div className="flex rounded-lg border border-border bg-card p-0.5">
+                <button
+                  onClick={() => setShowCompleted(false)}
+                  className={cn(
+                    'rounded-md px-3 py-1 text-xs font-semibold transition-colors',
+                    !showCompleted ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  Pending ({pendingCount})
+                </button>
+                <button
+                  onClick={() => setShowCompleted(true)}
+                  className={cn(
+                    'flex items-center gap-1 rounded-md px-3 py-1 text-xs font-semibold transition-colors',
+                    showCompleted ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {completedLoading && showCompleted && <Loader2 className="h-3 w-3 animate-spin" />}
+                  Completed{showCompleted && completedCount > 0 ? ` (${completedCount})` : ''}
+                </button>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSortNewest(!sortNewest)}
+                className="gap-2"
+              >
+                <ArrowUpDown className="h-3.5 w-3.5" />
+                {sortNewest ? 'Newest' : 'Oldest'}
+              </Button>
+            </div>
+          }
+        >
+          {filteredTasks.length === 0 ? (
+            <div className="px-4 py-14 text-center">
+              <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-muted-foreground/60" />
+              <h3 className="text-sm font-semibold text-foreground">
+                {showCompleted ? 'No completed tasks' : 'No pending tasks'}
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {showCompleted
+                  ? 'Complete some tasks to see them here'
+                  : 'Tasks will appear here when appointments need follow-up'}
+              </p>
+            </div>
+          ) : (
+            filteredTasks.map((task) => {
+              const appointment = appointments.find((a) => a.id === task.appointment);
+              const lead = leads.find((l) => l.id === appointment?.customer);
               const leadName = lead ? `${lead.first_name} ${lead.last_name}` : 'Unknown Customer';
               const overdue = task.status === 'pending' && isOverdue(task.due_date);
-              const assignedDC = currentUser?.role === 'admin' && selectedDC === 'all' 
-                ? teamMembers.find(tm => tm.id === task.assigned_to)
+              const assignedDC = isAdmin && selectedDC === 'all'
+                ? teamMembers.find((tm) => tm.id === task.assigned_to)
                 : null;
+              const isCompleted = task.status === 'completed';
+
+              const statusTone = isCompleted ? 'good' : overdue ? 'crit' : 'warn';
+              const statusLabel = isCompleted ? 'Done' : overdue ? 'Overdue' : 'Pending';
+
+              const meta = [
+                task.notes,
+                appointment?.status,
+                appointment?.appointment_date && `Appt ${format(new Date(appointment.appointment_date), 'MMM d')}`,
+                appointment?.not_sold_deal_size > 0 &&
+                  `Deal $${Number(appointment.not_sold_deal_size).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                assignedDC && `${assignedDC.first_name} ${assignedDC.last_name}`,
+              ]
+                .filter(Boolean)
+                .join('  ·  ');
 
               return (
-                <motion.div
-                  key={task.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <div className={cn(
-                    "bg-card rounded-2xl border p-5 transition-all",
-                    task.status === 'completed' && "border-green-200 bg-green-50/50 dark:border-green-500/25 dark:bg-green-500/10",
-                    overdue && "border-red-200 bg-red-50/50 dark:border-red-500/25 dark:bg-red-500/10",
-                    task.status === 'pending' && !overdue && "border-border hover:border-primary/40 hover:shadow-lg"
-                  )}>
-                    <div className="flex items-start gap-4">
-                      {/* Status Icon */}
-                      <div
+                <div key={task.id}>
+                  <WorkRow
+                    lead={
+                      <span className={cn('block', overdue && 'text-crit')}>
+                        {format(new Date(task.due_date), 'MMM d')}
+                      </span>
+                    }
+                    primary={
+                      <Link
+                        to={createPageUrl('AppointmentDetail') + `?id=${task.appointment}`}
                         className={cn(
-                          "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5",
-                          task.status === 'completed'
-                            ? "bg-green-600 text-white"
-                            : "bg-muted"
+                          'transition-colors hover:text-primary',
+                          isCompleted && 'text-muted-foreground line-through'
                         )}
                       >
-                        {task.status === 'completed' && <CheckCircle2 className="w-4 h-4" />}
-                      </div>
+                        {leadName}
+                      </Link>
+                    }
+                    meta={meta}
+                    trailing={<StatusPill tone={statusTone}>{statusLabel}</StatusPill>}
+                  />
 
-                      {/* Delete Button */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 pb-3">
+                    {lead?.phone && (
+                      <a
+                        href={`tel:${lead.phone}`}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-primary"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Phone className="h-3.5 w-3.5" />
+                        {lead.phone}
+                      </a>
+                    )}
+                    {lead?.email && (
+                      <a
+                        href={`mailto:${lead.email}`}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-primary"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        {lead.email}
+                      </a>
+                    )}
+
+                    <div className="ml-auto flex items-center gap-1.5">
+                      <Button
+                        variant={isCompleted ? 'outline' : 'default'}
+                        size="sm"
+                        onClick={() => {
+                          if (isCompleted) {
+                            uncompleteMutation.mutate(task.id);
+                          } else {
+                            setFollowUpDialog({
+                              taskId: task.id,
+                              appointmentId: task.appointment,
+                              leadName,
+                            });
+                          }
+                        }}
+                        className="gap-1"
+                      >
+                        <MessageCircle className="h-3 w-3" />
+                        {isCompleted ? 'Reopen Task' : 'Log Follow-Up'}
+                      </Button>
                       <button
                         onClick={() => {
                           if (confirm('Delete this task?')) {
                             deleteMutation.mutate(task.id);
                           }
                         }}
-                        className="flex-shrink-0 p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                        className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                         title="Delete task"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
+                    </div>
+                  </div>
 
-                      {/* Content */}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <Link
-                              to={createPageUrl('AppointmentDetail') + `?id=${task.appointment}`}
-                              className={cn(
-                                "font-semibold text-lg hover:text-primary transition-colors",
-                                task.status === 'completed' ? "line-through text-muted-foreground" : "text-foreground"
-                              )}
-                            >
-                              {leadName}
-                            </Link>
-                            {assignedDC && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Assigned to: {assignedDC.first_name} {assignedDC.last_name}
-                              </p>
-                            )}
-                            {task.notes && (
-                              <p className={cn(
-                                "text-sm mt-1",
-                                task.status === 'completed' ? "text-muted-foreground" : "text-muted-foreground"
-                              )}>
-                                {task.notes}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Due Date Badge */}
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              'flex items-center gap-1',
-                              overdue && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-                              !overdue && task.status === 'pending' && 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
-                              task.status === 'completed' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
-                            )}
-                          >
-                            <Clock className="w-3 h-3" />
-                            {format(new Date(task.due_date), 'MMM d, yyyy')}
-                            {overdue && ' - Overdue'}
-                          </Badge>
-                        </div>
-
-                        {/* Appointment Status & Contact Info */}
-                        {appointment && (
-                          <div className="space-y-2 mt-3">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge variant="secondary" className="text-xs">
-                                {appointment.status}
-                              </Badge>
-                              {appointment.appointment_date && (
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <CalendarIcon className="w-3 h-3" />
-                                  {format(new Date(appointment.appointment_date), 'MMM d')}
-                                </span>
-                              )}
-                              {appointment.not_sold_deal_size > 0 && (
-                                <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25">
-                                  Deal Size: ${Number(appointment.not_sold_deal_size).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-3 flex-wrap overflow-x-auto">
-                               {lead?.phone && (
-                                 <a 
-                                   href={`tel:${lead.phone}`}
-                                   className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-                                   onClick={(e) => e.stopPropagation()}
-                                 >
-                                   <Phone className="w-3.5 h-3.5" />
-                                   {lead.phone}
-                                 </a>
-                               )}
-                               {lead?.email && (
-                                 <a 
-                                   href={`mailto:${lead.email}`}
-                                   className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-                                   onClick={(e) => e.stopPropagation()}
-                                 >
-                                   <Mail className="w-3.5 h-3.5" />
-                                   {lead.email}
-                                 </a>
-                               )}
-                               <Button
-                                 variant={task.status === 'pending' ? 'default' : 'outline'}
-                                 size="sm"
-                                 onClick={() => {
-                                   if (task.status === 'completed') {
-                                     uncompleteMutation.mutate(task.id);
-                                   } else {
-                                     setFollowUpDialog({ 
-                                       taskId: task.id, 
-                                       appointmentId: task.appointment,
-                                       leadName 
-                                     });
-                                   }
-                                 }}
-                                 className={cn(
-                                   "h-7 text-xs",
-                                   task.status === 'pending' && "bg-primary text-primary-foreground hover:opacity-90"
-                                 )}
-                               >
-                                 <MessageCircle className="w-3 h-3 mr-1" />
-                                 {task.status === 'pending' ? 'Log Follow-Up' : 'Reopen Task'}
-                               </Button>
-                             </div>
-
-                            {/* Notes Section */}
-                            {appointment?.notes && appointment.notes.length > 0 && (
-                             <div className="mt-3 border-t border-border pt-3">
-                               <p className="text-xs font-semibold text-muted-foreground mb-2">Appointment Notes</p>
-                               <div className="max-h-32 overflow-y-auto space-y-2 pr-2 overscroll-contain overflow-x-hidden" style={{ WebkitOverflowScrolling: 'touch' }}>
-                                 {[...appointment.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, idx) => (
-                                   <div key={idx} className="bg-muted rounded-lg p-2.5 border border-border break-words">
-                                      <div className="flex items-start justify-between gap-2 mb-1">
-                                        <p className="text-xs font-semibold text-foreground">{note.user_name}</p>
-                                        {note.context && (
-                                          <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
-                                            {note.context}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      <p className="text-xs text-muted-foreground leading-relaxed">{note.content}</p>
-                                      {note.timestamp && (
-                                        <p className="text-[10px] text-muted-foreground mt-1">
-                                          {format(new Date(note.timestamp), 'MMM d, yyyy h:mm a')}
-                                        </p>
-                                      )}
-                                    </div>
-                                  ))}
+                  {appointment?.notes && appointment.notes.length > 0 && (
+                    <div className="px-4 pb-4">
+                      <div className="rounded-lg border border-border bg-muted/40 p-3">
+                        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Appointment Notes
+                        </p>
+                        <div
+                          className="max-h-32 space-y-2 overflow-y-auto overflow-x-hidden overscroll-contain pr-2"
+                          style={{ WebkitOverflowScrolling: 'touch' }}
+                        >
+                          {[...appointment.notes]
+                            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                            .map((note, idx) => (
+                              <div key={idx} className="break-words rounded-lg border border-border bg-card p-2.5">
+                                <div className="mb-1 flex items-start justify-between gap-2">
+                                  <p className="text-xs font-semibold text-foreground">{note.user_name}</p>
+                                  {note.context && (
+                                    <span className="shrink-0 rounded-full border border-border bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                      {note.context}
+                                    </span>
+                                  )}
                                 </div>
+                                <p className="text-xs leading-relaxed text-muted-foreground">{note.content}</p>
+                                {note.timestamp && (
+                                  <p className="mt-1 text-[10px] text-muted-foreground">
+                                    {format(new Date(note.timestamp), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                )}
                               </div>
-                            )}
-                            </div>
-                            )}
-                            </div>
-                            </div>
-                            </div>
-                </motion.div>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
-            })}
-          </div>
-        )}
+            })
+          )}
+        </ModuleCard>
       </div>
 
       {/* Follow-Up Dialog */}
@@ -613,11 +545,11 @@ export default function MyTasks() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Log Follow-Up</DialogTitle>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="mt-1 text-sm text-muted-foreground">
               {followUpDialog?.leadName}
             </p>
           </DialogHeader>
-          <div className="space-y-4 mt-4">
+          <div className="mt-4 space-y-4">
             <div>
               <Label>Follow-Up Method</Label>
               <Select value={followUpMethod} onValueChange={setFollowUpMethod}>
@@ -651,9 +583,9 @@ export default function MyTasks() {
                   value={newTaskDueDate}
                   onChange={(e) => setNewTaskDueDate(e.target.value)}
                   disabled={markAsWonOrLost}
-                  className="mt-1.5 w-full px-3 py-2 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring disabled:bg-muted disabled:cursor-not-allowed"
+                  className="mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:bg-muted"
                 />
-                <p className="text-xs text-muted-foreground mt-1.5">
+                <p className="mt-1.5 text-xs text-muted-foreground">
                   A new follow-up task will be created automatically
                 </p>
               </div>
@@ -676,9 +608,9 @@ export default function MyTasks() {
                     window.location.href = `/ConsultantAppointmentView?id=${followUpDialog?.appointmentId}&action=sold`;
                   }}
                   disabled={!followUpNotes.trim() || saveFollowUpMutation.isPending}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="flex-1 bg-good text-white hover:bg-good/90"
                 >
-                  <Trophy className="w-4 h-4 mr-2" />
+                  <Trophy className="mr-2 h-4 w-4" />
                   Mark as Won
                 </Button>
                 <Button
@@ -699,10 +631,10 @@ export default function MyTasks() {
                   className="flex-1 border-destructive/30 text-destructive hover:bg-destructive/10"
                 >
                   {saveFollowUpMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
                     <>
-                      <X className="w-4 h-4 mr-2" />
+                      <X className="mr-2 h-4 w-4" />
                       Mark as Lost
                     </>
                   )}
@@ -733,7 +665,7 @@ export default function MyTasks() {
                 >
                   {saveFollowUpMutation.isPending ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Saving...
                     </>
                   ) : (

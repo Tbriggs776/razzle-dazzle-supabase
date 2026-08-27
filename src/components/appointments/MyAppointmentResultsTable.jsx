@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '@/utils';
 import { Loader2, Calendar, ArrowUpDown, MessageSquare, Phone, Mail, MessageCircle, Clock, Circle, AlertCircle } from 'lucide-react';
@@ -11,15 +10,35 @@ import { cn } from '@/lib/utils';
 import { format, parseISO, isValid } from 'date-fns';
 import ContactCustomerDialog from './ContactCustomerDialog';
 import FollowUpDialog from './FollowUpDialog';
-import StatCard from './StatCard';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import StatusPill from '@/components/common/StatusPill';
 
-// Status list drives the filter chips (order preserved). The row pill uses a plain
-// secondary Badge, so only the keys matter here.
+// Status list drives the filter chips (order preserved).
 const STATUSES = [
   'Sold', 'Completed', 'Cancelled', 'Lost', 'Pitch and Miss', 'One-Leg',
   'Credit Decline', 'Follow-Up', 'Scheduled', 'Rescheduled', 'In Route',
   'On Site', 'Lead', 'Awaiting Assignment',
 ];
+
+// Appointment status -> semantic StatusPill tone.
+const STATUS_TONE = {
+  'Sold': 'good', 'Completed': 'good',
+  'Cancelled': 'crit', 'Lost': 'crit', 'Credit Decline': 'crit',
+  'Pitch and Miss': 'warn', 'One-Leg': 'warn', 'Follow-Up': 'warn',
+  'Scheduled': 'info', 'Rescheduled': 'info', 'In Route': 'info', 'On Site': 'info',
+  'Lead': 'info', 'Awaiting Assignment': 'info',
+};
+const toneFor = (s) => STATUS_TONE[s] || 'neutral';
+
+// Delta vs prior period, with SEMANTIC good/bad decoupled from direction.
+function deltaFor(cur, prev, { invert = false, unit = '' } = {}) {
+  const d = Math.round((cur - prev) * 10) / 10;
+  const dir = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
+  const good = invert ? d < 0 : d > 0;
+  const deltaTone = d === 0 ? 'flat' : good ? 'good' : 'bad';
+  return { delta: `${d >= 0 ? '+' : ''}${d}${unit} vs prior`, dir, deltaTone };
+}
 
 function normalizePhone(phone) {
   if (!phone) return '';
@@ -101,7 +120,7 @@ export default function MyAppointmentResultsTable({ currentUser }) {
     return unsubscribe;
   }, [queryClient]);
 
-  // Track last-seen timestamp per lead so unread inbound messages show a red badge
+  // Track last-seen timestamp per lead so unread inbound messages show a badge
   const [lastSeenMap, setLastSeenMap] = useState(() => {
     try { return JSON.parse(localStorage.getItem('rd_convo_seen') || '{}'); } catch { return {}; }
   });
@@ -236,50 +255,48 @@ export default function MyAppointmentResultsTable({ currentUser }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
+  const sortedRows = [...filtered].sort((a, b) => {
+    const cmp = String(a.appointment_date || '').localeCompare(String(b.appointment_date || ''));
+    return sortDir === 'desc' ? -cmp : cmp;
+  });
+
   return (
-    <div className="space-y-5">
-      {/* Stats */}
+    <div className="space-y-6">
+      {/* MTD performance KPIs */}
       <div>
-        <div className="flex items-end justify-between mb-3">
+        <div className="mb-3 flex items-end justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Month to Date Performance</h2>
+            <h2 className="font-display text-base font-bold text-foreground">Month to Date Performance</h2>
             <p className="text-xs text-muted-foreground">
               {format(parseISO(mtdRange.start), 'MMM d')} – {format(parseISO(mtdRange.end), 'MMM d, yyyy')} · vs {format(parseISO(prevRange.start), 'MMM d')} – {format(parseISO(prevRange.end), 'MMM d')}
             </p>
           </div>
           <p className="text-[11px] text-muted-foreground/70">Total = sold + not-won outcomes</p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard label="Total" value={overallStats.total} prev={prevStats.total} color="text-foreground" />
-          <StatCard label="Sold" value={overallStats.sold} prev={prevStats.sold} color="text-emerald-600 dark:text-emerald-400" />
-          <StatCard label="Cancelled" value={overallStats.cancelled} prev={prevStats.cancelled} color="text-red-600 dark:text-red-400" invertTrend />
-          <StatCard
-            label="Close Rate"
-            value={`${overallStats.closeRate}%`}
-            prev={prevStats.closeRate}
-            prevSuffix="%"
-            color="text-indigo-600 dark:text-indigo-400"
-            sub={`${overallStats.sold} sold / ${overallStats.total} total`}
-          />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <KpiTile label="Total" value={overallStats.total} foot="Sold + not-won" {...deltaFor(overallStats.total, prevStats.total)} />
+          <KpiTile label="Sold" value={overallStats.sold} foot="Closed this period" {...deltaFor(overallStats.sold, prevStats.sold)} />
+          <KpiTile label="Cancelled" value={overallStats.cancelled} foot="Fewer is better" {...deltaFor(overallStats.cancelled, prevStats.cancelled, { invert: true })} />
+          <KpiTile label="Close Rate" value={`${overallStats.closeRate}%`} hero foot={`${overallStats.sold} sold / ${overallStats.total} total`} {...deltaFor(overallStats.closeRate, prevStats.closeRate, { unit: 'pts' })} />
         </div>
       </div>
 
       {/* Controls */}
-      <div className="bg-card rounded-xl border border-border p-4 flex flex-col gap-3">
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-muted-foreground mr-1">Status:</span>
+          <span className="mr-1 text-sm font-medium text-muted-foreground">Status:</span>
           <button
             onClick={() => setStatusFilter(null)}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
+              'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
               !statusFilter
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-card text-muted-foreground border-border hover:bg-muted"
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-card text-muted-foreground hover:bg-muted'
             )}
           >
             All
@@ -289,10 +306,10 @@ export default function MyAppointmentResultsTable({ currentUser }) {
               key={status}
               onClick={() => setStatusFilter(statusFilter === status ? null : status)}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors",
+                'rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
                 statusFilter === status
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-card text-muted-foreground border-border hover:bg-muted"
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-card text-muted-foreground hover:bg-muted'
               )}
             >
               {status}
@@ -303,9 +320,9 @@ export default function MyAppointmentResultsTable({ currentUser }) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')}
-            className="ml-auto px-3 py-1.5 rounded-lg text-sm font-medium border bg-card text-muted-foreground border-border hover:bg-muted flex items-center gap-1.5"
+            className="ml-auto flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted"
           >
-            <ArrowUpDown className="w-3.5 h-3.5" />
+            <ArrowUpDown className="h-3.5 w-3.5" />
             {sortDir === 'desc' ? 'Newest' : 'Oldest'}
           </button>
         </div>
@@ -319,149 +336,137 @@ export default function MyAppointmentResultsTable({ currentUser }) {
         </div>
       </div>
 
-      {/* Flat list */}
-      {filtered.length === 0 ? (
-        <div className="text-center py-12 bg-card rounded-2xl border border-border">
-          <Calendar className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No appointments found</h3>
-          <p className="text-muted-foreground">Adjust your filters or date range</p>
-        </div>
-      ) : (
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <div className="divide-y divide-border">
-            {[...filtered].sort((a, b) => {
-              const cmp = String(a.appointment_date || '').localeCompare(String(b.appointment_date || ''));
-              return sortDir === 'desc' ? -cmp : cmp;
-            }).map(apt => {
-              const lead = getLead(apt.customer);
-              const unread = getUnreadCount(apt);
-              const task = tasksByAppointment[apt.id];
-              const taskOverdue = task ? isTaskOverdue(task.due_date) : false;
+      {/* Results list */}
+      <ModuleCard
+        title={statusFilter || 'All Appointments'}
+        subtitle={`${filtered.length} ${filtered.length === 1 ? 'appointment' : 'appointments'}`}
+        icon={Calendar}
+      >
+        {filtered.length === 0 ? (
+          <div className="px-4 py-14 text-center">
+            <Calendar className="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
+            <h3 className="text-sm font-semibold text-foreground">No appointments found</h3>
+            <p className="mt-1 text-xs text-muted-foreground">Adjust your filters or search.</p>
+          </div>
+        ) : (
+          sortedRows.map(apt => {
+            const lead = getLead(apt.customer);
+            const unread = getUnreadCount(apt);
+            const task = tasksByAppointment[apt.id];
+            const taskOverdue = task ? isTaskOverdue(task.due_date) : false;
 
-              return (
-                <div key={apt.id} className="p-5 hover:bg-muted/50 transition-colors">
-                  {/* Header row */}
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        to={createPageUrl('AppointmentDetail') + `?id=${apt.id}`}
-                        className="font-semibold text-lg text-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                      >
-                        {apt.customer_name}
-                      </Link>
-                      <p className="text-sm text-muted-foreground mt-0.5">
-                        Follow up with customer regarding this appointment
-                      </p>
-                    </div>
-
-                    {/* Pending task badge */}
-                    {task && (
-                      <div className={cn(
-                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap",
-                        taskOverdue
-                          ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25"
-                          : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25"
-                      )}>
-                        {taskOverdue ? <AlertCircle className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                        <Clock className="w-3 h-3" />
-                        {task.due_date ? format(parseISO(task.due_date), 'MMM d, yyyy') : 'No date'}
-                        {taskOverdue && ' · Overdue'}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Badges row */}
-                  <div className="flex items-center gap-2 flex-wrap mt-3">
-                    <Badge variant="secondary" className="text-xs">
-                      {apt.status || '—'}
-                    </Badge>
-                    {apt.appointment_date && (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {format(parseISO(apt.appointment_date), 'MMM d')}
-                      </span>
-                    )}
-                    {apt.not_sold_deal_size > 0 && (
-                      <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25">
-                        Deal Size: ${Number(apt.not_sold_deal_size).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Contact info + actions */}
-                  <div className="flex items-center gap-3 flex-wrap mt-3">
-                    {lead?.phone && (
-                      <a href={`tel:${lead.phone}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                        <Phone className="w-3.5 h-3.5" />
-                        {lead.phone}
-                      </a>
-                    )}
-                    {lead?.email && (
-                      <a href={`mailto:${lead.email}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                        <Mail className="w-3.5 h-3.5" />
-                        {lead.email}
-                      </a>
-                    )}
-                    <Button
-                      size="sm"
-                      onClick={() => setFollowUpApt(apt)}
-                      className="h-7 text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
+            return (
+              <div key={apt.id} className="px-4 py-4 transition-colors hover:bg-muted/50">
+                {/* Header row */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      to={createPageUrl('AppointmentDetail') + `?id=${apt.id}`}
+                      className="font-semibold text-foreground transition-colors hover:text-brand-blue"
                     >
-                      <MessageCircle className="w-3 h-3 mr-1" />
-                      Log Follow-Up
-                    </Button>
-                    <button
-                      onClick={() => { markLeadSeen(lead); setContactApt(apt); }}
-                      disabled={!lead?.phone && !lead?.email}
-                      className={cn(
-                        "relative p-1.5 rounded-lg border transition-colors disabled:opacity-30 disabled:cursor-not-allowed",
-                        unread > 0
-                          ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25"
-                          : "border-border text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-400 dark:hover:border-indigo-500/25"
-                      )}
-                      title={unread > 0 ? `${unread} unread message${unread > 1 ? 's' : ''}` : "Text / Email customer"}
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      {unread > 0 && (
-                        <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold leading-none">
-                          {unread > 9 ? '9+' : unread}
-                        </span>
-                      )}
-                    </button>
+                      {apt.customer_name}
+                    </Link>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Follow up with customer regarding this appointment
+                    </p>
                   </div>
 
-                  {/* Appointment Notes */}
-                  {apt.notes && apt.notes.length > 0 && (
-                    <div className="mt-3 border-t border-border pt-3">
-                      <p className="text-xs font-semibold text-muted-foreground mb-2">Appointment Notes</p>
-                      <div className="max-h-32 overflow-y-auto space-y-2 pr-2">
-                        {[...apt.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, idx) => (
-                          <div key={idx} className="bg-muted rounded-lg p-2.5 border border-border break-words">
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <p className="text-xs font-semibold text-foreground">{note.user_name}</p>
-                              {note.context && (
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
-                                  {note.context}
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{note.content}</p>
-                            {note.timestamp && (
-                              <p className="text-[10px] text-muted-foreground/70 mt-1">
-                                {format(new Date(note.timestamp), 'MMM d, yyyy h:mm a')}
-                              </p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                  {task && (
+                    <div className={cn(
+                      'flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold',
+                      taskOverdue ? 'bg-crit/12 text-crit' : 'bg-warn/15 text-warn'
+                    )}>
+                      {taskOverdue ? <AlertCircle className="h-3 w-3" /> : <Circle className="h-3 w-3" />}
+                      <Clock className="h-3 w-3" />
+                      {task.due_date ? format(parseISO(task.due_date), 'MMM d, yyyy') : 'No date'}
+                      {taskOverdue && ' · Overdue'}
                     </div>
                   )}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+
+                {/* Badges row */}
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  <StatusPill tone={toneFor(apt.status)}>{apt.status || '—'}</StatusPill>
+                  {apt.appointment_date && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      {format(parseISO(apt.appointment_date), 'MMM d')}
+                    </span>
+                  )}
+                  {apt.not_sold_deal_size > 0 && (
+                    <span className="rounded-full bg-good/12 px-2 py-0.5 text-[11px] font-semibold text-good">
+                      Deal Size: ${Number(apt.not_sold_deal_size).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                  )}
+                </div>
+
+                {/* Contact info + actions */}
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  {lead?.phone && (
+                    <a href={`tel:${lead.phone}`} className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-brand-blue">
+                      <Phone className="h-3.5 w-3.5" />
+                      {lead.phone}
+                    </a>
+                  )}
+                  {lead?.email && (
+                    <a href={`mailto:${lead.email}`} className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-brand-blue">
+                      <Mail className="h-3.5 w-3.5" />
+                      {lead.email}
+                    </a>
+                  )}
+                  <Button size="sm" variant="outline" onClick={() => setFollowUpApt(apt)} className="h-7 text-xs">
+                    <MessageCircle className="mr-1 h-3 w-3" />
+                    Log Follow-Up
+                  </Button>
+                  <button
+                    onClick={() => { markLeadSeen(lead); setContactApt(apt); }}
+                    disabled={!lead?.phone && !lead?.email}
+                    className={cn(
+                      'relative rounded-lg border p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30',
+                      unread > 0
+                        ? 'border-crit/30 bg-crit/12 text-crit hover:bg-crit/20'
+                        : 'border-border text-muted-foreground hover:border-brand-blue/30 hover:bg-brand-blue/10 hover:text-brand-blue'
+                    )}
+                    title={unread > 0 ? `${unread} unread message${unread > 1 ? 's' : ''}` : 'Text / Email customer'}
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    {unread > 0 && (
+                      <span className="absolute -right-1.5 -top-1.5 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-crit px-1 text-[10px] font-bold leading-none text-white">
+                        {unread > 9 ? '9+' : unread}
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                {/* Appointment Notes */}
+                {apt.notes && apt.notes.length > 0 && (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <p className="mb-2 text-xs font-semibold text-muted-foreground">Appointment Notes</p>
+                    <div className="max-h-32 space-y-2 overflow-y-auto pr-2">
+                      {[...apt.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).map((note, idx) => (
+                        <div key={idx} className="break-words rounded-lg border border-border bg-muted p-2.5">
+                          <div className="mb-1 flex items-start justify-between gap-2">
+                            <p className="text-xs font-semibold text-foreground">{note.user_name}</p>
+                            {note.context && (
+                              <span className="rounded bg-card px-1.5 py-0.5 text-[10px] text-muted-foreground">{note.context}</span>
+                            )}
+                          </div>
+                          <p className="text-xs leading-relaxed text-muted-foreground">{note.content}</p>
+                          {note.timestamp && (
+                            <p className="mt-1 text-[10px] text-muted-foreground/70">
+                              {format(new Date(note.timestamp), 'MMM d, yyyy h:mm a')}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
+      </ModuleCard>
 
       {contactApt && (
         <ContactCustomerDialog

@@ -1,15 +1,41 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Calendar, Search, Loader2, Filter } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Calendar, Search, Loader2, Filter, History, CheckCircle2 } from 'lucide-react';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import AppointmentCard from '@/components/appointments/AppointmentCard';
+import PageHeader from '@/components/common/PageHeader';
+import StatusPill from '@/components/common/StatusPill';
+import SyncBadge from '@/components/common/SyncBadge';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import WorkRow from '@/components/dashboard/WorkRow';
+
+// Appointment outcome/stage → StatusPill tone.
+const STATUS_TONE = {
+  'Lead': 'info',
+  'Awaiting Assignment': 'warn',
+  'Scheduled': 'info',
+  'Rescheduled': 'warn',
+  'In Route': 'info',
+  'On Site': 'info',
+  'Cancelled': 'crit',
+  'Completed': 'good',
+  'Sold': 'good',
+  'Lost': 'crit',
+  'Pitch and Miss': 'crit',
+  'One-Leg': 'warn',
+  'Credit Decline': 'crit',
+  'Follow-Up': 'warn',
+};
 
 export default function MyAppointments() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('upcoming');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -146,6 +172,53 @@ export default function MyAppointments() {
     .filter(matchesSearch)
     .sort((a, b) => new Date(b.appointment_date + 'T00:00:00') - new Date(a.appointment_date + 'T00:00:00'));
 
+  // Presentational KPI: appointments flagged for follow-up (stable across the toggle).
+  const followUpCount = appointments.filter(apt => apt.status === 'Follow-Up').length;
+
+  const renderRows = (list, data) =>
+    list.map((apt) => {
+      const lead = data?.leads?.find((l) => l.id === apt.customer);
+      const dc = data?.teamMembers?.find((tm) => tm.id === apt.assigned_dc);
+      const csr = data?.teamMembers?.find((tm) => tm.id === apt.assigned_csr);
+      const checklist = data?.checklists?.find((c) => c.appointment === apt.id);
+      const name = lead ? `${lead.first_name} ${lead.last_name}` : 'Unknown Customer';
+      const tone = STATUS_TONE[apt.status] || 'neutral';
+      const meta = [
+        apt.appointment_block,
+        apt.location_address,
+        dc && `DC: ${dc.first_name} ${dc.last_name}`,
+        csr && `Booked by ${csr.first_name} ${csr.last_name}`,
+        checklist?.project_budget && `Budget ${checklist.project_budget}`,
+        checklist?.photos?.length ? `${checklist.photos.length} photos` : null,
+      ]
+        .filter(Boolean)
+        .join('  ·  ');
+      return (
+        <WorkRow
+          key={apt.id}
+          lead={apt.appointment_date ? format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d') : '—'}
+          primary={name}
+          meta={meta}
+          onClick={() => navigate(createPageUrl('AppointmentDetail') + `?id=${apt.id}&from=MyAppointments`)}
+          trailing={
+            <div className="flex items-center gap-2">
+              {apt.rfms_sync_status === 'synced' && <SyncBadge status="synced" label="RFMS" />}
+              {apt.rfms_sync_status === 'error' && <SyncBadge status="error" label="RFMS" />}
+              <StatusPill tone={tone}>{apt.status}</StatusPill>
+            </div>
+          }
+        />
+      );
+    });
+
+  const emptyBody = (title, sub, Icon = Calendar) => (
+    <div className="px-4 py-14 text-center">
+      <Icon className="mx-auto mb-3 h-10 w-10 text-muted-foreground/60" />
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+    </div>
+  );
+
   if (isCheckingAuth || userLoading || appointmentsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -167,140 +240,126 @@ export default function MyAppointments() {
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg">
-              <Calendar className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">My Appointments</h1>
-              <p className="text-muted-foreground mt-1">View and manage your scheduled appointments</p>
-            </div>
-          </div>
-        </motion.div>
+      <div className="mx-auto max-w-7xl space-y-6">
+        <PageHeader
+          eyebrow="Consultant"
+          title="My Appointments"
+          subtitle="View and manage your scheduled appointments."
+          actions={
+            <>
+              <div className="relative w-52">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search name, address, notes…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-9 border-border bg-card pl-9"
+                />
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowFollowUpOnly(!showFollowUpOnly)}
+                className={cn(
+                  'h-9 border-border',
+                  showFollowUpOnly && 'border-primary/30 bg-primary/10 text-primary'
+                )}
+              >
+                <Filter className="mr-2 h-4 w-4" />
+                {showFollowUpOnly ? 'Show All' : 'Follow-Up Only'}
+              </Button>
+            </>
+          }
+        />
 
-        {/* Search and Filter */}
-        <div className="mb-6 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input
-              placeholder="Search by name, location or notes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12 bg-card border-border"
-            />
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowFollowUpOnly(!showFollowUpOnly)}
-            className={cn(
-              "h-12 px-5 border-border",
-              showFollowUpOnly && "bg-primary/10 border-primary/20 text-primary"
-            )}
-          >
-            <Filter className="w-4 h-4 mr-2" />
-            {showFollowUpOnly ? 'Show All' : 'Follow-Up Only'}
-          </Button>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiTile
+            label="Upcoming"
+            value={upcomingAppointments.length}
+            foot="Scheduled ahead"
+            onClick={() => setActiveTab('upcoming')}
+          />
+          <KpiTile
+            label="Follow-Ups"
+            value={followUpCount}
+            foot="Flagged for follow-up"
+          />
+          <KpiTile
+            label="Sold"
+            value={soldAppointments.length}
+            hero
+            foot="Closed from your appointments"
+            onClick={() => setActiveTab('sold')}
+          />
         </div>
 
-        {/* Tabs */}
-         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-           <div className="overflow-x-auto pb-1">
-           <TabsList className="bg-card border border-border p-1 flex-nowrap">
-             <TabsTrigger value="upcoming" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-               Upcoming ({upcomingAppointments.length})
-             </TabsTrigger>
-             <TabsTrigger value="past" onClick={() => setShowHistorical(true)} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-               Historical {showHistorical ? `(${pastAppointments.length})` : ''}
-             </TabsTrigger>
-             <TabsTrigger value="sold" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-               Sold ({soldAppointments.length})
-             </TabsTrigger>
-           </TabsList>
-           </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="overflow-x-auto pb-1">
+            <TabsList className="flex-nowrap border border-border bg-card p-1">
+              <TabsTrigger value="upcoming" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Upcoming ({upcomingAppointments.length})
+              </TabsTrigger>
+              <TabsTrigger value="past" onClick={() => setShowHistorical(true)} className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Historical {showHistorical ? `(${pastAppointments.length})` : ''}
+              </TabsTrigger>
+              <TabsTrigger value="sold" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Sold ({soldAppointments.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="upcoming" className="space-y-4">
-            {upcomingAppointments.length === 0 ? (
-              <div className="text-center py-12 bg-card rounded-2xl border border-border">
-                <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {searchQuery ? 'No matching appointments' : 'No upcoming appointments'}
-                </h3>
-                <p className="text-muted-foreground">
-                  {searchQuery ? 'Try adjusting your search' :'Your upcoming appointments will appear here'}
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {upcomingAppointments.map((appointment) => (
-                  <AppointmentCard 
-                    key={appointment.id} 
-                    appointment={appointment}
-                    preloadedData={appointmentData}
-                  />
-                ))}
-              </div>
-            )}
+          <TabsContent value="upcoming">
+            <ModuleCard
+              title="Upcoming Appointments"
+              subtitle={`${upcomingAppointments.length} ${upcomingAppointments.length === 1 ? 'appointment' : 'appointments'}${showFollowUpOnly ? ' · follow-up only' : ''}`}
+              icon={Calendar}
+            >
+              {upcomingAppointments.length === 0
+                ? emptyBody(
+                    searchQuery ? 'No matching appointments' : 'No upcoming appointments',
+                    searchQuery ? 'Try adjusting your search.' : 'Your upcoming appointments will appear here.'
+                  )
+                : renderRows(upcomingAppointments, appointmentData)}
+            </ModuleCard>
           </TabsContent>
 
-          <TabsContent value="past" className="space-y-4">
-            {historicalLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="w-8 h-8 text-primary animate-spin" />
-              </div>
-            ) : pastAppointments.length === 0 ? (
-              <div className="text-center py-12 bg-card rounded-2xl border border-border">
-                <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {searchQuery ? 'No matching appointments' : 'No past appointments'}
-                </h3>
-                <p className="text-muted-foreground">
-                  {searchQuery ? 'Try adjusting your search' :'Your completed appointments will appear here'}
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {pastAppointments.map((appointment) => (
-                  <AppointmentCard 
-                    key={appointment.id} 
-                    appointment={appointment}
-                    preloadedData={historicalData}
-                  />
-                ))}
-              </div>
-            )}
+          <TabsContent value="past">
+            <ModuleCard
+              title="Historical Appointments"
+              subtitle={showHistorical ? `${pastAppointments.length} past` : 'Open to load history'}
+              icon={History}
+            >
+              {historicalLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : pastAppointments.length === 0 ? (
+                emptyBody(
+                  searchQuery ? 'No matching appointments' : 'No past appointments',
+                  searchQuery ? 'Try adjusting your search.' : 'Your completed appointments will appear here.',
+                  History
+                )
+              ) : (
+                renderRows(pastAppointments, historicalData)
+              )}
+            </ModuleCard>
           </TabsContent>
 
-          <TabsContent value="sold" className="space-y-4">
-            {soldAppointments.length === 0 ? (
-              <div className="text-center py-12 bg-card rounded-2xl border border-border">
-                <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {searchQuery ? 'No matching appointments' : 'No sold appointments'}
-                </h3>
-                <p className="text-muted-foreground">
-                  {searchQuery ? 'Try adjusting your search' :'Your sold appointments will appear here'}
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {soldAppointments.map((appointment) => (
-                  <AppointmentCard 
-                    key={appointment.id} 
-                    appointment={appointment}
-                    preloadedData={appointmentData}
-                  />
-                ))}
-              </div>
-            )}
+          <TabsContent value="sold">
+            <ModuleCard
+              title="Sold Appointments"
+              subtitle={`${soldAppointments.length} ${soldAppointments.length === 1 ? 'closed job' : 'closed jobs'}`}
+              icon={CheckCircle2}
+            >
+              {soldAppointments.length === 0
+                ? emptyBody(
+                    searchQuery ? 'No matching appointments' : 'No sold appointments',
+                    searchQuery ? 'Try adjusting your search.' : 'Your sold appointments will appear here.',
+                    CheckCircle2
+                  )
+                : renderRows(soldAppointments, appointmentData)}
+            </ModuleCard>
           </TabsContent>
-          </Tabs>
+        </Tabs>
       </div>
     </div>
   );
