@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DollarSign, Search, Loader2, Calendar, MapPin, User } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DollarSign, Search, Loader2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, subMonths, subQuarters, startOfYear } from 'date-fns';
+import PageHeader from '@/components/common/PageHeader';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import WorkRow from '@/components/dashboard/WorkRow';
+
+const DATE_PRESETS = [
+  { value: 'mtd', label: 'Month to Date' },
+  { value: 'last_month', label: 'Last Month' },
+  { value: 'qtd', label: 'This Quarter' },
+  { value: 'last_quarter', label: 'Last Quarter' },
+  { value: 'last_3_months', label: 'Last 3 Months' },
+  { value: 'ytd', label: 'Year to Date' },
+  { value: 'all', label: 'All Time' },
+  { value: 'custom', label: 'Custom Range' },
+];
 
 function getDateRange(preset) {
   const now = new Date();
@@ -22,6 +35,8 @@ function getDateRange(preset) {
   }
 }
 
+const money = (n) => '$' + Math.round(n || 0).toLocaleString();
+
 export default function MySales() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDcId, setSelectedDcId] = useState('');
@@ -32,7 +47,7 @@ export default function MySales() {
   const { data: currentUser, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
-    retry: false
+    retry: false,
   });
 
   const isAdmin = currentUser?.role === 'admin';
@@ -40,7 +55,7 @@ export default function MySales() {
   const { data: allTeamMembers = [] } = useQuery({
     queryKey: ['teamMembersAll'],
     queryFn: () => base44.entities.TeamMember.list(),
-    enabled: !!currentUser
+    enabled: !!currentUser,
   });
 
   const { data: salesData, isLoading: salesLoading } = useQuery({
@@ -51,7 +66,7 @@ export default function MySales() {
       if (isAdmin) {
         const [sales, customers] = await Promise.all([
           base44.entities.Sale.list('-sale_date', 500),
-          base44.entities.Customer.list()
+          base44.entities.Customer.list(),
         ]);
         return { sales, customers };
       }
@@ -66,25 +81,25 @@ export default function MySales() {
       return { sales, customers };
     },
     enabled: !!currentUser?.email,
-    staleTime: 30000
+    staleTime: 30000,
   });
 
   const sales = salesData?.sales || [];
   const customers = salesData?.customers || [];
 
   const designConsultants = allTeamMembers
-    .filter(tm => tm.role === 'Design Consultant' || tm.role === 'Sales Manager')
+    .filter((tm) => tm.role === 'Design Consultant' || tm.role === 'Sales Manager')
     .sort((a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`));
 
-  const getCustomer = (customerId) => customers.find(c => c.id === customerId);
-  const getDC = (dcId) => allTeamMembers.find(tm => tm.id === dcId);
+  const getCustomer = (customerId) => customers.find((c) => c.id === customerId);
+  const getDC = (dcId) => allTeamMembers.find((tm) => tm.id === dcId);
 
   const activeDateRange = datePreset === 'custom'
     ? (customStart && customEnd ? { start: new Date(customStart), end: new Date(customEnd + 'T23:59:59') } : null)
     : getDateRange(datePreset);
 
   const filteredSales = sales
-    .filter(sale => {
+    .filter((sale) => {
       if (sale.is_cancelled) return false;
       if (isAdmin && selectedDcId && sale.assigned_dc !== selectedDcId) return false;
       if (activeDateRange && sale.sale_date) {
@@ -105,193 +120,150 @@ export default function MySales() {
     .sort((a, b) => new Date(b.sale_date) - new Date(a.sale_date));
 
   const totalRevenue = filteredSales.reduce((sum, s) => sum + (s.sale_amount || 0), 0);
-  const salesWithAmount = filteredSales.filter(s => s.sale_amount);
+  const salesWithAmount = filteredSales.filter((s) => s.sale_amount);
   const avgSale = salesWithAmount.length > 0 ? totalRevenue / salesWithAmount.length : 0;
+
+  // Trend sparklines from the filtered set (chronological buckets).
+  const spark = useMemo(() => {
+    const asc = filteredSales
+      .filter((s) => s.sale_date)
+      .slice()
+      .sort((a, b) => new Date(a.sale_date) - new Date(b.sale_date));
+    if (asc.length < 2) return { rev: [], count: [] };
+    const n = Math.min(8, asc.length);
+    const size = Math.ceil(asc.length / n);
+    const rev = [];
+    const count = [];
+    for (let i = 0; i < asc.length; i += size) {
+      const chunk = asc.slice(i, i + size);
+      rev.push(chunk.reduce((s, x) => s + (x.sale_amount || 0), 0));
+      count.push(chunk.length);
+    }
+    return { rev, count };
+  }, [filteredSales]);
 
   if (userLoading || salesLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
+  const rangeLabel = DATE_PRESETS.find((p) => p.value === datePreset)?.label || 'All Time';
+
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg">
-              <DollarSign className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">My Sales</h1>
-              <p className="text-muted-foreground mt-1">{isAdmin ? 'All closed sales' : 'Your closed sales and revenue'}</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-card rounded-xl border border-border p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Sales</p>
-            <p className="text-2xl font-bold text-foreground">{filteredSales.length}</p>
-          </div>
-          <div className="bg-card rounded-xl border border-border p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Total Revenue</p>
-            <p className="text-2xl font-bold text-primary">${totalRevenue.toLocaleString()}</p>
-          </div>
-          <div className="bg-card rounded-xl border border-border p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Avg Sale</p>
-            <p className="text-2xl font-bold text-foreground">${Math.round(avgSale).toLocaleString()}</p>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-col gap-3 mb-6">
-          <div className="flex flex-wrap gap-2">
-            {[
-              { value: 'mtd', label: 'Month to Date' },
-              { value: 'last_month', label: 'Last Month' },
-              { value: 'qtd', label: 'This Quarter' },
-              { value: 'last_quarter', label: 'Last Quarter' },
-              { value: 'last_3_months', label: 'Last 3 Months' },
-              { value: 'ytd', label: 'Year to Date' },
-              { value: 'all', label: 'All Time' },
-              { value: 'custom', label: 'Custom Range' },
-            ].map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => setDatePreset(opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                  datePreset === opt.value
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-card text-muted-foreground border-border hover:bg-secondary'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
-          {datePreset === 'custom' && (
-            <div className="flex flex-wrap items-center gap-3">
-              <input
-                type="date"
-                value={customStart}
-                onChange={e => setCustomStart(e.target.value)}
-                className="border border-border rounded-lg px-3 py-2 text-sm bg-card"
-              />
-              <span className="text-muted-foreground text-sm">to</span>
-              <input
-                type="date"
-                value={customEnd}
-                onChange={e => setCustomEnd(e.target.value)}
-                className="border border-border rounded-lg px-3 py-2 text-sm bg-card"
-              />
-            </div>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            {isAdmin && (
-              <Select value={selectedDcId || 'all'} onValueChange={v => setSelectedDcId(v === 'all' ? '' : v)}>
-                <SelectTrigger className="w-full sm:w-64 bg-card h-10">
-                  <SelectValue placeholder="All Consultants" />
+      <div className="mx-auto max-w-7xl space-y-6">
+        <PageHeader
+          eyebrow="Sales"
+          title="My Sales"
+          subtitle={isAdmin ? 'All closed sales across the team.' : 'Your closed sales and revenue.'}
+          actions={
+            <>
+              {isAdmin && (
+                <Select value={selectedDcId || 'all'} onValueChange={(v) => setSelectedDcId(v === 'all' ? '' : v)}>
+                  <SelectTrigger className="h-9 w-48 bg-card">
+                    <SelectValue placeholder="All Consultants" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Consultants</SelectItem>
+                    {designConsultants.map((dc) => (
+                      <SelectItem key={dc.id} value={dc.id}>
+                        {dc.first_name} {dc.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              <Select value={datePreset} onValueChange={setDatePreset}>
+                <SelectTrigger className="h-9 w-44 bg-card">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Consultants</SelectItem>
-                  {designConsultants.map(dc => (
-                    <SelectItem key={dc.id} value={dc.id}>
-                      {dc.first_name} {dc.last_name}
-                    </SelectItem>
+                  {DATE_PRESETS.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            )}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                placeholder="Search by customer, location..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 bg-card border-border"
-              />
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        />
 
-        {/* Sales List */}
-        {filteredSales.length === 0 ? (
-          <div className="text-center py-12 bg-card rounded-2xl border border-border">
-            <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              {searchQuery || selectedDcId ? 'No matching sales' : 'No sales yet'}
-            </h3>
-            <p className="text-muted-foreground">
-              {searchQuery || selectedDcId ? 'Try adjusting your filters' : 'Your closed sales will appear here'}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredSales.map((sale, i) => {
-              const customer = getCustomer(sale.customer);
-              const dc = isAdmin ? getDC(sale.assigned_dc) : null;
-              return (
-                <motion.div
-                  key={sale.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
-                  className="bg-card rounded-xl border border-border p-4 flex flex-col sm:flex-row sm:items-center gap-4"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="font-semibold text-foreground text-lg">
-                        {customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown Customer'}
-                      </span>
-                      {dc && (
-                        <Badge variant="outline" className="text-primary border-primary/20 bg-primary/10 text-xs">
-                          <User className="w-3 h-3 mr-1" />{dc.first_name} {dc.last_name}
-                        </Badge>
-                      )}
-                      {sale.sale_amount && (
-                        <Badge className="bg-primary/10 text-primary border-primary/20 font-bold">
-                          ${sale.sale_amount.toLocaleString()}
-                        </Badge>
-                      )}
-                      {sale.deposit_payment_method && (
-                        <Badge variant="outline" className="text-muted-foreground text-xs">
-                          {sale.deposit_payment_method}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                      {sale.sale_date && (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {format(new Date(sale.sale_date), 'MMM d, yyyy')}
-                        </span>
-                      )}
-                      {sale.location_address && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {sale.location_address}
-                        </span>
-                      )}
-                      {sale.deposit_amount && (
-                        <span>Deposit: ${sale.deposit_amount.toLocaleString()}</span>
-                      )}
-                      {sale.invoice_number && (
-                        <span>Invoice #{sale.invoice_number}</span>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+        {datePreset === 'custom' && (
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="date"
+              value={customStart}
+              onChange={(e) => setCustomStart(e.target.value)}
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+            />
+            <span className="text-sm text-muted-foreground">to</span>
+            <input
+              type="date"
+              value={customEnd}
+              onChange={(e) => setCustomEnd(e.target.value)}
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+            />
           </div>
         )}
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiTile label="Total Sales" value={filteredSales.length} foot={`Closed · ${rangeLabel}`} spark={spark.count} />
+          <KpiTile label="Total Revenue" value={money(totalRevenue)} hero foot={`${salesWithAmount.length} with an amount`} spark={spark.rev} />
+          <KpiTile label="Avg Sale" value={money(avgSale)} foot="Per closed job with an amount" />
+        </div>
+
+        <ModuleCard
+          title="Closed Sales"
+          subtitle={`${filteredSales.length} ${filteredSales.length === 1 ? 'sale' : 'sales'} · ${rangeLabel}`}
+          icon={DollarSign}
+          action={
+            <div className="relative w-52">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search customer, address…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 border-border bg-card pl-9"
+              />
+            </div>
+          }
+        >
+          {filteredSales.length === 0 ? (
+            <div className="px-4 py-14 text-center">
+              <DollarSign className="mx-auto mb-3 h-10 w-10 text-muted-foreground/60" />
+              <h3 className="text-sm font-semibold text-foreground">
+                {searchQuery || selectedDcId ? 'No matching sales' : 'No sales yet'}
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {searchQuery || selectedDcId ? 'Try adjusting your filters.' : 'Your closed sales will appear here.'}
+              </p>
+            </div>
+          ) : (
+            filteredSales.map((sale) => {
+              const customer = getCustomer(sale.customer);
+              const dc = isAdmin ? getDC(sale.assigned_dc) : null;
+              const meta = [
+                sale.sale_date && format(new Date(sale.sale_date), 'MMM d, yyyy'),
+                sale.location_address,
+                sale.invoice_number && `Inv #${sale.invoice_number}`,
+                dc && `${dc.first_name} ${dc.last_name}`,
+                sale.deposit_amount && `Deposit ${money(sale.deposit_amount)}`,
+              ].filter(Boolean).join('  ·  ');
+              return (
+                <WorkRow
+                  key={sale.id}
+                  lead={sale.sale_amount ? money(sale.sale_amount) : '—'}
+                  primary={customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown Customer'}
+                  meta={meta}
+                  status={sale.deposit_payment_method || 'Sold'}
+                  tone={sale.deposit_payment_method ? 'neutral' : 'good'}
+                />
+              );
+            })
+          )}
+        </ModuleCard>
       </div>
     </div>
   );
