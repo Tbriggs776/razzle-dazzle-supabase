@@ -6,17 +6,33 @@ import { createPageUrl } from '@/utils';
 import { ChevronLeft, ChevronRight, X, Users, Calendar as CalendarIcon, ExternalLink, Loader2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isSameMonth, isSameDay } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import StatusPill from '@/components/common/StatusPill';
 import CopyTable from '@/components/projects/CopyTable';
 
-const statusColors = {
-  'Accepted': 'bg-blue-100 text-blue-800',
-  'Materials Ordered': 'bg-purple-100 text-purple-800',
-  'Scheduled': 'bg-yellow-100 text-yellow-800',
-  'In Progress': 'bg-orange-100 text-orange-800',
-  'Quality Checks': 'bg-indigo-100 text-indigo-800',
-  'Completed': 'bg-green-100 text-green-800'
+// Domain project status → semantic StatusPill tone (mirrors Projects.jsx). Progress reads
+// info, review reads warn, done reads good — replacing the old bg-*-100 lookups.
+const STATUS_TONE = {
+  'Accepted': 'info',
+  'Materials Ordered': 'info',
+  'Scheduled': 'info',
+  'In Progress': 'info',
+  'Quality Checks': 'warn',
+  'Completed': 'good',
 };
+
+// Soft-fill classes per tone — the Badge semantic variants applied to the tiny,
+// name-bearing calendar/day chips that can't use the (uppercasing) StatusPill.
+const TONE_CHIP = {
+  good: 'bg-good/12 text-good',
+  warn: 'bg-warn/15 text-warn',
+  crit: 'bg-crit/12 text-crit',
+  info: 'bg-info/12 text-info',
+  neutral: 'bg-muted text-muted-foreground',
+};
+
+// Glue-down jobs override to the warn tone (matches the Projects.jsx StatusPill).
+const chipTone = (p) => (p.isGlueDown ? 'warn' : (STATUS_TONE[p.status] || 'neutral'));
 
 // Parse raw RFMS date string (e.g. '20260414') to 'YYYY-MM-DD' without timezone issues
 const parseRFMSDate = (d) => {
@@ -151,9 +167,9 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
   if (!allLoaded) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-        <p className="text-slate-500 text-sm">Loading crew schedules from RFMS...</p>
-        <p className="text-slate-400 text-xs">{rfmsQueries.filter(q => !q.isLoading).length} / {rfmsQueries.length} loaded</p>
+        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+        <p className="text-muted-foreground text-sm">Loading crew schedules from RFMS...</p>
+        <p className="text-muted-foreground/70 text-xs">{rfmsQueries.filter(q => !q.isLoading).length} / {rfmsQueries.length} loaded</p>
       </div>
     );
   }
@@ -161,22 +177,22 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
   return (
     <div className="space-y-4">
       {/* Month navigation */}
-      <div className="flex items-center justify-between bg-white rounded-xl border border-slate-200 px-6 py-3">
-        <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
-          <ChevronLeft className="w-5 h-5 text-slate-600" />
+      <div className="flex items-center justify-between bg-card rounded-xl border border-border px-6 py-3">
+        <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="p-1.5 hover:bg-muted rounded-lg transition-colors">
+          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
         </button>
-        <h2 className="text-lg font-semibold text-slate-800">{format(currentMonth, 'MMMM yyyy')}</h2>
-        <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors">
-          <ChevronRight className="w-5 h-5 text-slate-600" />
+        <h2 className="font-display text-lg font-semibold text-foreground">{format(currentMonth, 'MMMM yyyy')}</h2>
+        <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="p-1.5 hover:bg-muted rounded-lg transition-colors">
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
         </button>
       </div>
 
       {/* Calendar grid */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         {/* Day headers */}
-        <div className="grid grid-cols-7 border-b border-slate-200">
+        <div className="grid grid-cols-7 border-b border-border">
           {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
-            <div key={d} className="py-2 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div key={d} className="py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               {d}
             </div>
           ))}
@@ -194,14 +210,14 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
               <div
                 key={i}
                 className={cn(
-                  'min-h-[100px] border-b border-r border-slate-100 p-1.5',
-                  !inMonth && 'bg-slate-50',
-                  isToday && 'bg-indigo-50/50'
+                  'min-h-[100px] border-b border-r border-border p-1.5',
+                  !inMonth && 'bg-muted/40',
+                  isToday && 'bg-info/5'
                 )}
               >
                 <div className={cn(
                   'text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full',
-                  isToday ? 'bg-indigo-600 text-white' : inMonth ? 'text-slate-700' : 'text-slate-400'
+                  isToday ? 'bg-info text-white' : inMonth ? 'text-foreground' : 'text-muted-foreground'
                 )}>
                   {format(d, 'd')}
                 </div>
@@ -215,7 +231,7 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
                         onClick={(e) => { e.stopPropagation(); setSelectedProject(p); }}
                         className={cn(
                           'block w-full text-left text-[11px] font-medium px-1.5 py-0.5 rounded truncate leading-tight hover:opacity-80 transition-opacity',
-                          p.isGlueDown ? 'bg-red-200 text-red-900' : (statusColors[p.status] || 'bg-slate-100 text-slate-700')
+                          TONE_CHIP[chipTone(p)]
                         )}
                         title={`${name}${p.crewName ? ` — ${p.crewName}` : ''}${p.isGlueDown ? ' 🔧 Glue Down' : ''}`}
                       >
@@ -238,39 +254,39 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
         const jobs = selectedProject.jobs || [];
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setSelectedProject(null)}>
-            <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
+            <div className="bg-card rounded-2xl shadow-2xl border border-border p-6 w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">{name}</h3>
-                  {selectedProject.sale?.invoice_number && <p className="text-xs text-slate-500 mt-0.5">Invoice #{selectedProject.sale.invoice_number}</p>}
+                  <h3 className="font-display text-lg font-bold text-foreground">{name}</h3>
+                  {selectedProject.sale?.invoice_number && <p className="text-xs text-muted-foreground mt-0.5">Invoice #{selectedProject.sale.invoice_number}</p>}
                 </div>
-                <button onClick={() => setSelectedProject(null)} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
-                  <X className="w-4 h-4 text-slate-500" />
+                <button onClick={() => setSelectedProject(null)} className="p-1 hover:bg-muted rounded-lg transition-colors">
+                  <X className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
 
               <div className="flex flex-wrap gap-2 mb-4">
-                <Badge className={cn('border', statusColors[selectedProject.status] || 'bg-slate-100 text-slate-700')}>
+                <StatusPill tone={STATUS_TONE[selectedProject.status] || 'neutral'}>
                   {selectedProject.status}
-                </Badge>
+                </StatusPill>
                 {selectedProject.isGlueDown && (
-                  <Badge className="bg-red-100 text-red-800 border border-red-200">🔧 Glue Down</Badge>
+                  <StatusPill tone="warn">🔧 Glue Down</StatusPill>
                 )}
               </div>
 
               {jobs.length > 0 ? (
                 <div className="space-y-3">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">RFMS Crew Schedule</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">RFMS Crew Schedule</p>
                   {jobs.map((job, i) => (
-                    <div key={i} className="bg-indigo-50 border border-indigo-100 rounded-lg p-3 space-y-1">
+                    <div key={i} className="bg-info/10 border border-info/20 rounded-lg p-3 space-y-1">
                       {job.crewName && (
-                        <div className="flex items-center gap-2 text-sm font-semibold text-indigo-800">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-info">
                           <Users className="w-4 h-4" />{job.crewName}
                         </div>
                       )}
                       {(job.scheduledStart || job.scheduledEnd) && (
-                        <div className="flex items-center gap-2 text-xs text-slate-600">
-                          <CalendarIcon className="w-3.5 h-3.5 text-indigo-400" />
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <CalendarIcon className="w-3.5 h-3.5 text-info" />
                           <span>
                             {job.scheduledStart && formatRFMSDate(job.scheduledStart)}
                             {job.scheduledEnd && job.scheduledEnd !== job.scheduledStart && (
@@ -279,25 +295,24 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
                           </span>
                         </div>
                       )}
-                      {job.jobStatus && <p className="text-xs text-indigo-600 font-medium">{job.jobStatus}</p>}
+                      {job.jobStatus && <p className="text-xs text-info font-medium">{job.jobStatus}</p>}
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="space-y-1 text-sm text-slate-500">
+                <div className="space-y-1 text-sm text-muted-foreground">
                   <p>No RFMS crew assigned.</p>
                   {selectedProject.installation_date && (
-                    <p className="text-xs text-slate-400">Install date: {selectedProject.installation_date}</p>
+                    <p className="text-xs text-muted-foreground/70">Install date: {selectedProject.installation_date}</p>
                   )}
                 </div>
               )}
 
-              <Link
-                to={createPageUrl('ProjectDetail') + `?id=${selectedProject.id}`}
-                className="mt-4 flex items-center justify-center gap-2 w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                <ExternalLink className="w-4 h-4" /> View Project
-              </Link>
+              <Button asChild variant="accent" className="mt-4 w-full">
+                <Link to={createPageUrl('ProjectDetail') + `?id=${selectedProject.id}`}>
+                  <ExternalLink className="w-4 h-4" /> View Project
+                </Link>
+              </Button>
             </div>
           </div>
         );
@@ -311,8 +326,8 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
 
       {/* Projects without any date */}
       {projectsWithoutDate.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">No Date Assigned ({projectsWithoutDate.length})</p>
+        <div className="bg-card rounded-xl border border-border p-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">No Date Assigned ({projectsWithoutDate.length})</p>
           <div className="flex flex-wrap gap-2">
             {projectsWithoutDate.map(p => {
               const customer = customers.find(c => c.id === p.customer);
@@ -321,7 +336,7 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
                 <Link
                   key={p.id}
                   to={createPageUrl('ProjectDetail') + `?id=${p.id}`}
-                  className={cn('text-xs font-medium px-2 py-1 rounded border hover:opacity-80 transition-opacity', statusColors[p.status] || 'bg-slate-100 text-slate-700')}
+                  className={cn('text-xs font-medium px-2 py-1 rounded hover:opacity-80 transition-opacity', TONE_CHIP[STATUS_TONE[p.status] || 'neutral'])}
                 >
                   {name}
                 </Link>

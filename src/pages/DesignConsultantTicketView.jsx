@@ -2,7 +2,6 @@ import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, CheckCircle2, AlertCircle, Package, Clock } from 'lucide-react';
@@ -12,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Paperclip, X, Image as ImageIcon, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
 import { SignedImage, SignedFileLink } from '@/lib/fileUrl';
+import StatusPill from '@/components/common/StatusPill';
 
 export default function DesignConsultantTicketView() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -96,7 +96,7 @@ export default function DesignConsultantTicketView() {
       } catch (error) {
         // Not logged in, use default DC name
       }
-      
+
       const ticketMessage = await base44.entities.TicketMessage.create({
         ticket: ticketId,
         message,
@@ -226,8 +226,8 @@ export default function DesignConsultantTicketView() {
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center">
-            <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-3" />
-            <h2 className="text-xl font-semibold text-foreground mb-2">Ticket not found</h2>
+            <AlertCircle className="w-12 h-12 text-crit mx-auto mb-3" />
+            <h2 className="font-display text-xl font-semibold text-foreground mb-2">Ticket not found</h2>
             <p className="text-muted-foreground">This ticket may have been deleted or the link is invalid.</p>
           </CardContent>
         </Card>
@@ -247,7 +247,7 @@ export default function DesignConsultantTicketView() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand-pink mb-4 shadow-xl">
             <Package className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Order Processing Ticket</h1>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground mb-2">Order Processing Ticket</h1>
           <p className="text-muted-foreground">Review and resolve ticket issues</p>
         </div>
 
@@ -256,29 +256,19 @@ export default function DesignConsultantTicketView() {
           <CardHeader className="border-b border-border">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <CardTitle className="text-2xl mb-3">Order #{ticket.order_number}</CardTitle>
-                <div className="flex flex-wrap gap-2">
+                <CardTitle className="font-display text-2xl mb-3">Order #{ticket.order_number}</CardTitle>
+                <div className="flex flex-wrap items-center gap-2">
                   {ticket.customer_last_name && (
-                    <Badge variant="secondary" className="bg-secondary text-secondary-foreground border-border">
-                      {ticket.customer_last_name}
-                    </Badge>
+                    <StatusPill tone="neutral">{ticket.customer_last_name}</StatusPill>
                   )}
-                  <Badge
-                    variant="secondary"
-                    className={cn(
-                      "border",
-                      allResolved
-                        ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25"
-                        : "bg-red-100 text-red-800 border-red-300 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25"
-                    )}
-                  >
+                  <StatusPill tone={allResolved ? 'good' : 'crit'}>
                     {allResolved ? (
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      <CheckCircle2 className="w-3 h-3" />
                     ) : (
-                      <AlertCircle className="w-3 h-3 mr-1" />
+                      <AlertCircle className="w-3 h-3" />
                     )}
                     {resolvedCount} of {totalCount} Resolved
-                  </Badge>
+                  </StatusPill>
                 </div>
               </div>
             </div>
@@ -287,12 +277,12 @@ export default function DesignConsultantTicketView() {
           <CardContent className="pt-6 space-y-6">
             {/* Ticket Info */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Description</h3>
+              <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Description</h3>
               <p className="text-foreground">{ticket.description}</p>
             </div>
 
             {/* Team Members */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-secondary rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
               {assignedDC && (
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Assigned To</p>
@@ -309,7 +299,7 @@ export default function DesignConsultantTicketView() {
 
             {/* Categories */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Issues to Resolve</h3>
+              <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Issues to Resolve</h3>
               <div className="space-y-3">
                 {ticket.categories && ticket.categories.length > 0 ? (
                   ticket.categories.map((cat, idx) => (
@@ -318,32 +308,32 @@ export default function DesignConsultantTicketView() {
                       className={cn(
                         "flex flex-wrap items-center justify-between gap-4 p-4 rounded-lg border transition-all",
                         cat.status === 'Resolved'
-                          ? "bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/20"
+                          ? "bg-good/10 border-good/20"
                           : cat.status === 'Requested Resolve'
-                          ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/20"
+                          ? "bg-warn/10 border-warn/20"
                           : "bg-card border-border"
                       )}
                     >
                       <div className="flex items-start gap-3 flex-1 min-w-0">
                         {cat.status === 'Resolved' ? (
-                          <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                          <CheckCircle2 className="w-5 h-5 text-good flex-shrink-0 mt-0.5" />
                         ) : cat.status === 'Requested Resolve' ? (
-                          <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                          <Clock className="w-5 h-5 text-warn flex-shrink-0 mt-0.5" />
                         ) : (
-                          <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                          <AlertCircle className="w-5 h-5 text-crit flex-shrink-0 mt-0.5" />
                         )}
                         <div className="flex-1">
                           <span className={cn(
                             "font-medium",
-                            cat.status === 'Resolved' ? "text-green-900 dark:text-green-300 line-through" : "text-foreground"
+                            cat.status === 'Resolved' ? "text-good line-through" : "text-foreground"
                           )}>
                             {cat.name}
                           </span>
                           {cat.status === 'Requested Resolve' && (
-                            <div className="text-xs text-yellow-700 dark:text-yellow-400 mt-1">Awaiting approval</div>
+                            <div className="text-xs text-warn mt-1">Awaiting approval</div>
                           )}
                           {cat.status === 'Open' && cat.needs_additional_info && (
-                            <div className="text-xs text-orange-700 dark:text-orange-400 mt-1 font-medium">⚠️ Needs additional information</div>
+                            <div className="text-xs text-warn mt-1 font-medium">⚠️ Needs additional information</div>
                           )}
                         </div>
                       </div>
@@ -355,20 +345,15 @@ export default function DesignConsultantTicketView() {
                             status: 'Requested Resolve'
                           })}
                           disabled={updateCategoryStatusMutation.isPending}
-                          className="bg-primary text-primary-foreground hover:opacity-90"
                         >
                           Request Resolved
                         </Button>
                       )}
                       {cat.status === 'Requested Resolve' && (
-                        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25">
-                          Pending Approval
-                        </Badge>
+                        <StatusPill tone="warn">Pending Approval</StatusPill>
                       )}
                       {cat.status === 'Resolved' && (
-                        <Badge className="bg-green-100 text-green-800 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25">
-                          Resolved
-                        </Badge>
+                        <StatusPill tone="good">Resolved</StatusPill>
                       )}
                     </div>
                   ))
@@ -398,7 +383,7 @@ export default function DesignConsultantTicketView() {
                       {ticketMessages.map((msg) => {
                         const isImage = (url) => {
                           // Check for image extensions in URL (including query params)
-                          return /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i.test(url) || 
+                          return /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i.test(url) ||
                                  url.includes('image');
                         };
                         const getFileName = (url) => {
@@ -417,7 +402,7 @@ export default function DesignConsultantTicketView() {
                             "p-3 rounded-lg border text-sm",
                             msg.sender_role === 'DC'
                               ? "bg-primary/10 border-primary/20 ml-8"
-                              : "bg-secondary border-border mr-8"
+                              : "bg-muted border-border mr-8"
                           )}>
                             <p className="font-medium text-foreground">{msg.sender_name}</p>
                             {msg.message && msg.message !== '(attached files)' && (
@@ -447,7 +432,7 @@ export default function DesignConsultantTicketView() {
                                     <SignedFileLink
                                       key={idx}
                                       src={url}
-                                      className="flex items-center gap-1 px-2 py-1 bg-card border border-border rounded hover:bg-secondary"
+                                      className="flex items-center gap-1 px-2 py-1 bg-card border border-border rounded hover:bg-muted"
                                     >
                                       <Paperclip className="w-3 h-3" />
                                       <span className="text-xs">{getFileName(url)}</span>
@@ -469,12 +454,12 @@ export default function DesignConsultantTicketView() {
                       {uploadingFiles.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {uploadingFiles.map((file, idx) => (
-                            <div key={idx} className="flex items-center gap-1 px-2 py-1 bg-secondary border border-border rounded text-xs">
+                            <div key={idx} className="flex items-center gap-1 px-2 py-1 bg-muted border border-border rounded text-xs">
                               <ImageIcon className="w-3 h-3" />
                               <span className="truncate max-w-[150px]">{file.name}</span>
                               <button
                                 onClick={() => setUploadingFiles(prev => prev.filter((_, i) => i !== idx))}
-                                className="ml-1 hover:text-destructive"
+                                className="ml-1 hover:text-crit"
                               >
                                 <X className="w-3 h-3" />
                               </button>
@@ -544,7 +529,7 @@ export default function DesignConsultantTicketView() {
                                   }
                                 }
                               }
-                              sendMessageMutation.mutate({ 
+                              sendMessageMutation.mutate({
                                 message: messageText.trim() || '(attached files)',
                                 fileUrls
                               });
@@ -552,7 +537,6 @@ export default function DesignConsultantTicketView() {
                             }
                           }}
                           disabled={(!messageText.trim() && !uploadingFiles.length) || sendMessageMutation.isPending}
-                          className="bg-primary text-primary-foreground hover:opacity-90"
                         >
                           {sendMessageMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send'}
                         </Button>
@@ -574,7 +558,7 @@ export default function DesignConsultantTicketView() {
                     <AccordionContent>
                       <div className="space-y-3 mt-2">
                         {ticketLogs.map((log) => (
-                          <div key={log.id} className="p-3 bg-secondary rounded-lg border border-border">
+                          <div key={log.id} className="p-3 bg-muted rounded-lg border border-border">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
                                 <p className="font-medium text-foreground text-sm">{log.action}</p>
@@ -593,17 +577,17 @@ export default function DesignConsultantTicketView() {
                 </Accordion>
               </div>
             )}
-            </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-xs text-muted-foreground">Powered by Floor Daddy RAZZLE DAZZLE</p>
         </div>
-        </div>
+      </div>
 
-        {/* Image Viewer Dialog */}
-        <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
+      {/* Image Viewer Dialog */}
+      <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
         <DialogContent className="max-w-5xl p-0">
           <div className="relative bg-black">
             <button
@@ -643,7 +627,7 @@ export default function DesignConsultantTicketView() {
             )}
           </div>
         </DialogContent>
-        </Dialog>
-        </div>
-        );
-        }
+      </Dialog>
+    </div>
+  );
+}

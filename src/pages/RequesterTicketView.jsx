@@ -2,7 +2,6 @@ import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, CheckCircle2, AlertCircle, Package, Clock, Send } from 'lucide-react';
@@ -12,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Paperclip, X, Image as ImageIcon, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
 import { SignedImage, SignedFileLink } from '@/lib/fileUrl';
+import StatusPill from '@/components/common/StatusPill';
 
 export default function RequesterTicketView() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -192,7 +192,7 @@ export default function RequesterTicketView() {
             const dcData = await base44.entities.TeamMember.filter({ id: ticket.assigned_dc });
             const dc = dcData[0];
             if (dc && dc.phone) {
-              const template = smsSettings.dc_resolution_denied_template || 
+              const template = smsSettings.dc_resolution_denied_template ||
                 'Hi {dc_first_name}! Your resolution request for \'{category_name}\' on Order #{order_number} was denied by {denier_name}. Please review the ticket: {ticket_url}';
 
               const message = template
@@ -257,7 +257,7 @@ export default function RequesterTicketView() {
         throw new Error('DC phone number not found');
       }
 
-      const template = smsSettings.dc_ticket_reminder_template || 
+      const template = smsSettings.dc_ticket_reminder_template ||
         'Hi {dc_first_name}! Reminder: You have an open ticket for Order #{order_number}. Please review and resolve: {ticket_url}';
 
       const message = template
@@ -321,7 +321,7 @@ export default function RequesterTicketView() {
       } catch (error) {
         // Not logged in, use default name
       }
-      
+
       const ticketMessage = await base44.entities.TicketMessage.create({
         ticket: ticketId,
         message,
@@ -364,8 +364,8 @@ export default function RequesterTicketView() {
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center">
-            <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-3" />
-            <h2 className="text-xl font-semibold text-foreground mb-2">Ticket not found</h2>
+            <AlertCircle className="w-12 h-12 text-crit mx-auto mb-3" />
+            <h2 className="font-display text-xl font-bold text-foreground mb-2">Ticket not found</h2>
             <p className="text-muted-foreground">This ticket may have been deleted or the link is invalid.</p>
           </CardContent>
         </Card>
@@ -385,7 +385,8 @@ export default function RequesterTicketView() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary mb-4 shadow-xl">
             <Package className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Order Processing Ticket</h1>
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">Requester View</div>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground mb-2">Order Processing Ticket</h1>
           <p className="text-muted-foreground">Track ticket progress and communicate with DC</p>
         </div>
 
@@ -394,36 +395,26 @@ export default function RequesterTicketView() {
           <CardHeader className="border-b border-border">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <CardTitle className="text-2xl mb-3">Order #{ticket.order_number}</CardTitle>
-                <div className="flex flex-wrap gap-2">
+                <CardTitle className="font-display text-2xl mb-3">Order #{ticket.order_number}</CardTitle>
+                <div className="flex flex-wrap items-center gap-2">
                   {ticket.customer_last_name && (
-                    <Badge variant="secondary" className="bg-secondary text-secondary-foreground border-border">
-                      {ticket.customer_last_name}
-                    </Badge>
+                    <StatusPill tone="neutral">{ticket.customer_last_name}</StatusPill>
                   )}
-                  <Badge
-                    variant="secondary"
-                    className={cn(
-                      "border",
-                      allResolved
-                        ? "bg-green-100 text-green-800 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25"
-                        : "bg-red-100 text-red-800 border-red-300 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25"
-                    )}
-                  >
+                  <StatusPill tone={allResolved ? 'good' : 'crit'}>
                     {allResolved ? (
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      <CheckCircle2 className="w-3 h-3" />
                     ) : (
-                      <AlertCircle className="w-3 h-3 mr-1" />
+                      <AlertCircle className="w-3 h-3" />
                     )}
                     {resolvedCount} of {totalCount} Resolved
-                  </Badge>
+                  </StatusPill>
                   {assignedDC && !allResolved && (
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => sendReminderMutation.mutate()}
                       disabled={sendReminderMutation.isPending}
-                      className="h-6 px-2 text-xs border-primary/30 text-primary hover:bg-primary/10"
+                      className="h-6 px-2 text-xs"
                     >
                       <Send className="w-3 h-3 mr-1" />
                       Remind DC
@@ -437,12 +428,12 @@ export default function RequesterTicketView() {
           <CardContent className="pt-6 space-y-6">
             {/* Ticket Info */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Description</h3>
+              <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Description</h3>
               <p className="text-foreground">{ticket.description}</p>
             </div>
 
             {/* Team Members */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-secondary rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
               {requester && (
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Requested By</p>
@@ -459,7 +450,7 @@ export default function RequesterTicketView() {
 
             {/* Categories */}
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Issue Status</h3>
+              <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Issue Status</h3>
               <div className="space-y-3">
                 {ticket.categories && ticket.categories.length > 0 ? (
                   ticket.categories.map((cat, idx) => (
@@ -468,23 +459,23 @@ export default function RequesterTicketView() {
                       className={cn(
                         "flex flex-wrap items-center justify-between gap-4 p-4 rounded-lg border",
                         cat.status === 'Resolved'
-                          ? "bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/20"
+                          ? "bg-good/10 border-good/20"
                           : cat.status === 'Requested Resolve'
-                          ? "bg-yellow-50 border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/20"
+                          ? "bg-warn/10 border-warn/20"
                           : "bg-card border-border"
                       )}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         {cat.status === 'Resolved' ? (
-                          <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                          <CheckCircle2 className="w-5 h-5 text-good flex-shrink-0" />
                         ) : cat.status === 'Requested Resolve' ? (
-                          <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                          <Clock className="w-5 h-5 text-warn flex-shrink-0" />
                         ) : (
-                          <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                          <AlertCircle className="w-5 h-5 text-crit flex-shrink-0" />
                         )}
                         <span className={cn(
                           "font-medium",
-                          cat.status === 'Resolved' ? "text-green-900 dark:text-green-300 line-through" : "text-foreground"
+                          cat.status === 'Resolved' ? "text-good line-through" : "text-foreground"
                         )}>
                           {cat.name}
                         </span>
@@ -495,7 +486,7 @@ export default function RequesterTicketView() {
                             size="sm"
                             onClick={() => approveCategoryMutation.mutate({ categoryIndex: idx })}
                             disabled={approveCategoryMutation.isPending || denyCategoryMutation.isPending}
-                            className="bg-green-600 text-white hover:bg-green-700"
+                            className="bg-good text-white hover:bg-good/90"
                           >
                             Approve Resolved
                           </Button>
@@ -515,7 +506,6 @@ export default function RequesterTicketView() {
                           size="sm"
                           onClick={() => requestResolveMutation.mutate({ categoryIndex: idx })}
                           disabled={requestResolveMutation.isPending}
-                          className="bg-primary text-primary-foreground hover:opacity-90"
                         >
                           Request Resolved
                         </Button>
@@ -526,7 +516,6 @@ export default function RequesterTicketView() {
                           variant="outline"
                           onClick={() => denyCategoryMutation.mutate({ categoryIndex: idx })}
                           disabled={approveCategoryMutation.isPending || denyCategoryMutation.isPending}
-                          className="border-border text-foreground hover:bg-secondary"
                         >
                           Reopen
                         </Button>
@@ -559,7 +548,7 @@ export default function RequesterTicketView() {
                       {ticketMessages.map((msg) => {
                         const isImage = (url) => {
                           // Check for image extensions in URL (including query params)
-                          return /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i.test(url) || 
+                          return /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?|$)/i.test(url) ||
                                  url.includes('image');
                         };
                         const getFileName = (url) => {
@@ -578,7 +567,7 @@ export default function RequesterTicketView() {
                             "p-3 rounded-lg border text-sm",
                             msg.sender_role === 'Requester'
                               ? "bg-primary/10 border-primary/20 ml-8"
-                              : "bg-secondary border-border mr-8"
+                              : "bg-muted border-border mr-8"
                           )}>
                             <p className="font-medium text-foreground">{msg.sender_name}</p>
                             {msg.message && msg.message !== '(attached files)' && (
@@ -608,7 +597,7 @@ export default function RequesterTicketView() {
                                     <SignedFileLink
                                       key={idx}
                                       src={url}
-                                      className="flex items-center gap-1 px-2 py-1 bg-card border border-border rounded hover:bg-secondary"
+                                      className="flex items-center gap-1 px-2 py-1 bg-card border border-border rounded hover:bg-muted"
                                     >
                                       <Paperclip className="w-3 h-3" />
                                       <span className="text-xs">{getFileName(url)}</span>
@@ -630,7 +619,7 @@ export default function RequesterTicketView() {
                       {uploadingFiles.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {uploadingFiles.map((file, idx) => (
-                            <div key={idx} className="flex items-center gap-1 px-2 py-1 bg-secondary border border-border rounded text-xs">
+                            <div key={idx} className="flex items-center gap-1 px-2 py-1 bg-muted border border-border rounded text-xs">
                               <ImageIcon className="w-3 h-3" />
                               <span className="truncate max-w-[150px]">{file.name}</span>
                               <button
@@ -705,7 +694,7 @@ export default function RequesterTicketView() {
                                   }
                                 }
                               }
-                              sendMessageMutation.mutate({ 
+                              sendMessageMutation.mutate({
                                 message: messageText.trim() || '(attached files)',
                                 fileUrls
                               });
@@ -713,7 +702,6 @@ export default function RequesterTicketView() {
                             }
                           }}
                           disabled={(!messageText.trim() && !uploadingFiles.length) || sendMessageMutation.isPending}
-                          className="bg-primary text-primary-foreground hover:opacity-90"
                         >
                           {sendMessageMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Send'}
                         </Button>
@@ -735,7 +723,7 @@ export default function RequesterTicketView() {
                     <AccordionContent>
                       <div className="space-y-3 mt-2">
                         {ticketLogs.map((log) => (
-                          <div key={log.id} className="p-3 bg-secondary rounded-lg border border-border">
+                          <div key={log.id} className="p-3 bg-muted rounded-lg border border-border">
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1">
                                 <p className="font-medium text-foreground text-sm">{log.action}</p>

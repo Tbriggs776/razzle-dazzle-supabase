@@ -40,7 +40,7 @@ export default function CustomerForm({ customer, onSubmit, onCancel, isLoading }
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Information */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-slate-700 uppercase tracking-wider">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Basic Information
         </h3>
         <div className="grid grid-cols-2 gap-4">
@@ -89,7 +89,7 @@ export default function CustomerForm({ customer, onSubmit, onCancel, isLoading }
 
       {/* Address */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-slate-700 uppercase tracking-wider">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Address
         </h3>
         <div className="space-y-2">
@@ -166,8 +166,9 @@ export default function CustomerForm({ customer, onSubmit, onCancel, isLoading }
         </Button>
         <Button
           type="submit"
+          variant="accent"
           disabled={isLoading}
-          className="bg-indigo-600 hover:bg-indigo-700 h-11 px-5"
+          className="h-11 px-5"
         >
           {isLoading ? (
             <>
