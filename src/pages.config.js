@@ -67,11 +67,13 @@ import LeadAppointmentView from './pages/LeadAppointmentView';
 import LeadDetail from './pages/LeadDetail';
 import Leads from './pages/Leads';
 import InstallerApplications from './pages/InstallerApplications';
+import InstallTeam from './pages/InstallTeam';
 import Logs from './pages/Logs';
 import MyAppointments from './pages/MyAppointments';
 import MyAppointmentResults from './pages/MyAppointmentResults';
 import MyTasks from './pages/MyTasks';
 import MyTickets from './pages/MyTickets';
+import OrderingTeam from './pages/OrderingTeam';
 import OrderProcessing from './pages/OrderProcessing';
 import ProjectDetail from './pages/ProjectDetail';
 import Projects from './pages/Projects';
@@ -86,6 +88,7 @@ import SalesReports from './pages/SalesReports';
 import ScheduleAssistant from './pages/ScheduleAssistant';
 import ScheduledThisWeek from './pages/ScheduledThisWeek';
 import Settings from './pages/Settings';
+import SpeedToInstall from './pages/SpeedToInstall';
 import SubmitTicket from './pages/SubmitTicket';
 import TeamMemberDetail from './pages/TeamMemberDetail';
 import TeamMembers from './pages/TeamMembers';
@@ -112,12 +115,14 @@ export const PAGES = {
     "LeadAppointmentView": LeadAppointmentView,
     "LeadDetail": LeadDetail,
     "InstallerApplications": InstallerApplications,
+    "InstallTeam": InstallTeam,
     "Leads": Leads,
     "Logs": Logs,
     "MyAppointments": MyAppointments,
     "MyAppointmentResults": MyAppointmentResults,
     "MyTasks": MyTasks,
     "MyTickets": MyTickets,
+    "OrderingTeam": OrderingTeam,
     "OrderProcessing": OrderProcessing,
     "ProjectDetail": ProjectDetail,
     "Projects": Projects,
@@ -132,6 +137,7 @@ export const PAGES = {
     "ScheduleAssistant": ScheduleAssistant,
     "ScheduledThisWeek": ScheduledThisWeek,
     "Settings": Settings,
+    "SpeedToInstall": SpeedToInstall,
     "SubmitTicket": SubmitTicket,
     "TeamMemberDetail": TeamMemberDetail,
     "TeamMembers": TeamMembers,

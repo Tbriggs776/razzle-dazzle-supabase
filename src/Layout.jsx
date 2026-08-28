@@ -313,6 +313,7 @@ export default function Layout({ children, currentPageName }) {
     {
       name: 'Order Processing', icon: Package,
       subItems: [
+        { name: 'Ordering Team', href: 'OrderingTeam', pages: ['OrderingTeam'] },
         { name: 'Order Processing', href: 'OrderProcessing', pages: ['OrderProcessing', 'Calculators'] },
         { name: 'Finance', href: 'Finance', pages: ['Finance'] },
       ],
@@ -320,6 +321,8 @@ export default function Layout({ children, currentPageName }) {
     {
       name: 'Installations', icon: HardHat,
       subItems: [
+        { name: 'Install Team', href: 'InstallTeam', pages: ['InstallTeam'] },
+        { name: 'Speed to Install', href: 'SpeedToInstall', pages: ['SpeedToInstall'] },
         { name: 'Install Journey', href: 'Journey', pages: ['Journey', 'JourneyProjectDetail'] },
         { name: 'Projects', href: 'Projects', pages: ['Projects', 'ProjectDetail'] },
         { name: 'Cancellations', href: 'CancelledProjects', pages: ['CancelledProjects'] },
