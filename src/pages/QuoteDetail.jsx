@@ -5,28 +5,33 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { 
-  ArrowLeft, Loader2, FileText, DollarSign, Calendar, MapPin, User,
+import {
+  ArrowLeft, Loader2, FileText, Calendar, MapPin, User,
   Upload, CheckCircle2, Send, ExternalLink, Trophy, RefreshCw, Receipt
 } from 'lucide-react';
 import { generateReceiptPDF } from '@/utils/generateReceiptPDF';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useSignedUrl } from '@/lib/fileUrl';
+import PageHeader from '@/components/common/PageHeader';
+import StatusPill from '@/components/common/StatusPill';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import WorkRow from '@/components/dashboard/WorkRow';
 
-const STATUS_COLORS = {
-  'Draft':     'bg-secondary text-secondary-foreground border-border',
-  'Sent':      'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  'Accepted':  'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
-  'Rejected':  'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'Converted': 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25',
-  'Expired':   'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
+// Domain quote status → StatusPill tone.
+const STATUS_TONE = {
+  Draft: 'neutral',
+  Sent: 'info',
+  Accepted: 'good',
+  Converted: 'good',
+  Rejected: 'crit',
+  Expired: 'crit',
 };
 
 function formatCurrency(val) {
@@ -342,17 +347,17 @@ export default function QuoteDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!quote) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-foreground mb-2">Quote not found</h2>
+          <h2 className="mb-2 text-xl font-semibold text-foreground">Quote not found</h2>
           <Link to={createPageUrl('MyQuotes')} className="text-primary hover:underline">Back to Quotes</Link>
         </div>
       </div>
@@ -361,181 +366,161 @@ export default function QuoteDetail() {
 
   const leadName = lead ? `${lead.first_name} ${lead.last_name}` : 'Unknown Customer';
   const isConverted = quote.status === 'Converted';
+  const statusTone = STATUS_TONE[quote.status] || 'neutral';
+
+  const detailRows = [
+    {
+      label: 'Quote Date',
+      value: quote.quote_date ? format(new Date(quote.quote_date), 'MMM d, yyyy') : '—',
+      Icon: Calendar,
+    },
+    quote.expiration_date && {
+      label: 'Expiration Date',
+      value: format(new Date(quote.expiration_date + 'T00:00:00'), 'MMM d, yyyy'),
+      Icon: Calendar,
+    },
+    quote.location_address && {
+      label: 'Location',
+      value: quote.location_address,
+      Icon: MapPin,
+    },
+    dc && {
+      label: 'Design Consultant',
+      value: `${dc.first_name} ${dc.last_name}`,
+      Icon: User,
+    },
+  ].filter(Boolean);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link to={createPageUrl('MyQuotes')} className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Quotes
-          </Link>
-          <div className="flex flex-col md:flex-row md:items-start gap-6">
-            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg">
-              <FileText className="w-8 h-8" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-foreground">{leadName}</h1>
-              <div className="flex flex-wrap gap-2 mt-3">
-                <Badge variant="secondary" className={cn('border', STATUS_COLORS[quote.status])}>
-                  {quote.status}
-                </Badge>
-                {isConverted && (
-                  <Link to={createPageUrl('SaleDetail') + `?id=${quote.converted_sale_id}`}>
-                    <Badge variant="secondary" className="border bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25 cursor-pointer">
-                      View Sale Record →
-                    </Badge>
-                  </Link>
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <PageHeader
+          eyebrow={
+            <Link
+              to={createPageUrl('MyQuotes')}
+              className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to Quotes
+            </Link>
+          }
+          title={leadName}
+          actions={
+            !isConverted && (
+              <>
+                {quote.quote_file_url && quote.status === 'Draft' && (
+                  <Button variant="outline" onClick={() => setShowSendDialog(true)}>
+                    <Send className="mr-2 h-4 w-4" />
+                    Mark as Sent
+                  </Button>
                 )}
-              </div>
-            </div>
+                {['Draft', 'Sent'].includes(quote.status) && (
+                  <>
+                    <Button variant="outline" onClick={() => updateMutation.mutate({ status: 'Accepted' })} className="text-good">
+                      Mark Accepted
+                    </Button>
+                    <Button variant="outline" onClick={() => updateMutation.mutate({ status: 'Rejected' })} className="text-crit">
+                      Mark Rejected
+                    </Button>
+                  </>
+                )}
+                {['Draft', 'Sent', 'Accepted'].includes(quote.status) && (
+                  <Button
+                    variant="accent"
+                    onClick={() => {
+                      setConvertAmount(quote.quote_amount?.toString() || '');
+                      setInstallationDate('');
+                      // Pre-fill deposit from saved quote deposit info
+                      if (quote.deposit_amount) setDepositAmount(quote.deposit_amount.toString());
+                      if (quote.deposit_payment_method) setDepositPaymentMethod(quote.deposit_payment_method);
+                      if (quote.check_number) setCheckNumber(quote.check_number);
+                      if (quote.check_date) setCheckDate(quote.check_date);
+                      setShowConvertDialog(true);
+                    }}
+                  >
+                    <Trophy className="mr-2 h-4 w-4" />
+                    Convert to Sale
+                  </Button>
+                )}
+              </>
+            )
+          }
+        >
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <StatusPill tone={statusTone} dot>{quote.status}</StatusPill>
           </div>
+        </PageHeader>
 
-          {/* Action Buttons */}
-          {!isConverted && (
-            <div className="flex flex-wrap gap-3 mt-6">
-              {quote.quote_file_url && quote.status === 'Draft' && (
-                <Button
-                  onClick={() => setShowSendDialog(true)}
-                  className="bg-primary text-primary-foreground hover:opacity-90 h-10"
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  Mark as Sent to Customer
-                </Button>
-              )}
-              {['Draft', 'Sent', 'Accepted'].includes(quote.status) && (
-                <Button
-                  onClick={() => {
-                    setConvertAmount(quote.quote_amount?.toString() || '');
-                    setInstallationDate('');
-                    // Pre-fill deposit from saved quote deposit info
-                    if (quote.deposit_amount) setDepositAmount(quote.deposit_amount.toString());
-                    if (quote.deposit_payment_method) setDepositPaymentMethod(quote.deposit_payment_method);
-                    if (quote.check_number) setCheckNumber(quote.check_number);
-                    if (quote.check_date) setCheckDate(quote.check_date);
-                    setShowConvertDialog(true);
-                  }}
-                  className="bg-brand-pink hover:bg-brand-pink/90 text-white h-10"
-                >
-                  <Trophy className="w-4 h-4 mr-2" />
-                  Convert to Sale
-                </Button>
-              )}
-              {['Draft', 'Sent'].includes(quote.status) && (
-                <>
-                  <Button variant="outline" onClick={() => updateMutation.mutate({ status: 'Accepted' })} className="border-green-300 text-green-700 dark:border-green-500/30 dark:text-green-300 h-10">
-                    Mark Accepted
-                  </Button>
-                  <Button variant="outline" onClick={() => updateMutation.mutate({ status: 'Rejected' })} className="border-destructive/30 text-destructive hover:bg-destructive/10 h-10">
-                    Mark Rejected
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
+        {/* Headline metrics */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiTile
+            label="Quote Amount"
+            value={formatCurrency(quote.quote_amount)}
+            hero
+            foot={quote.quote_date ? `Quoted ${format(new Date(quote.quote_date), 'MMM d, yyyy')}` : 'Headline quote value'}
+          />
+          <KpiTile
+            label="Deposit"
+            value={formatCurrency(quote.deposit_amount)}
+            foot={quote.deposit_payment_method || 'No deposit recorded'}
+          />
+          <KpiTile
+            label="Expiration"
+            value={quote.expiration_date ? format(new Date(quote.expiration_date + 'T00:00:00'), 'MMM d, yyyy') : '—'}
+            foot={quote.status === 'Expired' ? 'Quote expired' : 'Valid until'}
+          />
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* Quote Details */}
-          <div className="bg-card rounded-2xl border border-border p-6">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Quote Details</h2>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Quoted Amount</p>
-                  <p className="font-semibold text-foreground text-lg">{formatCurrency(quote.quote_amount)}</p>
-                </div>
+        {/* Details + Customer */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <ModuleCard title="Quote Details" icon={FileText}>
+            {detailRows.map((row) => (
+              <div key={row.label} className="flex items-center gap-3 px-4 py-3">
+                <row.Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{row.label}</span>
+                <span className="ml-auto text-right text-sm font-medium text-foreground">{row.value}</span>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-brand-blue" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Quote Date</p>
-                  <p className="text-foreground">{quote.quote_date ? format(new Date(quote.quote_date), 'MMM d, yyyy') : '—'}</p>
-                </div>
-              </div>
-              {quote.expiration_date && (
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center">
-                    <Calendar className="w-5 h-5 text-brand-gold" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Expiration Date</p>
-                    <p className="text-foreground">{format(new Date(quote.expiration_date + 'T00:00:00'), 'MMM d, yyyy')}</p>
-                  </div>
-                </div>
-              )}
-              {quote.location_address && (
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-brand-gold" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Location</p>
-                    <p className="text-foreground">{quote.location_address}</p>
-                  </div>
-                </div>
-              )}
-              {dc && (
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Design Consultant</p>
-                    <p className="text-foreground">{dc.first_name} {dc.last_name}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+            ))}
+          </ModuleCard>
 
-          {/* Customer Info */}
-          <div className="bg-card rounded-2xl border border-border p-6">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Customer</h2>
+          <ModuleCard title="Customer" icon={User}>
             {lead ? (
-              <div className="space-y-3">
-                <p className="font-semibold text-foreground text-lg">{leadName}</p>
+              <div className="space-y-1.5 px-4 py-4">
+                <p className="text-sm font-semibold text-foreground">{leadName}</p>
                 {lead.email && <p className="text-sm text-muted-foreground">{lead.email}</p>}
                 {lead.phone && <p className="text-sm text-muted-foreground">{lead.phone}</p>}
                 {lead.address_line1 && (
-                  <p className="text-sm text-muted-foreground">{lead.address_line1}{lead.city ? `, ${lead.city}` : ''}{lead.state ? `, ${lead.state}` : ''}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {lead.address_line1}{lead.city ? `, ${lead.city}` : ''}{lead.state ? `, ${lead.state}` : ''}
+                  </p>
                 )}
               </div>
             ) : (
-              <p className="text-muted-foreground">Loading...</p>
+              <div className="px-4 py-4 text-sm text-muted-foreground">Loading...</div>
             )}
-          </div>
+          </ModuleCard>
+        </div>
 
-          {/* Quote PDF */}
-          <div className="bg-card rounded-2xl border border-border p-6 md:col-span-2">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Quote Document</h2>
+        {/* Quote Document */}
+        <ModuleCard title="Quote Document" icon={FileText}>
+          <div className="p-4">
             {quote.quote_file_url ? (
-              <div className="flex flex-wrap items-center gap-4 p-4 rounded-xl bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25">
-                <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+              <div className="flex flex-wrap items-center gap-4 rounded-xl border border-good/25 bg-good/10 p-4">
+                <CheckCircle2 className="h-6 w-6 text-good" />
                 <div className="flex-1">
-                  <p className="font-medium text-green-800 dark:text-green-300">Quote PDF Uploaded</p>
+                  <p className="font-medium text-good">Quote PDF Uploaded</p>
                   {quote.sent_at && (
-                    <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">Sent on {format(new Date(quote.sent_at), 'MMM d, yyyy h:mm a')}</p>
+                    <p className="mt-0.5 text-xs text-good/80">Sent on {format(new Date(quote.sent_at), 'MMM d, yyyy h:mm a')}</p>
                   )}
                 </div>
                 <a href={signedQuoteFileUrl || undefined} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="sm" className="border-green-300 text-green-700 dark:border-green-500/30 dark:text-green-300">
-                    <ExternalLink className="w-4 h-4 mr-1" /> View PDF
+                  <Button variant="outline" size="sm">
+                    <ExternalLink className="mr-1 h-4 w-4" /> View PDF
                   </Button>
                 </a>
                 {!isConverted && (
-                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="border-border">
-                    <RefreshCw className="w-4 h-4 mr-1" /> Replace
+                  <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                    <RefreshCw className="mr-1 h-4 w-4" /> Replace
                   </Button>
                 )}
               </div>
@@ -543,13 +528,13 @@ export default function QuoteDetail() {
               !isConverted && (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-xl cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                  className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border transition-colors hover:border-primary/40 hover:bg-primary/5"
                 >
                   {uploadingQuotePdf ? (
-                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   ) : (
                     <>
-                      <Upload className="w-6 h-6 text-muted-foreground mb-2" />
+                      <Upload className="mb-2 h-6 w-6 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">Upload Quote PDF</p>
                     </>
                   )}
@@ -558,21 +543,24 @@ export default function QuoteDetail() {
             )}
             <input ref={fileInputRef} type="file" accept=".pdf" onChange={handleUploadQuotePdf} className="hidden" />
           </div>
+        </ModuleCard>
 
-          {/* Deposit & Receipt */}
-          <div className="bg-card rounded-2xl border border-border p-6 md:col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Deposit & Receipt</h2>
-              {quote.receipt_file_url && (
-                <a href={signedReceiptFileUrl || undefined} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="sm" className="border-primary/30 text-primary">
-                    <ExternalLink className="w-4 h-4 mr-1" /> View Receipt PDF
-                  </Button>
-                </a>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Deposit & Receipt */}
+        <ModuleCard
+          title="Deposit & Receipt"
+          icon={Receipt}
+          action={
+            quote.receipt_file_url && (
+              <a href={signedReceiptFileUrl || undefined} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="text-primary">
+                  <ExternalLink className="mr-1 h-4 w-4" /> View Receipt PDF
+                </Button>
+              </a>
+            )
+          }
+        >
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* Deposit Amount */}
               <div className="space-y-2">
                 <Label>Deposit Amount</Label>
@@ -619,65 +607,76 @@ export default function QuoteDetail() {
             </div>
 
             {!isConverted && (
-              <div className="flex flex-wrap gap-3 mt-5">
+              <div className="mt-5 flex flex-wrap gap-3">
                 <Button
                   variant="outline"
                   onClick={handleSaveDeposit}
                   disabled={savingDeposit}
-                  className="border-border"
                 >
-                  {savingDeposit ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save Deposit Info'}
+                  {savingDeposit ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : 'Save Deposit Info'}
                 </Button>
                 <Button
                   onClick={handleGenerateReceipt}
                   disabled={generatingReceipt || !quoteDepositAmount || !quoteDepositMethod}
-                  className="bg-primary text-primary-foreground hover:opacity-90"
                 >
                   {generatingReceipt ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating...</>
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>
                   ) : (
-                    <><Receipt className="w-4 h-4 mr-2" />{quote.receipt_file_url ? 'Regenerate Receipt PDF' : 'Generate Receipt PDF'}</>
+                    <><Receipt className="mr-2 h-4 w-4" />{quote.receipt_file_url ? 'Regenerate Receipt PDF' : 'Generate Receipt PDF'}</>
                   )}
                 </Button>
               </div>
             )}
 
             {quote.receipt_file_url && (
-              <div className="mt-4 flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20">
-                <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+              <div className="mt-4 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/10 p-3">
+                <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-primary">Receipt PDF Generated</p>
                   <p className="text-xs text-muted-foreground">Send this along with the quote PDF to the customer.</p>
                 </div>
                 <a href={signedReceiptFileUrl || undefined} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="outline" className="border-primary/30 text-primary">
-                    <ExternalLink className="w-4 h-4 mr-1" /> Open
+                  <Button size="sm" variant="outline" className="text-primary">
+                    <ExternalLink className="mr-1 h-4 w-4" /> Open
                   </Button>
                 </a>
               </div>
             )}
           </div>
+        </ModuleCard>
 
-          {/* Notes */}
-          {quote.notes && (
-            <div className="bg-card rounded-2xl border border-border p-6 md:col-span-2">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">Notes</h2>
-              <p className="text-foreground whitespace-pre-wrap">{quote.notes}</p>
+        {/* Notes */}
+        {quote.notes && (
+          <ModuleCard title="Notes" icon={FileText}>
+            <div className="p-4">
+              <p className="whitespace-pre-wrap text-sm text-foreground">{quote.notes}</p>
             </div>
-          )}
+          </ModuleCard>
+        )}
 
-          {/* Appointment Link */}
-          {quote.appointment && (
-            <div className="bg-card rounded-2xl border border-border p-6 md:col-span-2 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Created from appointment</p>
-              <Link to={createPageUrl('AppointmentDetail') + `?id=${quote.appointment}`}>
-                <Button variant="outline" size="sm" className="border-primary/30 text-primary">
-                  View Appointment →
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
+        {/* Related records */}
+        {(quote.appointment || (isConverted && quote.converted_sale_id)) && (
+          <ModuleCard title="Related" icon={FileText}>
+            {isConverted && quote.converted_sale_id && (
+              <WorkRow
+                lead={convertedSale?.sale_amount ? formatCurrency(convertedSale.sale_amount) : undefined}
+                primary="Sale Record"
+                meta="Converted from this quote"
+                status="Converted"
+                tone="good"
+                onClick={() => navigate(createPageUrl('SaleDetail') + `?id=${quote.converted_sale_id}`)}
+              />
+            )}
+            {quote.appointment && (
+              <WorkRow
+                primary="Source Appointment"
+                meta="Created from appointment"
+                trailing={<span className="text-sm text-muted-foreground">View →</span>}
+                onClick={() => navigate(createPageUrl('AppointmentDetail') + `?id=${quote.appointment}`)}
+              />
+            )}
+          </ModuleCard>
+        )}
       </div>
 
       {/* Mark Sent Dialog */}
@@ -689,8 +688,8 @@ export default function QuoteDetail() {
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSendDialog(false)}>Cancel</Button>
-            <Button onClick={handleMarkSent} disabled={sendingSending} className="bg-primary text-primary-foreground hover:opacity-90">
-              {sendingSending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Confirm Sent'}
+            <Button onClick={handleMarkSent} disabled={sendingSending}>
+              {sendingSending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : 'Confirm Sent'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -698,10 +697,10 @@ export default function QuoteDetail() {
 
       {/* Convert to Sale Dialog */}
       <Dialog open={showConvertDialog} onOpenChange={setShowConvertDialog}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-brand-pink" />
+              <Trophy className="h-5 w-5 text-brand-pink" />
               Convert Quote to Sale
             </DialogTitle>
             <DialogDescription>
@@ -714,9 +713,9 @@ export default function QuoteDetail() {
               <Label>Final Signed Contract PDF *</Label>
               <input ref={contractFileInputRef} type="file" accept=".pdf" onChange={handleUploadContract} className="hidden" />
               {contractFileUrl ? (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  <span className="text-sm text-green-800 dark:text-green-300 flex-1">Contract uploaded</span>
+                <div className="flex items-center gap-3 rounded-lg border border-good/25 bg-good/10 p-3">
+                  <CheckCircle2 className="h-5 w-5 text-good" />
+                  <span className="flex-1 text-sm text-good">Contract uploaded</span>
                   <Button variant="outline" size="sm" onClick={() => contractFileInputRef.current?.click()}>Replace</Button>
                 </div>
               ) : (
@@ -725,9 +724,9 @@ export default function QuoteDetail() {
                   variant="outline"
                   onClick={() => contractFileInputRef.current?.click()}
                   disabled={uploadingContract}
-                  className="w-full h-16 border-dashed"
+                  className="h-16 w-full border-dashed"
                 >
-                  {uploadingContract ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Uploading...</> : <><Upload className="w-4 h-4 mr-2" />Upload Final Contract</>}
+                  {uploadingContract ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Uploading...</> : <><Upload className="mr-2 h-4 w-4" />Upload Final Contract</>}
                 </Button>
               )}
             </div>
@@ -806,7 +805,7 @@ export default function QuoteDetail() {
 
             {/* Email Receipt */}
             {depositAmount && depositPaymentMethod && lead?.email && (
-              <label className="flex items-center gap-3 p-3 rounded-lg border border-primary/20 bg-primary/10 cursor-pointer">
+              <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-primary/20 bg-primary/10 p-3">
                 <input
                   type="checkbox"
                   checked={emailReceiptOnConvert}
@@ -823,14 +822,14 @@ export default function QuoteDetail() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConvertDialog(false)}>Cancel</Button>
             <Button
+              variant="accent"
               onClick={() => convertMutation.mutate()}
               disabled={convertMutation.isPending || !contractFileUrl}
-              className="bg-brand-pink hover:bg-brand-pink/90 text-white"
             >
               {convertMutation.isPending ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Converting...</>
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Converting...</>
               ) : (
-                <><Trophy className="w-4 h-4 mr-2" />Convert to Sale</>
+                <><Trophy className="mr-2 h-4 w-4" />Convert to Sale</>
               )}
             </Button>
           </DialogFooter>

@@ -6,25 +6,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { SignedImage, openSignedFile, resolveFileUrl } from '@/lib/fileUrl';
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  ArrowLeft, 
-  Calendar as CalendarIcon, 
+import {
+  ArrowLeft,
+  Calendar as CalendarIcon,
   Clock,
   User,
   Mail,
   Phone,
   Loader2,
-  FileText,
   DollarSign,
   Edit,
   CheckCircle2,
-  Circle,
   MapPin,
   UserPlus,
   Copy,
@@ -34,14 +29,18 @@ import {
   Download,
   MessageSquare,
   Activity,
-  Image,
   Upload,
   X,
   Paperclip
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import PageHeader from '@/components/common/PageHeader';
+import StatusPill from '@/components/common/StatusPill';
+import SyncBadge from '@/components/common/SyncBadge';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import WorkRow from '@/components/dashboard/WorkRow';
 import TeamNotesSection from '@/components/projects/TeamNotesSection';
 import { generatePreInstallPDF } from '@/utils/generatePreInstallPDF';
 import ImageDescriptionInput from '@/components/projects/ImageDescriptionInput';
@@ -55,14 +54,15 @@ import ProjectProgressTracker from '@/components/projects/ProjectProgressTracker
 import TagSelector from '@/components/tags/TagSelector';
 import PhotoLightbox from '@/components/PhotoLightbox';
 
-const statusColors = {
-  'Cancelled': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'Accepted': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  'Materials Ordered': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
-  'Scheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
-  'In Progress': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
-  'Quality Checks': 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/25',
-  'Completed': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
+// Domain project status → StatusPill tone.
+const STATUS_TONE = {
+  'Cancelled': 'crit',
+  'Accepted': 'info',
+  'Materials Ordered': 'info',
+  'Scheduled': 'warn',
+  'In Progress': 'warn',
+  'Quality Checks': 'info',
+  'Completed': 'good',
 };
 
 const statusSteps = [
@@ -74,25 +74,20 @@ const statusSteps = [
   'Completed'
 ];
 
-// Static class lookups — Tailwind purges dynamically interpolated class names
-// (e.g. `border-${color}-200`), so map each color to full literal strings instead.
+// Customer-experience action button tints, mapped onto the semantic status tokens
+// (attempted → info, completed → good). Keyed by the same `color` field the action
+// list carries, so the button-rendering logic below is unchanged.
 const CX_ACTION_COLORS = {
-  blue: 'border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-500/30 dark:text-blue-300 dark:hover:bg-blue-500/10',
-  green: 'border-green-200 text-green-600 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10',
-  indigo: 'border-indigo-200 text-indigo-600 hover:bg-indigo-50 dark:border-indigo-500/30 dark:text-indigo-300 dark:hover:bg-indigo-500/10',
-  emerald: 'border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/10'
+  blue: 'border-info/30 text-info hover:bg-info/10',
+  green: 'border-good/30 text-good hover:bg-good/10',
+  indigo: 'border-info/30 text-info hover:bg-info/10',
+  emerald: 'border-good/30 text-good hover:bg-good/10'
 };
 const CX_ACTION_ACTIVE = {
-  blue: 'bg-blue-50 dark:bg-blue-500/10',
-  green: 'bg-green-50 dark:bg-green-500/10',
-  indigo: 'bg-indigo-50 dark:bg-indigo-500/10',
-  emerald: 'bg-emerald-50 dark:bg-emerald-500/10'
-};
-const CX_BADGE_COLORS = {
-  blue: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  green: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
-  indigo: 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/25',
-  emerald: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25'
+  blue: 'bg-info/10',
+  green: 'bg-good/10',
+  indigo: 'bg-info/10',
+  emerald: 'bg-good/10'
 };
 
 export default function ProjectDetail() {
@@ -129,9 +124,9 @@ export default function ProjectDetail() {
     queryFn: async () => {
       const projects = await base44.entities.Project.filter({ id: projectId });
       const proj = projects[0];
-      
+
       if (!proj) return null;
-      
+
       // Auto-generate tracker URL if not exists
       if (!proj.project_tracker_url) {
         const fullUrl = `${window.location.origin}/CustomerProjectView?id=${projectId}`;
@@ -143,7 +138,7 @@ export default function ProjectDetail() {
           console.error('Failed to generate tracker URL:', error);
         }
       }
-      
+
       return proj;
     },
     enabled: !!projectId
@@ -351,7 +346,7 @@ export default function ProjectDetail() {
   };
 
   const handleSetInstallationSubmit = () => {
-    updateProjectMutation.mutate({ 
+    updateProjectMutation.mutate({
       installation_date: installationDateData,
       installation_date_status: installationDateStatusData,
       status: 'Scheduled'
@@ -367,12 +362,12 @@ export default function ProjectDetail() {
 
   const handleSendTrackerSMS = async () => {
     if (!customer?.phone || !project.project_tracker_url) return;
-    
+
     setSendingSMS(true);
     try {
       const settings = await base44.entities.SMSSettings.list();
       const smsSettings = settings[0];
-      
+
       if (smsSettings?.customer_project_created_template) {
         const message = smsSettings.customer_project_created_template
           .replace('{customer_first_name}', customer.first_name || '')
@@ -530,7 +525,7 @@ export default function ProjectDetail() {
   };
 
   const handleUpdateImageDescription = async (imageIndex, description) => {
-    const updatedImages = project.images.map((img, i) => 
+    const updatedImages = project.images.map((img, i) =>
       i === imageIndex ? { ...(typeof img === 'string' ? { url: img } : img), description } : img
     );
     await base44.entities.Project.update(projectId, { images: updatedImages });
@@ -609,369 +604,363 @@ export default function ProjectDetail() {
 
   const projectImageUrls = project?.images ? project.images.map(img => typeof img === 'string' ? img : img.url) : [];
   const customerName = customer ? `${customer.first_name} ${customer.last_name}` : 'Loading...';
-  
+
   // Map backend status to display status
   let displayStatus = project.status;
   if (project.status === 'Accepted' && project.installation_date) {
     displayStatus = 'Scheduled';
   }
-  
+
   const currentStepIndex = statusSteps.indexOf(displayStatus);
 
   // Get latest customer experience action
   const getLatestCustomerExperience = () => {
     const actions = [
-      { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', color: CX_BADGE_COLORS.blue },
-      { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', color: CX_BADGE_COLORS.green },
-      { date: project.check_in_attempted_date, label: 'Check-In Attempted', color: CX_BADGE_COLORS.blue },
-      { date: project.check_in_completed_date, label: 'Check-In Completed', color: CX_BADGE_COLORS.green },
-      { date: project.pre_install_call_attempted_date, label: 'Pre-Install Call Attempted', color: CX_BADGE_COLORS.blue },
-      { date: project.pre_install_call_completed_date, label: 'Pre-Install Call Completed', color: CX_BADGE_COLORS.green },
-      { date: project.qa_in_progress_date, label: 'QA In Progress', color: CX_BADGE_COLORS.indigo },
-      { date: project.qa_completed_date, label: 'QA Completed', color: CX_BADGE_COLORS.emerald }
+      { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', tone: 'info' },
+      { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', tone: 'good' },
+      { date: project.check_in_attempted_date, label: 'Check-In Attempted', tone: 'info' },
+      { date: project.check_in_completed_date, label: 'Check-In Completed', tone: 'good' },
+      { date: project.pre_install_call_attempted_date, label: 'Pre-Install Call Attempted', tone: 'info' },
+      { date: project.pre_install_call_completed_date, label: 'Pre-Install Call Completed', tone: 'good' },
+      { date: project.qa_in_progress_date, label: 'QA In Progress', tone: 'info' },
+      { date: project.qa_completed_date, label: 'QA Completed', tone: 'good' }
     ].filter(a => a.date);
-    
+
     if (actions.length === 0) return null;
-    
+
     return actions.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
   };
 
   const latestCustomerExperience = getLatestCustomerExperience();
 
+  const isGlueDown = (() => {
+    if (!sale) return false;
+    const lines = sale.rfms_order_data?.result?.lines || sale.rfms_order_data?.order?.result?.lines;
+    return lines?.some(l => [l.styleName, l.supplierName, l.colorName, l.description].some(v => v?.toLowerCase().includes('glue')));
+  })();
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link
-            to={createPageUrl('Projects')}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Projects
-          </Link>
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-6xl space-y-6">
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col gap-6"
-          >
-            <div className="flex flex-col md:flex-row md:items-start gap-6">
-            <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg ring-4 ring-brand-gold/25">
-              <FileText className="w-10 h-10" />
-            </div>
-
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-foreground tracking-tight">{customerName}</h1>
-              <div className="mt-2 mb-1">
-                <TagSelector
-                  selectedTagIds={project.tags || []}
-                  onChange={(tags) => updateProjectMutation.mutate({ tags })}
-                  className="w-full sm:w-64"
-                />
-              </div>
-              <div className="flex items-center gap-2 mt-3 flex-wrap">
-                <Badge variant="secondary" className={cn('border text-lg px-4 py-1', statusColors[project.status])}>
-                  {project.status}
-                </Badge>
-                {project.installation_date_status && (
-                  <Badge className="border text-lg px-4 py-1 bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
-                    {project.installation_date_status}
-                  </Badge>
-                )}
-                {latestCustomerExperience && (
-                  <Badge variant="secondary" className={cn('border px-3 py-1', latestCustomerExperience.color)}>
-                    {latestCustomerExperience.label}
-                  </Badge>
-                )}
-              </div>
-              {sale && (() => {
-                const lines = sale.rfms_order_data?.result?.lines || sale.rfms_order_data?.order?.result?.lines;
-                const isGlueDown = lines?.some(l => [l.styleName, l.supplierName, l.colorName, l.description].some(v => v?.toLowerCase().includes('glue')));
-                return isGlueDown ? (
-                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100 border border-amber-300 dark:bg-amber-500/15 dark:border-amber-500/30 rounded-lg text-amber-800 dark:text-amber-300 font-semibold text-sm">
-                    🔧 Glue Down Project
-                  </div>
-                ) : null;
-              })()}
-              {project.created_by && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  Created by <span className="font-medium text-muted-foreground">{project.created_by}</span>
-                  {project.created_date && (
-                    <> on {format(new Date(project.created_date), 'MMM d, yyyy')} at {format(new Date(project.created_date), 'h:mm a')}</>
-                  )}
-                </p>
+        <PageHeader
+          eyebrow={
+            <Link
+              to={createPageUrl('Projects')}
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Projects
+            </Link>
+          }
+          title={customerName}
+          actions={
+            <>
+              {project.project_tracker_url && (
+                <Button
+                  onClick={() => window.open(project.project_tracker_url, '_blank')}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Customer View
+                </Button>
+              )}
+              <Button onClick={handleEditClick} variant="accent" size="sm">
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Project
+              </Button>
+              {project.status !== 'Cancelled' ? (
+                <Button
+                  onClick={() => setShowCancelDialog(true)}
+                  variant="outline"
+                  size="sm"
+                  className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Cancel Project
+                </Button>
+              ) : (
+                <Button
+                  onClick={async () => {
+                    const restoreStatus = project.pre_cancelled_status || 'Accepted';
+                    await updateProjectMutation.mutateAsync({
+                      status: restoreStatus,
+                      installation_date_status: null,
+                      cancelled_date: null,
+                      cancelled_by: null,
+                      cancelled_reason: null,
+                      pre_cancelled_status: null
+                    });
+                    if (sale?.id) {
+                      await base44.entities.Sale.update(sale.id, {
+                        is_cancelled: false,
+                        cancelled_date: null,
+                        cancelled_reason: null
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['sale', sale.id] });
+                    }
+                    await base44.entities.ProjectLog.create({
+                      project: projectId,
+                      action: 'Cancellation Removed',
+                      details: `Project restored to ${restoreStatus}`,
+                      user_email: currentUser?.email,
+                      user_name: currentUser?.full_name
+                    });
+                    queryClient.invalidateQueries({ queryKey: ['projectLogs', projectId] });
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="border-good/30 text-good hover:bg-good/10"
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  Restore Project
+                </Button>
+              )}
+              <Button
+                onClick={() => setShowDeleteDialog(true)}
+                variant="outline"
+                size="sm"
+                className="border-destructive/40 text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </>
+          }
+        >
+          <div className="mt-3 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusPill tone={STATUS_TONE[project.status] || 'neutral'} dot>
+                {project.status}
+              </StatusPill>
+              {project.installation_date_status && (
+                <StatusPill tone="crit">{project.installation_date_status}</StatusPill>
+              )}
+              {latestCustomerExperience && (
+                <StatusPill tone={latestCustomerExperience.tone}>
+                  {latestCustomerExperience.label}
+                </StatusPill>
+              )}
+              {sale?.invoice_number && <SyncBadge status="synced" label="RFMS" />}
+              {isGlueDown && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-warn/30 bg-warn/10 px-2.5 py-0.5 text-[11px] font-semibold text-warn">
+                  🔧 Glue Down Project
+                </span>
               )}
             </div>
 
-              <div className="flex flex-wrap gap-2 sm:gap-3">
-                {project.project_tracker_url && (
-                  <Button
-                    onClick={() => window.open(project.project_tracker_url, '_blank')}
-                    variant="outline"
-                    className="border-purple-200 text-purple-600 hover:bg-purple-50 dark:border-purple-500/30 dark:text-purple-300 dark:hover:bg-purple-500/10"
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Customer View
-                  </Button>
+            <TagSelector
+              selectedTagIds={project.tags || []}
+              onChange={(tags) => updateProjectMutation.mutate({ tags })}
+              className="w-full sm:w-64"
+            />
+
+            {project.created_by && (
+              <p className="text-xs text-muted-foreground">
+                Created by <span className="font-medium text-foreground">{project.created_by}</span>
+                {project.created_date && (
+                  <> on {format(new Date(project.created_date), 'MMM d, yyyy')} at {format(new Date(project.created_date), 'h:mm a')}</>
                 )}
-                <Button
-                  onClick={handleEditClick}
-                  variant="outline"
-                  className="border-primary/30 text-primary hover:bg-primary/10"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Project
-                </Button>
-                {project.status !== 'Cancelled' ? (
-                  <Button
-                    onClick={() => setShowCancelDialog(true)}
-                    variant="outline"
-                    className="border-destructive/40 text-destructive hover:bg-destructive/10"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Cancel Project
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={async () => {
-                      const restoreStatus = project.pre_cancelled_status || 'Accepted';
-                      await updateProjectMutation.mutateAsync({
-                        status: restoreStatus,
-                        installation_date_status: null,
-                        cancelled_date: null,
-                        cancelled_by: null,
-                        cancelled_reason: null,
-                        pre_cancelled_status: null
-                      });
-                      if (sale?.id) {
-                        await base44.entities.Sale.update(sale.id, {
-                          is_cancelled: false,
-                          cancelled_date: null,
-                          cancelled_reason: null
-                        });
-                        queryClient.invalidateQueries({ queryKey: ['sale', sale.id] });
-                      }
-                      await base44.entities.ProjectLog.create({
-                        project: projectId,
-                        action: 'Cancellation Removed',
-                        details: `Project restored to ${restoreStatus}`,
-                        user_email: currentUser?.email,
-                        user_name: currentUser?.full_name
-                      });
-                      queryClient.invalidateQueries({ queryKey: ['projectLogs', projectId] });
-                    }}
-                    variant="outline"
-                    className="border-green-200 text-green-600 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
-                  >
-                    <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Restore Project
-                  </Button>
-                )}
-                <Button
-                  onClick={() => setShowDeleteDialog(true)}
-                  variant="outline"
-                  className="border-destructive/40 text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
+              </p>
+            )}
+          </div>
+        </PageHeader>
+
+        {/* Cancelled banner */}
+        {project.status === 'Cancelled' && (
+          <div className="flex items-center gap-3 rounded-xl border border-crit/25 bg-crit/10 px-5 py-4">
+            <span className="text-2xl">🚫</span>
+            <div className="flex-1">
+              <p className="text-sm font-bold uppercase tracking-wide text-crit">Project Cancelled</p>
+              {project.cancelled_date && (
+                <p className="mt-0.5 text-sm text-crit">
+                  {project.cancelled_by && <span>By {project.cancelled_by} · </span>}
+                  {format(new Date(project.cancelled_date), 'MMM d, yyyy h:mm a')}
+                </p>
+              )}
+              {project.cancelled_reason && (
+                <p className="mt-0.5 text-sm text-crit">Reason: {project.cancelled_reason}</p>
+              )}
             </div>
+          </div>
+        )}
 
-            {project.status === 'Cancelled' && (
-              <div className="bg-red-50 border border-red-300 dark:bg-red-500/10 dark:border-red-500/25 rounded-xl px-5 py-4 flex items-center gap-3">
-                <span className="text-2xl">🚫</span>
-                <div className="flex-1">
-                  <p className="font-bold text-red-800 dark:text-red-300 text-sm uppercase tracking-wide">Project Cancelled</p>
-                  {project.cancelled_date && (
-                    <p className="text-red-700 dark:text-red-300 text-sm mt-0.5">
-                      {project.cancelled_by && <span>By {project.cancelled_by} · </span>}
-                      {format(new Date(project.cancelled_date), 'MMM d, yyyy h:mm a')}
-                    </p>
-                  )}
-                  {project.cancelled_reason && (
-                    <p className="text-red-600 dark:text-red-300 text-sm mt-0.5">Reason: {project.cancelled_reason}</p>
-                  )}
-                </div>
-              </div>
-            )}
+        {/* Pre-1978 notice */}
+        {isPreConstruction1978 && (
+          <div className="flex items-center gap-3 rounded-xl border border-crit/25 bg-crit/10 px-5 py-4">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-crit">Pre-1978 Home — Lead Paint &amp; Asbestos Notice Required</p>
+              <p className="mt-0.5 text-sm text-crit">This home was built on or before 1978. Ensure all required lead paint disclosures, asbestos precautions, and EPA RRP protocols are followed.</p>
+            </div>
+          </div>
+        )}
 
-            {isPreConstruction1978 && (
-              <div className="bg-red-50 border border-red-300 dark:bg-red-500/10 dark:border-red-500/25 rounded-xl px-5 py-4 flex items-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                <div>
-                  <p className="font-bold text-red-800 dark:text-red-300 text-sm uppercase tracking-wide">Pre-1978 Home — Lead Paint & Asbestos Notice Required</p>
-                  <p className="text-red-700 dark:text-red-300 text-sm mt-0.5">This home was built on or before 1978. Ensure all required lead paint disclosures, asbestos precautions, and EPA RRP protocols are followed.</p>
-                </div>
-              </div>
-            )}
+        <ProjectProgressTracker project={project} projectLogs={projectLogs} />
 
-            <ProjectProgressTracker project={project} projectLogs={projectLogs} />
-          </motion.div>
+        {/* KPI summary */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <KpiTile
+            label="Sale Amount"
+            value={sale?.sale_amount ? `$${sale.sale_amount.toLocaleString()}` : '—'}
+            hero
+            foot={sale?.invoice_number ? `Invoice #${sale.invoice_number}` : 'Linked sale'}
+          />
+          <KpiTile
+            label="Installation Date"
+            value={project.installation_date ? format(new Date(project.installation_date + 'T00:00:00'), 'MMM d, yyyy') : 'Not set'}
+            foot={project.installation_date_status || (project.installation_date ? 'Scheduled' : 'Awaiting schedule')}
+          />
+          <KpiTile
+            label="Install Stage"
+            value={currentStepIndex >= 0 ? `${currentStepIndex + 1} / ${statusSteps.length}` : '—'}
+            foot={displayStatus}
+          />
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {/* Sale Documentation Photos */}
-          {sale && (sale.folder_photo_url || sale.yard_sign_photo_url || sale.driver_license_photo_url) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Sale Documentation Photos
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {sale.folder_photo_url && (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-foreground">RAZZLE DAZZLE Folder</p>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={async () => {
-                          const signedUrl = await resolveFileUrl(sale.folder_photo_url);
-                          if (!signedUrl) return;
+        {/* Sale Documentation Photos */}
+        {sale && (sale.folder_photo_url || sale.yard_sign_photo_url || sale.driver_license_photo_url) && (
+          <ModuleCard title="Sale Documentation Photos">
+            <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
+              {sale.folder_photo_url && (
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-sm font-medium text-foreground">RAZZLE DAZZLE Folder</p>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={async () => {
+                        const signedUrl = await resolveFileUrl(sale.folder_photo_url);
+                        if (!signedUrl) return;
+                        const link = document.createElement('a');
+                        link.href = signedUrl;
+                        link.download = 'folder-photo.jpg';
+                        link.click();
+                      }}
+                      className="h-7 px-2 text-xs"
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <SignedImage
+                    src={sale.folder_photo_url}
+                    alt="RAZZLE DAZZLE Folder"
+                    className="h-64 w-full cursor-pointer rounded-lg border border-border object-cover transition-opacity hover:opacity-90"
+                    onClick={() => openSignedFile(sale.folder_photo_url)}
+                  />
+                </div>
+              )}
+              {sale.yard_sign_photo_url && (
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-sm font-medium text-foreground">Yard Sign</p>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={async () => {
+                        const signedUrl = await resolveFileUrl(sale.yard_sign_photo_url);
+                        if (!signedUrl) return;
+                        const link = document.createElement('a');
+                        link.href = signedUrl;
+                        link.download = 'yard-sign-photo.jpg';
+                        link.click();
+                      }}
+                      className="h-7 px-2 text-xs"
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <SignedImage
+                    src={sale.yard_sign_photo_url}
+                    alt="Yard Sign"
+                    className="h-64 w-full cursor-pointer rounded-lg border border-border object-cover transition-opacity hover:opacity-90"
+                    onClick={() => openSignedFile(sale.yard_sign_photo_url)}
+                  />
+                </div>
+              )}
+              {sale.driver_license_photo_url && (
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-sm font-medium text-foreground">Driver's License</p>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={async () => {
+                        const signedUrl = await resolveFileUrl(sale.driver_license_photo_url);
+                        if (!signedUrl) return;
+                        try {
+                          const response = await fetch(signedUrl, {
+                            mode: 'cors'
+                          });
+                          const blob = await response.blob();
+                          const url = window.URL.createObjectURL(blob);
                           const link = document.createElement('a');
-                          link.href = signedUrl;
-                          link.download = 'folder-photo.jpg';
+                          link.style.display = 'none';
+                          link.href = url;
+                          link.setAttribute('download', `${customer?.last_name || 'customer'}-drivers-license.jpg`);
+                          document.body.appendChild(link);
                           link.click();
-                        }}
-                        className="h-7 px-2 text-xs"
-                      >
-                        <Download className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <SignedImage
-                      src={sale.folder_photo_url}
-                      alt="RAZZLE DAZZLE Folder"
-                      className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => openSignedFile(sale.folder_photo_url)}
-                    />
+                          setTimeout(() => {
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(url);
+                          }, 100);
+                        } catch (error) {
+                          console.error('Download failed:', error);
+                          window.open(signedUrl, '_blank');
+                        }
+                      }}
+                      className="h-7 px-2 text-xs"
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
                   </div>
-                )}
-                {sale.yard_sign_photo_url && (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-foreground">Yard Sign</p>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={async () => {
-                          const signedUrl = await resolveFileUrl(sale.yard_sign_photo_url);
-                          if (!signedUrl) return;
-                          const link = document.createElement('a');
-                          link.href = signedUrl;
-                          link.download = 'yard-sign-photo.jpg';
-                          link.click();
-                        }}
-                        className="h-7 px-2 text-xs"
-                      >
-                        <Download className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <SignedImage
-                      src={sale.yard_sign_photo_url}
-                      alt="Yard Sign"
-                      className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => openSignedFile(sale.yard_sign_photo_url)}
-                    />
-                  </div>
-                )}
-                {sale.driver_license_photo_url && (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-foreground">Driver's License</p>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={async () => {
-                          const signedUrl = await resolveFileUrl(sale.driver_license_photo_url);
-                          if (!signedUrl) return;
-                          try {
-                            const response = await fetch(signedUrl, {
-                              mode: 'cors'
-                            });
-                            const blob = await response.blob();
-                            const url = window.URL.createObjectURL(blob);
-                            const link = document.createElement('a');
-                            link.style.display = 'none';
-                            link.href = url;
-                            link.setAttribute('download', `${customer?.last_name || 'customer'}-drivers-license.jpg`);
-                            document.body.appendChild(link);
-                            link.click();
-                            setTimeout(() => {
-                              document.body.removeChild(link);
-                              window.URL.revokeObjectURL(url);
-                            }, 100);
-                          } catch (error) {
-                            console.error('Download failed:', error);
-                            window.open(signedUrl, '_blank');
-                          }
-                        }}
-                        className="h-7 px-2 text-xs"
-                      >
-                        <Download className="w-3 h-3" />
-                      </Button>
-                    </div>
-                    <SignedImage
-                      src={sale.driver_license_photo_url}
-                      alt="Driver's License"
-                      className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => openSignedFile(sale.driver_license_photo_url)}
-                    />
-                  </div>
-                )}
-                {sale.yard_sign_opted_out && !sale.yard_sign_photo_url && (
-                  <div className="flex items-center justify-center h-64 rounded-lg border border-border bg-secondary">
-                    <p className="text-sm text-muted-foreground">Customer opted out of yard sign</p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
+                  <SignedImage
+                    src={sale.driver_license_photo_url}
+                    alt="Driver's License"
+                    className="h-64 w-full cursor-pointer rounded-lg border border-border object-cover transition-opacity hover:opacity-90"
+                    onClick={() => openSignedFile(sale.driver_license_photo_url)}
+                  />
+                </div>
+              )}
+              {sale.yard_sign_opted_out && !sale.yard_sign_photo_url && (
+                <div className="flex h-64 items-center justify-center rounded-lg border border-border bg-muted">
+                  <p className="text-sm text-muted-foreground">Customer opted out of yard sign</p>
+                </div>
+              )}
+            </div>
+          </ModuleCard>
+        )}
 
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Customer Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Customer Information
-            </h2>
+          <ModuleCard title="Customer Information" icon={User}>
             {customer ? (
-              <div className="space-y-4">
+              <div className="space-y-1 p-3">
                 <Link
                   to={createPageUrl('CustomerDetail') + `?id=${customer.id}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
+                  className="group flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-muted/50"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <User className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs text-muted-foreground mb-0.5">Name</p>
-                    <p className="text-foreground group-hover:text-primary transition-colors">
+                    <p className="mb-0.5 text-xs text-muted-foreground">Name</p>
+                    <p className="text-foreground transition-colors group-hover:text-primary">
                       {customerName}
                     </p>
                   </div>
                 </Link>
                 <a
                   href={`mailto:${customer.email}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
+                  className="group flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-muted/50"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-500/15 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-600 dark:text-green-300" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-good/12">
+                    <Mail className="h-5 w-5 text-good" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Email</p>
-                    <p className="text-foreground group-hover:text-green-600 transition-colors">
+                    <p className="mb-0.5 text-xs text-muted-foreground">Email</p>
+                    <p className="text-foreground transition-colors group-hover:text-good">
                       {customer.email}
                     </p>
                   </div>
@@ -979,14 +968,14 @@ export default function ProjectDetail() {
                 {customer.phone && (
                   <a
                     href={`tel:${customer.phone}`}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
+                    className="group flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-muted/50"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-brand-blue" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-blue/12">
+                      <Phone className="h-5 w-5 text-brand-blue" />
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
-                      <p className="text-foreground group-hover:text-brand-blue transition-colors">
+                      <p className="mb-0.5 text-xs text-muted-foreground">Phone</p>
+                      <p className="text-foreground transition-colors group-hover:text-brand-blue">
                         {customer.phone}
                       </p>
                     </div>
@@ -994,52 +983,83 @@ export default function ProjectDetail() {
                 )}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-4">Loading customer information...</p>
+              <p className="py-8 text-center text-muted-foreground">Loading customer information...</p>
             )}
-          </motion.div>
+          </ModuleCard>
 
-          {/* Sale Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
+          {/* Assigned Team */}
+          <ModuleCard
+            title="Assigned Team"
+            icon={UserPlus}
+            action={
+              <Button onClick={handleAssignClick} size="sm">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Assign Team
+              </Button>
+            }
           >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Related Sale
-            </h2>
-            {sale ? (
-              <div className="space-y-4">
-                <Link
-                  to={createPageUrl('SaleDetail') + `?id=${sale.id}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
+            <div className="space-y-3 p-4">
+              {projectManager && (
+                <div className="flex items-center gap-4 rounded-xl border border-primary/20 bg-primary/10 p-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+                    <User className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Sale Amount</p>
-                    <p className="text-foreground group-hover:text-emerald-600 transition-colors text-lg font-semibold">
-                      {sale.sale_amount ? `$${sale.sale_amount.toLocaleString()}` : 'N/A'}
+                    <p className="text-sm font-medium text-primary">Project Manager</p>
+                    <p className="font-semibold text-foreground">
+                      {projectManager.first_name} {projectManager.last_name}
                     </p>
-                    {sale.invoice_number && (
-                      <p className="text-xs text-muted-foreground mt-1">Invoice #{sale.invoice_number}</p>
-                    )}
                   </div>
-                </Link>
+                </div>
+              )}
+
+              {installationManager && (
+                <div className="flex items-center gap-4 rounded-xl border border-brand-blue/20 bg-brand-blue/10 p-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/15">
+                    <User className="h-6 w-6 text-brand-blue" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-brand-blue">Installation Manager</p>
+                    <p className="font-semibold text-foreground">
+                      {installationManager.first_name} {installationManager.last_name}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {!projectManager && !installationManager && (
+                <p className="py-6 text-center text-muted-foreground">No team members assigned yet</p>
+              )}
+            </div>
+          </ModuleCard>
+        </div>
+
+        {/* Related Sale */}
+        <ModuleCard title="Related Sale" icon={DollarSign}>
+          {sale ? (
+            <>
+              <WorkRow
+                lead={sale.sale_amount ? `$${sale.sale_amount.toLocaleString()}` : 'N/A'}
+                primary={sale.invoice_number ? `Invoice #${sale.invoice_number}` : 'Sale record'}
+                meta={sale.sale_date ? format(new Date(sale.sale_date), 'MMM d, yyyy') : 'Open sale record'}
+                status="View Sale"
+                tone="good"
+                onClick={() => navigate(createPageUrl('SaleDetail') + `?id=${sale.id}`)}
+              />
+              <div className="space-y-3 p-4">
                 {project.installation_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-yellow-50 border border-yellow-100 dark:bg-yellow-500/10 dark:border-yellow-500/20">
-                    <div className="w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
-                      <CalendarIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-300" />
+                  <div className="flex items-center gap-4 rounded-xl border border-warn/20 bg-warn/10 p-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warn/15">
+                      <CalendarIcon className="h-5 w-5 text-warn" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-yellow-600 dark:text-yellow-300 mb-0.5">Installation Date</p>
+                      <p className="mb-0.5 text-xs text-warn">Installation Date</p>
                       <div className="flex items-center gap-2">
-                        <p className="text-foreground font-semibold">
+                        <p className="font-semibold text-foreground">
                           {format(new Date(project.installation_date + 'T00:00:00'), 'MMMM d, yyyy')}
                         </p>
                         {project.installation_date_status && (
-                          <span className="text-xs font-semibold text-red-600 bg-red-100 dark:text-red-300 dark:bg-red-500/15 px-2 py-1 rounded capitalize">
+                          <span className="rounded bg-crit/12 px-2 py-1 text-xs font-semibold capitalize text-crit">
                             {project.installation_date_status}
                           </span>
                         )}
@@ -1063,7 +1083,7 @@ export default function ProjectDetail() {
                     }
                   }}
                   variant="outline"
-                  className="w-full border-green-200 text-green-700 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
+                  className="w-full border-good/30 text-good hover:bg-good/10"
                 >
                   {downloadingChecklistPDF ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
                   Download Pre-Install Checklist
@@ -1078,909 +1098,761 @@ export default function ProjectDetail() {
                     Download Contract
                   </Button>
                 )}
-
-
               </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">Loading sale information...</p>
-            )}
-          </motion.div>
-
-          {/* Order Processor Tools */}
-          {(currentUser?.role === 'admin' || currentTeamMember?.role === 'Order Processor' || currentTeamMember?.role === 'Customer Experience Coordinator') && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-card rounded-2xl border border-border p-6"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Order Processor Tools
-              </h2>
-              <div className="space-y-3">
-                {!project.installation_date && (
-                  <Button
-                    onClick={handleSetInstallationClick}
-                    variant="outline"
-                    className="w-full border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
-                  >
-                    <CalendarIcon className="w-4 h-4 mr-2" />
-                    Set Installation Date
-                  </Button>
-                )}
-                {project.installation_date && (
-                  <Button
-                    onClick={handleRescheduleClick}
-                    variant="outline"
-                    className="w-full border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-500/30 dark:text-yellow-300 dark:hover:bg-yellow-500/10"
-                  >
-                    <Clock className="w-4 h-4 mr-2" />
-                    Reschedule Installation
-                  </Button>
-                )}
-                {sale?.contract_file_url && (
-                  <Button
-                    onClick={() => openSignedFile(sale.contract_file_url)}
-                    variant="outline"
-                    className="w-full border-primary/30 text-primary hover:bg-primary/10"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Contract
-                  </Button>
-                )}
-                <Button
-                  onClick={() => updateProjectMutation.mutate({ status: 'Materials Ordered' })}
-                  disabled={updateProjectMutation.isPending || project.status === 'Materials Ordered'}
-                  className="w-full bg-purple-600 hover:bg-purple-700"
-                >
-                  {updateProjectMutation.isPending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    'Mark Materials Ordered'
-                  )}
-                </Button>
-
-                {/* Installation Status Buttons */}
-                {project.installation_date && (
-                  <div className="pt-3 border-t border-border space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground uppercase">Installation Status</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        onClick={() => {
-                          setUpdatingStatus('pending payment');
-                          updateProjectMutation.mutate({ installation_date_status: 'pending payment' });
-                        }}
-                        disabled={updateProjectMutation.isPending}
-                        variant="outline"
-                        size="sm"
-                        className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10"
-                      >
-                        {updatingStatus === 'pending payment' && updateProjectMutation.isPending ? (
-                          <>
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            Updating...
-                          </>
-                        ) : project.installation_date_status === 'pending payment' ? (
-                          <>
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Pending Payment
-                          </>
-                        ) : (
-                          'Pending Payment'
-                        )}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setUpdatingStatus('pending contract');
-                          updateProjectMutation.mutate({ installation_date_status: 'pending contract' });
-                        }}
-                        disabled={updateProjectMutation.isPending}
-                        variant="outline"
-                        size="sm"
-                        className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10"
-                      >
-                        {updatingStatus === 'pending contract' && updateProjectMutation.isPending ? (
-                          <>
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            Updating...
-                          </>
-                        ) : project.installation_date_status === 'pending contract' ? (
-                          <>
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Pending Contract
-                          </>
-                        ) : (
-                          'Pending Contract'
-                        )}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setUpdatingStatus('on hold');
-                          updateProjectMutation.mutate({ installation_date_status: 'on hold' });
-                        }}
-                        disabled={updateProjectMutation.isPending}
-                        variant="outline"
-                        size="sm"
-                        className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10"
-                      >
-                        {updatingStatus === 'on hold' && updateProjectMutation.isPending ? (
-                          <>
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            Updating...
-                          </>
-                        ) : project.installation_date_status === 'on hold' ? (
-                          <>
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            On Hold
-                          </>
-                        ) : (
-                          'On Hold'
-                        )}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setUpdatingStatus('pending cancellation');
-                          updateProjectMutation.mutate({ installation_date_status: 'pending cancellation' });
-                        }}
-                        disabled={updateProjectMutation.isPending}
-                        variant="outline"
-                        size="sm"
-                        className="border-destructive/40 text-destructive hover:bg-destructive/10"
-                      >
-                        {updatingStatus === 'pending cancellation' && updateProjectMutation.isPending ? (
-                          <>
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            Updating...
-                          </>
-                        ) : project.installation_date_status === 'pending cancellation' ? (
-                          <>
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Pending Cancellation
-                          </>
-                        ) : (
-                          'Pending Cancellation'
-                        )}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setUpdatingStatus('clear');
-                          const wasOnHold = project.installation_date_status && ['pending payment','pending contract','on hold','pending cancellation'].includes(project.installation_date_status);
-                          updateProjectMutation.mutate({ installation_date_status: '', ...(wasOnHold ? { hold_cleared_date: new Date().toISOString() } : {}) });
-                        }}
-                        disabled={updateProjectMutation.isPending}
-                        variant="outline"
-                        size="sm"
-                        className="border-border text-muted-foreground hover:bg-secondary"
-                      >
-                        {updatingStatus === 'clear' && updateProjectMutation.isPending ? (
-                          <>
-                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                            Clearing...
-                          </>
-                        ) : !project.installation_date_status ? (
-                          <>
-                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                            Clear Status
-                          </>
-                        ) : (
-                          'Clear Status'
-                        )}
-                      </Button>
-                    </div>
-
-                    {/* Project Status Buttons */}
-                    <div className="pt-3 border-t border-border space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground uppercase">Project Status</p>
-                      <Button
-                        onClick={() => {
-                          setUpdatingStatus('in_progress');
-                          updateProjectMutation.mutate({ status: 'In Progress' });
-                        }}
-                        disabled={updateProjectMutation.isPending || project.status === 'In Progress'}
-                        className={cn(
-                          "w-full",
-                          project.status === 'In Progress'
-                            ? "bg-orange-500 hover:bg-orange-500 cursor-default"
-                            : "bg-orange-500 hover:bg-orange-600"
-                        )}
-                      >
-                        {updatingStatus === 'in_progress' && updateProjectMutation.isPending ? (
-                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</>
-                        ) : project.status === 'In Progress' ? (
-                          <><CheckCircle2 className="w-4 h-4 mr-2" />In Progress</>
-                        ) : (
-                          'Mark as In Progress'
-                        )}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setUpdatingStatus('completed');
-                          updateProjectMutation.mutate({ status: 'Completed' });
-                        }}
-                        disabled={updateProjectMutation.isPending || project.status === 'Completed'}
-                        className={cn(
-                          "w-full",
-                          project.status === 'Completed'
-                            ? "bg-green-600 hover:bg-green-600 cursor-default"
-                            : "bg-green-600 hover:bg-green-700"
-                        )}
-                      >
-                        {updatingStatus === 'completed' && updateProjectMutation.isPending ? (
-                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</>
-                        ) : project.status === 'Completed' ? (
-                          <><CheckCircle2 className="w-4 h-4 mr-2" />Completed</>
-                        ) : (
-                          'Mark as Completed'
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
+            </>
+          ) : (
+            <p className="py-8 text-center text-muted-foreground">Loading sale information...</p>
           )}
+        </ModuleCard>
 
-          {/* Operations Status Buttons */}
-          {currentTeamMember?.role === 'Operations' && currentUser?.role !== 'admin' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-card rounded-2xl border border-border p-6"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Project Status
-              </h2>
-              <div className="space-y-2">
+        {/* Order Processor Tools */}
+        {(currentUser?.role === 'admin' || currentTeamMember?.role === 'Order Processor' || currentTeamMember?.role === 'Customer Experience Coordinator') && (
+          <ModuleCard title="Order Processor Tools" icon={Clock}>
+            <div className="space-y-3 p-4">
+              {!project.installation_date && (
                 <Button
-                  onClick={() => {
-                    setUpdatingStatus('in_progress');
-                    updateProjectMutation.mutate({ status: 'In Progress' });
-                  }}
-                  disabled={updateProjectMutation.isPending || project.status === 'In Progress'}
-                  className={cn(
-                    "w-full",
-                    project.status === 'In Progress'
-                      ? "bg-orange-500 hover:bg-orange-500 cursor-default"
-                      : "bg-orange-500 hover:bg-orange-600"
-                  )}
+                  onClick={handleSetInstallationClick}
+                  variant="outline"
+                  className="w-full border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
                 >
-                  {updatingStatus === 'in_progress' && updateProjectMutation.isPending ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</>
-                  ) : project.status === 'In Progress' ? (
-                    <><CheckCircle2 className="w-4 h-4 mr-2" />In Progress</>
-                  ) : (
-                    'Mark as In Progress'
-                  )}
+                  <CalendarIcon className="w-4 h-4 mr-2" />
+                  Set Installation Date
                 </Button>
+              )}
+              {project.installation_date && (
                 <Button
-                  onClick={() => {
-                    setUpdatingStatus('completed');
-                    updateProjectMutation.mutate({ status: 'Completed' });
-                  }}
-                  disabled={updateProjectMutation.isPending || project.status === 'Completed'}
-                  className={cn(
-                    "w-full",
-                    project.status === 'Completed'
-                      ? "bg-green-600 hover:bg-green-600 cursor-default"
-                      : "bg-green-600 hover:bg-green-700"
-                  )}
+                  onClick={handleRescheduleClick}
+                  variant="outline"
+                  className="w-full border-warn/30 text-warn hover:bg-warn/10"
                 >
-                  {updatingStatus === 'completed' && updateProjectMutation.isPending ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</>
-                  ) : project.status === 'Completed' ? (
-                    <><CheckCircle2 className="w-4 h-4 mr-2" />Completed</>
-                  ) : (
-                    'Mark as Completed'
-                  )}
+                  <Clock className="w-4 h-4 mr-2" />
+                  Reschedule Installation
                 </Button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Customer Experience - Using inline component to reduce file size */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.21 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Customer Experience</h2>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { id: 'welcome_call_attempted', label: 'Welcome Call Attempted', dateField: 'welcome_call_attempted_date', color: 'blue' },
-                  { id: 'welcome_call_completed', label: 'Welcome Call Completed', dateField: 'welcome_call_completed_date', color: 'green' },
-                  { id: 'check_in_attempted', label: 'Check-In Attempted', dateField: 'check_in_attempted_date', color: 'blue' },
-                  { id: 'check_in_completed', label: 'Check-In Completed', dateField: 'check_in_completed_date', color: 'green' },
-                  { id: 'pre_install_call_attempted', label: 'Pre-Install Call Attempted', dateField: 'pre_install_call_attempted_date', color: 'blue' },
-                  { id: 'pre_install_call_completed', label: 'Pre-Install Call Completed', dateField: 'pre_install_call_completed_date', color: 'green' },
-                  { id: 'qa_in_progress', label: 'QA In Progress', dateField: 'qa_in_progress_date', color: 'indigo' },
-                  { id: 'qa_completed', label: 'QA Completed', dateField: 'qa_completed_date', color: 'emerald' }
-                ].map(action => (
-                  <Button key={action.id} onClick={() => handleCustomerExperienceAction(action.id)} variant="outline" size="sm" className={cn(CX_ACTION_COLORS[action.color], project[action.dateField] && CX_ACTION_ACTIVE[action.color])}>
-                    {project[action.dateField] && <CheckCircle2 className="w-3 h-3 mr-1" />}
-                    {action.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Assigned Team */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.23 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                Assigned Team
-              </h2>
+              )}
+              {sale?.contract_file_url && (
+                <Button
+                  onClick={() => openSignedFile(sale.contract_file_url)}
+                  variant="outline"
+                  className="w-full border-primary/30 text-primary hover:bg-primary/10"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Contract
+                </Button>
+              )}
               <Button
-                onClick={handleAssignClick}
-                size="sm"
-                className="bg-primary text-primary-foreground hover:opacity-90"
+                onClick={() => updateProjectMutation.mutate({ status: 'Materials Ordered' })}
+                disabled={updateProjectMutation.isPending || project.status === 'Materials Ordered'}
+                className="w-full bg-info text-white hover:bg-info/90"
               >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Assign Team
+                {updateProjectMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  'Mark Materials Ordered'
+                )}
+              </Button>
+
+              {/* Installation Status Buttons */}
+              {project.installation_date && (
+                <div className="space-y-2 border-t border-border pt-3">
+                  <p className="text-xs font-medium uppercase text-muted-foreground">Installation Status</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      onClick={() => {
+                        setUpdatingStatus('pending payment');
+                        updateProjectMutation.mutate({ installation_date_status: 'pending payment' });
+                      }}
+                      disabled={updateProjectMutation.isPending}
+                      variant="outline"
+                      size="sm"
+                      className="border-warn/30 text-warn hover:bg-warn/10"
+                    >
+                      {updatingStatus === 'pending payment' && updateProjectMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          Updating...
+                        </>
+                      ) : project.installation_date_status === 'pending payment' ? (
+                        <>
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          Pending Payment
+                        </>
+                      ) : (
+                        'Pending Payment'
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setUpdatingStatus('pending contract');
+                        updateProjectMutation.mutate({ installation_date_status: 'pending contract' });
+                      }}
+                      disabled={updateProjectMutation.isPending}
+                      variant="outline"
+                      size="sm"
+                      className="border-warn/30 text-warn hover:bg-warn/10"
+                    >
+                      {updatingStatus === 'pending contract' && updateProjectMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          Updating...
+                        </>
+                      ) : project.installation_date_status === 'pending contract' ? (
+                        <>
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          Pending Contract
+                        </>
+                      ) : (
+                        'Pending Contract'
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setUpdatingStatus('on hold');
+                        updateProjectMutation.mutate({ installation_date_status: 'on hold' });
+                      }}
+                      disabled={updateProjectMutation.isPending}
+                      variant="outline"
+                      size="sm"
+                      className="border-warn/30 text-warn hover:bg-warn/10"
+                    >
+                      {updatingStatus === 'on hold' && updateProjectMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          Updating...
+                        </>
+                      ) : project.installation_date_status === 'on hold' ? (
+                        <>
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          On Hold
+                        </>
+                      ) : (
+                        'On Hold'
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setUpdatingStatus('pending cancellation');
+                        updateProjectMutation.mutate({ installation_date_status: 'pending cancellation' });
+                      }}
+                      disabled={updateProjectMutation.isPending}
+                      variant="outline"
+                      size="sm"
+                      className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                    >
+                      {updatingStatus === 'pending cancellation' && updateProjectMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          Updating...
+                        </>
+                      ) : project.installation_date_status === 'pending cancellation' ? (
+                        <>
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          Pending Cancellation
+                        </>
+                      ) : (
+                        'Pending Cancellation'
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setUpdatingStatus('clear');
+                        const wasOnHold = project.installation_date_status && ['pending payment','pending contract','on hold','pending cancellation'].includes(project.installation_date_status);
+                        updateProjectMutation.mutate({ installation_date_status: '', ...(wasOnHold ? { hold_cleared_date: new Date().toISOString() } : {}) });
+                      }}
+                      disabled={updateProjectMutation.isPending}
+                      variant="outline"
+                      size="sm"
+                      className="border-border text-muted-foreground hover:bg-muted"
+                    >
+                      {updatingStatus === 'clear' && updateProjectMutation.isPending ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          Clearing...
+                        </>
+                      ) : !project.installation_date_status ? (
+                        <>
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          Clear Status
+                        </>
+                      ) : (
+                        'Clear Status'
+                      )}
+                    </Button>
+                  </div>
+
+                  {/* Project Status Buttons */}
+                  <div className="space-y-2 border-t border-border pt-3">
+                    <p className="text-xs font-medium uppercase text-muted-foreground">Project Status</p>
+                    <Button
+                      onClick={() => {
+                        setUpdatingStatus('in_progress');
+                        updateProjectMutation.mutate({ status: 'In Progress' });
+                      }}
+                      disabled={updateProjectMutation.isPending || project.status === 'In Progress'}
+                      className={cn(
+                        "w-full text-white",
+                        project.status === 'In Progress'
+                          ? "bg-warn hover:bg-warn cursor-default"
+                          : "bg-warn hover:bg-warn/90"
+                      )}
+                    >
+                      {updatingStatus === 'in_progress' && updateProjectMutation.isPending ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</>
+                      ) : project.status === 'In Progress' ? (
+                        <><CheckCircle2 className="w-4 h-4 mr-2" />In Progress</>
+                      ) : (
+                        'Mark as In Progress'
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setUpdatingStatus('completed');
+                        updateProjectMutation.mutate({ status: 'Completed' });
+                      }}
+                      disabled={updateProjectMutation.isPending || project.status === 'Completed'}
+                      className={cn(
+                        "w-full text-white",
+                        project.status === 'Completed'
+                          ? "bg-good hover:bg-good cursor-default"
+                          : "bg-good hover:bg-good/90"
+                      )}
+                    >
+                      {updatingStatus === 'completed' && updateProjectMutation.isPending ? (
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</>
+                      ) : project.status === 'Completed' ? (
+                        <><CheckCircle2 className="w-4 h-4 mr-2" />Completed</>
+                      ) : (
+                        'Mark as Completed'
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </ModuleCard>
+        )}
+
+        {/* Operations Status Buttons */}
+        {currentTeamMember?.role === 'Operations' && currentUser?.role !== 'admin' && (
+          <ModuleCard title="Project Status" icon={Activity}>
+            <div className="space-y-2 p-4">
+              <Button
+                onClick={() => {
+                  setUpdatingStatus('in_progress');
+                  updateProjectMutation.mutate({ status: 'In Progress' });
+                }}
+                disabled={updateProjectMutation.isPending || project.status === 'In Progress'}
+                className={cn(
+                  "w-full text-white",
+                  project.status === 'In Progress'
+                    ? "bg-warn hover:bg-warn cursor-default"
+                    : "bg-warn hover:bg-warn/90"
+                )}
+              >
+                {updatingStatus === 'in_progress' && updateProjectMutation.isPending ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</>
+                ) : project.status === 'In Progress' ? (
+                  <><CheckCircle2 className="w-4 h-4 mr-2" />In Progress</>
+                ) : (
+                  'Mark as In Progress'
+                )}
+              </Button>
+              <Button
+                onClick={() => {
+                  setUpdatingStatus('completed');
+                  updateProjectMutation.mutate({ status: 'Completed' });
+                }}
+                disabled={updateProjectMutation.isPending || project.status === 'Completed'}
+                className={cn(
+                  "w-full text-white",
+                  project.status === 'Completed'
+                    ? "bg-good hover:bg-good cursor-default"
+                    : "bg-good hover:bg-good/90"
+                )}
+              >
+                {updatingStatus === 'completed' && updateProjectMutation.isPending ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</>
+                ) : project.status === 'Completed' ? (
+                  <><CheckCircle2 className="w-4 h-4 mr-2" />Completed</>
+                ) : (
+                  'Mark as Completed'
+                )}
               </Button>
             </div>
+          </ModuleCard>
+        )}
 
-            <div className="space-y-3">
-              {projectManager && (
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
-                  <div className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center">
-                    <User className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-primary font-medium">Project Manager</p>
-                    <p className="text-foreground font-semibold">
-                      {projectManager.first_name} {projectManager.last_name}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {installationManager && (
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-brand-blue/10 border border-brand-blue/20">
-                  <div className="w-12 h-12 rounded-full bg-brand-blue/15 flex items-center justify-center">
-                    <User className="w-6 h-6 text-brand-blue" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-brand-blue font-medium">Installation Manager</p>
-                    <p className="text-foreground font-semibold">
-                      {installationManager.first_name} {installationManager.last_name}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {!projectManager && !installationManager && (
-                <p className="text-muted-foreground text-center py-6">No team members assigned yet</p>
-              )}
+        {/* Customer Experience */}
+        <ModuleCard title="Customer Experience" icon={Phone}>
+          <div className="p-4">
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'welcome_call_attempted', label: 'Welcome Call Attempted', dateField: 'welcome_call_attempted_date', color: 'blue' },
+                { id: 'welcome_call_completed', label: 'Welcome Call Completed', dateField: 'welcome_call_completed_date', color: 'green' },
+                { id: 'check_in_attempted', label: 'Check-In Attempted', dateField: 'check_in_attempted_date', color: 'blue' },
+                { id: 'check_in_completed', label: 'Check-In Completed', dateField: 'check_in_completed_date', color: 'green' },
+                { id: 'pre_install_call_attempted', label: 'Pre-Install Call Attempted', dateField: 'pre_install_call_attempted_date', color: 'blue' },
+                { id: 'pre_install_call_completed', label: 'Pre-Install Call Completed', dateField: 'pre_install_call_completed_date', color: 'green' },
+                { id: 'qa_in_progress', label: 'QA In Progress', dateField: 'qa_in_progress_date', color: 'indigo' },
+                { id: 'qa_completed', label: 'QA Completed', dateField: 'qa_completed_date', color: 'emerald' }
+              ].map(action => (
+                <Button key={action.id} onClick={() => handleCustomerExperienceAction(action.id)} variant="outline" size="sm" className={cn(CX_ACTION_COLORS[action.color], project[action.dateField] && CX_ACTION_ACTIVE[action.color])}>
+                  {project[action.dateField] && <CheckCircle2 className="w-3 h-3 mr-1" />}
+                  {action.label}
+                </Button>
+              ))}
             </div>
-          </motion.div>
+          </div>
+        </ModuleCard>
 
-          {/* Customer Tracker Link */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Customer Tracker
-            </h2>
-            {project.project_tracker_url ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary">
-                  <LinkIcon className="w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={project.project_tracker_url}
-                    readOnly
-                    className="flex-1 bg-transparent text-sm text-muted-foreground outline-none"
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleCopyTrackerUrl}
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <a
-                    href={project.project_tracker_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    View Customer Tracker
-                  </a>
-                  {customer?.phone && (
-                    <>
-                      <Button
-                        onClick={handleSendTrackerSMS}
-                        disabled={sendingSMS}
-                        variant="outline"
-                        size="sm"
-                        className="border-green-200 text-green-600 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
-                      >
-                        {sendingSMS ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Sending...
-                          </>
-                        ) : (
-                          <>
-                            <MessageSquare className="w-4 h-4 mr-2" />
-                            Send Tracker Text
-                          </>
-                        )}
-                      </Button>
-                      {smsPreview && (
-                        <div className="p-3 rounded-lg bg-secondary border border-border">
-                          <p className="text-xs text-muted-foreground mb-1">Preview:</p>
-                          <p className="text-sm text-foreground">{smsPreview}</p>
-                        </div>
+        {/* Customer Tracker */}
+        <ModuleCard title="Customer Tracker" icon={LinkIcon}>
+          {project.project_tracker_url ? (
+            <div className="space-y-3 p-4">
+              <div className="flex items-center gap-2 rounded-xl bg-muted p-3">
+                <LinkIcon className="h-5 w-5 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={project.project_tracker_url}
+                  readOnly
+                  className="flex-1 bg-transparent text-sm text-muted-foreground outline-none"
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCopyTrackerUrl}
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex flex-col gap-2">
+                <a
+                  href={project.project_tracker_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View Customer Tracker
+                </a>
+                {customer?.phone && (
+                  <>
+                    <Button
+                      onClick={handleSendTrackerSMS}
+                      disabled={sendingSMS}
+                      variant="outline"
+                      size="sm"
+                      className="border-good/30 text-good hover:bg-good/10"
+                    >
+                      {sendingSMS ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          Send Tracker Text
+                        </>
                       )}
-                    </>
-                  )}
-                </div>
+                    </Button>
+                    {smsPreview && (
+                      <div className="rounded-lg border border-border bg-muted p-3">
+                        <p className="mb-1 text-xs text-muted-foreground">Preview:</p>
+                        <p className="text-sm text-foreground">{smsPreview}</p>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            ) : (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 text-primary animate-spin" />
-              </div>
-            )}
-          </motion.div>
-
-          {sale?.invoice_number && (
-            <RFMSOrderNotes invoiceNumber={sale.invoice_number} currentUser={currentUser} />
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+            </div>
           )}
+        </ModuleCard>
 
-          {/* Project Location */}
-          {sale?.location_address && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Project Location
-              </h2>
-              <div className="flex items-start gap-4 p-3 rounded-xl bg-secondary mb-4">
-                <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-500/15 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-300" />
+        {sale?.invoice_number && (
+          <RFMSOrderNotes invoiceNumber={sale.invoice_number} currentUser={currentUser} />
+        )}
+
+        {/* Project Location */}
+        {sale?.location_address && (
+          <ModuleCard title="Project Location" icon={MapPin}>
+            <div className="p-4">
+              <div className="mb-4 flex items-start gap-4 rounded-xl bg-muted p-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-warn/12">
+                  <MapPin className="h-5 w-5 text-warn" />
                 </div>
                 <div>
-                  <p className="text-foreground font-medium">{sale.location_address}</p>
+                  <p className="font-medium text-foreground">{sale.location_address}</p>
                 </div>
               </div>
               {appointment?.street_view_url && (
-                <div className="rounded-xl overflow-hidden border border-border">
+                <div className="overflow-hidden rounded-xl border border-border">
                   <img
                     src={appointment.street_view_url}
                     alt="Street view"
-                    className="w-full h-64 object-cover"
+                    className="h-64 w-full object-cover"
                   />
                 </div>
               )}
-            </motion.div>
-          )}
+            </div>
+          </ModuleCard>
+        )}
 
-          {/* Schedule */}
-          {(project.scheduled_start_date || project.scheduled_end_date) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-card rounded-2xl border border-border p-6"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Scheduled Dates
-              </h2>
-              <div className="space-y-4">
-                {project.scheduled_start_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-brand-blue/12">
-                    <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
-                      <CalendarIcon className="w-5 h-5 text-brand-blue" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-brand-blue mb-0.5">Start Date</p>
-                      <p className="text-foreground">
-                        {format(new Date(project.scheduled_start_date + 'T00:00:00'), 'MMMM d, yyyy')}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {project.scheduled_end_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-purple-50 dark:bg-purple-500/10">
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center">
-                      <CalendarIcon className="w-5 h-5 text-purple-600 dark:text-purple-300" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-purple-600 dark:text-purple-300 mb-0.5">End Date</p>
-                      <p className="text-foreground">
-                        {format(new Date(project.scheduled_end_date + 'T00:00:00'), 'MMMM d, yyyy')}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Actual Dates */}
-          {(project.actual_start_date || project.actual_completion_date) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-card rounded-2xl border border-border p-6"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Actual Dates
-              </h2>
-              <div className="space-y-4">
-                {project.actual_start_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50 dark:bg-green-500/10">
-                    <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
-                      <CalendarIcon className="w-5 h-5 text-green-600 dark:text-green-300" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-green-600 dark:text-green-300 mb-0.5">Actual Start</p>
-                      <p className="text-foreground">
-                        {format(new Date(project.actual_start_date + 'T00:00:00'), 'MMMM d, yyyy')}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {project.actual_completion_date && (
-                  <div className="flex items-center gap-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
-                    <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-emerald-600 dark:text-emerald-300 mb-0.5">Completed</p>
-                      <p className="text-foreground">
-                        {format(new Date(project.actual_completion_date + 'T00:00:00'), 'MMMM d, yyyy')}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Pre-Install Checklist */}
-          {(project.pre_install_checklist_signature_url || project.pre_install_product_info) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25 rounded-2xl p-6 md:col-span-2 xl:col-span-3"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-300" />
-                  <h2 className="text-sm font-semibold text-green-800 dark:text-green-300 uppercase tracking-wider">Pre-Installation Checklist — Signed</h2>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={downloadingChecklistPDF}
-                  onClick={async () => {
-                    setDownloadingChecklistPDF(true);
-                    try {
-                      await generatePreInstallPDF({
-                        customerName: customer ? `${customer.first_name} ${customer.last_name}` : 'Customer',
-                        productInfo: project.pre_install_product_info || '',
-                        signatureUrl: project.pre_install_checklist_signature_url,
-                        saleDate: sale?.sale_date
-                      });
-                    } finally {
-                      setDownloadingChecklistPDF(false);
-                    }
-                  }}
-                  className="border-green-300 text-green-700 hover:bg-green-100 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/15"
-                >
-                  {downloadingChecklistPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
-                  Download PDF
-                </Button>
-              </div>
-              <div className="space-y-3">
-                {project.pre_install_product_info && (
-                  <p className="text-sm text-green-800 dark:text-green-300"><span className="font-semibold">Product Confirmed:</span> {project.pre_install_product_info}</p>
-                )}
-                {project.pre_install_checklist_signature_url && (
-                  <div>
-                    <p className="text-xs text-green-700 dark:text-green-300 font-medium mb-2">Customer Signature:</p>
-                    <SignedImage src={project.pre_install_checklist_signature_url} alt="Customer signature" className="h-20 border border-green-200 dark:border-green-500/25 rounded-lg bg-white p-2" />
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Notes */}
-          {(project.project_notes || project.materials_notes || project.quality_check_notes) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Project Details Notes
-              </h2>
-              <div className="space-y-4">
-                {project.project_notes && (
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-2">Project Notes</p>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{project.project_notes}</p>
-                  </div>
-                )}
-                {project.materials_notes && (
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-2">Materials Notes</p>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{project.materials_notes}</p>
-                  </div>
-                )}
-                {project.quality_check_notes && (
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-2">Quality Check Notes</p>
-                    <p className="text-muted-foreground whitespace-pre-wrap">{project.quality_check_notes}</p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Project Images */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.54 }}
-            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Project Images
-            </h2>
-            <div className="space-y-4">
-              {/* Upload Button */}
-              <label className="flex items-center justify-center w-full p-4 border-2 border-dashed border-border rounded-lg hover:border-primary/40 hover:bg-primary/10 transition-colors cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  disabled={uploadingImage}
-                  className="hidden"
-                />
-                {uploadingImage ? (
-                  <>
-                    <Loader2 className="w-5 h-5 text-primary animate-spin mr-2" />
-                    <span className="text-sm text-muted-foreground">Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-5 h-5 text-muted-foreground mr-2" />
-                    <span className="text-sm text-muted-foreground">Click to upload images (select multiple)</span>
-                  </>
-                )}
-              </label>
-
-              {/* Images Grid */}
-              {project.images && project.images.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-2 border-t border-border">
-                  {[...project.images].reverse().map((image, index) => {
-                    const realIndex = project.images.length - 1 - index;
-                    return (
-                    <div key={image.url} className="rounded-lg border border-border hover:border-primary/40 transition-colors overflow-hidden">
-                      <div className="relative group">
-                        <button
-                          onClick={() => setLightboxIndex(realIndex)}
-                          className="w-full h-full"
-                        >
-                          <SignedImage
-                            src={image.url}
-                            alt="Project"
-                            className="w-full h-40 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                          />
-                        </button>
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => openSignedFile(image.url)}
-                            className="bg-card hover:bg-secondary"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDeleteImage(realIndex)}
-                            className="bg-destructive text-destructive-foreground hover:opacity-90"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-                          <p className="text-xs text-white font-medium">{image.user_name}</p>
-                          <p className="text-xs text-gray-300">
-                            {new Date(image.timestamp).toLocaleString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              hour12: true
-                            })}
-                          </p>
-                        </div>
+        {/* Schedule + Actual Dates */}
+        {((project.scheduled_start_date || project.scheduled_end_date) || (project.actual_start_date || project.actual_completion_date)) && (
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {(project.scheduled_start_date || project.scheduled_end_date) && (
+              <ModuleCard title="Scheduled Dates" icon={CalendarIcon}>
+                <div className="space-y-4 p-4">
+                  {project.scheduled_start_date && (
+                    <div className="flex items-center gap-4 rounded-xl bg-brand-blue/12 p-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-blue/15">
+                        <CalendarIcon className="h-5 w-5 text-brand-blue" />
                       </div>
-                      <ImageDescriptionInput
-                        initialValue={image.description || ''}
-                        onSave={(desc) => handleUpdateImageDescription(realIndex, desc)}
-                      />
+                      <div>
+                        <p className="mb-0.5 text-xs text-brand-blue">Start Date</p>
+                        <p className="text-foreground">
+                          {format(new Date(project.scheduled_start_date + 'T00:00:00'), 'MMMM d, yyyy')}
+                        </p>
+                      </div>
                     </div>
-                    );
-                  })}
+                  )}
+                  {project.scheduled_end_date && (
+                    <div className="flex items-center gap-4 rounded-xl bg-info/10 p-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/15">
+                        <CalendarIcon className="h-5 w-5 text-info" />
+                      </div>
+                      <div>
+                        <p className="mb-0.5 text-xs text-info">End Date</p>
+                        <p className="text-foreground">
+                          {format(new Date(project.scheduled_end_date + 'T00:00:00'), 'MMMM d, yyyy')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">No images yet</p>
+              </ModuleCard>
+            )}
+
+            {(project.actual_start_date || project.actual_completion_date) && (
+              <ModuleCard title="Actual Dates" icon={CalendarIcon}>
+                <div className="space-y-4 p-4">
+                  {project.actual_start_date && (
+                    <div className="flex items-center gap-4 rounded-xl bg-good/10 p-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-good/15">
+                        <CalendarIcon className="h-5 w-5 text-good" />
+                      </div>
+                      <div>
+                        <p className="mb-0.5 text-xs text-good">Actual Start</p>
+                        <p className="text-foreground">
+                          {format(new Date(project.actual_start_date + 'T00:00:00'), 'MMMM d, yyyy')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {project.actual_completion_date && (
+                    <div className="flex items-center gap-4 rounded-xl bg-good/10 p-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-good/15">
+                        <CheckCircle2 className="h-5 w-5 text-good" />
+                      </div>
+                      <div>
+                        <p className="mb-0.5 text-xs text-good">Completed</p>
+                        <p className="text-foreground">
+                          {format(new Date(project.actual_completion_date + 'T00:00:00'), 'MMMM d, yyyy')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ModuleCard>
+            )}
+          </div>
+        )}
+
+        {/* Pre-Install Checklist */}
+        {(project.pre_install_checklist_signature_url || project.pre_install_product_info) && (
+          <ModuleCard
+            title="Pre-Installation Checklist — Signed"
+            icon={CheckCircle2}
+            className="border-good/25 bg-good/5"
+            action={
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={downloadingChecklistPDF}
+                onClick={async () => {
+                  setDownloadingChecklistPDF(true);
+                  try {
+                    await generatePreInstallPDF({
+                      customerName: customer ? `${customer.first_name} ${customer.last_name}` : 'Customer',
+                      productInfo: project.pre_install_product_info || '',
+                      signatureUrl: project.pre_install_checklist_signature_url,
+                      saleDate: sale?.sale_date
+                    });
+                  } finally {
+                    setDownloadingChecklistPDF(false);
+                  }
+                }}
+                className="border-good/30 text-good hover:bg-good/10"
+              >
+                {downloadingChecklistPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
+                Download PDF
+              </Button>
+            }
+          >
+            <div className="space-y-3 p-4">
+              {project.pre_install_product_info && (
+                <p className="text-sm text-foreground"><span className="font-semibold">Product Confirmed:</span> {project.pre_install_product_info}</p>
+              )}
+              {project.pre_install_checklist_signature_url && (
+                <div>
+                  <p className="mb-2 text-xs font-medium text-muted-foreground">Customer Signature:</p>
+                  <SignedImage src={project.pre_install_checklist_signature_url} alt="Customer signature" className="h-20 rounded-lg border border-good/25 bg-white p-2" />
+                </div>
               )}
             </div>
-          </motion.div>
+          </ModuleCard>
+        )}
 
-          {/* Project Files */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.56 }}
-            className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Project Files
-            </h2>
-            <div className="space-y-4">
-              <label className="flex items-center justify-center w-full p-4 border-2 border-dashed border-border rounded-lg hover:border-primary/40 hover:bg-primary/10 transition-colors cursor-pointer">
-                <input
-                  type="file"
-                  multiple
-                  onChange={handleFileUpload}
-                  disabled={uploadingFile}
-                  className="hidden"
-                />
-                {uploadingFile ? (
-                  <>
-                    <Loader2 className="w-5 h-5 text-primary animate-spin mr-2" />
-                    <span className="text-sm text-muted-foreground">Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Paperclip className="w-5 h-5 text-muted-foreground mr-2" />
-                    <span className="text-sm text-muted-foreground">Click to upload files (select multiple)</span>
-                  </>
-                )}
-              </label>
+        {/* Project Details Notes */}
+        {(project.project_notes || project.materials_notes || project.quality_check_notes) && (
+          <ModuleCard title="Project Details Notes">
+            <div className="space-y-4 p-4">
+              {project.project_notes && (
+                <div>
+                  <p className="mb-2 text-sm font-medium text-foreground">Project Notes</p>
+                  <p className="whitespace-pre-wrap text-muted-foreground">{project.project_notes}</p>
+                </div>
+              )}
+              {project.materials_notes && (
+                <div>
+                  <p className="mb-2 text-sm font-medium text-foreground">Materials Notes</p>
+                  <p className="whitespace-pre-wrap text-muted-foreground">{project.materials_notes}</p>
+                </div>
+              )}
+              {project.quality_check_notes && (
+                <div>
+                  <p className="mb-2 text-sm font-medium text-foreground">Quality Check Notes</p>
+                  <p className="whitespace-pre-wrap text-muted-foreground">{project.quality_check_notes}</p>
+                </div>
+              )}
+            </div>
+          </ModuleCard>
+        )}
 
-              {project.files && project.files.length > 0 ? (
-                <div className="space-y-2 pt-2 border-t border-border">
-                  {[...project.files].reverse().map((file, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-secondary hover:bg-secondary transition-colors group">
-                      <Paperclip className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">{file.user_name} · {new Date(file.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</p>
-                      </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <Button size="sm" variant="ghost" onClick={() => openSignedFile(file.url)} className="h-8 px-2">
-                          <Download className="w-4 h-4" />
+        {/* Project Images */}
+        <ModuleCard title="Project Images">
+          <div className="space-y-4 p-4">
+            {/* Upload Button */}
+            <label className="flex w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-border p-4 transition-colors hover:border-primary/40 hover:bg-primary/10">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                disabled={uploadingImage}
+                className="hidden"
+              />
+              {uploadingImage ? (
+                <>
+                  <Loader2 className="w-5 h-5 text-primary animate-spin mr-2" />
+                  <span className="text-sm text-muted-foreground">Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-5 h-5 text-muted-foreground mr-2" />
+                  <span className="text-sm text-muted-foreground">Click to upload images (select multiple)</span>
+                </>
+              )}
+            </label>
+
+            {/* Images Grid */}
+            {project.images && project.images.length > 0 ? (
+              <div className="grid grid-cols-2 gap-4 border-t border-border pt-2 md:grid-cols-3">
+                {[...project.images].reverse().map((image, index) => {
+                  const realIndex = project.images.length - 1 - index;
+                  return (
+                  <div key={image.url} className="overflow-hidden rounded-lg border border-border transition-colors hover:border-primary/40">
+                    <div className="relative group">
+                      <button
+                        onClick={() => setLightboxIndex(realIndex)}
+                        className="h-full w-full"
+                      >
+                        <SignedImage
+                          src={image.url}
+                          alt="Project"
+                          className="h-40 w-full cursor-pointer object-cover transition-opacity hover:opacity-90"
+                        />
+                      </button>
+                      <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black bg-opacity-0 opacity-0 transition-all group-hover:bg-opacity-40 group-hover:opacity-100">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openSignedFile(image.url)}
+                          className="bg-card hover:bg-muted"
+                        >
+                          <ExternalLink className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteFile(project.files.length - 1 - index)} className="h-8 px-2 text-destructive hover:opacity-80 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteImage(realIndex)}
+                          className="bg-destructive text-destructive-foreground hover:opacity-90"
+                        >
                           <X className="w-4 h-4" />
                         </Button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">No files uploaded yet</p>
-              )}
-            </div>
-          </motion.div>
-
-          <DesignModsSection
-            project={project}
-            customer={customer}
-            sale={sale}
-          />
-
-          <InspectionReportsSection
-            project={project}
-            customer={customer}
-            sale={sale}
-            currentUser={currentUser}
-          />
-
-          <InstallationCheckpointsSection
-            project={project}
-            currentUser={currentUser}
-          />
-
-          <ProjectClaimsSection
-            project={project}
-            customer={customer}
-            sale={sale}
-            currentUser={currentUser}
-          />
-
-          <TeamNotesSection
-            project={project}
-            newNote={newNote}
-            setNewNote={setNewNote}
-            onAddNote={handleAddNote}
-            onAddReaction={handleAddReaction}
-            currentUser={currentUser}
-            isLoading={updateProjectMutation.isPending}
-          />
-
-
-
-          {/* Activity Log */}
-          {projectLogs.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <Activity className="w-5 h-5 text-primary" />
-                <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                  Activity Log
-                </h2>
-              </div>
-              <div className="space-y-3">
-                {projectLogs.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).map((log) => (
-                  <div key={log.id} className="flex gap-4 p-4 rounded-xl bg-secondary hover:bg-secondary transition-colors">
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="font-medium text-foreground">{log.action}</p>
-                          {log.details && (
-                            <p className="text-sm text-muted-foreground mt-1">{log.details}</p>
-                          )}
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(log.created_date).toLocaleString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              hour12: true
-                            })}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{log.user_name || log.user_email}</p>
-                        </div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                        <p className="text-xs font-medium text-white">{image.user_name}</p>
+                        <p className="text-xs text-white/70">
+                          {new Date(image.timestamp).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
+                        </p>
                       </div>
+                    </div>
+                    <ImageDescriptionInput
+                      initialValue={image.description || ''}
+                      onSave={(desc) => handleUpdateImageDescription(realIndex, desc)}
+                    />
+                  </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="py-8 text-center text-sm text-muted-foreground">No images yet</p>
+            )}
+          </div>
+        </ModuleCard>
+
+        {/* Project Files */}
+        <ModuleCard title="Project Files" icon={Paperclip}>
+          <div className="space-y-4 p-4">
+            <label className="flex w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-border p-4 transition-colors hover:border-primary/40 hover:bg-primary/10">
+              <input
+                type="file"
+                multiple
+                onChange={handleFileUpload}
+                disabled={uploadingFile}
+                className="hidden"
+              />
+              {uploadingFile ? (
+                <>
+                  <Loader2 className="w-5 h-5 text-primary animate-spin mr-2" />
+                  <span className="text-sm text-muted-foreground">Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <Paperclip className="w-5 h-5 text-muted-foreground mr-2" />
+                  <span className="text-sm text-muted-foreground">Click to upload files (select multiple)</span>
+                </>
+              )}
+            </label>
+
+            {project.files && project.files.length > 0 ? (
+              <div className="space-y-2 border-t border-border pt-2">
+                {[...project.files].reverse().map((file, index) => (
+                  <div key={index} className="group flex items-center gap-3 rounded-lg bg-muted p-3 transition-colors hover:bg-muted/70">
+                    <Paperclip className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
+                      <p className="text-xs text-muted-foreground">{file.user_name} · {new Date(file.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</p>
+                    </div>
+                    <div className="flex flex-shrink-0 items-center gap-1">
+                      <Button size="sm" variant="ghost" onClick={() => openSignedFile(file.url)} className="h-8 px-2">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => handleDeleteFile(project.files.length - 1 - index)} className="h-8 px-2 text-destructive opacity-0 transition-opacity hover:opacity-80 group-hover:opacity-100">
+                        <X className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
-            </motion.div>
-          )}
-        </div>
+            ) : (
+              <p className="py-8 text-center text-sm text-muted-foreground">No files uploaded yet</p>
+            )}
+          </div>
+        </ModuleCard>
+
+        <DesignModsSection
+          project={project}
+          customer={customer}
+          sale={sale}
+        />
+
+        <InspectionReportsSection
+          project={project}
+          customer={customer}
+          sale={sale}
+          currentUser={currentUser}
+        />
+
+        <InstallationCheckpointsSection
+          project={project}
+          currentUser={currentUser}
+        />
+
+        <ProjectClaimsSection
+          project={project}
+          customer={customer}
+          sale={sale}
+          currentUser={currentUser}
+        />
+
+        <TeamNotesSection
+          project={project}
+          newNote={newNote}
+          setNewNote={setNewNote}
+          onAddNote={handleAddNote}
+          onAddReaction={handleAddReaction}
+          currentUser={currentUser}
+          isLoading={updateProjectMutation.isPending}
+        />
+
+        {/* Activity Log */}
+        {projectLogs.length > 0 && (
+          <ModuleCard title="Activity Log" icon={Activity}>
+            <div className="space-y-3 p-4">
+              {projectLogs.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).map((log) => (
+                <div key={log.id} className="flex gap-4 rounded-xl bg-muted p-4 transition-colors hover:bg-muted/70">
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-medium text-foreground">{log.action}</p>
+                        {log.details && (
+                          <p className="mt-1 text-sm text-muted-foreground">{log.details}</p>
+                        )}
+                      </div>
+                      <div className="flex-shrink-0 text-right">
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(log.created_date).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{log.user_name || log.user_email}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ModuleCard>
+        )}
       </div>
 
       {/* Cancel Project Dialog */}
@@ -2059,6 +1931,6 @@ export default function ProjectDetail() {
 
       <PhotoLightbox photos={projectImageUrls} lightboxIndex={lightboxIndex} onClose={setLightboxIndex} />
 
-      </div>
-      );
+    </div>
+  );
 }

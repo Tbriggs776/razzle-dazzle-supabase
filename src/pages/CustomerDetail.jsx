@@ -5,22 +5,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   User,
   Mail,
   Phone,
   MapPin,
   FileText,
   Calendar,
-  Pencil, 
-  Trash2, 
+  Pencil,
+  Trash2,
   Loader2
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import CustomerForm from '@/components/customers/CustomerForm';
+import PageHeader from '@/components/common/PageHeader';
+import StatusPill from '@/components/common/StatusPill';
+import ModuleCard from '@/components/dashboard/ModuleCard';
 
 export default function CustomerDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -98,17 +100,17 @@ export default function CustomerDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!customer) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-foreground mb-2">Customer not found</h2>
+          <h2 className="mb-2 text-xl font-semibold text-foreground">Customer not found</h2>
           <Link to={createPageUrl('Customers')} className="text-primary hover:underline">
             Back to customers
           </Link>
@@ -127,210 +129,162 @@ export default function CustomerDetail() {
   ].filter(Boolean).join(', ');
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link
-            to={createPageUrl('Customers')}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Customers
-          </Link>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col md:flex-row md:items-start gap-6"
-          >
-            <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground font-bold text-2xl shadow-lg">
-              {initials}
-            </div>
-
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-foreground tracking-tight">
-                {customer.first_name} {customer.last_name}
-              </h1>
-              <p className="text-muted-foreground mt-1">Customer</p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setShowEditDialog(true)}
-                className="h-11 px-5 border-border hover:bg-secondary"
-              >
-                <Pencil className="w-4 h-4 mr-2" />
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <PageHeader
+          eyebrow={
+            <Link
+              to={createPageUrl('Customers')}
+              className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to Customers
+            </Link>
+          }
+          title={`${customer.first_name} ${customer.last_name}`}
+          actions={
+            <>
+              <Button variant="accent" onClick={() => setShowEditDialog(true)}>
+                <Pencil className="mr-2 h-4 w-4" />
                 Edit
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setShowDeleteDialog(true)}
-                className="h-11 px-5 border-destructive/30 text-destructive hover:bg-destructive/10"
+                className="border-crit/30 text-crit hover:bg-crit/10"
               >
-                <Trash2 className="w-4 h-4 mr-2" />
+                <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </Button>
-            </div>
-          </motion.div>
-        </div>
-      </div>
+            </>
+          }
+        >
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <StatusPill tone="good" dot>Customer</StatusPill>
+            {customer.converted_from_lead && <StatusPill tone="info">Converted Lead</StatusPill>}
+          </div>
+        </PageHeader>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Contact Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Contact Information
-            </h2>
-            <div className="space-y-4">
-              <a
-                href={`mailto:${customer.email}`}
-                className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-brand-blue" />
+          <ModuleCard title="Contact Information" icon={User}>
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-pink/15 font-display text-sm font-extrabold text-brand-pink">
+                {initials}
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold text-foreground">
+                  {customer.first_name} {customer.last_name}
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">Email</p>
-                  <p className="text-foreground group-hover:text-brand-blue transition-colors">
-                    {customer.email}
-                  </p>
-                </div>
-              </a>
-              {customer.phone && (
-                <a
-                  href={`tel:${customer.phone}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-brand-pink/12 flex items-center justify-center">
-                    <Phone className="w-5 h-5 text-brand-pink" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
-                    <p className="text-foreground group-hover:text-brand-pink transition-colors">
-                      {customer.phone}
-                    </p>
-                  </div>
-                </a>
-              )}
+                <div className="text-xs text-muted-foreground">Customer record</div>
+              </div>
             </div>
-          </motion.div>
 
-          {/* Address */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Address
-            </h2>
-            {fullAddress ? (
-              <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-brand-gold" />
-                </div>
-                <div>
-                  <p className="text-foreground">{fullAddress}</p>
+            <a
+              href={`mailto:${customer.email}`}
+              className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-blue/12">
+                <Mail className="h-4 w-4 text-brand-blue" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Email</div>
+                <div className="truncate text-sm text-foreground transition-colors group-hover:text-brand-blue">
+                  {customer.email}
                 </div>
               </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-6">No address provided</p>
+            </a>
+
+            {customer.phone && (
+              <a
+                href={`tel:${customer.phone}`}
+                className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-pink/12">
+                  <Phone className="h-4 w-4 text-brand-pink" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Phone</div>
+                  <div className="truncate text-sm text-foreground transition-colors group-hover:text-brand-pink">
+                    {customer.phone}
+                  </div>
+                </div>
+              </a>
             )}
-          </motion.div>
+          </ModuleCard>
+
+          {/* Address */}
+          <ModuleCard title="Address" icon={MapPin}>
+            {fullAddress ? (
+              <div className="flex items-start gap-3 px-4 py-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-gold/15">
+                  <MapPin className="h-4 w-4 text-brand-gold" />
+                </div>
+                <p className="text-sm text-foreground">{fullAddress}</p>
+              </div>
+            ) : (
+              <div className="px-4 py-10 text-center text-sm text-muted-foreground">No address provided</div>
+            )}
+          </ModuleCard>
 
           {/* Lead Source */}
           {checklist?.heard_about_us && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="bg-card rounded-2xl border border-border p-6"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Lead Source
-              </h2>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-brand-gold/10">
-                <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-brand-gold" />
+            <ModuleCard title="Lead Source" icon={MapPin}>
+              <div className="flex items-center gap-3 px-4 py-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-gold/15">
+                  <MapPin className="h-4 w-4 text-brand-gold" />
                 </div>
-                <div>
-                  <p className="text-xs text-brand-gold mb-0.5">Heard About Us</p>
-                  <p className="text-foreground font-medium">
+                <div className="min-w-0">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Heard About Us</div>
+                  <div className="text-sm font-medium text-foreground">
                     {checklist.heard_about_us}{checklist.heard_about_us === 'Other' && checklist.heard_about_us_other ? ` — ${checklist.heard_about_us_other}` : ''}
-                  </p>
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </ModuleCard>
           )}
 
           {/* Notes */}
           {customer.notes && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Notes
-              </h2>
-              <div className="flex items-start gap-4 p-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-primary" />
-                </div>
-                <p className="text-foreground whitespace-pre-wrap">{customer.notes}</p>
-              </div>
-            </motion.div>
+            <div className="md:col-span-2">
+              <ModuleCard title="Notes" icon={FileText}>
+                <p className="whitespace-pre-wrap px-4 py-3 text-sm text-foreground">{customer.notes}</p>
+              </ModuleCard>
+            </div>
           )}
 
-          {/* Metadata */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-card rounded-2xl border border-border p-6 md:col-span-2"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Record Information
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
-                <Calendar className="w-5 h-5 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">Created</p>
-                  <p className="text-sm text-foreground">
-                    {format(new Date(customer.created_date), 'MMM d, yyyy h:mm a')}
-                  </p>
+          {/* Record Information */}
+          <div className="md:col-span-2">
+            <ModuleCard title="Record Information" icon={Calendar}>
+              <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="flex items-center gap-3 rounded-xl bg-muted p-3">
+                  <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0">
+                    <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Created</div>
+                    <div className="text-sm text-foreground">
+                      {format(new Date(customer.created_date), 'MMM d, yyyy h:mm a')}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl bg-muted p-3">
+                  <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0">
+                    <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Last Updated</div>
+                    <div className="text-sm text-foreground">
+                      {format(new Date(customer.updated_date), 'MMM d, yyyy h:mm a')}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl bg-muted p-3">
+                  <Mail className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0">
+                    <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Created By</div>
+                    <div className="truncate text-sm text-foreground">{customer.created_by}</div>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
-                <Calendar className="w-5 h-5 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">Last Updated</p>
-                  <p className="text-sm text-foreground">
-                    {format(new Date(customer.updated_date), 'MMM d, yyyy h:mm a')}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
-                <Mail className="w-5 h-5 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">Created By</p>
-                  <p className="text-sm text-foreground truncate">{customer.created_by}</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+            </ModuleCard>
+          </div>
         </div>
       </div>
 
@@ -338,7 +292,7 @@ export default function CustomerDetail() {
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-foreground">Edit Customer</DialogTitle>
+            <DialogTitle className="font-display text-2xl font-bold text-foreground">Edit Customer</DialogTitle>
           </DialogHeader>
           <CustomerForm
             customer={customer}
@@ -353,9 +307,9 @@ export default function CustomerDetail() {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-foreground">Delete Customer</DialogTitle>
-            <DialogDescription className="text-muted-foreground mt-2">
-              Are you sure you want to delete {customer.first_name} {customer.last_name}? 
+            <DialogTitle className="font-display text-xl font-bold text-foreground">Delete Customer</DialogTitle>
+            <DialogDescription className="mt-2 text-muted-foreground">
+              Are you sure you want to delete {customer.first_name} {customer.last_name}?
               This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
@@ -375,7 +329,7 @@ export default function CustomerDetail() {
             >
               {deleteMutation.isPending ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Deleting...
                 </>
               ) : (

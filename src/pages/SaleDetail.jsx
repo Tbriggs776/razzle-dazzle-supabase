@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { SignedImage, resolveFileUrl } from '@/lib/fileUrl';
+import { cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -12,9 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  ArrowLeft, 
-  Calendar as CalendarIcon, 
+import {
+  ArrowLeft,
+  Calendar as CalendarIcon,
   Clock,
   MapPin,
   User,
@@ -33,12 +34,49 @@ import {
   Send,
   Upload,
   RefreshCw,
-  RotateCcw
+  IdCard,
+  Image as ImageIcon,
+  Boxes
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { format, parseISO } from 'date-fns';
+import PageHeader from '@/components/common/PageHeader';
+import StatusPill from '@/components/common/StatusPill';
+import SyncBadge from '@/components/common/SyncBadge';
+import KpiTile from '@/components/dashboard/KpiTile';
+import ModuleCard from '@/components/dashboard/ModuleCard';
+import WorkRow from '@/components/dashboard/WorkRow';
 import CostBreakdownModal from '@/components/sales/CostBreakdownModal';
 import { buildCatalogCostMap, computeCatalogGP } from '@/lib/catalogCost';
+
+const money = (n) =>
+  '$' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// Presentational labeled field used inside the info ModuleCards. Renders as a Link, an
+// anchor, or a static div depending on which target is supplied so navigation stays intact.
+function DetailField({ icon: Icon, label, children, to, href, className }) {
+  const interactive = !!(to || href);
+  const cls = cn(
+    'flex items-center gap-3 rounded-lg px-3 py-2.5',
+    interactive && 'group transition-colors hover:bg-muted/60',
+    className
+  );
+  const inner = (
+    <>
+      {Icon && (
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+          <Icon className="h-4 w-4" />
+        </div>
+      )}
+      <div className="min-w-0">
+        <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+        <div className="truncate text-sm text-foreground">{children}</div>
+      </div>
+    </>
+  );
+  if (to) return <Link to={to} className={cls}>{inner}</Link>;
+  if (href) return <a href={href} className={cls}>{inner}</a>;
+  return <div className={cls}>{inner}</div>;
+}
 
 export default function SaleDetail() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -140,7 +178,7 @@ export default function SaleDetail() {
     mutationFn: async () => {
       // Auto-set status to "Scheduled" if installation_date exists
       const projectStatus = sale.installation_date ? 'Scheduled' : 'Accepted';
-      
+
       const newProject = await base44.entities.Project.create({
         sale: saleId,
         customer: sale.customer,
@@ -155,7 +193,7 @@ export default function SaleDetail() {
         const baseUrl = appUrl.data.url;
         const fullUrl = `${baseUrl}/CustomerProjectView?id=${newProject.id}`;
         trackerUrl = fullUrl;
-        
+
         // Try to shorten the URL
         try {
           const { data } = await base44.functions.invoke('shortenUrl', { originalURL: fullUrl });
@@ -165,7 +203,7 @@ export default function SaleDetail() {
         } catch (error) {
           console.error('Failed to shorten URL, using full URL:', error);
         }
-        
+
         // Save the tracker URL to the project
         await base44.entities.Project.update(newProject.id, { project_tracker_url: trackerUrl });
       } catch (error) {
@@ -257,22 +295,22 @@ export default function SaleDetail() {
 
   const handleExtractLineItems = async () => {
     if (!sale?.contract_file_url) return;
-    
+
     // Update status to processing
     await base44.entities.Sale.update(saleId, {
       contract_extraction_status: 'processing'
     });
     queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
-    
+
     try {
       const { data } = await base44.functions.invoke('extractContractData', {
         contractUrl: sale.contract_file_url,
         saleId: saleId
       });
-      
+
       if (data.success) {
         queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
-        
+
         // After successful extraction, fetch RFMS data if invoice number exists
         const updatedSale = await base44.entities.Sale.filter({ id: saleId });
         if (updatedSale?.[0]?.invoice_number) {
@@ -280,7 +318,7 @@ export default function SaleDetail() {
             const { data: rfmsData } = await base44.functions.invoke('testOrderDirect', {
               invoiceNumber: updatedSale[0].invoice_number
             });
-            
+
             if (rfmsData.success) {
               await base44.entities.Sale.update(saleId, {
                 rfms_order_data: rfmsData.order,
@@ -423,14 +461,14 @@ export default function SaleDetail() {
 
       const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
       setNewContractFileUrl(fileUrl);
-      
+
       // Auto-extract invoice total from new PDF
       setExtractingNewAmount(true);
       try {
         const { data } = await base44.functions.invoke('extractInvoiceTotal', {
           pdfUrl: fileUrl
         });
-        
+
         if (data?.success && data?.total) {
           setEditAmount(data.total.toString());
         }
@@ -449,7 +487,7 @@ export default function SaleDetail() {
 
   const handleReplaceContract = async () => {
     if (!newContractFileUrl) return;
-    
+
     try {
       // Update sale with new contract URL and reset extraction status
       await base44.entities.Sale.update(saleId, {
@@ -458,7 +496,7 @@ export default function SaleDetail() {
         contract_extraction_status: 'pending',
         invoice_line_items: [] // Clear old line items
       });
-      
+
       queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
       setShowReplaceContractDialog(false);
       setNewContractFileUrl('');
@@ -521,684 +559,543 @@ export default function SaleDetail() {
   const customerName = customer ? `${customer.first_name} ${customer.last_name}` : 'Loading...';
   const consultantName = consultant ? `${consultant.first_name} ${consultant.last_name}` : 'Loading...';
 
+  // Presentational rollups for the header + KPI row.
+  const isCancelled = !!sale.is_cancelled;
+  const rfmsSourced = !!sale.rfms_order_data;
+  const balanceDue = (sale.sale_amount || 0) - (sale.deposit_amount || 0);
+  const heroGP = rfmsLines.length > 0 ? computeCatalogGP(rfmsLines, catalogCostMap) : null;
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link
-            to={createPageUrl('Sales')}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
+    <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <PageHeader
+          eyebrow={
+            <Link
+              to={createPageUrl('Sales')}
+              className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to Sales
+            </Link>
+          }
+          title={customerName}
+          subtitle={`Sold on ${format(parseISO(sale.sale_date), 'MMMM d, yyyy')} at ${format(parseISO(sale.sale_date), 'h:mm a')}`}
+          actions={
+            project ? (
+              <Button
+                variant="accent"
+                onClick={() => navigate(createPageUrl('ProjectDetail') + `?id=${project.id}`)}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                View Project
+              </Button>
+            ) : (
+              <Button
+                variant="accent"
+                onClick={() => createProjectMutation.mutate()}
+                disabled={createProjectMutation.isPending}
+              >
+                {createProjectMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Project
+                  </>
+                )}
+              </Button>
+            )
+          }
+        >
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <StatusPill tone={isCancelled ? 'crit' : 'good'} dot>
+              {isCancelled ? 'Cancelled' : 'Sold'}
+            </StatusPill>
+            {sale.invoice_number && (
+              <StatusPill tone="neutral">Inv #{sale.invoice_number}</StatusPill>
+            )}
+            {rfmsSourced && (
+              <SyncBadge
+                status="synced"
+                label={sale.rfms_sync_date ? `RFMS · ${format(parseISO(sale.rfms_sync_date), 'MMM d')}` : 'RFMS'}
+              />
+            )}
+          </div>
+        </PageHeader>
+
+        {/* Secondary action toolbar */}
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={handleDownloadContract} variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Download Contract
+          </Button>
+          <Button
+            onClick={() => setShowReplaceContractDialog(true)}
+            variant="outline"
+            className="border-brand-blue/40 text-brand-blue hover:bg-brand-blue/12"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Sales
-          </Link>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Replace Contract
+          </Button>
+          <Button onClick={handleEditClick} variant="outline">
+            <Edit className="mr-2 h-4 w-4" />
+            Edit Sale
+          </Button>
+          <Button
+            onClick={() => setShowCancelDialog(true)}
+            variant="outline"
+            className="border-warn/40 text-warn hover:bg-warn/10"
           >
-            <div className="flex flex-col md:flex-row md:items-start gap-6">
-              <div className="w-20 h-20 flex-shrink-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-white shadow-xl shadow-emerald-200">
-                <DollarSign className="w-10 h-10" />
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <h1 className="text-3xl font-bold text-foreground tracking-tight">{customerName}</h1>
-                <p className="text-muted-foreground mt-1">
-                  Sold on {format(parseISO(sale.sale_date), 'MMMM d, yyyy')} at {format(parseISO(sale.sale_date), 'h:mm a')}
-                </p>
-              </div>
-
-              {sale.sale_amount && (
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Sale Amount</p>
-                  <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                    ${sale.sale_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              {project ? (
-                <Button
-                  onClick={() => navigate(createPageUrl('ProjectDetail') + `?id=${project.id}`)}
-                  className="bg-primary text-primary-foreground hover:opacity-90 h-11 px-5"
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Project
-                </Button>
+            <X className="mr-2 h-4 w-4" />
+            Cancel Sale
+          </Button>
+          <Button
+            onClick={() => setShowDeleteDialog(true)}
+            variant="outline"
+            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
+          {currentUser?.role === 'admin' && (
+            <Button
+              onClick={handleSendSalesEmail}
+              disabled={sendingEmail}
+              variant="outline"
+              className="border-info/40 text-info hover:bg-info/10"
+            >
+              {sendingEmail ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
               ) : (
-                <Button
-                  onClick={() => createProjectMutation.mutate()}
-                  disabled={createProjectMutation.isPending}
-                  className="bg-primary text-primary-foreground hover:opacity-90 h-11 px-5"
-                >
-                  {createProjectMutation.isPending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Project
-                    </>
-                  )}
-                </Button>
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Sales Email
+                </>
               )}
-              <Button
-                onClick={handleDownloadContract}
-                variant="outline"
-                className="h-11 px-5 border-border"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Download Contract
-              </Button>
-              <Button
-                onClick={() => setShowReplaceContractDialog(true)}
-                variant="outline"
-                className="h-11 px-5 border-brand-blue/40 text-brand-blue hover:bg-brand-blue/12"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Replace Contract
-              </Button>
-              <Button
-                onClick={handleEditClick}
-                variant="outline"
-                className="h-11 px-5 border-border"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Sale
-              </Button>
-              <Button
-                onClick={() => setShowCancelDialog(true)}
-                variant="outline"
-                className="h-11 px-5 border-orange-300 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10"
-              >
-                <X className="w-4 h-4 mr-2" />
-                Cancel Sale
-              </Button>
-              <Button
-                onClick={() => setShowDeleteDialog(true)}
-                variant="outline"
-                className="h-11 px-5 border-destructive/40 text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </Button>
-              {currentUser?.role === 'admin' && (
-                <Button
-                  onClick={handleSendSalesEmail}
-                  disabled={sendingEmail}
-                  variant="outline"
-                  className="h-11 px-5 border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-500/30 dark:text-purple-300 dark:hover:bg-purple-500/10"
-                >
-                  {sendingEmail ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Sales Email
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-          </motion.div>
+            </Button>
+          )}
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {/* Summary KPIs */}
+        <div className={cn('grid grid-cols-1 gap-3 sm:grid-cols-2', heroGP ? 'lg:grid-cols-4' : 'lg:grid-cols-3')}>
+          <KpiTile
+            hero
+            label="Sale Amount"
+            value={money(sale.sale_amount)}
+            foot={sale.invoice_number ? `Invoice #${sale.invoice_number}` : 'Closed sale'}
+          />
+          <KpiTile
+            label="Deposit"
+            value={money(sale.deposit_amount)}
+            foot={sale.deposit_payment_method || 'Deposit collected'}
+          />
+          <KpiTile
+            label="Balance Due"
+            value={money(balanceDue)}
+            foot="Sale amount − deposit"
+          />
+          {heroGP && (
+            <KpiTile
+              label="Gross Profit"
+              value={`${heroGP.grossProfitPercent.toFixed(1)}%`}
+              foot={`Catalog GP · ${money(heroGP.grossProfit)}`}
+            />
+          )}
+        </div>
+
+        {/* Info cards */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Customer Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Customer Information
-            </h2>
+          <ModuleCard title="Customer" icon={User}>
             {customer ? (
-              <div className="space-y-4">
-                <Link
+              <div className="p-3 space-y-1">
+                <DetailField
+                  icon={User}
+                  label="Name"
                   to={createPageUrl('CustomerDetail') + `?id=${customer.id}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground mb-0.5">Name</p>
-                    <p className="text-foreground group-hover:text-primary transition-colors">
-                      {customerName}
-                    </p>
-                  </div>
-                </Link>
-                <a
-                  href={`mailto:${customer.email}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-500/15 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-600 dark:text-green-300" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Email</p>
-                    <p className="text-foreground group-hover:text-green-600 transition-colors">
-                      {customer.email}
-                    </p>
-                  </div>
-                </a>
+                  <span className="group-hover:text-primary">{customerName}</span>
+                </DetailField>
+                <DetailField icon={Mail} label="Email" href={`mailto:${customer.email}`}>
+                  {customer.email}
+                </DetailField>
                 {customer.phone && (
-                  <a
-                    href={`tel:${customer.phone}`}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-brand-blue" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
-                      <p className="text-foreground group-hover:text-brand-blue transition-colors">
-                        {customer.phone}
-                      </p>
-                    </div>
-                  </a>
+                  <DetailField icon={Phone} label="Phone" href={`tel:${customer.phone}`}>
+                    {customer.phone}
+                  </DetailField>
                 )}
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-4">Loading customer information...</p>
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">Loading customer information...</p>
             )}
-          </motion.div>
+          </ModuleCard>
 
           {/* Consultant Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Design Consultant
-            </h2>
+          <ModuleCard title="Design Consultant" icon={User}>
             {consultant ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-brand-blue/12">
-                  <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
-                    <User className="w-5 h-5 text-brand-blue" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-brand-blue mb-0.5">Name</p>
-                    <p className="text-foreground">{consultantName}</p>
-                  </div>
-                </div>
-                <a
-                  href={`mailto:${consultant.email}`}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-500/15 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-green-600 dark:text-green-300" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Email</p>
-                    <p className="text-foreground group-hover:text-green-600 transition-colors">
-                      {consultant.email}
-                    </p>
-                  </div>
-                </a>
+              <div className="p-3 space-y-1">
+                <DetailField icon={User} label="Name">
+                  {consultantName}
+                </DetailField>
+                <DetailField icon={Mail} label="Email" href={`mailto:${consultant.email}`}>
+                  {consultant.email}
+                </DetailField>
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-4">Loading consultant information...</p>
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">Loading consultant information...</p>
             )}
-          </motion.div>
+          </ModuleCard>
 
           {/* Appointment Details */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Original Appointment
-            </h2>
-            <div className="space-y-4">
+          <ModuleCard title="Original Appointment" icon={CalendarIcon}>
+            <div className="p-3 space-y-1">
               {sale.appointment_date && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
-                    <CalendarIcon className="w-5 h-5 text-brand-blue" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Date</p>
-                    <p className="text-foreground">
-                      {format(new Date(sale.appointment_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
-                    </p>
-                  </div>
-                </div>
+                <DetailField icon={CalendarIcon} label="Date">
+                  {format(new Date(sale.appointment_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}
+                </DetailField>
               )}
               {sale.appointment_block && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-500/15 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-purple-600 dark:text-purple-300" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Time Block</p>
-                    <p className="text-foreground">{sale.appointment_block}</p>
-                  </div>
-                </div>
+                <DetailField icon={Clock} label="Time Block">
+                  {sale.appointment_block}
+                </DetailField>
               )}
               {checklist?.heard_about_us && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-500/15 flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-amber-600 dark:text-amber-300" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Lead Source</p>
-                    <p className="text-foreground">
-                      {checklist.heard_about_us}{checklist.heard_about_us === 'Other' && checklist.heard_about_us_other ? ` — ${checklist.heard_about_us_other}` : ''}
-                    </p>
-                  </div>
-                </div>
+                <DetailField icon={MapPin} label="Lead Source">
+                  {checklist.heard_about_us}{checklist.heard_about_us === 'Other' && checklist.heard_about_us_other ? ` — ${checklist.heard_about_us_other}` : ''}
+                </DetailField>
               )}
-              <Link
+              <DetailField
+                icon={FileText}
+                label="View Details"
                 to={createPageUrl('AppointmentDetail') + `?id=${sale.appointment}`}
-                className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
               >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">View Details</p>
-                  <p className="text-primary group-hover:underline">Full Appointment</p>
-                </div>
-              </Link>
+                <span className="text-primary group-hover:underline">Full Appointment</span>
+              </DetailField>
             </div>
-          </motion.div>
+          </ModuleCard>
 
           {/* Payment Details */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Payment Details
-            </h2>
-            <div className="space-y-4">
+          <ModuleCard title="Payment Details" icon={DollarSign}>
+            <div className="p-3 space-y-1">
               {sale.deposit_payment_method && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Payment Method</p>
-                    <p className="text-foreground">{sale.deposit_payment_method}</p>
-                  </div>
-                </div>
+                <DetailField icon={DollarSign} label="Payment Method">
+                  {sale.deposit_payment_method}
+                </DetailField>
               )}
               {sale.deposit_amount && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-500/15 flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-green-600 dark:text-green-300" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Deposit Amount</p>
-                    <p className="text-foreground">
-                      ${sale.deposit_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                </div>
+                <DetailField icon={DollarSign} label="Deposit Amount">
+                  {money(sale.deposit_amount)}
+                </DetailField>
               )}
               {sale.check_number && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-brand-blue" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Check Number</p>
-                    <p className="text-foreground">{sale.check_number}</p>
-                  </div>
-                </div>
+                <DetailField icon={FileText} label="Check Number">
+                  {sale.check_number}
+                </DetailField>
               )}
               {sale.check_date && (
-                <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-500/15 flex items-center justify-center">
-                    <CalendarIcon className="w-5 h-5 text-purple-600 dark:text-purple-300" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground mb-0.5">Check Date</p>
-                    <p className="text-foreground">
-                      {format(new Date(sale.check_date + 'T00:00:00'), 'MMMM d, yyyy')}
-                    </p>
-                  </div>
-                </div>
+                <DetailField icon={CalendarIcon} label="Check Date">
+                  {format(new Date(sale.check_date + 'T00:00:00'), 'MMMM d, yyyy')}
+                </DetailField>
+              )}
+              {!sale.deposit_payment_method && !sale.deposit_amount && !sale.check_number && !sale.check_date && (
+                <p className="px-3 py-6 text-center text-sm text-muted-foreground">No payment details recorded</p>
               )}
             </div>
-          </motion.div>
+          </ModuleCard>
 
           {/* Location */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-card rounded-2xl border border-border p-6"
-          >
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-              Location
-            </h2>
+          <ModuleCard title="Location" icon={MapPin}>
             {sale.location_address ? (
-              <div className="flex items-start gap-4 p-3">
-                <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-500/15 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-300" />
-                </div>
-                <div>
-                  <p className="text-foreground">{sale.location_address}</p>
-                </div>
+              <div className="p-3">
+                <DetailField icon={MapPin} label="Address">
+                  <span className="whitespace-normal">{sale.location_address}</span>
+                </DetailField>
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-6">No location specified</p>
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">No location specified</p>
             )}
-          </motion.div>
+          </ModuleCard>
 
-          {/* Final Product Selected Photos */}
-          {sale.product_photos && sale.product_photos.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Final Product Selected Photos
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {sale.product_photos.map((url, idx) => (
-                  <div key={idx}>
-                    <p className="text-xs font-medium text-muted-foreground mb-1">Product {idx + 1}</p>
-                    <div className="rounded-lg overflow-hidden border border-border">
-                      <SignedImage
-                        src={url}
-                        alt={`Product ${idx + 1}`}
-                        className="w-full h-48 object-cover"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+          {/* Related Project */}
+          {project && (
+            <ModuleCard title="Related Project" icon={Boxes}>
+              <WorkRow
+                primary="Installation Project"
+                meta={[
+                  project.installation_date && `Installs ${format(new Date(project.installation_date + 'T00:00:00'), 'MMM d, yyyy')}`,
+                  'Created from this sale',
+                ].filter(Boolean).join('  ·  ')}
+                status={project.status}
+                tone="info"
+                onClick={() => navigate(createPageUrl('ProjectDetail') + `?id=${project.id}`)}
+              />
+            </ModuleCard>
           )}
+        </div>
 
-          {/* Driver's License Photo */}
-          {sale.driver_license_photo_url && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-card rounded-2xl border border-border p-6"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Driver's License
-              </h2>
-              <div className="rounded-lg overflow-hidden border border-border">
+        {/* Driver's License */}
+        {sale.driver_license_photo_url && (
+          <ModuleCard title="Driver's License" icon={IdCard}>
+            <div className="p-4">
+              <div className="overflow-hidden rounded-lg border border-border">
                 <SignedImage
                   src={sale.driver_license_photo_url}
                   alt="Driver's License"
                   className="w-full h-auto"
                 />
               </div>
-            </motion.div>
-          )}
+            </div>
+          </ModuleCard>
+        )}
 
-          {/* Notes */}
-          {sale.notes && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55 }}
-              className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-            >
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-                Sale Notes
-              </h2>
-              <div className="flex items-start gap-4 p-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-500/15 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-5 h-5 text-purple-600 dark:text-purple-300" />
-                </div>
-                <p className="text-foreground whitespace-pre-wrap">{sale.notes}</p>
+        {/* Final Product Selected Photos */}
+        {sale.product_photos && sale.product_photos.length > 0 && (
+          <ModuleCard title="Final Product Selected Photos" subtitle={`${sale.product_photos.length} photo${sale.product_photos.length === 1 ? '' : 's'}`} icon={ImageIcon}>
+            <div className="p-4">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                {sale.product_photos.map((url, idx) => (
+                  <div key={idx}>
+                    <p className="mb-1 text-xs font-medium text-muted-foreground">Product {idx + 1}</p>
+                    <div className="overflow-hidden rounded-lg border border-border">
+                      <SignedImage
+                        src={url}
+                        alt={`Product ${idx + 1}`}
+                        className="h-48 w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </motion.div>
-          )}
+            </div>
+          </ModuleCard>
+        )}
 
-          {/* Invoice Details */}
-          <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.6 }}
-           className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-          >
-           <div className="flex items-center justify-between mb-4">
-             <div>
-               <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                 Invoice Details
-               </h2>
-               {sale.invoice_number && (
-                 <p className="text-xs text-muted-foreground mt-1">Invoice #{sale.invoice_number}</p>
-               )}
-             </div>
-           </div>
+        {/* Notes */}
+        {sale.notes && (
+          <ModuleCard title="Sale Notes" icon={FileText}>
+            <div className="p-4">
+              <p className="whitespace-pre-wrap text-sm text-foreground">{sale.notes}</p>
+            </div>
+          </ModuleCard>
+        )}
 
-           <Tabs defaultValue="rfms" className="w-full">
-             <TabsList className="grid w-full grid-cols-2">
-               <TabsTrigger value="rfms">RFMS API Data</TabsTrigger>
-               <TabsTrigger value="contract">Contract Extraction</TabsTrigger>
-             </TabsList>
+        {/* Invoice Details */}
+        <ModuleCard
+          title="Invoice Details"
+          subtitle={sale.invoice_number ? `Invoice #${sale.invoice_number}` : undefined}
+          icon={FileText}
+        >
+          <div className="p-4">
+            <Tabs defaultValue="rfms" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="rfms">RFMS API Data</TabsTrigger>
+                <TabsTrigger value="contract">Contract Extraction</TabsTrigger>
+              </TabsList>
 
-             <TabsContent value="rfms" className="mt-6">
-              {(() => {
-                const PRODUCT_TYPES = {
-                  1: '01 CARPET', 2: '02 VINYL', 3: '03 PAD', 4: '04 WOOD',
-                  5: '05 TILE', 6: '06 LAMINATE', 7: '07 VINYL TILE - LVT, LVP',
-                  8: '08 CARPET TILE', 9: '09 VCT', 10: '10 NATURAL STONE',
-                  11: '11 RUBBER TILE', 12: '12 SD/ESD TILE', 13: '13 SUNDRIES',
-                  14: '14 ADHESIVES', 15: '15 METAL', 16: '16 WALL BASE',
-                  17: '17 TRIMS/TRANSITIONS', 18: '18 UNDERLAYMENT',
-                  19: '19 INSTALL MATERIALS', 20: '20 AREA RUGS', 21: '21 REMNANTS'
-                };
-                const result = sale.rfms_order_data?.order?.result || sale.rfms_order_data?.result;
-                const lines = result?.lines;
-                const privateNotes = result?.privateNotes;
-                const publicNotes = result?.publicNotes;
-                const workOrderNotes = result?.workOrderNotes;
-                if (!lines || lines.length === 0) {
+              <TabsContent value="rfms" className="mt-6">
+                {(() => {
+                  const PRODUCT_TYPES = {
+                    1: '01 CARPET', 2: '02 VINYL', 3: '03 PAD', 4: '04 WOOD',
+                    5: '05 TILE', 6: '06 LAMINATE', 7: '07 VINYL TILE - LVT, LVP',
+                    8: '08 CARPET TILE', 9: '09 VCT', 10: '10 NATURAL STONE',
+                    11: '11 RUBBER TILE', 12: '12 SD/ESD TILE', 13: '13 SUNDRIES',
+                    14: '14 ADHESIVES', 15: '15 METAL', 16: '16 WALL BASE',
+                    17: '17 TRIMS/TRANSITIONS', 18: '18 UNDERLAYMENT',
+                    19: '19 INSTALL MATERIALS', 20: '20 AREA RUGS', 21: '21 REMNANTS'
+                  };
+                  const result = sale.rfms_order_data?.order?.result || sale.rfms_order_data?.result;
+                  const lines = result?.lines;
+                  const privateNotes = result?.privateNotes;
+                  const publicNotes = result?.publicNotes;
+                  const workOrderNotes = result?.workOrderNotes;
+                  if (!lines || lines.length === 0) {
+                    return (
+                      <div className="text-center py-8">
+                        <Download className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground text-sm">No RFMS data available</p>
+                        <p className="text-muted-foreground text-xs mt-1">
+                          {sale.invoice_number
+                            ? 'Click "Fetch from RFMS" in the RFMS Order Data section below'
+                            : 'Invoice number required to fetch RFMS data'}
+                        </p>
+                      </div>
+                    );
+                  }
+                  const totalCost = lines.reduce((sum, item) => sum + (item.unitCost * item.quantity), 0);
+                  const orderTotal = lines.reduce((sum, item) => sum + (item.total || 0), 0);
+                  const grossProfitPercent = orderTotal > 0 ? ((orderTotal - totalCost) / orderTotal * 100) : 0;
+                  // New GP calc using catalog per_unit_cost when available, else falls back to RFMS unitCost
+                  const { catalogTotalCost, grossProfit: catalogGrossProfit, grossProfitPercent: catalogGPPercent } = computeCatalogGP(lines, catalogCostMap);
                   return (
-                    <div className="text-center py-8">
-                      <Download className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-muted-foreground text-sm">No RFMS data available</p>
-                      <p className="text-muted-foreground text-xs mt-1">
-                        {sale.invoice_number
-                          ? 'Click "Fetch from RFMS" in the RFMS Order Data section below'
-                          : 'Invoice number required to fetch RFMS data'}
-                      </p>
+                    <div>
+                      <div className="border border-border rounded-lg overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow className="bg-muted">
+                              <TableHead>Supplier</TableHead>
+                              <TableHead>Style Name</TableHead>
+                              <TableHead>Color</TableHead>
+                              <TableHead>Product Code</TableHead>
+                              <TableHead>Product Type</TableHead>
+                              <TableHead className="text-right">Quantity</TableHead>
+                              <TableHead className="text-right">Unit Cost</TableHead>
+                              <TableHead className="text-right">Per Unit Cost</TableHead>
+                              <TableHead className="text-right">Unit Price</TableHead>
+                              <TableHead className="text-right">Total</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {lines.map((item, index) => (
+                              <TableRow key={index}>
+                                <TableCell className="font-medium">{item.supplierName}</TableCell>
+                                <TableCell>{item.styleName}</TableCell>
+                                <TableCell>{item.colorName}</TableCell>
+                                <TableCell className="text-muted-foreground">{item.productCode ?? '—'}</TableCell>
+                                <TableCell className="text-muted-foreground whitespace-nowrap">{PRODUCT_TYPES[parseInt(item.productCode, 10)] || '—'}</TableCell>
+                                <TableCell className="text-right">{item.quantity}</TableCell>
+                                <TableCell className="text-right">${item.unitCost?.toFixed(2) || '0.00'}</TableCell>
+                                <TableCell className="text-right">{(() => { const c = catalogCostMap[String(item.styleName).toLowerCase()]; return c != null ? `$${Number(c).toFixed(2)}` : '—'; })()}</TableCell>
+                                <TableCell className="text-right">${item.unitPrice?.toFixed(2) || '0.00'}</TableCell>
+                                <TableCell className="text-right font-semibold">${item.total?.toFixed(2) || '0.00'}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      {/* New GP calc using catalog per_unit_cost (larger) */}
+                      <div className="border-t-2 border-border pt-4 mt-6 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-base font-semibold text-foreground">Total Cost (Catalog):</span>
+                          <span className="text-2xl font-bold text-foreground">
+                            ${catalogTotalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-base font-semibold text-foreground">Order Total:</span>
+                          <span className="text-3xl font-bold text-good">
+                            ${orderTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center pt-2 border-t border-border">
+                          <span className="text-base font-semibold text-foreground">Gross Profit % (Catalog):</span>
+                          <span className="text-2xl font-bold text-brand-blue">{catalogGPPercent.toFixed(2)}%</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-2">
+                          <span className="text-base font-semibold text-foreground">Gross Profit $ (Catalog):</span>
+                          <span className="text-2xl font-bold text-good">${(orderTotal - catalogTotalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                      </div>
+                      {/* Old GP calc using RFMS unit cost (smaller, for diff) */}
+                      <div className="border-t border-border pt-3 mt-4 space-y-1 bg-muted rounded-lg p-3">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">RFMS Unit Cost GP (legacy)</p>
+                        <div
+                          className="flex justify-between items-center cursor-pointer group"
+                          onClick={() => {
+                            setCostBreakdownData({ lines, totalCost, orderTotal, grossProfitPercent });
+                            setShowCostBreakdown(true);
+                          }}
+                        >
+                          <span className="text-xs font-medium text-muted-foreground group-hover:underline">Total Cost:</span>
+                          <span className="text-sm font-semibold text-muted-foreground group-hover:underline">
+                            ${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-medium text-muted-foreground">Order Total:</span>
+                          <span className="text-sm font-semibold text-muted-foreground">
+                            ${orderTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-medium text-muted-foreground">Gross Profit %:</span>
+                          <span className="text-sm font-bold text-muted-foreground">{grossProfitPercent.toFixed(2)}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-medium text-muted-foreground">Gross Profit $:</span>
+                          <span className="text-sm font-bold text-muted-foreground">${(orderTotal - totalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                      </div>
+                      <div className="mt-6 space-y-2">
+                        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">GP% by Line Item</h3>
+                        {lines.map((item, index) => {
+                          const itemGP = item.total > 0 ? ((item.total - (item.unitCost * item.quantity)) / item.total * 100) : 0;
+                          return (
+                            <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium text-foreground truncate">{item.styleName}</p>
+                              </div>
+                              <span className="text-xs font-bold text-brand-blue ml-2">{itemGP.toFixed(1)}%</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {(publicNotes || privateNotes || workOrderNotes) && (
+                        <div className="mt-6 space-y-4 border-t border-border pt-4">
+                          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order Notes</h3>
+                          {publicNotes && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Public Notes</p>
+                              <div className="bg-muted rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: publicNotes }} />
+                            </div>
+                          )}
+                          {privateNotes && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Private Notes</p>
+                              <div className="bg-warn/10 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: privateNotes }} />
+                            </div>
+                          )}
+                          {workOrderNotes && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Work Order Notes</p>
+                              <div className="bg-brand-blue/12 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: workOrderNotes }} />
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
-                }
-                const totalCost = lines.reduce((sum, item) => sum + (item.unitCost * item.quantity), 0);
-                const orderTotal = lines.reduce((sum, item) => sum + (item.total || 0), 0);
-                const grossProfitPercent = orderTotal > 0 ? ((orderTotal - totalCost) / orderTotal * 100) : 0;
-                // New GP calc using catalog per_unit_cost when available, else falls back to RFMS unitCost
-                const { catalogTotalCost, grossProfit: catalogGrossProfit, grossProfitPercent: catalogGPPercent } = computeCatalogGP(lines, catalogCostMap);
-                return (
+                })()}
+              </TabsContent>
+
+              <TabsContent value="contract" className="mt-6">
+                <div className="flex justify-end mb-4">
+                  <Button
+                    onClick={handleExtractLineItems}
+                    disabled={sale?.contract_extraction_status === 'processing'}
+                    variant="outline"
+                    size="sm"
+                    className="border-primary/30 text-primary hover:bg-primary/10"
+                  >
+                    {sale?.contract_extraction_status === 'processing' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Extracting...
+                      </>
+                    ) : sale?.contract_extraction_status === 'error' ? (
+                      <>
+                        <ClipboardCheck className="w-4 h-4 mr-2" />
+                        Retry Extraction
+                      </>
+                    ) : (
+                      <>
+                        <ClipboardCheck className="w-4 h-4 mr-2" />
+                        {sale?.invoice_line_items?.length ? 'Re-extract' : 'Extract from Contract'}
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {sale.invoice_line_items && sale.invoice_line_items.length > 0 ? (
                   <div>
-                    <div className="border border-border rounded-lg overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-muted">
-                            <TableHead>Supplier</TableHead>
-                            <TableHead>Style Name</TableHead>
-                            <TableHead>Color</TableHead>
-                            <TableHead>Product Code</TableHead>
-                            <TableHead>Product Type</TableHead>
-                            <TableHead className="text-right">Quantity</TableHead>
-                            <TableHead className="text-right">Unit Cost</TableHead>
-                            <TableHead className="text-right">Per Unit Cost</TableHead>
-                            <TableHead className="text-right">Unit Price</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {lines.map((item, index) => (
-                            <TableRow key={index}>
-                              <TableCell className="font-medium">{item.supplierName}</TableCell>
-                              <TableCell>{item.styleName}</TableCell>
-                              <TableCell>{item.colorName}</TableCell>
-                              <TableCell className="text-muted-foreground">{item.productCode ?? '—'}</TableCell>
-                              <TableCell className="text-muted-foreground whitespace-nowrap">{PRODUCT_TYPES[parseInt(item.productCode, 10)] || '—'}</TableCell>
-                              <TableCell className="text-right">{item.quantity}</TableCell>
-                              <TableCell className="text-right">${item.unitCost?.toFixed(2) || '0.00'}</TableCell>
-                              <TableCell className="text-right">{(() => { const c = catalogCostMap[String(item.styleName).toLowerCase()]; return c != null ? `$${Number(c).toFixed(2)}` : '—'; })()}</TableCell>
-                              <TableCell className="text-right">${item.unitPrice?.toFixed(2) || '0.00'}</TableCell>
-                              <TableCell className="text-right font-semibold">${item.total?.toFixed(2) || '0.00'}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                    <div className="border-b border-border pb-2 mb-4">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Item</h3>
                     </div>
-                     {/* New GP calc using catalog per_unit_cost (larger) */}
-                     <div className="border-t-2 border-border pt-4 mt-6 space-y-2">
-                       <div className="flex justify-between items-center">
-                         <span className="text-base font-semibold text-foreground">Total Cost (Catalog):</span>
-                         <span className="text-2xl font-bold text-foreground">
-                           ${catalogTotalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                         </span>
-                       </div>
-                       <div className="flex justify-between items-center">
-                         <span className="text-base font-semibold text-foreground">Order Total:</span>
-                         <span className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                           ${orderTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                         </span>
-                       </div>
-                       <div className="flex justify-between items-center pt-2 border-t border-border">
-                         <span className="text-base font-semibold text-foreground">Gross Profit % (Catalog):</span>
-                         <span className="text-2xl font-bold text-brand-blue">{catalogGPPercent.toFixed(2)}%</span>
-                       </div>
-                       <div className="flex justify-between items-center pt-2">
-                         <span className="text-base font-semibold text-foreground">Gross Profit $ (Catalog):</span>
-                         <span className="text-2xl font-bold text-green-600 dark:text-green-400">${(orderTotal - catalogTotalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                       </div>
-                     </div>
-                     {/* Old GP calc using RFMS unit cost (smaller, for diff) */}
-                     <div className="border-t border-border pt-3 mt-4 space-y-1 bg-muted rounded-lg p-3">
-                       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">RFMS Unit Cost GP (legacy)</p>
-                       <div
-                         className="flex justify-between items-center cursor-pointer group"
-                         onClick={() => {
-                           setCostBreakdownData({ lines, totalCost, orderTotal, grossProfitPercent });
-                           setShowCostBreakdown(true);
-                         }}
-                       >
-                         <span className="text-xs font-medium text-muted-foreground group-hover:underline">Total Cost:</span>
-                         <span className="text-sm font-semibold text-muted-foreground group-hover:underline">
-                           ${totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                         </span>
-                       </div>
-                       <div className="flex justify-between items-center">
-                         <span className="text-xs font-medium text-muted-foreground">Order Total:</span>
-                         <span className="text-sm font-semibold text-muted-foreground">
-                           ${orderTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                         </span>
-                       </div>
-                       <div className="flex justify-between items-center">
-                         <span className="text-xs font-medium text-muted-foreground">Gross Profit %:</span>
-                         <span className="text-sm font-bold text-muted-foreground">{grossProfitPercent.toFixed(2)}%</span>
-                       </div>
-                       <div className="flex justify-between items-center">
-                         <span className="text-xs font-medium text-muted-foreground">Gross Profit $:</span>
-                         <span className="text-sm font-bold text-muted-foreground">${(orderTotal - totalCost).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                       </div>
-                     </div>
-                     <div className="mt-6 space-y-2">
-                      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">GP% by Line Item</h3>
-                      {lines.map((item, index) => {
-                         const itemGP = item.total > 0 ? ((item.total - (item.unitCost * item.quantity)) / item.total * 100) : 0;
-                         return (
-                           <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
-                             <div className="flex-1 min-w-0">
-                               <p className="text-xs font-medium text-foreground truncate">{item.styleName}</p>
-                             </div>
-                             <span className="text-xs font-bold text-brand-blue ml-2">{itemGP.toFixed(1)}%</span>
-                           </div>
-                         );
-                       })}
-                     </div>
-                     {(publicNotes || privateNotes || workOrderNotes) && (
-                       <div className="mt-6 space-y-4 border-t border-border pt-4">
-                         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order Notes</h3>
-                         {publicNotes && (
-                           <div>
-                             <p className="text-xs font-medium text-muted-foreground mb-1">Public Notes</p>
-                             <div className="bg-muted rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: publicNotes }} />
-                           </div>
-                         )}
-                         {privateNotes && (
-                           <div>
-                             <p className="text-xs font-medium text-muted-foreground mb-1">Private Notes</p>
-                             <div className="bg-amber-50 dark:bg-amber-500/10 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: privateNotes }} />
-                           </div>
-                         )}
-                         {workOrderNotes && (
-                           <div>
-                             <p className="text-xs font-medium text-muted-foreground mb-1">Work Order Notes</p>
-                             <div className="bg-brand-blue/12 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: workOrderNotes }} />
-                           </div>
-                         )}
-                       </div>
-                     )}
-                     </div>
-                     );
-               })()}
-                     </TabsContent>
-
-                     <TabsContent value="contract" className="mt-6">
-               <div className="flex justify-end mb-4">
-                 <Button
-                   onClick={handleExtractLineItems}
-                   disabled={sale?.contract_extraction_status === 'processing'}
-                   variant="outline"
-                   size="sm"
-                   className="border-primary/30 text-primary hover:bg-primary/10"
-                 >
-                   {sale?.contract_extraction_status === 'processing' ? (
-                     <>
-                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                       Extracting...
-                     </>
-                   ) : sale?.contract_extraction_status === 'error' ? (
-                     <>
-                       <ClipboardCheck className="w-4 h-4 mr-2" />
-                       Retry Extraction
-                     </>
-                   ) : (
-                     <>
-                       <ClipboardCheck className="w-4 h-4 mr-2" />
-                       {sale?.invoice_line_items?.length ? 'Re-extract' : 'Extract from Contract'}
-                     </>
-                   )}
-                 </Button>
-               </div>
-
-               {sale.invoice_line_items && sale.invoice_line_items.length > 0 ? (
-                 <div>
-                   <div className="border-b border-border pb-2 mb-4">
-                     <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">Item</h3>
-                   </div>
                     <div className="space-y-0">
                       {sale.invoice_line_items.map((item, index) => (
                         <div key={index} className="py-2 border-b border-border last:border-0">
@@ -1212,7 +1109,7 @@ export default function SaleDetail() {
                     {sale.sale_amount && (
                       <div className="border-t-2 border-border pt-4 mt-6 flex justify-between items-center">
                         <span className="text-sm font-semibold text-foreground">Invoice Total:</span>
-                        <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                        <span className="text-2xl font-bold text-good">
                           ${sale.sale_amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
@@ -1225,96 +1122,86 @@ export default function SaleDetail() {
                     <p className="text-muted-foreground text-xs mt-1">Click "Extract from Contract" to analyze the contract PDF</p>
                   </div>
                 )}
-             </TabsContent>
-           </Tabs>
-          </motion.div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </ModuleCard>
 
-          {/* RFMS Order Data - Admin Only */}
-          {currentUser?.role === 'admin' && (
-           <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.65 }}
-             className="bg-card rounded-2xl border border-border p-6 md:col-span-2 xl:col-span-3"
-           >
-             <div className="flex items-center justify-between mb-4">
-               <div>
-                 <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                   RFMS Order Data
-                 </h2>
-                 {sale.rfms_sync_date && (
-                   <p className="text-xs text-muted-foreground mt-1">
-                     Last synced: {format(parseISO(sale.rfms_sync_date), 'MMM d, yyyy h:mm a')}
-                   </p>
-                 )}
-               </div>
-               <div className="flex items-center gap-2">
-                  {sale.rfms_order_data && (
-                    <Button
-                      onClick={handleSendGPAlert}
-                      disabled={sendingGPAlert}
-                      variant="outline"
-                      size="sm"
-                      className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
-                    >
-                      {sendingGPAlert ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          Send GP Alert
-                        </>
-                      )}
-                    </Button>
-                  )}
+        {/* RFMS Order Data - Admin Only */}
+        {currentUser?.role === 'admin' && (
+          <ModuleCard
+            title="RFMS Order Data"
+            subtitle={sale.rfms_sync_date ? `Last synced: ${format(parseISO(sale.rfms_sync_date), 'MMM d, yyyy h:mm a')}` : undefined}
+            icon={RefreshCw}
+            action={
+              <div className="flex items-center gap-2">
+                {sale.rfms_order_data && (
                   <Button
-                    onClick={handleFetchRFMSOrder}
-                    disabled={fetchingRFMS || !sale.invoice_number}
+                    onClick={handleSendGPAlert}
+                    disabled={sendingGPAlert}
                     variant="outline"
                     size="sm"
-                    className="border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
+                    className="border-good/40 text-good hover:bg-good/10"
                   >
-                    {fetchingRFMS ? (
+                    {sendingGPAlert ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Fetching...
+                        Sending...
                       </>
                     ) : (
                       <>
-                        <Download className="w-4 h-4 mr-2" />
-                        {sale.rfms_order_data ? 'Refresh from RFMS' : 'Fetch from RFMS'}
+                        <Send className="w-4 h-4 mr-2" />
+                        Send GP Alert
                       </>
                     )}
                   </Button>
+                )}
+                <Button
+                  onClick={handleFetchRFMSOrder}
+                  disabled={fetchingRFMS || !sale.invoice_number}
+                  variant="outline"
+                  size="sm"
+                  className="border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
+                >
+                  {fetchingRFMS ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Fetching...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      {sale.rfms_order_data ? 'Refresh from RFMS' : 'Fetch from RFMS'}
+                    </>
+                  )}
+                </Button>
+              </div>
+            }
+          >
+            <div className="p-4">
+              {sale.rfms_order_data ? (
+                <div className="bg-muted rounded-lg p-4 max-h-96 overflow-auto">
+                  <pre className="text-xs text-foreground whitespace-pre-wrap">
+                    {JSON.stringify(sale.rfms_order_data, null, 2)}
+                  </pre>
                 </div>
-             </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Download className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm">No RFMS order data fetched yet</p>
+                  <p className="text-muted-foreground text-xs mt-1">
+                    {sale.invoice_number
+                      ? `Click "Fetch from RFMS" to retrieve order data for invoice #${sale.invoice_number}`
+                      : 'Invoice number required to fetch RFMS data'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </ModuleCard>
+        )}
+      </div>
 
-             {sale.rfms_order_data ? (
-               <div className="bg-muted rounded-lg p-4 max-h-96 overflow-auto">
-                 <pre className="text-xs text-foreground whitespace-pre-wrap">
-                   {JSON.stringify(sale.rfms_order_data, null, 2)}
-                 </pre>
-               </div>
-             ) : (
-               <div className="text-center py-8">
-                 <Download className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                 <p className="text-muted-foreground text-sm">No RFMS order data fetched yet</p>
-                 <p className="text-muted-foreground text-xs mt-1">
-                   {sale.invoice_number 
-                     ? `Click "Fetch from RFMS" to retrieve order data for invoice #${sale.invoice_number}`
-                     : 'Invoice number required to fetch RFMS data'}
-                 </p>
-               </div>
-             )}
-           </motion.div>
-          )}
-          </div>
-          </div>
-
-          <CostBreakdownModal
+      <CostBreakdownModal
         open={showCostBreakdown}
         onClose={setShowCostBreakdown}
         data={costBreakdownData}
@@ -1329,7 +1216,7 @@ export default function SaleDetail() {
               Update the sale amount and notes
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="edit-sale-date">Sale Date & Time</Label>
@@ -1398,7 +1285,7 @@ export default function SaleDetail() {
               This will revert the appointment status back to "Completed" and remove the sale record. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          
+
           <DialogFooter>
             <Button
               variant="outline"
@@ -1409,7 +1296,7 @@ export default function SaleDetail() {
             <Button
               onClick={() => cancelSaleMutation.mutate()}
               disabled={cancelSaleMutation.isPending}
-              className="bg-orange-600 hover:bg-orange-700"
+              className="bg-warn text-white hover:bg-warn/90"
             >
               {cancelSaleMutation.isPending ? (
                 <>
@@ -1433,7 +1320,7 @@ export default function SaleDetail() {
               This will permanently delete this sale record. The appointment will remain in "Sold" status. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          
+
           <DialogFooter>
             <Button
               variant="outline"
@@ -1468,7 +1355,7 @@ export default function SaleDetail() {
               Upload a new contract PDF to replace the existing one. This will also reset invoice extraction data.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>New Contract PDF *</Label>
@@ -1502,8 +1389,8 @@ export default function SaleDetail() {
 
             {newContractFileUrl && (
               <>
-                <div className="p-3 bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25 rounded-lg">
-                  <p className="text-sm text-green-800 dark:text-green-300 flex items-center gap-2">
+                <div className="p-3 bg-good/10 border border-good/25 rounded-lg">
+                  <p className="text-sm text-good flex items-center gap-2">
                     <FileText className="w-4 h-4" />
                     New contract uploaded successfully
                   </p>
