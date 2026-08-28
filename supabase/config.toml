@@ -70,3 +70,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.twilioStatus]
 verify_jwt = false
+
+[functions.userAdmin]
+verify_jwt = false

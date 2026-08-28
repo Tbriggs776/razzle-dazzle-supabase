@@ -93,6 +93,7 @@ import SpeedToInstall from './pages/SpeedToInstall';
 import SubmitTicket from './pages/SubmitTicket';
 import TeamMemberDetail from './pages/TeamMemberDetail';
 import TeamMembers from './pages/TeamMembers';
+import UserAccess from './pages/UserAccess';
 import __Layout from './Layout.jsx';
 
 
@@ -143,6 +144,7 @@ export const PAGES = {
     "SubmitTicket": SubmitTicket,
     "TeamMemberDetail": TeamMemberDetail,
     "TeamMembers": TeamMembers,
+    "UserAccess": UserAccess,
 }
 
 export const pagesConfig = {

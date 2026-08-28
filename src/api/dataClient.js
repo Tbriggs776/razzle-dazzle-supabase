@@ -332,6 +332,7 @@ const auth = {
 // button can no longer silently fake success.
 // ---------------------------------------------------------------------------
 const DEPLOYED_FUNCTIONS = new Set([
+  'userAdmin',
   'getAppUrl',
   'getPublicProjectSigned',
   'logAppointmentAction',
