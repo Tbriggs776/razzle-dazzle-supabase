@@ -8,13 +8,18 @@ description: Deep RFMS (Cyncly) flooring-ERP expertise — domain model, order l
 Working knowledge of RFMS for the Floor Daddy / RAZZLE DAZZLE integration, distilled
 from a full read of the RFMS help centre (2,355 articles).
 
-**Full reference:** `reference/rfms-engineering-reference.md` (~68 KB, 11 sections —
-domain model, flooring concepts, order lifecycle, money, purchasing, scheduling, the
-API, integration playbook, traps, glossary). Read it when you need detail; the
-essentials are below.
+## Which reference to read
 
-**Floor Daddy's own configuration:** `reference/floor-daddy-system.md`. Read this
-before assuming anything about their install — several defaults are non-obvious.
+| File | What it is | Authority |
+|---|---|---|
+| `reference/rfms-api-v2-reference.md` | **The API reference.** All 86 endpoints from the official published Postman collection, plus corrections, integration design and spike questions. | **Highest — this wins on anything API-related.** |
+| `reference/rfms-api-v2-raw-endpoints.md` | Raw dump of every endpoint (URL, headers, body, sample response) for lookup. | Primary source |
+| `reference/rfms-engineering-reference.md` | Product/domain knowledge from the help centre (2,355 articles): domain model, flooring concepts, order lifecycle, money, purchasing, traps, glossary. | Good on the **product**; ⚠️ **wrong in places about the API** — see §3 of the API reference |
+| `reference/floor-daddy-system.md` | Floor Daddy's actual install (customer 61152). | Ground truth for this client |
+
+> ⚠️ **The help-centre reference contains ~16 API claims the official API docs disprove.**
+> The corrections are catalogued in §3 of the API reference. The big ones are repeated
+> below. When the two disagree, **the API reference is right.**
 
 ---
 
@@ -38,18 +43,25 @@ before assuming anything about their install — several defaults are non-obviou
 4. **"Delivered" does not mean delivered to the customer.** It is an inventory/
    accounting state. Do not surface it to a customer as a delivery.
 
-5. **Scheduling has NO API at any tier.** No create/read/update of scheduled jobs,
-   crews, capacities or job statuses. Only the `X*` tables via SQL/Crystal, or CSV
-   exports. This is decisive for anything that intends to own scheduling.
+5. **Scheduling HAS a full API.** ~~No scheduling API~~ — that help-centre claim is
+   **wrong**. v2 ships 18 Schedule Pro endpoints: Create Job, Create Job From Order,
+   Update Job, Delete Job, Change Job Status, Get Crews, Get Time Slots, Find Jobs,
+   Post Provider Record From Job. RAZZLE DAZZLE can own scheduling *and* write it back.
 
-6. **The API token inherits a human user's permissions.** Visible stores, assignable
+6. **The API token impersonates a specific RFMS user.** Visible stores, assignable
    inventory, searchable documents and price levels all follow that user's *System
-   Options*, not the token. Changing the user silently changes API behaviour. Use a
-   dedicated integration user and treat its System Options as part of the contract.
+   Options*, not the token. Changing the user in ROS silently changes API behaviour.
+   Use a dedicated integration user and treat its System Options as part of the contract.
 
 7. **Store Queue and API Token are rotatable configuration, never constants.** An
    Azure Service Bus incident once changed store queue IDs and invalidated every
    issued key.
+
+8. **Tier gating is per FOLDER and returns `Unauthorized`, not a `failed` envelope.**
+   `/Order Entry` requires Plus or Enterprise. **All creates (order/quote/estimate) are
+   Enterprise, and there is no line-less create variant** — so at Standard the only
+   usable folder is `/Customers`, and the only route to a selling document is
+   `POST /v2/opportunity`. There is no cheap on-ramp.
 
 ---
 
@@ -64,26 +76,25 @@ before assuming anything about their install — several defaults are non-obviou
 
 ---
 
-## Money — and why our number will never equal theirs
+## Money — and how our number relates to theirs
 
-RFMS's own formula (Accounting Terms):
+`GET /v2/order/grossprofit/:number` returns **exactly one** percentage, and its
+denominator is `NetSales = TotalTransaction − TaxCost` — i.e. **tax-EXCLUSIVE**
+(verified to the cent against both published samples). It is the analogue of Core's
+`GPNetSales`.
 
-```
-GP% = (Total Selling Price − Total Costs) ÷ Total Selling Price × 100     … before commissions
-```
+⚠️ **`TaxCost` is not a cost.** Tax sits on the revenue side, not the cost side. The
+help-centre reference's formula ("… + Load + Load% + Tax" in costs) double-counts tax
+and understates margin. Do not port it.
 
-Cost side = Material + Labor + Misc + Freight + Overhead Margin + Load + Load% + Tax.
+Header money buckets are `{material, labor, misc, total, salesTax, miscTax, grandTotal,
+recycleFee}` — "Services" maps to `labor`, and there is a `recycleFee` bucket.
 
-Job Cost Analysis stores **three** GP percentages per job, not one:
-`GPGrsSales` (÷ delivered sales incl. tax), `GPMatOnly`, `GPNetSales` (÷ invoice total − sales tax).
-
-**Two deliberate divergences in RAZZLE DAZZLE** (see `DECISIONS.md` §3) — document them,
-never "fix" them by matching RFMS:
-
-- **We subtract sales commission; RFMS does not.** (RFMS subtracts referral fees, not
-  commissions.) Our GP is therefore structurally lower and is a truer job cost.
-- **We divide by revenue net of TPT.** Several RFMS denominators are tax-*inclusive*,
-  so a tax-exclusive GP computed externally will never match by construction.
+**Our one deliberate divergence** (see `DECISIONS.md` §3): **we subtract sales commission
+and finance dealer fees; RFMS's GP is computed BEFORE commissions** (it subtracts referral
+fees, not commissions). So our GP is structurally lower and is a truer job cost. Our
+tax-exclusive denominator, by contrast, **does** line up with the API's `NetSales` — so
+revenue reconciles even though margin deliberately does not.
 
 ⚠️ **"Net Sales" means three different things** across RFMS reports (Sales Totals =
 ex sales + use tax; Profit Analysis = total sales − (labor + tax liability); Job Cost
@@ -120,10 +131,30 @@ Reporting semantics that differ from intuition:
 Not available at **any** tier: purchase orders, receiving, scheduling, crews,
 provider/installer pay, commissions, GL/journal, payroll, adjustments, work orders.
 
-**Auth:** Store Queue + API Token, generated in RFMS Online Services → RFMS Online tile
-→ **API** button → Generate Key → pick a default user → label → Save. Tokens are
-revocable. A "Third Party Developer Opt-in" flow also exists (developer requests using
-the store's Business ID; admin approves).
+**Auth — settled, not guesswork.** Store Queue + API Token, generated in RFMS Online
+Services → RFMS Online tile → **API** button → Generate Key → pick a default user →
+label → Save. Tokens are revocable.
+
+```
+POST /v2/session/begin      Basic( storeQueue : apiKey )     no body
+  → { authorized, sessionToken, sessionExpires }             (bare — no envelope)
+
+every other call             Basic( storeQueue : sessionToken )
+```
+
+The `/Authentication` folder states it verbatim: *"The session token must be sent with
+all API requests as the password using HTTP Basic Auth. User name should be set using
+the same user name you used in the first step."*
+
+- **Sliding expiry** — the session is extended on every call, so a busy integration may
+  never re-begin while an idle one dies silently. Refresh on auth-failure; treat
+  `sessionExpires` as a hint only.
+- `sessionExpires` is **not ISO-8601** (`M/d/yyyy h:mm:ss tt zzz`). Never `Date.parse` it.
+- There is **no logout/revoke/introspect endpoint**. Revocation is a human action in ROS.
+- **Do not build on a TPD key.** A TPD session is granted Plus *"regardless of the store's
+  actual subscription level"* — read as a **ceiling**, it could never reach any
+  Enterprise endpoint, which is exactly the set a material-authoritative integration
+  needs. Use Floor Daddy's own store credentials at Enterprise.
 
 **Transport:** everything (Mobile, Warehouse Mobile, CRM, Measure export, Next, and the
 REST API) runs through one on-prem Windows service — `RFMSDataEndpoint`, formerly
@@ -163,9 +194,37 @@ inventory availability, product/catalog data, order/quote headers for reconcilia
 notes, attachments, payments (post only, Plus+), order lines and inventory assignment
 (**Enterprise only**).
 
-**Do not attempt:** scheduling (no API), purchase orders, receiving, GL/journal
-postings, payroll, commissions, adjustments. Those stay in RFMS or move wholly to us.
+**Also available** (contradicting the help centre): `POST /v2/order/purchaseorder/find`
+(the **only** material-ETA source — per-(order,line), so drive a poller from OUR open-job
+list, not an RFMS sweep), `POST /v2/calculatetaxes`, `POST /v2/payables`,
+`POST /v2/order/provider`, and the full Schedule Pro surface.
 
-Before building against any of it, settle the questions in §9.6 of the full reference
-during a live spike — several tier boundaries and payload shapes are documented
-ambiguously and can only be confirmed against the real endpoint.
+**Genuinely absent:** receiving, GL/journal postings, payroll, adjustments.
+
+### Non-negotiable client rules
+
+- Always read with **`?locked=false`** (the default). Locking is opt-in via `locked=true`
+  — routine reads are safe and need no lock machinery. If you ever take a lock, release
+  it in a `finally` via `GET /v2/unlock/:id`.
+- **Persist both `lineNumber` and `lines[].id`.** `lines[].id` is the reconciliation key
+  — *not* (invoice number, line number).
+- **Never set `width` on a line you intend to reserve against** — it becomes unreferenced.
+- **Never blind-retry an inventory write on `waiting`.** Only Create Order and Record
+  Payment document a `messageId` header for idempotency; the inventory writes do not.
+- Treat **Reserve / Cut / Deliver as irreversible and human-gated.** `setToGeneratePO`
+  (`POST /v2/order/save/linestatus`) is the *only* reversible transition and is safe to
+  automate — but it does **not** create a PO, so the purchasing loop cannot close
+  programmatically.
+- **Determine the ERRM regime before any inventory write ships.** Non-ERRM consumes
+  inventory at **Cut**; ERRM at **Deliver**, which also posts real-time journal entries.
+  *(Floor Daddy has ERRM ON — see `floor-daddy-system.md`.)* Same code, opposite
+  accounting effects.
+- Write a **tolerant unwrapper**: eight endpoints return bare objects with no
+  `{status,result}` envelope, and the payload key varies across the rest.
+  `GET /v2/customers` never contacts the store, so it can never return `waiting` — it is
+  **not** a valid connectivity probe.
+
+Before building, settle the spike questions in §5 of the API reference — chiefly whether
+the TPD Plus grant is a floor or a ceiling, and a full untruncated `Get Order` response
+(the published sample truncates before any line-status field, and the whole material
+readiness roll-up depends on it).
