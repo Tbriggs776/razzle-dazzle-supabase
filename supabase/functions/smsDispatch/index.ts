@@ -218,14 +218,18 @@ async function handleType(s: any, type: string, p: any, user: any): Promise<Reco
     // ── Generic direct sender (SYNCHRONOUS — legacy sendSMS shape) ──────────────────────
     case 'direct': {
       if (!p.to || !p.message) return { success: false, error: 'Missing required fields: to, message', to: p.to ?? null };
+      // Divert applies here too. This path used to hand p.to straight to Twilio,
+      // so a test send from any logged-in account reached the real customer even
+      // with test divert switched on.
+      const to = divertCustomer(cfg, p.to);
       const internal = await getSecret('CRON_SECRET');
       const r = await fetch(`${FUNCTIONS_BASE}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-internal-secret': internal || '' },
-        body: JSON.stringify({ channel: 'sms', to: p.to, body: p.message, sent_by: user?.email || 'System' }),
+        body: JSON.stringify({ channel: 'sms', to, body: p.message, sent_by: user?.email || 'System' }),
       });
       const d = await r.json().catch(() => ({} as any));
-      return { success: d.ok === true, messageSid: d.provider_message_id ?? null, twilioStatus: d.delivery_status ?? d.skipped ?? null, to: p.to, error: d.error ?? d.skipped ?? null };
+      return { success: d.ok === true, messageSid: d.provider_message_id ?? null, twilioStatus: d.delivery_status ?? d.skipped ?? null, to, error: d.error ?? d.skipped ?? null };
     }
 
     // ── Ticket-reply notification ───────────────────────────────────────────────────────
@@ -409,6 +413,26 @@ async function handleType(s: any, type: string, p: any, user: any): Promise<Reco
   }
 }
 
+/**
+ * Staff check for the free-text 'direct' send. Evaluated with the CALLER's JWT
+ * (not the service role) so the module grants actually apply — same pattern the
+ * e-sign engine uses for its staff-only actions.
+ */
+async function canSendDirect(req: Request): Promise<boolean> {
+  const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!jwt) return false;
+  const asUser = createClient(SUPABASE_URL, ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${jwt}` } },
+    auth: { persistSession: false },
+  });
+  const [{ data: isAdmin }, { data: comms }, { data: appts }] = await Promise.all([
+    asUser.rpc('is_org_admin'),
+    asUser.rpc('can_edit', { m: 'communication' }),
+    asUser.rpc('can_edit', { m: 'appointments' }),
+  ]);
+  return !!(isAdmin || comms || appts);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
@@ -423,6 +447,17 @@ Deno.serve(async (req) => {
   try {
     const p = await req.json();
     if (!p?.type) return Response.json({ error: 'type required' }, { status: 400, headers: cors });
+
+    // 'direct' sends arbitrary text to an arbitrary number from the company's
+    // Twilio identity. Every other type is template-driven against a known
+    // record, so this is the one that needs a role behind it.
+    if (!isInternal && p.type === 'direct' && !(await canSendDirect(req))) {
+      return Response.json(
+        { success: false, error: 'Not authorized to send a direct message' },
+        { status: 403, headers: cors },
+      );
+    }
+
     const result = await handleType(svc(), p.type, p, user);
     // `direct` always returns 200 (legacy shape carries success/error in-body); other types
     // 400 only on a real dispatch error.

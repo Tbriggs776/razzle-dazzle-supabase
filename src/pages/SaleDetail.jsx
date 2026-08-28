@@ -26,7 +26,6 @@ import {
   DollarSign,
   Download,
   Edit,
-  Trash2,
   X,
   ClipboardCheck,
   Eye,
@@ -85,7 +84,6 @@ export default function SaleDetail() {
   const queryClient = useQueryClient();
 
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [editAmount, setEditAmount] = useState('');
   const [editNotes, setEditNotes] = useState('');
@@ -147,21 +145,11 @@ export default function SaleDetail() {
     }
   });
 
-  // Both routes undo the sale atomically via cancel_sale (deletes the project(s) created from the
-  // sale + the sale, and reverts the linked appointment to 'Completed') so nothing is left
-  // half-cancelled or orphaned with a dangling sale reference.
-  const deleteSaleMutation = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await base44.functions.invoke('cancelSale', { saleId });
-      if (error || data?.error || data?.success !== true) {
-        throw new Error(data?.error || error?.message || 'Failed to delete the sale.');
-      }
-    },
-    onSuccess: () => {
-      navigate(createPageUrl('Sales'));
-    }
-  });
-
+  // cancel_sale SOFT-cancels atomically: the sale and its project(s) are flagged
+  // is_cancelled / 'Cancelled' and the linked appointment reverts to 'Completed'.
+  // Nothing is deleted — the deposit history has to survive, because the company
+  // is still holding that money. There is deliberately ONE cancellation path here;
+  // the old "Delete" button ran this same RPC while promising permanent deletion.
   const cancelSaleMutation = useMutation({
     mutationFn: async () => {
       const { data, error } = await base44.functions.invoke('cancelSale', { saleId });
@@ -651,14 +639,6 @@ export default function SaleDetail() {
           >
             <X className="mr-2 h-4 w-4" />
             Cancel Sale
-          </Button>
-          <Button
-            onClick={() => setShowDeleteDialog(true)}
-            variant="outline"
-            className="border-destructive/40 text-destructive hover:bg-destructive/10"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete
           </Button>
           {currentUser?.role === 'admin' && (
             <Button
@@ -1311,40 +1291,6 @@ export default function SaleDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete Sale</DialogTitle>
-            <DialogDescription>
-              This will permanently delete this sale record. The appointment will remain in "Sold" status. This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => deleteSaleMutation.mutate()}
-              disabled={deleteSaleMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:opacity-90"
-            >
-              {deleteSaleMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                'Delete Sale'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Replace Contract Dialog */}
       <Dialog open={showReplaceContractDialog} onOpenChange={setShowReplaceContractDialog}>

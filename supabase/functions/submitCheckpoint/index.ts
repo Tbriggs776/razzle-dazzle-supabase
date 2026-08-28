@@ -330,6 +330,36 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
   }
 }
 
+/**
+ * Actions that release a job, clear a safety stop, or move money. The UI shows
+ * these only to a field manager, but the UI is not a security boundary: the
+ * approval screen was reachable by editing a URL parameter, which meant a crew
+ * could sign off their own work — including approving past the asbestos
+ * hard-stop. Enforce it server-side.
+ */
+const APPROVAL_ACTIONS = new Set([
+  'approve',
+  'approve_prep',
+  'approve_final',
+  'reject',
+  'submit_for_payment',
+]);
+
+async function canApprove(req: Request): Promise<boolean> {
+  const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!jwt) return false;
+  const asUser = createClient(SUPABASE_URL, ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${jwt}` } },
+    auth: { persistSession: false },
+  });
+  const [{ data: isAdmin }, { data: journey }, { data: projects }] = await Promise.all([
+    asUser.rpc('is_org_admin'),
+    asUser.rpc('can_edit', { m: 'journey' }),
+    asUser.rpc('can_edit', { m: 'projects' }),
+  ]);
+  return !!(isAdmin || journey || projects);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
@@ -342,6 +372,14 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     if (!body?.action) return Response.json({ error: 'action required' }, { status: 400, headers: cors });
+
+    if (!isInternal && APPROVAL_ACTIONS.has(body.action) && !(await canApprove(req))) {
+      return Response.json(
+        { error: 'Not authorized to approve, reject or release this checkpoint' },
+        { status: 403, headers: cors },
+      );
+    }
+
     const result = await handle(s, body, user);
     return Response.json(result.body, { status: result.status, headers: cors });
   } catch (e) {

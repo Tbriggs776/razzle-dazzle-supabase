@@ -37,6 +37,37 @@ function normE164(p: unknown): string | null {
   return digits.startsWith('1') ? `+${digits}` : `+1${digits}`;
 }
 
+/** Wall-clock minutes since midnight in a named timezone. */
+function tzNowMinutes(tz: string): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false,
+  }).formatToParts(new Date());
+  const h = Number(parts.find((x) => x.type === 'hour')?.value ?? '0');
+  const m = Number(parts.find((x) => x.type === 'minute')?.value ?? '0');
+  return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
+}
+
+function hhmmToMinutes(v: string): number {
+  const [h, m] = String(v || '0:0').split(':').map(Number);
+  return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
+}
+
+/**
+ * If we are currently inside quiet hours, return the moment they end; otherwise
+ * null. Handles the usual window that wraps midnight (20:00 → 08:00).
+ */
+function quietHoldUntil(cfg: any): Date | null {
+  const tz = cfg.quiet_hours_timezone || 'America/Phoenix';
+  const now = tzNowMinutes(tz);
+  const start = hhmmToMinutes(cfg.quiet_hours_start || '20:00');
+  const end = hhmmToMinutes(cfg.quiet_hours_end || '08:00');
+  const inside = start <= end ? (now >= start && now < end) : (now >= start || now < end);
+  if (!inside) return null;
+  let wait = end - now;
+  if (wait <= 0) wait += 24 * 60; // quiet hours end tomorrow morning
+  return new Date(Date.now() + wait * 60_000);
+}
+
 Deno.serve(async (req) => {
   const internal = await getSecret('CRON_SECRET');
   if (!internal || req.headers.get('x-internal-secret') !== internal) {
@@ -80,6 +111,53 @@ Deno.serve(async (req) => {
     return Response.json({ ok: false, skipped: 'disabled', communication_id: id });
   }
   const cfg = (integ.config as Record<string, any>) || {};
+
+  // 1.5) SMS safety rails — arm switch, then quiet hours.
+  //
+  // Thirteen crons begin sending the moment Twilio is credentialed. This is the
+  // one choke point every outbound message passes through, so the switch lives
+  // here rather than in each dispatcher.
+  if (channel === 'sms') {
+    const { data: smsCfgList } = await s.from('sms_settings').select('*').limit(1);
+    const smsCfg: any = smsCfgList?.[0] || {};
+
+    // Fail CLOSED: send only when explicitly armed. A missing or unreadable
+    // sms_settings row must not become an open gate.
+    if (smsCfg.sms_outbound_enabled !== true) {
+      const id = await insertComm(s, {
+        ...commBase, status: 'skipped', delivery_status: 'skipped_disarmed',
+        status_updated_at: new Date().toISOString(),
+        error: 'Outbound SMS is disarmed — enable it in SMS settings',
+      });
+      return Response.json({ ok: false, skipped: 'sms_disarmed', communication_id: id });
+    }
+
+    // Quiet hours protect CUSTOMERS. Internal staff alerts carry no lead or
+    // customer reference and must still get through at 2am — an asbestos
+    // hard-stop cannot wait until morning.
+    const customerFacing = !!(p.lead_id || p.customer_id) && p.bypass_quiet_hours !== true;
+    if (smsCfg.quiet_hours_enabled && customerFacing) {
+      const until = quietHoldUntil(smsCfg);
+      if (until) {
+        // Held, not dropped: re-queue for the moment quiet hours end.
+        await s.rpc('enqueue_job', {
+          p_type: 'send_sms',
+          p_payload: p,
+          p_run_at: until.toISOString(),
+          p_max_attempts: 5,
+        });
+        const id = await insertComm(s, {
+          ...commBase, status: 'skipped', delivery_status: 'deferred_quiet_hours',
+          status_updated_at: new Date().toISOString(),
+          error: `Held for quiet hours until ${until.toISOString()}`,
+        });
+        return Response.json({
+          ok: false, skipped: 'quiet_hours',
+          deferred_until: until.toISOString(), communication_id: id,
+        });
+      }
+    }
+  }
 
   // 2) Suppressed?
   const { data: suppressed } = await s.rpc('is_suppressed', { p_channel: channel, p_value: to });
