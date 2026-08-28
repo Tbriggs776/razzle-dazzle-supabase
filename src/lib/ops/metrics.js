@@ -256,7 +256,11 @@ export function buildInstallBoard({ projects = [], sales = [], customers = [], m
         install,
         completed: done,
         daysOut,
-        onHold: !!p.pending_cancellation_date || p.installation_date_status === 'Hold',
+        // Case-insensitive on purpose: submitCheckpoint's asbestos hard-stop
+        // writes 'on hold' while the UI writes 'Hold'. An exact match silently
+        // missed every asbestos halt on this board.
+        onHold: !!p.pending_cancellation_date
+          || ['on hold', 'hold'].includes(String(p.installation_date_status || '').trim().toLowerCase()),
         amount: Number(sale?.sale_amount) || 0,
         material: mat || null,
         readiness: readinessLabel(mat),

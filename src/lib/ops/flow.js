@@ -92,9 +92,22 @@ export function classifyJob({ sale, project, appointment, customer, material, as
 
   // ── Cross-cutting blockers — these travel with the job into ANY stage, which
   // is exactly how a Finance hold becomes visible on the install board.
-  const onHold = !!(project?.pending_cancellation_date && !project?.hold_cleared_date);
+  //
+  // installation_date_status is written by different code paths in different
+  // cases: submitCheckpoint's asbestos hard-stop writes 'on hold' (lower), the
+  // UI writes 'Hold'. Compare case-insensitively — an exact match missed the
+  // asbestos halt entirely, which is the one hold that must never be missed.
+  const holdFlag = String(project?.installation_date_status || '').trim().toLowerCase();
+  const statusHold = holdFlag === 'on hold' || holdFlag === 'hold';
+  const cancelHold = !!(project?.pending_cancellation_date && !project?.hold_cleared_date);
+  const onHold = statusHold || cancelHold;
   if (onHold) {
-    blockers.push(blocker('hold', 'crit', 'On hold', 'Pending cancellation — not cleared', 'sales'));
+    blockers.push(blocker(
+      'hold', 'crit', 'On hold',
+      statusHold ? 'Job is flagged on hold — safety or credit stop not cleared'
+                 : 'Pending cancellation — not cleared',
+      'sales',
+    ));
   }
   const depositMissing = !sale?.deposit_amount || Number(sale.deposit_amount) <= 0;
   if (depositMissing && sale?.sale_amount) {
