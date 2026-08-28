@@ -80,6 +80,7 @@ const ALL_PAGES = [
   { name: 'Project Detail', key: 'ProjectDetail' },
   { name: 'Claims & Inspections', key: 'ClaimsDashboard' },
   { name: 'Order Processing', key: 'OrderProcessing' },
+  { name: 'Job Flow', key: 'JobFlow' },
   { name: 'Ordering Team', key: 'OrderingTeam' },
   { name: 'Install Team', key: 'InstallTeam' },
   { name: 'Speed to Install', key: 'SpeedToInstall' },

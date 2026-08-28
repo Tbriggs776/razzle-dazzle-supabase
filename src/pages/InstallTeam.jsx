@@ -8,6 +8,7 @@ import {
   HardHat,
   AlertTriangle,
   PackageCheck,
+  ArrowLeftRight,
 } from 'lucide-react';
 import {
   BarChart,
@@ -41,6 +42,7 @@ import {
   STATUS_HELP,
   STATUS_TONE,
 } from '@/lib/ops/metrics';
+import { buildJobFlow, departmentView } from '@/lib/ops/flow';
 
 // ── Presentation maps ────────────────────────────────────────────────────────
 // Domain project stage → StatusPill tone (same vocabulary as ProjectDetail).
@@ -73,6 +75,9 @@ const STATUS_FILL = {
 };
 
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+// How many handoff rows each half of the card shows before it stops.
+const HANDOFF_CAP = 6;
 
 // ISO day → "Today · Aug 27" / "Thu · Aug 28". Local Date built from the parts, so
 // no timezone can slide the weekday a day either way.
@@ -139,6 +144,24 @@ export default function InstallTeam() {
       }),
     [projects, sales, customers, statusRows]
   );
+
+  // The same source data run through the stage engine. The board answers "what is
+  // on the calendar"; the flow answers "who owns this job right now" — which is
+  // what makes the handoff visible in both directions.
+  const flow = useMemo(
+    () =>
+      buildJobFlow({
+        sales,
+        projects,
+        appointments: [],
+        customers,
+        material: materialIndex(statusRows),
+        asOf: today(),
+      }),
+    [projects, sales, customers, statusRows]
+  );
+
+  const view = useMemo(() => departmentView(flow, 'install'), [flow]);
 
   // The board itself: everything scheduled ahead of us, soonest first.
   const futureSorted = useMemo(
@@ -344,6 +367,11 @@ export default function InstallTeam() {
     <SyncBadge status="stale" label="RFMS not connected" />
   );
 
+  // Both halves cap at HANDOFF_CAP rows; say so rather than quietly truncating.
+  const handoffHidden =
+    Math.max(0, view.waitingOnUs.length - HANDOFF_CAP) +
+    Math.max(0, view.weAreBlocking.length - HANDOFF_CAP);
+
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -354,7 +382,7 @@ export default function InstallTeam() {
           actions={rfmsBadge}
         />
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
           <KpiTile
             label="Installing today"
             value={board.todayJobs.length}
@@ -393,6 +421,14 @@ export default function InstallTeam() {
             foot="Install date passed with no completion recorded"
           />
           <KpiTile
+            label="Waiting on us"
+            value={view.waitingOnUs.length}
+            delta={view.overSla.length ? `${view.overSla.length} past SLA` : null}
+            dir="up"
+            deltaTone="bad"
+            foot="Live jobs the stage engine says Install owns right now"
+          />
+          <KpiTile
             label="Material w/o a PO"
             value={board.materialKnown ? board.noPO.length : '—'}
             delta={board.materialKnown && board.noPO.length ? 'no PO raised' : null}
@@ -407,6 +443,81 @@ export default function InstallTeam() {
             }
           />
         </div>
+
+        <ModuleCard
+          title="Handoffs"
+          subtitle="What's waiting on Install, and what Install is holding up"
+          icon={ArrowLeftRight}
+          footer={
+            handoffHidden > 0 ? (
+              <span className="text-muted-foreground">
+                {plural(handoffHidden, 'more item', 'more items')} not shown.
+              </span>
+            ) : null
+          }
+        >
+          <div className="grid grid-cols-1 gap-px bg-border lg:grid-cols-2">
+            <div className="bg-card">
+              <div className="flex items-center justify-between gap-3 bg-muted/40 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <span>Waiting on us</span>
+                <span className="tabular-nums">
+                  {plural(view.waitingOnUs.length, 'job', 'jobs')} · {money(view.value)}
+                </span>
+              </div>
+              <div className="divide-y divide-border">
+                {view.waitingOnUs.length === 0 ? (
+                  <div className="px-4 py-10 text-center">
+                    <h3 className="text-sm font-semibold text-foreground">Nothing sitting with Install</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      No live job currently has this department as its owner.
+                    </p>
+                  </div>
+                ) : (
+                  view.waitingOnUs.slice(0, HANDOFF_CAP).map((j) => (
+                    <WorkRow
+                      key={j.id}
+                      lead={j.ageDays != null ? `${j.ageDays}d` : '—'}
+                      primary={j.customerName}
+                      meta={`${j.stageLabel} · ${j.nextAction}`}
+                      status={j.overSla ? 'Past SLA' : 'In stage'}
+                      tone={j.overSla ? 'crit' : 'info'}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="bg-card">
+              <div className="flex items-center justify-between gap-3 bg-muted/40 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                <span>We&apos;re holding up</span>
+                <span className="tabular-nums">
+                  {plural(view.weAreBlocking.length, 'blocker', 'blockers')}
+                </span>
+              </div>
+              <div className="divide-y divide-border">
+                {view.weAreBlocking.length === 0 ? (
+                  <div className="px-4 py-10 text-center">
+                    <p className="text-sm font-semibold text-good">
+                      Install isn&apos;t blocking anything right now.
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      No other department is waiting on this crew to move.
+                    </p>
+                  </div>
+                ) : (
+                  view.weAreBlocking.slice(0, HANDOFF_CAP).map((b) => (
+                    <AlertRow
+                      key={`${b.code}-${b.job.id}`}
+                      severity={b.severity}
+                      title={`${b.label} — ${b.job.customerName}`}
+                      detail={b.detail}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </ModuleCard>
 
         {board.rows.length === 0 ? (
           <ModuleCard title="Install board" subtitle="Every active project, soonest first" icon={CalendarRange}>

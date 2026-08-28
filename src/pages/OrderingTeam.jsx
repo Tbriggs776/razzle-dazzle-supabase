@@ -14,7 +14,15 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from 'recharts';
-import { Loader2, BarChart3, ClipboardList, TableProperties, Boxes, CheckCircle2 } from 'lucide-react';
+import {
+  Loader2,
+  BarChart3,
+  ClipboardList,
+  TableProperties,
+  Boxes,
+  CheckCircle2,
+  ArrowLeftRight,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import PageHeader from '@/components/common/PageHeader';
@@ -24,6 +32,7 @@ import DataTable from '@/components/common/DataTable';
 import KpiTile from '@/components/dashboard/KpiTile';
 import ModuleCard from '@/components/dashboard/ModuleCard';
 import WorkRow from '@/components/dashboard/WorkRow';
+import AlertRow from '@/components/dashboard/AlertRow';
 import PipelineBar from '@/components/dashboard/PipelineBar';
 
 import {
@@ -38,6 +47,7 @@ import {
   fmtDate,
   today,
 } from '@/lib/ops/metrics';
+import { buildJobFlow, departmentView } from '@/lib/ops/flow';
 
 // ── Local presentation helpers ───────────────────────────────────────────────
 const GRAINS = [
@@ -63,6 +73,11 @@ function queueTone(ageDays) {
   if (ageDays > 7) return 'warn';
   return 'info';
 }
+
+// Handoffs are capped so the card stays a glance, not a backlog. The cap only
+// works if the worst thing is guaranteed to be inside it — hence the sort.
+const HANDOFF_CAP = 6;
+const SEV_RANK = { crit: 0, warn: 1, info: 2 };
 
 function ChartTooltip({ active, payload }) {
   if (!active || !payload || !payload.length) return null;
@@ -164,6 +179,32 @@ export default function OrderingTeam() {
     };
   }, [material, sales]);
 
+  // ── Handoffs ───────────────────────────────────────────────────────────────
+  // The same rows this page already loads, run through the stage engine so the
+  // desk can see both directions of the handoff: what has landed on Ordering,
+  // and what Ordering is holding up for somebody downstream. No appointments are
+  // needed here — nothing Ordering owns turns on one.
+  const flow = useMemo(
+    () => buildJobFlow({ sales, projects, appointments: [], customers, material, asOf }),
+    [sales, projects, customers, material, asOf]
+  );
+
+  const view = useMemo(() => departmentView(flow, 'ordering'), [flow]);
+
+  // Worst first, so the cap can never hide a crit. A committed install date with
+  // material still short is the sharpest signal this page can raise.
+  const blocking = useMemo(
+    () =>
+      view.weAreBlocking
+        .slice()
+        .sort(
+          (a, b) =>
+            (SEV_RANK[a.severity] ?? 3) - (SEV_RANK[b.severity] ?? 3) ||
+            (b.job?.amount || 0) - (a.job?.amount || 0)
+        ),
+    [view.weAreBlocking]
+  );
+
   const grainWord = GRAINS.find((g) => g.value === grain)?.word || 'week';
   const completePeriods = pipeline.series.filter((b) => b.kind === 'complete').length;
   const hasPartial = pipeline.series.some((b) => b.kind === 'partial');
@@ -235,6 +276,11 @@ export default function OrderingTeam() {
     },
   ];
 
+  const waitingShown = view.waitingOnUs.slice(0, HANDOFF_CAP);
+  const waitingMore = view.waitingOnUs.length - waitingShown.length;
+  const blockingShown = blocking.slice(0, HANDOFF_CAP);
+  const blockingMore = blocking.length - blockingShown.length;
+
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -264,7 +310,7 @@ export default function OrderingTeam() {
           }
         />
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <KpiTile
             label={`Avg ordered / ${grainWord}`}
             value={avgFmt(pipeline.avgOrdered)}
@@ -308,7 +354,125 @@ export default function OrderingTeam() {
                 : 'Every live sale has an RFMS invoice number'
             }
           />
+          <KpiTile
+            label="Waiting on us"
+            value={view.waitingOnUs.length}
+            delta={view.overSla.length > 0 ? `${view.overSla.length} past SLA` : undefined}
+            dir="up"
+            deltaTone="bad"
+            foot={
+              view.waitingOnUs.length
+                ? `Jobs Ordering owns right now · ${money(view.value)}`
+                : 'Nothing is sitting with Ordering'
+            }
+          />
         </div>
+
+        <ModuleCard
+          title="Handoffs"
+          subtitle="What's waiting on Ordering, and what Ordering is holding up"
+          icon={ArrowLeftRight}
+          action={
+            view.overSla.length > 0 || !flow.materialKnown ? (
+              <div className="flex items-center gap-2">
+                {view.overSla.length > 0 && (
+                  <StatusPill tone="crit" dot>
+                    {view.overSla.length} past SLA
+                  </StatusPill>
+                )}
+                {!flow.materialKnown && <SyncBadge status="stale" label="RFMS not connected" />}
+              </div>
+            ) : null
+          }
+          footer={
+            <span className="text-muted-foreground">
+              Left is Ordering's own inbox — jobs whose next move belongs to this desk, worst first. Right
+              is what Ordering is holding up for another department. A committed install date with material
+              still short is the sharpest signal either side can carry.
+              {!flow.materialKnown && ' Material-gated handoffs cannot appear until RFMS is connected.'}
+            </span>
+          }
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            <section className="min-w-0">
+              <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/40 px-4 py-2">
+                <h3 className="font-display text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Waiting on us
+                </h3>
+                <span className="text-[11px] font-bold tabular-nums text-muted-foreground">
+                  {view.waitingOnUs.length}
+                </span>
+              </div>
+              {view.waitingOnUs.length === 0 ? (
+                <div className="px-4 py-12 text-center">
+                  <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-good/70" />
+                  <p className="text-xs text-muted-foreground">
+                    Nothing is sitting with Ordering right now.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {waitingShown.map((job) => (
+                    <WorkRow
+                      key={job.id}
+                      lead={job.ageDays != null ? `${job.ageDays}d` : '—'}
+                      primary={job.customerName || '—'}
+                      meta={`${job.stageLabel} · ${job.nextAction}`}
+                      status={
+                        job.overSla
+                          ? `Past ${job.sla}d SLA`
+                          : job.sla != null
+                            ? `${job.sla}d SLA`
+                            : 'No SLA'
+                      }
+                      tone={job.overSla ? 'crit' : 'info'}
+                    />
+                  ))}
+                  {waitingMore > 0 && (
+                    <div className="px-4 py-2 text-[11px] text-muted-foreground">
+                      +{waitingMore} more waiting on Ordering
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+
+            <section className="min-w-0 border-t border-border lg:border-l lg:border-t-0">
+              <div className="flex items-center justify-between gap-2 border-b border-border bg-muted/40 px-4 py-2">
+                <h3 className="font-display text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  We're holding up
+                </h3>
+                <span className="text-[11px] font-bold tabular-nums text-muted-foreground">
+                  {blocking.length}
+                </span>
+              </div>
+              {blocking.length === 0 ? (
+                <div className="px-4 py-12 text-center">
+                  <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-good/70" />
+                  <p className="text-xs text-muted-foreground">
+                    Ordering isn't blocking anything right now.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {blockingShown.map((b) => (
+                    <AlertRow
+                      key={`${b.job?.id}-${b.code}`}
+                      severity={b.severity}
+                      title={`${b.label} — ${b.job?.customerName || '—'}`}
+                      detail={b.detail}
+                    />
+                  ))}
+                  {blockingMore > 0 && (
+                    <div className="px-4 py-2 text-[11px] text-muted-foreground">
+                      +{blockingMore} more held up by Ordering
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+          </div>
+        </ModuleCard>
 
         <ModuleCard
           title="Ordered vs installing"
