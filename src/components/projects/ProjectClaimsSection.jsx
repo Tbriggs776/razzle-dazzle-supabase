@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import { deliveryNote, invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,11 +66,11 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
     const created = await base44.entities.ProjectClaim.create({ ...formData, project: project.id });
     queryClient.invalidateQueries({ queryKey: ['projectClaims', project.id] });
     if (sendEmail && formData.email_recipients?.length > 0) {
-      try {
-        await base44.functions.invoke('sendProjectClaimEmail', { claimId: created.id });
-      } catch (e) {
-        console.error('Failed to send claim email:', e);
-      }
+      // The claim IS saved by this point, so this never throws — but a claim
+      // nobody was told about is a claim nobody works. Say it out loud.
+      const res = await base44.functions.invoke('sendProjectClaimEmail', { claimId: created.id });
+      const note = deliveryNote(res, { saved: 'Claim saved', sent: 'the email did not go out' });
+      if (note) toast.warning(note, { duration: 8000 });
     }
     setSaving(false);
     setShowForm(false);
@@ -115,15 +116,15 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
     };
     await base44.entities.ProjectClaim.update(claim.id, updates);
     if (completing) {
-      try {
-        await base44.functions.invoke('sendProjectClaimCompletedEmail', {
-          claimId: claim.id,
-          referenceNumber: refNum,
-          eta,
-        });
-      } catch (e) {
-        console.error('Failed to send completed email:', e);
-      }
+      const res = await base44.functions.invoke('sendProjectClaimCompletedEmail', {
+        claimId: claim.id,
+        referenceNumber: refNum,
+        eta,
+      });
+      const note = deliveryNote(res, {
+        saved: 'Claim marked complete', sent: 'the completion email did not go out',
+      });
+      if (note) toast.warning(note, { duration: 8000 });
     }
     queryClient.invalidateQueries({ queryKey: ['projectClaims', project.id] });
     setCompletingId(null);
@@ -142,8 +143,16 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
     setResendModal(null);
     try {
       await base44.entities.ProjectClaim.update(claim.id, { email_recipients: resendEmails });
-      await base44.functions.invoke('sendProjectClaimEmail', { claimId: claim.id });
+      const res = await base44.functions.invoke('sendProjectClaimEmail', { claimId: claim.id });
       queryClient.invalidateQueries({ queryKey: ['projectClaims', project.id] });
+      // Resend is a send-only action a person deliberately pressed: it needs a
+      // yes or a no. invoke() does not throw, so the catch below only ever saw
+      // the entity update — pressing Resend gave no feedback of any kind.
+      const failed = invokeFailure(res);
+      const notSent = invokeNotSent(res);
+      if (failed) toast.error(`Not sent — ${failed}`);
+      else if (notSent) toast.warning(`Nothing went out — ${notSent}`, { duration: 8000 });
+      else toast.success(`Sent to ${resendEmails.length} recipient${resendEmails.length === 1 ? '' : 's'}`);
     } catch (e) {
       toast.error('Failed to send: ' + e.message);
     }

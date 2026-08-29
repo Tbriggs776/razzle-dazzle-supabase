@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { announceDelivery } from '@/lib/deliveryToast';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
@@ -554,8 +555,11 @@ export default function SaleDetail() {
           const totalCost = lines.reduce((sum, item) => sum + (item.unitCost * item.quantity), 0);
           const orderTotal = lines.reduce((sum, item) => sum + (item.total || 0), 0);
           const gpPercent = orderTotal > 0 ? ((orderTotal - totalCost) / orderTotal * 100) : 0;
-          try {
-            await base44.functions.invoke('sendLowGPAlert', {
+          // The low-GP alert is a management control: if it does not go out,
+          // an under-margin order passes unnoticed. The import itself already
+          // succeeded, so this reports rather than throws.
+          announceDelivery(
+            base44.functions.invoke('sendLowGPAlert', {
               saleId,
               customerName: customerName,
               consultantName: consultantName,
@@ -563,10 +567,9 @@ export default function SaleDetail() {
               gpPercent,
               orderTotal,
               invoiceNumber: sale.invoice_number
-            });
-          } catch (gpErr) {
-            console.error('GP alert error:', gpErr);
-          }
+            }),
+            { saved: 'Order imported', sent: 'the low-GP alert did not go out' },
+          );
         }
 
         toast.success('RFMS order data fetched successfully!');

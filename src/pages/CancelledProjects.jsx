@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { announceDelivery } from '@/lib/deliveryToast';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -67,8 +68,12 @@ export default function CancelledProjects() {
         cancellation_save_attempt_by: userName,
         cancellation_save_attempt_date: now
       });
-      // Fire the SMS to the daily pending-cancellation alert list (fire-and-forget)
-      base44.functions.invoke('sendCancellationSaveAttempt', { project_id: project.id });
+      // Non-blocking, but no longer silent: this SMS is how the cancellation list
+      // learns someone tried to save the job.
+      announceDelivery(
+        base44.functions.invoke('sendCancellationSaveAttempt', { project_id: project.id }),
+        { saved: 'Save attempt recorded', sent: 'the alert did not go out' },
+      );
       queryClient.invalidateQueries({ queryKey: ['allProjectsForCancelled'] });
     } finally {
       setSavingAttempt(null);
@@ -99,8 +104,10 @@ export default function CancelledProjects() {
       await base44.entities.Project.update(project.id, {
         cancellation_updates: [...existing, { content: text, user_name: userName, timestamp: now }]
       });
-      // Fire the SMS to the daily pending-cancellation alert list (fire-and-forget)
-      base44.functions.invoke('sendCancellationUpdate', { project_id: project.id, message: text });
+      announceDelivery(
+        base44.functions.invoke('sendCancellationUpdate', { project_id: project.id, message: text }),
+        { saved: 'Update saved', sent: 'the alert did not go out' },
+      );
       setUpdateTexts(prev => ({ ...prev, [project.id]: '' }));
       queryClient.invalidateQueries({ queryKey: ['allProjectsForCancelled'] });
     } finally {
@@ -117,14 +124,16 @@ export default function CancelledProjects() {
         installation_date_status: null,
         pending_cancellation_date: null
       });
-      // Fire-and-forget alert
-      base44.functions.invoke('sendCancellationStatusAlert', {
-        type: 'cleared',
-        customerName: customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown',
-        invoiceNumber: sale?.invoice_number || null,
-        installDate: project.installation_date || null,
-        clearedBy: currentUser?.full_name || currentUser?.email || 'Unknown'
-      });
+      announceDelivery(
+        base44.functions.invoke('sendCancellationStatusAlert', {
+          type: 'cleared',
+          customerName: customer ? `${customer.first_name} ${customer.last_name}` : 'Unknown',
+          invoiceNumber: sale?.invoice_number || null,
+          installDate: project.installation_date || null,
+          clearedBy: currentUser?.full_name || currentUser?.email || 'Unknown'
+        }),
+        { saved: 'Pending cancellation cleared', sent: 'the alert did not go out' },
+      );
       queryClient.invalidateQueries({ queryKey: ['allProjectsForCancelled'] });
     } finally {
       setClearingPending(null);
@@ -159,15 +168,17 @@ export default function CancelledProjects() {
         });
       }
 
-      // Fire-and-forget alert
       const customer = customers.find(c => c.id === cancelDialog.project.customer);
-      base44.functions.invoke('sendCancellationStatusAlert', {
-        type: 'cancelled',
-        customerName: customer ? `${customer.first_name} ${customer.last_name}` : cancelDialog.customerName,
-        invoiceNumber: sales.find(s => s.id === cancelDialog.project.sale)?.invoice_number || null,
-        installDate: cancelDialog.project.installation_date || null,
-        reason: cancelReason.trim() || null
-      });
+      announceDelivery(
+        base44.functions.invoke('sendCancellationStatusAlert', {
+          type: 'cancelled',
+          customerName: customer ? `${customer.first_name} ${customer.last_name}` : cancelDialog.customerName,
+          invoiceNumber: sales.find(s => s.id === cancelDialog.project.sale)?.invoice_number || null,
+          installDate: cancelDialog.project.installation_date || null,
+          reason: cancelReason.trim() || null
+        }),
+        { saved: 'Project cancelled', sent: 'the alert did not go out' },
+      );
       queryClient.invalidateQueries({ queryKey: ['allProjectsForCancelled'] });
       setCancelDialog(null);
       setCancelReason('');

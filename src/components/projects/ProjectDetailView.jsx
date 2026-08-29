@@ -1,5 +1,6 @@
 import React from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -149,23 +150,31 @@ export default function ProjectDetailView({
           .replace('{customer_first_name}', customer.first_name || '')
           .replace('{project_tracker_url}', project.project_tracker_url);
 
-        await base44.functions.invoke('sendSMS', {
-          to: customer.phone,
-          message
-        });
+        const res = await base44.functions.invoke('sendSMS', { to: customer.phone, message });
+        const failed = invokeFailure(res);
+        const notSent = invokeNotSent(res);
 
-        // Log the activity
+        // The old code wrote an "SMS Sent" ProjectLog entry and toasted
+        // "SMS sent successfully!" whatever came back. That log is permanent and
+        // is what anyone later checks to answer "did we tell the customer?" —
+        // so a silent failure did not just mislead the sender, it recorded the
+        // wrong answer for good. Log what actually happened.
+        const sentOk = !failed && !notSent;
         await base44.entities.ProjectLog.create({
           project: project.id,
-          action: 'SMS Sent',
-          details: `Project tracker SMS sent to ${customer.first_name} ${customer.last_name} (${customer.phone})`,
+          action: sentOk ? 'SMS Sent' : 'SMS Not Sent',
+          details: sentOk
+            ? `Project tracker SMS sent to ${customer.first_name} ${customer.last_name} (${customer.phone})`
+            : `Project tracker SMS NOT sent to ${customer.first_name} ${customer.last_name} (${customer.phone}) — ${failed || notSent}`,
           user_email: currentUser?.email,
           user_name: currentUser?.full_name
         });
 
         queryClient.invalidateQueries({ queryKey: ['projectLogs', project.id] });
-        
-        toast.success('SMS sent successfully!');
+
+        if (failed) toast.error(`Not sent — ${failed}`);
+        else if (notSent) toast.warning(`Nothing went out — ${notSent}`, { duration: 8000 });
+        else toast.success('SMS sent successfully!');
       }
     } catch (error) {
       console.error('Failed to send SMS:', error);

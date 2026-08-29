@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
+import { toast } from 'sonner';
 import DateRangePicker from '@/components/dashboard/DateRangePicker';
 import { Loader2, RefreshCw, X } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -110,7 +112,14 @@ export default function Dashboard() {
   const refreshGHL = async () => {
     setGhlLoading(true);
     try {
-      await base44.functions.invoke('syncGHLContacts', {});
+      // A refresh button that silently does nothing is indistinguishable from a
+      // refresh that found no new leads — and GHL has no credentials today, so
+      // that is exactly what this returns.
+      const res = await base44.functions.invoke('syncGHLContacts', {});
+      const failed = invokeFailure(res);
+      const notSent = invokeNotSent(res);
+      if (failed) { toast.error(`Could not refresh from GoHighLevel — ${failed}`); setGhlLoading(false); return; }
+      if (notSent) { toast.warning(`Nothing was refreshed — ${notSent}`, { duration: 8000 }); }
       await loadFromCache();
     } catch (e) {
       setGhlLoading(false);

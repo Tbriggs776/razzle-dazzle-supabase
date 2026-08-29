@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +42,12 @@ export default function SalesReports() {
     e.stopPropagation();
     setAnalyzingId(appointmentId);
     try {
-      await base44.functions.invoke('analyzeNotSoldReason', { appointmentId });
+      // invoke() does not throw, so the catch below never fired: a failed
+      // analysis just spun the button and left the row unchanged, looking to the
+      // user like the AI had nothing to say.
+      const res = await base44.functions.invoke('analyzeNotSoldReason', { appointmentId });
+      const failed = invokeFailure(res);
+      if (failed) { toast.error(`Could not analyse this one — ${failed}`); return; }
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
     } catch (error) {
       console.error('Failed to analyze:', error);

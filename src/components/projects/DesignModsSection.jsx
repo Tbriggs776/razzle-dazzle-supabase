@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { signInPerson } from '@/lib/signInPerson';
+import { deliveryNote, invokeFailure, invokeNotSent } from '@/lib/invokeResult';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,13 +64,17 @@ export default function DesignModsSection({ project, customer, sale }) {
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const mod = await base44.entities.DesignMod.create({ ...data, project: project.id, customer_id: customer?.id, status: 'draft' });
-      await base44.functions.invoke('sendDesignModEmail', { designModId: mod.id });
-      return mod;
+      const res = await base44.functions.invoke('sendDesignModEmail', { designModId: mod.id });
+      // Deliberately NOT thrown. The DesignMod row is already committed, so
+      // failing here would leave the dialog open over a saved record and the
+      // natural retry would create a second one — and a second customer email.
+      return { mod, note: deliveryNote(res, { saved: 'Modification saved', sent: 'the email to the customer did not go out' }) };
     },
-    onSuccess: () => {
+    onSuccess: ({ note }) => {
       queryClient.invalidateQueries({ queryKey: ['designMods', project.id] });
       setShowDialog(false);
       resetForm();
+      if (note) toast.warning(note, { duration: 8000 });
     }
   });
 
@@ -87,8 +93,15 @@ export default function DesignModsSection({ project, customer, sale }) {
   const handleSend = async (mod) => {
     setSendingId(mod.id);
     try {
-      await base44.functions.invoke('sendDesignModEmail', { designModId: mod.id });
+      const res = await base44.functions.invoke('sendDesignModEmail', { designModId: mod.id });
       queryClient.invalidateQueries({ queryKey: ['designMods', project.id] });
+      // A Send button that reports nothing either way is indistinguishable from
+      // one that does nothing at all.
+      const failed = invokeFailure(res);
+      const notSent = invokeNotSent(res);
+      if (failed) toast.error(`Not sent — ${failed}`);
+      else if (notSent) toast.warning(`Nothing went out — ${notSent}`, { duration: 8000 });
+      else toast.success('Sent to the customer');
     } finally {
       setSendingId(null);
     }

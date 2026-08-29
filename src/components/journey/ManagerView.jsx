@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
+import { deliveryNote } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, MapPin, Calendar, ChevronRight, Users, UserPlus, Filter } from 'lucide-react';
@@ -63,11 +65,13 @@ export default function ManagerView() {
     });
     queryClient.invalidateQueries({ queryKey: ['journeyProjects'] });
     if (crewId) {
-      try {
-        await base44.functions.invoke('notifyInstallerAssigned', { project_id: projectId, crew_id: crewId });
-      } catch (e) {
-        console.error('Installer notification failed', e);
-      }
+      // The crew's ONLY notice that this job is theirs. It reaches them by SMS,
+      // which is switched off until the Twilio from-number is set — so this
+      // silently sent nothing and the assigner had no way to know. Say it, and
+      // never throw: the assignment itself is already committed.
+      const res = await base44.functions.invoke('notifyInstallerAssigned', { project_id: projectId, crew_id: crewId });
+      const dnote = deliveryNote(res, { saved: 'Crew assigned', sent: 'they were not notified' });
+      if (dnote) toast.warning(`${dnote}. Tell them directly.`, { duration: 9000 });
     }
   };
 

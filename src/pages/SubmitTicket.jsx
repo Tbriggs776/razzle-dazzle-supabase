@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -128,18 +130,26 @@ export default function SubmitTicket() {
           .replace('{order_number}', ticketData.order_number)
           .replace('{ticket_url}', dcUrlResponse.data.shortURL);
 
-        await base44.functions.invoke('sendSMS', {
-          to: assignedMember.phone,
-          message
-        });
+        const res = await base44.functions.invoke('sendSMS', { to: assignedMember.phone, message });
+        const failed = invokeFailure(res);
+        const notSent = invokeNotSent(res);
+        const sentOk = !failed && !notSent;
 
+        // The TicketLog entry is what someone reads later to answer "was the
+        // consultant told?". It said "SMS Sent to DC" regardless of what came
+        // back, so a text that never left recorded itself as delivered.
         await base44.entities.TicketLog.create({
           ticket: ticket.id,
-          action: 'SMS Sent to DC',
-          details: `Notification sent to ${assignedMember.first_name} ${assignedMember.last_name} (${assignedMember.phone})`,
+          action: sentOk ? 'SMS Sent to DC' : 'SMS Not Sent to DC',
+          details: sentOk
+            ? `Notification sent to ${assignedMember.first_name} ${assignedMember.last_name} (${assignedMember.phone})`
+            : `Notification NOT sent to ${assignedMember.first_name} ${assignedMember.last_name} (${assignedMember.phone}) — ${failed || notSent}`,
           user_email: currentUser?.email,
           user_name: currentUser?.full_name
         });
+        if (!sentOk) {
+          toast.warning(`Ticket created, but ${assignedMember.first_name} was not texted — ${failed || notSent}`, { duration: 9000 });
+        }
       }
 
       return ticket;

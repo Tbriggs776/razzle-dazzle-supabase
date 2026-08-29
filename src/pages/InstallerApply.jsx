@@ -137,7 +137,11 @@ export default function InstallerApply() {
       const rec = Array.isArray(r?.data) ? r.data[0] : Array.isArray(r) ? r[0] : (r?.data ?? r);
       setRoc(rec || { notFound: true });
       if (rec?.business_name && !form.legal_business_name) set('legal_business_name', rec.business_name);
-      await base44.functions.invoke('saveInstallerApplication', { token, payload: { ...form, roc_license_no: lic } });
+      // Autosave of the verified licence number. Silently losing it means the
+      // applicant re-enters it on a later step and wonders why Verify reset.
+      const saved = await base44.functions.invoke('saveInstallerApplication', { token, payload: { ...form, roc_license_no: lic } });
+      const saveFailed = invokeFailure(saved);
+      if (saveFailed) throw new Error(`Licence verified, but we could not save it — ${saveFailed}`);
     } catch (e) { setError(e.message); }
     setRocBusy(false);
   };

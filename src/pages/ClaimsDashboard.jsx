@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { deliveryNote } from '@/lib/invokeResult';
+import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -202,9 +204,13 @@ export default function ClaimsDashboard() {
     });
     queryClient.invalidateQueries({ queryKey: ['projectClaims'] });
     if (completing) {
-      try {
-        await base44.functions.invoke('sendProjectClaimCompletedEmail', { claimId: claim.id });
-      } catch (e) {}
+      // Was an empty catch on a call that never throws — so the completion email
+      // failing, or never being configured, produced literally nothing anywhere.
+      const res = await base44.functions.invoke('sendProjectClaimCompletedEmail', { claimId: claim.id });
+      const note = deliveryNote(res, {
+        saved: 'Claim marked complete', sent: 'the completion email did not go out',
+      });
+      if (note) toast.warning(note, { duration: 8000 });
     }
   };
 

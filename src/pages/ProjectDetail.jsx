@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { deliveryNote } from '@/lib/invokeResult';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
@@ -454,16 +455,16 @@ export default function ProjectDetail() {
       setNewNote('');
       // Also append as a private note to RFMS if the sale has an invoice number
       if (sale?.invoice_number) {
-        try {
-          await base44.functions.invoke('appendRFMSOrderNotes', {
-            documentNumber: sale.invoice_number,
-            noteType: 'privateNotes',
-            noteText: newNote.trim()
-          });
-          queryClient.invalidateQueries({ queryKey: ['rfmsOrderNotes', sale.invoice_number] });
-        } catch (rfmsError) {
-          console.error('Failed to append note to RFMS:', rfmsError);
-        }
+        const res = await base44.functions.invoke('appendRFMSOrderNotes', {
+          documentNumber: sale.invoice_number,
+          noteType: 'privateNotes',
+          noteText: newNote.trim()
+        });
+        queryClient.invalidateQueries({ queryKey: ['rfmsOrderNotes', sale.invoice_number] });
+        // The note is already saved here — never throw. But anyone working the
+        // job from RFMS will not see it, and only this toast says so.
+        const note = deliveryNote(res, { saved: 'Note added', sent: 'it was not copied to RFMS' });
+        if (note) toast.warning(note, { duration: 8000 });
       }
     } catch (error) {
       console.error('Failed to add note:', error);

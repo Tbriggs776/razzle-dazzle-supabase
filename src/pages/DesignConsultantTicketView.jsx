@@ -1,5 +1,6 @@
 import React from 'react';
 import { base44 } from '@/api/base44Client';
+import { announceDelivery } from '@/lib/deliveryToast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -106,17 +107,18 @@ export default function DesignConsultantTicketView() {
         file_urls: fileUrls
       });
 
-      // Send SMS via backend function (uses service role to access TeamMember)
-      try {
-        await base44.functions.invoke('sendTicketMessageSMS', {
+      // The message IS saved. The SMS is the part that tells the other person it
+      // exists, and with SMS switched off it went nowhere and said nothing.
+      // Non-blocking so the reply posts immediately either way.
+      announceDelivery(
+        base44.functions.invoke('sendTicketMessageSMS', {
           ticketId,
           senderName,
           message,
           senderRole: 'DC'
-        });
-      } catch (error) {
-        console.error('Failed to send SMS to requester:', error);
-      }
+        }),
+        { saved: 'Message posted', sent: 'the requester was not texted' },
+      );
 
       return ticketMessage;
     },

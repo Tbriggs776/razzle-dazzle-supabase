@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
+import { deliveryNote } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, User, Calendar, Loader2, Building2, HardHat, Globe } from 'lucide-react';
@@ -54,11 +56,13 @@ function JourneyProjectDetailInner() {
         installer_crew_name: installer?.crew_name || crewId,
       });
       queryClient.invalidateQueries({ queryKey: ['journeyProject', projectId] });
-      try {
-        await base44.functions.invoke('notifyInstallerAssigned', { project_id: projectId, crew_id: crewId });
-      } catch (e) {
-        console.error('Installer notification failed', e);
-      }
+      // The crew's ONLY notice that this job is theirs. It reaches them by SMS,
+      // which is switched off until the Twilio from-number is set — so this
+      // silently sent nothing and the assigner had no way to know. Say it, and
+      // never throw: the assignment itself is already committed.
+      const res = await base44.functions.invoke('notifyInstallerAssigned', { project_id: projectId, crew_id: crewId });
+      const dnote = deliveryNote(res, { saved: 'Crew assigned', sent: 'they were not notified' });
+      if (dnote) toast.warning(`${dnote}. Tell them directly.`, { duration: 9000 });
     } catch (e) {
       console.error('Failed to assign installer', e);
     } finally {

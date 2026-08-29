@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
+import { announceDelivery } from '@/lib/deliveryToast';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ClipboardCheck, Loader2, CheckCircle2, AlertCircle, Clock, ExternalLink, Plus, Paperclip, X, Image as ImageIcon, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
 import { SignedImage, SignedFileLink } from '@/lib/fileUrl';
@@ -121,10 +122,12 @@ export default function MyTickets() {
                   .replace(/{message}/g, message)
                   .replace(/{ticket_url}/g, ticket.dc_short_url || '');
 
-                await base44.functions.invoke('sendSMS', {
-                  to: dc.phone,
-                  message: smsText
-                });
+                // The message is already posted to the ticket; this only tells
+                // the consultant about it, and it failed silently.
+                await announceDelivery(
+                  base44.functions.invoke('sendSMS', { to: dc.phone, message: smsText }),
+                  { saved: 'Message posted', sent: 'the consultant was not texted' },
+                );
               }
             }
           } catch (error) {

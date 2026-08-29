@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import { deliveryNote, invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,11 +53,11 @@ export default function InspectionReportsSection({ project, customer, sale, curr
     queryClient.invalidateQueries({ queryKey: ['inspectionReports', project.id] });
     // Only send PDF email if submit=true
     if (submit && formData.email_recipients?.length > 0) {
-      try {
-        await base44.functions.invoke('sendInspectionReportEmail', { reportId: created.id });
-      } catch (e) {
-        console.error('Failed to send inspection report email:', e);
-      }
+      // The report IS saved by this point. Never throw here — but an inspection
+      // report that reached nobody is the same as one that was never written.
+      const res = await base44.functions.invoke('sendInspectionReportEmail', { reportId: created.id });
+      const note = deliveryNote(res, { saved: 'Report saved', sent: 'the email did not go out' });
+      if (note) toast.warning(note, { duration: 8000 });
     }
     setSaving(false);
     setShowForm(false);
@@ -86,8 +87,15 @@ export default function InspectionReportsSection({ project, customer, sale, curr
     try {
       // Update recipients on the record first, then send
       await base44.entities.InspectionReport.update(report.id, { email_recipients: resendEmails });
-      await base44.functions.invoke('sendInspectionReportEmail', { reportId: report.id });
+      const res = await base44.functions.invoke('sendInspectionReportEmail', { reportId: report.id });
       queryClient.invalidateQueries({ queryKey: ['inspectionReports', project.id] });
+      // invoke() does not throw, so the catch below only ever covered the entity
+      // update: pressing Resend reported neither success nor failure.
+      const failed = invokeFailure(res);
+      const notSent = invokeNotSent(res);
+      if (failed) toast.error(`Not sent — ${failed}`);
+      else if (notSent) toast.warning(`Nothing went out — ${notSent}`, { duration: 8000 });
+      else toast.success(`Sent to ${resendEmails.length} recipient${resendEmails.length === 1 ? '' : 's'}`);
     } catch (e) {
       toast.error('Failed to send: ' + e.message);
     }
