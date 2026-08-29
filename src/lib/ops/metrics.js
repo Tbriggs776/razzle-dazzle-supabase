@@ -44,6 +44,15 @@ export const STATUS_TONE = {
 export const PRE_RECEIPT = ['None', 'GenPO', 'OnOrder'];
 const PRE_RECEIPT_RANK = { None: 0, GenPO: 1, OnOrder: 2 };
 
+/**
+ * Every value `project.installation_date_status` can hold, lowercased. All of
+ * them stop the job — the enum has no benign member. 'hold' is not in the base44
+ * enum but the UI writes it, so it stays.
+ */
+export const HOLD_STATUSES = new Set([
+  'on hold', 'hold', 'pending payment', 'pending contract', 'pending cancellation',
+]);
+
 /** Worst (earliest-stage) pre-receipt status present. Lowest rank wins. */
 export function worstStatus(statuses = []) {
   const pre = statuses.filter((s) => s in PRE_RECEIPT_RANK);
@@ -258,9 +267,12 @@ export function buildInstallBoard({ projects = [], sales = [], customers = [], m
         daysOut,
         // Case-insensitive on purpose: submitCheckpoint's asbestos hard-stop
         // writes 'on hold' while the UI writes 'Hold'. An exact match silently
-        // missed every asbestos halt on this board.
-        onHold: !!p.pending_cancellation_date
-          || ['on hold', 'hold'].includes(String(p.installation_date_status || '').trim().toLowerCase()),
+        // missed every asbestos halt on this board. Every value in the
+        // installation_date_status enum stops the job — 'pending payment' is
+        // the deposit gate, 'pending contract' means no signed paper.
+        onHold: !!p.pending_cancellation_date || HOLD_STATUSES.has(
+          String(p.installation_date_status || '').trim().toLowerCase(),
+        ),
         amount: Number(sale?.sale_amount) || 0,
         material: mat || null,
         readiness: readinessLabel(mat),

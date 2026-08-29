@@ -97,17 +97,25 @@ export function classifyJob({ sale, project, appointment, customer, material, as
   // cases: submitCheckpoint's asbestos hard-stop writes 'on hold' (lower), the
   // UI writes 'Hold'. Compare case-insensitively — an exact match missed the
   // asbestos halt entirely, which is the one hold that must never be missed.
+  //
+  // All FOUR values in the enum stop a job, not just the two that say "hold":
+  // 'pending payment' is the deposit gate ordering waits on, and 'pending
+  // contract' means we have no signed paper. Treating them as healthy put jobs
+  // on the install board that nobody was allowed to touch.
+  const HOLD_REASONS = {
+    'on hold':            ['Job is flagged on hold — safety or credit stop not cleared', 'sales'],
+    'hold':               ['Job is flagged on hold — safety or credit stop not cleared', 'sales'],
+    'pending payment':    ['Deposit not collected — ordering cannot begin', 'finance'],
+    'pending contract':   ['No signed contract on file', 'sales'],
+    'pending cancellation': ['Customer has asked to cancel — not resolved', 'sales'],
+  };
   const holdFlag = String(project?.installation_date_status || '').trim().toLowerCase();
-  const statusHold = holdFlag === 'on hold' || holdFlag === 'hold';
+  const statusHold = HOLD_REASONS[holdFlag] || null;
   const cancelHold = !!(project?.pending_cancellation_date && !project?.hold_cleared_date);
-  const onHold = statusHold || cancelHold;
+  const onHold = !!statusHold || cancelHold;
   if (onHold) {
-    blockers.push(blocker(
-      'hold', 'crit', 'On hold',
-      statusHold ? 'Job is flagged on hold — safety or credit stop not cleared'
-                 : 'Pending cancellation — not cleared',
-      'sales',
-    ));
+    const [detail, owner] = statusHold || ['Pending cancellation — not cleared', 'sales'];
+    blockers.push(blocker('hold', 'crit', 'On hold', detail, owner));
   }
   const depositMissing = !sale?.deposit_amount || Number(sale.deposit_amount) <= 0;
   if (depositMissing && sale?.sale_amount) {
