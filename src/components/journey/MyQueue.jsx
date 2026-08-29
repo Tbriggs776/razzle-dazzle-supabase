@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, MapPin, Calendar, ChevronRight, Bell, CheckCircle2, AlertCircle, ClipboardList, HardHat, UserCog } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,14 +25,17 @@ const STEP_DOT_NEUTRAL = 'bg-muted text-muted-foreground';
 export default function MyQueue() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState('all'); // 'all' | 'pending'
 
-  const { data: user, isLoading: userLoading } = useQuery({
+  const { data: user, isLoading: userLoading, isError: userError } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: teamMember } = useQuery({
+  // Load-bearing: zoneProjects filters on teamMember.id, so if THIS alone fails the
+  // board empties and the screen says you are all caught up.
+  const { data: teamMember, isError: teamMemberError } = useQuery({
     queryKey: ['currentTeamMember', user?.email],
     queryFn: async () => {
       const result = await base44.entities.TeamMember.filter({ email: user.email });
@@ -42,7 +45,7 @@ export default function MyQueue() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading, isError: projectsError } = useQuery({
     queryKey: ['journeyProjects'],
     queryFn: () => base44.entities.Project.filter({ status: { $nin: ['Cancelled', 'Completed'] } }, '-installation_date', 100),
     enabled: !!user,
@@ -62,7 +65,9 @@ export default function MyQueue() {
     enabled: !!user,
   });
 
-  const { data: allCheckpoints = [] } = useQuery({
+  // Also load-bearing: every step dot falls back to 'Pending' when this is empty,
+  // so a failure here silently rewrites the status of every job on the board.
+  const { data: allCheckpoints = [], isError: checkpointsError } = useQuery({
     queryKey: ['allProjectCheckpoints'],
     queryFn: () => base44.entities.ProjectCheckpoint.list('-updated_date', 500),
     enabled: !!user,
@@ -112,6 +117,31 @@ export default function MyQueue() {
     return (
       <div className="flex justify-center py-12">
         <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  // A failed load must NEVER be shown as an empty queue. "You're all caught up"
+  // and "we could not reach the server" look identical to a Field Manager on one
+  // bar of signal, and only one of them means it is safe to go home.
+  // refetchOnWindowFocus is off globally, so this never self-corrects either.
+  if (userError || teamMemberError || projectsError || checkpointsError) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-12 text-center">
+        <AlertCircle className="mx-auto mb-3 h-10 w-10 text-crit" />
+        <h3 className="text-base font-semibold text-foreground">
+          {t('mqLoadFailedTitle')}
+        </h3>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          {t('mqLoadFailedBody')}
+        </p>
+        <button
+          type="button"
+          onClick={() => queryClient.invalidateQueries()}
+          className="mt-4 inline-flex min-h-11 items-center rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
+        >
+          {t('mqRetry')}
+        </button>
       </div>
     );
   }

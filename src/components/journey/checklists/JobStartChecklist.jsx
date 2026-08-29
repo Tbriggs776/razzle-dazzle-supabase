@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Send, CheckCircle2, XCircle, Clock, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -234,16 +235,23 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
   const handleApprove = async () => {
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'approve',
         checkpoint_id: checkpoint?.id,
         project_id: projectId,
         step_key: 'job_start_checklist',
       });
+      // invoke() never throws, so the old catch was dead code AND had no toast:
+      // a 403 or a timeout advanced the panel in silence and the crew was told to
+      // proceed on an approval that was never recorded. Nothing here was written
+      // locally first, so blocking is right — the panel must not move.
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(`Not approved — ${failed}. The crew has not been cleared to continue.`);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
       onSubmitted?.();
-    } catch (e) {
-      console.error('Approve failed', e);
     } finally {
       setSaving(false);
     }
@@ -254,18 +262,24 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
     if (!notes) return;
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'reject',
         checkpoint_id: checkpoint?.id,
         project_id: projectId,
         step_key: 'job_start_checklist',
         rejection_notes: notes,
       });
+      // A rejection that silently failed is the worse half of this pair: the FM
+      // believes they sent it back, the crew never sees it, and the reason they
+      // typed is gone.
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(`Not sent back — ${failed}. Your reason was not saved, so please try again.`);
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
       setMode('form');
       onSubmitted?.();
-    } catch (e) {
-      console.error('Reject failed', e);
     } finally {
       setSaving(false);
     }

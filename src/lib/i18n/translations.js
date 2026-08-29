@@ -33,6 +33,12 @@ export const journeyTranslations = {
     mqAll: 'All ({{count}})',
     mqNeedsApproval: 'Needs Approval ({{count}})',
     mqNoProjects: 'No projects awaiting approval — you\'re all caught up!',
+    // A failed load must never be shown as an empty queue: "all caught up" and
+    // "we could not reach the server" look identical on one bar of signal, and
+    // only one of them means it is safe to go home.
+    mqLoadFailedTitle: 'Could not load your queue',
+    mqLoadFailedBody: 'This is a connection problem, not an empty queue — there may well be work waiting. Check your signal and try again.',
+    mqRetry: 'Try again',
     mqColCustomer: 'Customer',
     mqColCG: 'CG #',
     mqColInstallDate: 'Install Date',
@@ -233,6 +239,9 @@ export const journeyTranslations = {
     mqAll: 'Todos ({{count}})',
     mqNeedsApproval: 'Necesita Aprobación ({{count}})',
     mqNoProjects: 'No hay proyectos pendientes de aprobación — ¡estás al día!',
+    mqLoadFailedTitle: 'No se pudo cargar tu lista',
+    mqLoadFailedBody: 'Es un problema de conexión, no una lista vacía — puede que sí haya trabajo esperando. Revisa tu señal e inténtalo de nuevo.',
+    mqRetry: 'Intentar de nuevo',
     mqColCustomer: 'Cliente',
     mqColCG: 'CG #',
     mqColInstallDate: 'Fecha de Instalación',

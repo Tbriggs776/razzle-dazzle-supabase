@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X, RefreshCw, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -270,6 +271,17 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
         startDate: toRFMSDate(jobsFrom),
         endDate: toRFMSDate(jobsTo),
       });
+      // `return res.data?.jobs || []` swallowed res.error, so fetchError was never
+      // set and the error banner further down could not fire. RFMS going down
+      // rendered as "no jobs this week" and a dispatcher planned off an empty
+      // board. Throwing here is what makes that banner reachable.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      // A read is different from a send: an unconfigured RFMS shows as an empty
+      // week, which is the exact lie we are removing. Surface it rather than
+      // returning [].
+      const notConnected = invokeNotSent(res);
+      if (notConnected) throw new Error(`RFMS is not connected — ${notConnected}`);
       return res.data?.jobs || [];
     },
     staleTime: 5 * 60 * 1000,
@@ -429,6 +441,13 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
             <div className="flex flex-col items-center py-6 gap-1 text-center px-2">
               <AlertCircle className="w-4 h-4 text-destructive" />
               <span className="text-[10px] text-destructive">{t('jcFailedLoad')}</span>
+              {/* The specific reason, when we have one — "RFMS is not connected"
+                  and "the request timed out" call for different actions. */}
+              {fetchError?.message && (
+                <span className="text-[10px] text-muted-foreground break-words">
+                  {fetchError.message}
+                </span>
+              )}
             </div>
           )}
           {!isLoading && !fetchError && (

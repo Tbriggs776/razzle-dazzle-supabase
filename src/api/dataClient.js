@@ -116,9 +116,22 @@ function applyOperator(q, key, op, val) {
     case '$contains': return q.contains(key, val); // array/jsonb containment (@>)
     case '$ilike': return q.ilike(key, val);
     case '$like': return q.like(key, val);
+    // Presence check. IS NOT NULL / IS NULL — note this treats '' as present,
+    // which matches how the callers use it (a stored file URL is either there or
+    // the column is null).
+    case '$exists': return val ? q.not(key, 'is', null) : q.is(key, null);
     default:
-      console.warn(`[dataClient] Unsupported filter operator "${op}" on "${key}".`);
-      return q;
+      // THROW, never return `q`. Returning the query unfiltered turns "give me
+      // the rows matching this" into "give me every row", and the caller cannot
+      // tell the difference — it just gets a confident wrong answer. That is
+      // exactly what happened with $exists on the pre-install checklist tab:
+      // 0 of 36 appointments had a signature and all 36 rendered as signed,
+      // which is what staff used to decide who still needed chasing.
+      // A filter the backend cannot express must fail loudly.
+      throw new Error(
+        `[dataClient] Unsupported filter operator "${op}" on "${key}". `
+        + `Refusing to run the query unfiltered — add the operator to applyOperator().`,
+      );
   }
 }
 

@@ -113,7 +113,7 @@ export default function MyTasks() {
   // Only fetch appointments + leads that tasks actually reference, in one chained query
   const appointmentIds = useMemo(() => [...new Set(tasks.map(t => t.appointment).filter(Boolean))], [tasks]);
 
-  const { data: { appointments, leads } = { appointments: [], leads: [] } } = useQuery({
+  const { data: { appointments, leads } = { appointments: [], leads: [] }, isError: detailsError } = useQuery({
     queryKey: ['taskAppointmentsAndLeads', appointmentIds.join(',')],
     queryFn: async () => {
       if (!appointmentIds.length) return { appointments: [], leads: [] };
@@ -124,9 +124,14 @@ export default function MyTasks() {
       for (let i = 0; i < appointmentIds.length; i += CHUNK) {
         appointmentChunks.push(appointmentIds.slice(i, i + CHUNK));
       }
+      // No per-chunk .catch(() => []). Swallowing one failed chunk silently drops
+      // 25 appointments, and the tasks that referenced them then render with no
+      // customer name and no tap-to-call button — indistinguishable from tasks
+      // that genuinely have no customer. Let the whole query fail so isError can
+      // say so.
       const appointmentResults = await Promise.all(
         appointmentChunks.map(chunk =>
-          base44.entities.Appointment.filter({ id: { $in: chunk } }, '-created_date', chunk.length).catch(() => [])
+          base44.entities.Appointment.filter({ id: { $in: chunk } }, '-created_date', chunk.length)
         )
       );
       const fetchedAppointments = appointmentResults.flat();
@@ -138,7 +143,7 @@ export default function MyTasks() {
       }
       const leadResults = await Promise.all(
         leadChunks.map(chunk =>
-          base44.entities.Lead.filter({ id: { $in: chunk } }, '-created_date', chunk.length).catch(() => [])
+          base44.entities.Lead.filter({ id: { $in: chunk } }, '-created_date', chunk.length)
         )
       );
       const fetchedLeads = leadResults.flat();
@@ -312,6 +317,21 @@ export default function MyTasks() {
             </Select>
           ) : undefined}
         />
+
+        {/* The tasks below are real; their customer details are not loaded. Say so,
+            rather than rendering a task with a blank name that reads as a task
+            with no customer. */}
+        {detailsError && (
+          <div className="rounded-xl border border-warn/40 bg-warn/10 p-3.5">
+            <p className="text-sm font-medium text-foreground">
+              Customer details could not be loaded
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Your tasks are listed below, but names and phone numbers are missing
+              because that request failed. Refresh to try again.
+            </p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <KpiTile

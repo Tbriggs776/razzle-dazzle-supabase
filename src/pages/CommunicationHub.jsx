@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Send, MessageSquare, Loader2, Phone, RefreshCw, Calendar, DollarSign, ClipboardCheck, ExternalLink, ArrowLeft, Info, X, Eye, EyeOff } from 'lucide-react';
@@ -211,14 +213,29 @@ export default function CommunicationHub() {
     if (!replyText.trim() || !selectedConversation?.contact_phone) return;
     setSending(true);
     try {
-      await base44.functions.invoke('sendSMS', {
+      // invoke() never throws, so the old catch here was dead code: every send
+      // cleared the textarea and refreshed the thread whether or not the message
+      // went anywhere. With SMS currently disarmed this returned 200
+      // { skipped: 'disabled' } and looked exactly like success.
+      const res = await base44.functions.invoke('sendSMS', {
         to: selectedConversation.contact_phone,
         message: replyText.trim()
       });
+
+      const failed = invokeFailure(res);
+      if (failed) {
+        // Keep what they typed. Clearing it loses the message they still need to send.
+        toast.error(`Message not sent — ${failed}`);
+        return;
+      }
+      const notSent = invokeNotSent(res);
+      if (notSent) {
+        toast.warning(`Nothing was sent — ${notSent}. The customer has not heard from you.`);
+        return;
+      }
+
       setReplyText('');
       queryClient.invalidateQueries({ queryKey: ['communications'] });
-    } catch (err) {
-      console.error('Send failed:', err);
     } finally {
       setSending(false);
     }
