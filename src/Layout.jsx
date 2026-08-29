@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Users, UserCog, CalendarDays, ClipboardCheck, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, FileText, Truck, Plug, BarChart3, HardHat, Briefcase, Package } from 'lucide-react';
@@ -23,6 +23,20 @@ export const useRecording = () => {
 export default function Layout({ children, currentPageName }) {
   const queryClient = useQueryClient();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // The sidebar is permanently visible from Tailwind's `lg` (1024px) up, so it is
+  // only ever off-canvas BELOW that. The existing useIsMobile hook is 768px, which
+  // is the wrong boundary here — between 768 and 1023 the sidebar is still hidden.
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches,
+  );
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 1024px)');
+    const onChange = (e) => setIsDesktop(e.matches);
+    mql.addEventListener('change', onChange);
+    setIsDesktop(mql.matches);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
   const [viewingAsRole, setViewingAsRole] = useState(null);
   const [expandedMenuItems, setExpandedMenuItems] = useState({});
   const [widgetPosition, setWidgetPosition] = useState({ x: null, y: null });
@@ -515,6 +529,16 @@ export default function Layout({ children, currentPageName }) {
   return (
     <RecordingContext.Provider value={recordingContextValue}>
     <div className="min-h-screen bg-background">
+      {/* First focusable thing on the page. Visually hidden until focused, which
+          is the standard pattern — a keyboard user presses Tab once and can jump
+          straight past the navigation instead of walking through all of it. */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
+
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -523,8 +547,16 @@ export default function Layout({ children, currentPageName }) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar.
+          `-translate-x-full` moves it out of sight but NOT out of the tab order,
+          so on a phone a keyboard or switch user tabbed through ~30 invisible
+          nav links before reaching any page content. `inert` removes it from
+          focus and from the accessibility tree while it is off-canvas; the lg
+          breakpoint is where it becomes permanently visible, so it is only ever
+          inert below that. */}
       <aside
+        aria-label="Main navigation"
+        {...(!sidebarOpen && !isDesktop ? { inert: '' } : {})}
         className={cn(
           "fixed top-0 left-0 bottom-0 w-64 bg-sidebar border-r border-sidebar-border z-50 transition-transform duration-300 lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -662,6 +694,9 @@ export default function Layout({ children, currentPageName }) {
         {/* Mobile header */}
         <div className="lg:hidden h-16 bg-sidebar border-b border-sidebar-border flex items-center px-6 flex-shrink-0">
           <button
+            type="button"
+            aria-label="Open navigation menu"
+            aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen(true)}
             className="p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
           >
@@ -673,7 +708,7 @@ export default function Layout({ children, currentPageName }) {
         </div>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto">{children}</main>
 
         {/* Role Toggle - Bottom Right */}
         {currentUser?.role === 'admin' && (

@@ -129,15 +129,20 @@ export default function Work() {
               Open
             </Button>
           )}
-          {t.assigned_user === myId && (
-            <Button size="sm" variant="outline" disabled={complete.isPending}
-              onClick={() => complete.mutate({ id: t.id, resolution: 'Completed from Work' })}>
-              {complete.isPending
-                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
-              Done
-            </Button>
-          )}
+          {t.assigned_user === myId && (() => {
+            // Per-row, not per-mutation: one shared `complete` object meant ticking
+            // one task spun the Done button on every task on the board.
+            const busy = complete.isPending && complete.variables?.id === t.id;
+            return (
+              <Button size="sm" variant="outline" disabled={busy}
+                onClick={() => complete.mutate({ id: t.id, resolution: 'Completed from Work' })}>
+                {busy
+                  ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
+                Done
+              </Button>
+            );
+          })()}
         </div>
       </div>
     );

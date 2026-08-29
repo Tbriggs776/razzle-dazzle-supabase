@@ -422,14 +422,42 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
         <ChecklistRow label="Is your truck parked on the street, NOT in the customer's driveway? (Oil leak risk!)" required checked={data.arrival.truck_parked_properly} missing={submitAttempted && missing.truck_parked_properly} onChange={v => update('arrival', 'truck_parked_properly', v)} disabled={isReadOnly} />
         <ChecklistRow label="Who is the Crew Lead for this job?" required checked={data.arrival.crew_lead_confirmed} missing={submitAttempted && missing.crew_lead_confirmed} onChange={v => update('arrival', 'crew_lead_confirmed', v)} disabled={isReadOnly} />
         <div className="ml-6 grid grid-cols-1 sm:grid-cols-2 gap-3 pl-7">
-          <div className="space-y-1">
-            <Label className="text-xs">Crew Lead Name <span className="text-crit">*</span></Label>
-            <Input value={data.arrival.crew_lead_name} onChange={e => update('arrival', 'crew_lead_name', e.target.value)} disabled={isReadOnly} placeholder="Name" className={submitAttempted && missing.crew_lead_name ? 'border-crit' : ''} />
+          {/* htmlFor/id pairing: the labels were visually present but not
+              programmatically associated, so a screen reader announced two bare
+              text fields. data-missing lets the submit handler scroll here too. */}
+          <div className="space-y-1" data-missing={submitAttempted && missing.crew_lead_name ? 'true' : undefined}>
+            <Label htmlFor="jsc-crew-lead-name" className="text-xs">Crew Lead Name <span className="text-crit">*</span></Label>
+            <Input
+              id="jsc-crew-lead-name"
+              autoComplete="name"
+              aria-required="true"
+              aria-invalid={submitAttempted && missing.crew_lead_name ? 'true' : undefined}
+              value={data.arrival.crew_lead_name}
+              onChange={e => update('arrival', 'crew_lead_name', e.target.value)}
+              disabled={isReadOnly}
+              placeholder="Name"
+              className={submitAttempted && missing.crew_lead_name ? 'border-crit' : ''}
+            />
             {submitAttempted && missing.crew_lead_name && <p className="text-xs text-crit">Required</p>}
           </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Crew Lead Phone <span className="text-crit">*</span></Label>
-            <Input value={data.arrival.crew_lead_phone} onChange={e => update('arrival', 'crew_lead_phone', e.target.value)} disabled={isReadOnly} placeholder="Phone" className={submitAttempted && missing.crew_lead_phone ? 'border-crit' : ''} />
+          <div className="space-y-1" data-missing={submitAttempted && missing.crew_lead_phone ? 'true' : undefined}>
+            <Label htmlFor="jsc-crew-lead-phone" className="text-xs">Crew Lead Phone <span className="text-crit">*</span></Label>
+            {/* type=tel + inputMode=tel: this opened a full QWERTY keyboard on a
+                phone, for a field that only ever takes digits, for a user standing
+                in a doorway. */}
+            <Input
+              id="jsc-crew-lead-phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              aria-required="true"
+              aria-invalid={submitAttempted && missing.crew_lead_phone ? 'true' : undefined}
+              value={data.arrival.crew_lead_phone}
+              onChange={e => update('arrival', 'crew_lead_phone', e.target.value)}
+              disabled={isReadOnly}
+              placeholder="Phone"
+              className={submitAttempted && missing.crew_lead_phone ? 'border-crit' : ''}
+            />
             {submitAttempted && missing.crew_lead_phone && <p className="text-xs text-crit">Required</p>}
           </div>
         </div>
@@ -455,7 +483,7 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-7">
               <div className="space-y-1">
                 <Label className="text-xs">Shortage count <span className="text-crit">*</span></Label>
-                <Input type="number" value={data.verification.shortage_count} onChange={e => update('verification', 'shortage_count', parseInt(e.target.value) || 0)} disabled={isReadOnly} className={submitAttempted && missing.shortage_count ? 'border-crit' : ''} />
+                <Input type="number" inputMode="numeric" aria-label="How many pieces are short?" value={data.verification.shortage_count} onChange={e => update('verification', 'shortage_count', parseInt(e.target.value) || 0)} disabled={isReadOnly} className={submitAttempted && missing.shortage_count ? 'border-crit' : ''} />
                 {submitAttempted && missing.shortage_count && <p className="text-xs text-crit">Required</p>}
               </div>
               <div className="space-y-1 sm:col-span-2">

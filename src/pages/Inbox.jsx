@@ -109,19 +109,26 @@ export default function Inbox() {
               : ''}
           </p>
         </div>
-        {!n.acknowledged_at && (
-          <Button
-            size="sm"
-            variant={n.severity === 'crit' ? 'default' : 'outline'}
-            className="shrink-0"
-            disabled={ack.isPending}
-            onClick={(e) => { e.stopPropagation(); ack.mutate(n.id); }}
-          >
-            {ack.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
-            {ack.isPending ? '' : 'Acknowledge'}
-          </Button>
-        )}
+        {!n.acknowledged_at && (() => {
+          // ONE mutation object serves every row, so `ack.isPending` alone put all
+          // 30 alerts into the spinner and blanked all 30 labels when you
+          // acknowledged one. Comparing against the in-flight variables narrows it
+          // to the row actually being acted on.
+          const busy = ack.isPending && ack.variables === n.id;
+          return (
+            <Button
+              size="sm"
+              variant={n.severity === 'crit' ? 'default' : 'outline'}
+              className="shrink-0"
+              disabled={busy}
+              onClick={(e) => { e.stopPropagation(); ack.mutate(n.id); }}
+            >
+              {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                : <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />}
+              {busy ? '' : 'Acknowledge'}
+            </Button>
+          );
+        })()}
       </div>
     );
   };

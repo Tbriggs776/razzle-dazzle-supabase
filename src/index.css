@@ -47,10 +47,18 @@
 
     /* Semantic status tokens — good/warn/crit/info. Deliberately separate from the
        pink brand accent; drive status pills, KPI deltas, and alert severities. */
-    --good: 152 55% 38%;
-    --warn: 38 92% 45%;
-    --crit: 352 74% 48%;
-    --info: 210 93% 47%;
+    /* Light-mode semantic text darkened to clear WCAG AA (4.5:1) on both the card
+       (#fff) and the page ground. Measured, not eyeballed: at the previous values
+       `good` was 3.71:1, `warn` 2.63:1 and `info` 4.33:1 — three of the four
+       failed, where the audit had only spotted `warn`. `crit` already passed at
+       5.13:1 and is untouched.
+       These are the LIGHTEST values that still pass, so the palette shifts as
+       little as possible. Hue and saturation are unchanged; only lightness moved.
+       Dark mode is left alone — every token there is 6.4:1 or better. */
+    --good: 152 55% 33%;   /* 4.73:1 on card */
+    --warn: 38 92% 33%;    /* 4.62:1 on card */
+    --crit: 352 74% 48%;   /* 5.13:1 already */
+    --info: 210 93% 45%;   /* 4.67:1 on card */
 
     --sidebar-background: 230 44% 14%;
     --sidebar-foreground: 220 30% 82%;

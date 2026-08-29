@@ -15,7 +15,12 @@ function JourneyProjectDetailInner() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
-  const projectId = urlParams.get('project_id');
+  // Accept BOTH names. The page only ever read `project_id`, but seven link sites
+  // — including the asbestos hard-stop alert and the COD-hold notice, the two
+  // things that must never fail to open — emit `?id=`. Fixing it here rather than
+  // at those seven sites also repairs notifications ALREADY SENT and sitting in
+  // the inbox, whose URLs cannot be rewritten.
+  const projectId = urlParams.get('project_id') || urlParams.get('id');
 
   const [activeStep, setActiveStep] = useState('job_start_checklist');
   const [assigning, setAssigning] = useState(false);
@@ -26,7 +31,7 @@ function JourneyProjectDetailInner() {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: project, isLoading: projectLoading } = useQuery({
+  const { data: project, isLoading: projectLoading, isError: projectError } = useQuery({
     queryKey: ['journeyProject', projectId],
     queryFn: () => base44.entities.Project.get(projectId),
     enabled: !!projectId,
@@ -104,6 +109,27 @@ function JourneyProjectDetailInner() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  // A failed fetch is NOT "no such project". Saying the wrong one sends a Field
+  // Manager hunting for a job they think was deleted, when the real answer is one
+  // bar of signal. refetchOnWindowFocus is off globally, so it never self-corrects.
+  if (projectError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <div className="max-w-sm text-center">
+          <h2 className="mb-2 text-xl font-semibold text-foreground">{t('jpdLoadFailed')}</h2>
+          <p className="mb-4 text-sm text-muted-foreground">{t('jpdLoadFailedBody')}</p>
+          <button
+            type="button"
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['journeyProject', projectId] })}
+            className="inline-flex min-h-11 items-center rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
+          >
+            {t('jpdRetry')}
+          </button>
+        </div>
       </div>
     );
   }

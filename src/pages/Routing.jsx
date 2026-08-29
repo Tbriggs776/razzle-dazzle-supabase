@@ -156,7 +156,7 @@ export default function Routing() {
                     <div className="flex flex-wrap gap-1.5">
                       {canAdd.map((p) => (
                         <Button key={p.userId} size="sm" variant="secondary"
-                          disabled={setMember.isPending}
+                          disabled={setMember.isPending && setMember.variables?.userId === p.userId}
                           onClick={() => setMember.mutate({ dept: d.key, userId: p.userId, isMember: true })}>
                           {p.name}
                         </Button>
@@ -181,21 +181,21 @@ export default function Routing() {
                       {r.is_lead && <StatusPill tone="info"><Crown className="mr-1 h-3 w-3" />Lead</StatusPill>}
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <Button size="sm" variant="ghost" disabled={setMember.isPending}
+                      <Button size="sm" variant="ghost" disabled={setMember.isPending && setMember.variables?.userId === r.user_id}
                         title="On call takes the work first"
                         onClick={() => setMember.mutate({
                           dept: d.key, userId: r.user_id, isMember: true, isOnCall: !r.is_on_call,
                         })}>
                         <Radio className={cn('h-3.5 w-3.5', r.is_on_call && 'text-emerald-600')} />
                       </Button>
-                      <Button size="sm" variant="ghost" disabled={setMember.isPending}
+                      <Button size="sm" variant="ghost" disabled={setMember.isPending && setMember.variables?.userId === r.user_id}
                         title="Lead receives escalations"
                         onClick={() => setMember.mutate({
                           dept: d.key, userId: r.user_id, isMember: true, isLead: !r.is_lead,
                         })}>
                         <Crown className={cn('h-3.5 w-3.5', r.is_lead && 'text-primary')} />
                       </Button>
-                      <Button size="sm" variant="ghost" disabled={setMember.isPending}
+                      <Button size="sm" variant="ghost" disabled={setMember.isPending && setMember.variables?.userId === r.user_id}
                         onClick={() => setMember.mutate({ dept: d.key, userId: r.user_id, isMember: false })}>
                         <X className="h-3.5 w-3.5" />
                       </Button>

@@ -36,6 +36,9 @@ export const journeyTranslations = {
     // A failed load must never be shown as an empty queue: "all caught up" and
     // "we could not reach the server" look identical on one bar of signal, and
     // only one of them means it is safe to go home.
+    jpdLoadFailed: 'Could not load this job',
+    jpdLoadFailedBody: 'This is a connection problem, not a missing job — it is still there. Check your signal and try again.',
+    jpdRetry: 'Try again',
     mqLoadFailedTitle: 'Could not load your queue',
     mqLoadFailedBody: 'This is a connection problem, not an empty queue — there may well be work waiting. Check your signal and try again.',
     mqRetry: 'Try again',
@@ -239,6 +242,9 @@ export const journeyTranslations = {
     mqAll: 'Todos ({{count}})',
     mqNeedsApproval: 'Necesita Aprobación ({{count}})',
     mqNoProjects: 'No hay proyectos pendientes de aprobación — ¡estás al día!',
+    jpdLoadFailed: 'No se pudo cargar este trabajo',
+    jpdLoadFailedBody: 'Es un problema de conexión, no un trabajo que falte — sigue ahí. Revisa tu señal e inténtalo de nuevo.',
+    jpdRetry: 'Intentar de nuevo',
     mqLoadFailedTitle: 'No se pudo cargar tu lista',
     mqLoadFailedBody: 'Es un problema de conexión, no una lista vacía — puede que sí haya trabajo esperando. Revisa tu señal e inténtalo de nuevo.',
     mqRetry: 'Intentar de nuevo',
