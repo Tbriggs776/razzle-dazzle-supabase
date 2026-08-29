@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils';
 // Live-comms feed row. channel ∈ sms | email | system. Ties to Twilio (sms) / Resend (email)
 // / system events. Inbound gets a pink unread dot.
 const CH = {
-  sms: 'bg-good/12 text-good',
-  email: 'bg-info/12 text-info',
+  sms: 'bg-good/15 text-good',
+  email: 'bg-info/15 text-info',
   system: 'bg-muted text-muted-foreground',
 };
 const AV = ['bg-brand-pink', 'bg-brand-navy', 'bg-brand-blue'];

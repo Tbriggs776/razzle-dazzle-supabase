@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap } from 'react-l
 import { isSameDay, parseISO, format, addDays, subDays } from 'date-fns';
 import { ChevronLeft, ChevronRight, MapPin, User, Hash, Navigation, Loader2, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import StatusPill from '@/components/common/StatusPill';
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -74,10 +75,24 @@ function MapController({ myRegions }) {
   return null;
 }
 
+/* Map-canvas palette — deliberately NOT theme tokens.
+   Everything below is painted onto the CARTO Voyager tile layer, which renders light in both
+   light and dark mode (and onto Leaflet's own popup chrome, which is hard-coded white by
+   leaflet.css). A theme token here would resolve to its dark-mode value — tuned for a dark
+   ground that never appears under the map — and wash out. These stay fixed on purpose. */
+const MAP_CANVAS = {
+  regionFallback: '#4F46E5',   // region with no colour set
+  orderFallback: '#94a3b8',    // order whose region has no colour
+  orderSelected: '#4F46E5',    // currently selected pin
+  orderOffDate: '#cbd5e1',     // assigned, but not on the selected date
+  homeBase: '#1e293b',
+  pinStroke: '#ffffff',
+};
+
 function createOrderIcon(color) {
   return L.divIcon({
     className: '',
-    html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35)"></div>`,
+    html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2.5px solid ${MAP_CANVAS.pinStroke};box-shadow:0 2px 6px rgba(0,0,0,0.35)"></div>`,
     iconSize: [14, 14],
     iconAnchor: [7, 7],
   });
@@ -85,14 +100,22 @@ function createOrderIcon(color) {
 
 const homeBaseIcon = L.divIcon({
   className: '',
-  html: `<div style="width:22px;height:22px;border-radius:50%;background:#1e293b;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;color:white;line-height:1">🏠</div>`,
+  html: `<div style="width:22px;height:22px;border-radius:50%;background:${MAP_CANVAS.homeBase};border:3px solid ${MAP_CANVAS.pinStroke};box-shadow:0 2px 8px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;color:${MAP_CANVAS.pinStroke};line-height:1">🏠</div>`,
   iconSize: [22, 22],
   iconAnchor: [11, 11],
 });
 
+// order.status → StatusPill tone. assigned = scheduled (info), in_progress = in flight (warn),
+// completed = done (good), anything else / unassigned = neutral.
+const STATUS_TONE = {
+  completed: 'good',
+  in_progress: 'warn',
+  assigned: 'info',
+};
+
 function JobCard({ order, region, isSelected, onClick, stopNumber }) {
   const { t } = useLanguage();
-  const color = region?.color || '#94a3b8';
+  const color = region?.color || MAP_CANVAS.orderFallback;
   const singleStopUrl = order.lat && order.lng
     ? `https://www.google.com/maps/dir/?api=1&origin=${HOME_BASE.lat},${HOME_BASE.lng}&destination=${order.lat},${order.lng}&travelmode=driving`
     : order.address
@@ -103,8 +126,8 @@ function JobCard({ order, region, isSelected, onClick, stopNumber }) {
     <div
       onClick={onClick}
       className={cn(
-        "bg-white rounded-xl border shadow-sm overflow-hidden cursor-pointer transition-all",
-        isSelected ? "border-indigo-400 ring-2 ring-indigo-200 shadow-md" : "border-slate-200 hover:border-slate-300 hover:shadow-md"
+        "bg-card rounded-xl border shadow-sm overflow-hidden cursor-pointer transition-all",
+        isSelected ? "border-primary ring-2 ring-primary/20 shadow-md" : "border-border hover:border-muted-foreground/30 hover:shadow-md"
       )}
     >
       <div className="h-1 w-full" style={{ backgroundColor: color }} />
@@ -112,22 +135,22 @@ function JobCard({ order, region, isSelected, onClick, stopNumber }) {
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex items-start gap-2 flex-1 min-w-0">
             {stopNumber != null && (
-              <span className="shrink-0 w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center mt-0.5">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center mt-0.5">
                 {stopNumber}
               </span>
             )}
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-slate-800 text-sm leading-tight truncate">
+              <p className="font-semibold text-foreground text-sm leading-tight truncate">
                 {order.customer_name || order.invoice_number || order.rfms_order_id}
               </p>
               <div className="flex items-center gap-1.5">
                 {order.invoice_number && (
-                  <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                  <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                     <Hash className="w-3 h-3 shrink-0" /> {order.invoice_number}
                   </p>
                 )}
                 {order.order_total > 0 && (
-                  <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                  <span className="text-[11px] font-bold text-good bg-good/10 px-1.5 py-0.5 rounded-full">
                     ${order.order_total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                   </span>
                 )}
@@ -135,6 +158,8 @@ function JobCard({ order, region, isSelected, onClick, stopNumber }) {
             </div>
           </div>
           {region && (
+            // Fill is the region's own colour (user data, arbitrary hex) — the label stays
+            // literal white so it keeps contrast against whatever hue was chosen.
             <span
               className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
               style={{ backgroundColor: color }}
@@ -146,33 +171,33 @@ function JobCard({ order, region, isSelected, onClick, stopNumber }) {
 
         <div className="space-y-1">
           {order.address && (
-            <div className="flex items-start gap-1.5 text-[11px] text-slate-500">
-              <MapPin className="w-3 h-3 text-slate-400 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+              <MapPin className="w-3 h-3 text-muted-foreground/70 shrink-0 mt-0.5" />
               <span className="truncate">{[order.address, order.city, order.zip_code].filter(Boolean).join(', ')}</span>
             </div>
           )}
           {order.preferred_installer_crew_name && (
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-              <User className="w-3 h-3 text-slate-400 shrink-0" />
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <User className="w-3 h-3 text-muted-foreground/70 shrink-0" />
               <span className="truncate">{order.preferred_installer_crew_name}</span>
             </div>
           )}
           {order.line_items?.length > 0 && (
-            <div className="mt-1.5 pt-1.5 border-t border-slate-100 space-y-0.5">
+            <div className="mt-1.5 pt-1.5 border-t border-border space-y-0.5">
               {order.line_items.filter(l => l.styleName).map((item, i) => {
                 const categoryName = getProductCategoryName(item.productCode);
                 return (
-                <div key={i} className="text-[10px] text-slate-500 flex items-start gap-1">
-                  <span className="shrink-0 font-mono bg-slate-100 text-slate-400 px-1 rounded text-[9px]">{item.productCode || '—'}</span>
+                <div key={i} className="text-[10px] text-muted-foreground flex items-start gap-1">
+                  <span className="shrink-0 font-mono bg-muted text-muted-foreground px-1 rounded text-[9px]">{item.productCode || '—'}</span>
                   <span className="truncate">
                     {item.styleName}
-                    {item.colorName ? <span className="text-slate-400"> · {item.colorName}</span> : null}
+                    {item.colorName ? <span className="text-muted-foreground/70"> · {item.colorName}</span> : null}
                   </span>
                   {categoryName && (
-                    <span className="shrink-0 text-[9px] font-semibold text-indigo-600 bg-indigo-50 px-1 rounded">{categoryName}</span>
+                    <span className="shrink-0 text-[9px] font-semibold text-primary bg-primary/10 px-1 rounded">{categoryName}</span>
                   )}
                   {item.quantity > 0 && (
-                    <span className="ml-auto shrink-0 text-slate-400">{item.quantity}{item.unit ? ` ${item.unit}` : ''}</span>
+                    <span className="ml-auto shrink-0 text-muted-foreground/70">{item.quantity}{item.unit ? ` ${item.unit}` : ''}</span>
                   )}
                 </div>
                 );
@@ -182,22 +207,16 @@ function JobCard({ order, region, isSelected, onClick, stopNumber }) {
         </div>
 
         <div className="mt-2 flex items-center justify-between">
-          <span className={cn(
-            "text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full",
-            order.status === 'completed' ? 'bg-green-100 text-green-700' :
-            order.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
-            order.status === 'assigned' ? 'bg-indigo-100 text-indigo-700' :
-            'bg-slate-100 text-slate-500'
-          )}>
+          <StatusPill tone={STATUS_TONE[order.status] || 'neutral'} className="px-2 text-[10px]">
             {order.status || 'unassigned'}
-          </span>
+          </StatusPill>
           {singleStopUrl && (
             <a
               href={singleStopUrl}
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 text-[10px] text-indigo-600 hover:text-indigo-800 hover:underline"
+              className="flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 hover:underline"
             >
               <Navigation className="w-3 h-3" /> {t('fiDirections')}
             </a>
@@ -290,16 +309,16 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
   return (
     <div className="flex flex-col h-full">
       {/* Top controls bar */}
-      <div className="bg-white border-b border-slate-200 px-4 py-2.5 shrink-0 flex flex-wrap gap-3 items-center">
-        <span className="text-sm font-bold text-slate-700 mr-1">{t('fiTitle')}</span>
+      <div className="bg-card border-b border-border px-4 py-2.5 shrink-0 flex flex-wrap gap-3 items-center">
+        <span className="text-sm font-bold text-foreground mr-1">{t('fiTitle')}</span>
 
         {/* Field Manager picker */}
         <div className="flex items-center gap-1.5">
-          <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
           <select
             value={selectedMemberId}
             onChange={e => setSelectedMemberId(e.target.value)}
-            className="text-sm border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white text-slate-700"
+            className="text-sm border border-input rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
           >
             {fieldManagers.length === 0 && <option value="">{t('fiNoFieldManagers')}</option>}
             {fieldManagers.map(m => (
@@ -310,34 +329,35 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
 
         {/* Date nav */}
         <div className="flex items-center gap-1 ml-auto">
-          <button onClick={() => setSelectedDate(d => subDays(d, 1))} className="p-1 rounded hover:bg-slate-100">
-            <ChevronLeft className="w-4 h-4 text-slate-600" />
+          <button onClick={() => setSelectedDate(d => subDays(d, 1))} className="p-1 rounded hover:bg-muted/60">
+            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
           <button
             onClick={() => setSelectedDate(new Date())}
             className={cn(
               "px-3 py-1 rounded-lg text-sm font-medium transition-colors",
-              isToday ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-100"
+              isToday ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/60"
             )}
           >
             {format(selectedDate, 'MMM d, yyyy')}
           </button>
-          <button onClick={() => setSelectedDate(d => addDays(d, 1))} className="p-1 rounded hover:bg-slate-100">
-            <ChevronRight className="w-4 h-4 text-slate-600" />
+          <button onClick={() => setSelectedDate(d => addDays(d, 1))} className="p-1 rounded hover:bg-muted/60">
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
           {!isToday && (
-          <button onClick={() => setSelectedDate(new Date())} className="ml-1 text-xs text-indigo-600 hover:underline">
+          <button onClick={() => setSelectedDate(new Date())} className="ml-1 text-xs text-primary hover:underline">
             {t('fiToday')}
           </button>
           )}
           </div>
 
-          {/* Job count */}
-          <span className="bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full px-2.5 py-0.5 shrink-0">
+          {/* Job count — a quantity, not a status, so it stays a plain token-styled chip
+              rather than a StatusPill (which would uppercase the translated string). */}
+          <span className="bg-primary/10 text-primary text-xs font-bold rounded-full px-2.5 py-0.5 shrink-0">
           {t('fiJobsCount', { count: ordersForDay.length })}
           </span>
           {geocodingIds.size > 0 && (
-          <span className="flex items-center gap-1 text-xs text-slate-400">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
           <Loader2 className="w-3 h-3 animate-spin" />
           {t('fiGeocoding', { count: geocodingIds.size })}
           </span>
@@ -347,7 +367,7 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
           href={fullRouteUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors shrink-0"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold rounded-lg transition-colors shrink-0"
           >
           <Navigation className="w-3.5 h-3.5" />
           {t('fiFullRoute')}
@@ -382,8 +402,8 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
                   key={region.id}
                   positions={region.polygon_coordinates}
                   pathOptions={{
-                    color: region.color || '#4F46E5',
-                    fillColor: region.color || '#4F46E5',
+                    color: region.color || MAP_CANVAS.regionFallback,
+                    fillColor: region.color || MAP_CANVAS.regionFallback,
                     fillOpacity: 0.1,
                     weight: 2,
                   }}
@@ -392,6 +412,11 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
             )}
 
             {/* Home base marker */}
+            {/* Leaflet paints its own popup chrome (.leaflet-popup-content-wrapper) an
+                unconditional white from leaflet.css, and nothing in the app overrides it.
+                Every <Popup> body below therefore keeps fixed colour classes — a theme token
+                would resolve to its dark-mode value and go light-on-white. Same reasoning as
+                the MAP_CANVAS note at the top of this file. */}
             <Marker position={[HOME_BASE.lat, HOME_BASE.lng]} icon={homeBaseIcon}>
               <Popup>
                 <div className="text-sm font-semibold">{t('fiHomeBase')}</div>
@@ -402,11 +427,11 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
             {/* All assigned orders (dimmed if not on selected date) */}
             {allMappableOrders.map(order => {
               const region = regions.find(r => r.id === order.region_assignment_id);
-              const color = region?.color || '#94a3b8';
+              const color = region?.color || MAP_CANVAS.orderFallback;
               const isSelected = selectedOrderId === order.id;
               const stopIdx = routedOrders.findIndex(o => o.id === order.id);
               const isOnSelectedDate = stopIdx !== -1;
-              const markerColor = isSelected ? '#4F46E5' : isOnSelectedDate ? color : '#cbd5e1';
+              const markerColor = isSelected ? MAP_CANVAS.orderSelected : isOnSelectedDate ? color : MAP_CANVAS.orderOffDate;
               return (
                 <Marker
                   key={order.id}
@@ -438,20 +463,21 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
 
           {/* No geo data notice */}
           {allMappableOrders.length === 0 && myRegionIds.size > 0 && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm rounded-xl shadow px-4 py-2 text-xs text-slate-500 z-[1000]">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-sm border border-border rounded-xl shadow px-4 py-2 text-xs text-muted-foreground z-[1000]">
               {t('fiNoGeoData')}
             </div>
           )}
         </div>
 
         {/* Right panel: job cards */}
-        <div className="w-72 shrink-0 border-l border-slate-200 bg-slate-50 flex flex-col overflow-hidden">
+        <div className="w-72 shrink-0 border-l border-border bg-muted/40 flex flex-col overflow-hidden">
           {/* Region tags */}
           {myRegions.length > 0 && (
-            <div className="px-3 py-2 border-b border-slate-200 flex flex-wrap gap-1.5 bg-white">
+            <div className="px-3 py-2 border-b border-border flex flex-wrap gap-1.5 bg-card">
               {myRegions.map(r => (
-                <div key={r.id} className="flex items-center gap-1 text-[10px] text-slate-500 bg-slate-50 border border-slate-200 rounded-full px-2 py-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: r.color || '#94a3b8' }} />
+                <div key={r.id} className="flex items-center gap-1 text-[10px] text-muted-foreground bg-muted border border-border rounded-full px-2 py-0.5">
+                  {/* Dot is the region's own colour from user data, not a theme token. */}
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: r.color || MAP_CANVAS.orderFallback }} />
                   {r.region_name}
                 </div>
               ))}
@@ -460,9 +486,9 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
 
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {selectedMemberId === '' ? (
-              <p className="text-xs text-slate-400 text-center mt-8">{t('fiNoFieldManagersRegions')}</p>
+              <p className="text-xs text-muted-foreground text-center mt-8">{t('fiNoFieldManagersRegions')}</p>
             ) : ordersForDay.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center mt-8">{t('fiNoJobsDate')}</p>
+              <p className="text-xs text-muted-foreground text-center mt-8">{t('fiNoJobsDate')}</p>
             ) : (
               routedOrders.map((order, idx) => {
                 const region = regions.find(r => r.id === order.region_assignment_id);

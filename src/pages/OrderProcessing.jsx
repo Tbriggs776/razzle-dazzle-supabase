@@ -676,7 +676,7 @@ export default function OrderProcessing() {
             className={cn(
               'whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
               filterStatus === 'Open'
-                ? 'border-crit bg-crit text-white'
+                ? 'border-crit bg-crit text-background'
                 : 'border-border bg-card text-muted-foreground hover:border-primary/40'
             )}
           >
@@ -687,7 +687,7 @@ export default function OrderProcessing() {
             className={cn(
               'whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
               filterStatus === 'Resolved'
-                ? 'border-good bg-good text-white'
+                ? 'border-good bg-good text-background'
                 : 'border-border bg-card text-muted-foreground hover:border-primary/40'
             )}
           >
@@ -814,7 +814,7 @@ export default function OrderProcessing() {
                                 <div key={idx} className={cn(
                                   "flex items-center justify-between gap-2 rounded-lg border p-2",
                                   cat.status === 'Resolved'
-                                    ? "border-good/25 bg-good/8"
+                                    ? "border-good/25 bg-good/10"
                                     : cat.status === 'Requested Resolve'
                                     ? "border-warn/25 bg-warn/10"
                                     : "border-border bg-card"
@@ -909,7 +909,7 @@ export default function OrderProcessing() {
                                 <div className="flex items-center gap-2">
                                   💬 Chat ({messages.length})
                                   {newMessages.length > 0 && (
-                                    <span className="inline-flex h-5 min-w-5 animate-pulse items-center justify-center rounded-full bg-crit px-1.5 text-[11px] font-bold text-white">
+                                    <span className="inline-flex h-5 min-w-5 animate-pulse items-center justify-center rounded-full bg-crit px-1.5 text-[11px] font-bold text-background">
                                       {newMessages.length}
                                     </span>
                                   )}

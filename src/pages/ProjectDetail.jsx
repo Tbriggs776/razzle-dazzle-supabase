@@ -956,7 +956,7 @@ export default function ProjectDetail() {
                   href={`mailto:${customer.email}`}
                   className="group flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-muted/50"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-good/12">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-good/15">
                     <Mail className="h-5 w-5 text-good" />
                   </div>
                   <div>
@@ -971,7 +971,7 @@ export default function ProjectDetail() {
                     href={`tel:${customer.phone}`}
                     className="group flex items-center gap-4 rounded-xl p-3 transition-colors hover:bg-muted/50"
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-blue/12">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-blue/15">
                       <Phone className="h-5 w-5 text-brand-blue" />
                     </div>
                     <div>
@@ -1060,7 +1060,7 @@ export default function ProjectDetail() {
                           {format(new Date(project.installation_date + 'T00:00:00'), 'MMMM d, yyyy')}
                         </p>
                         {project.installation_date_status && (
-                          <span className="rounded bg-crit/12 px-2 py-1 text-xs font-semibold capitalize text-crit">
+                          <span className="rounded bg-crit/15 px-2 py-1 text-xs font-semibold capitalize text-crit">
                             {project.installation_date_status}
                           </span>
                         )}
@@ -1114,7 +1114,7 @@ export default function ProjectDetail() {
                 <Button
                   onClick={handleSetInstallationClick}
                   variant="outline"
-                  className="w-full border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
+                  className="w-full border-brand-blue/30 text-brand-blue hover:bg-brand-blue/15"
                 >
                   <CalendarIcon className="w-4 h-4 mr-2" />
                   Set Installation Date
@@ -1143,7 +1143,7 @@ export default function ProjectDetail() {
               <Button
                 onClick={() => updateProjectMutation.mutate({ status: 'Materials Ordered' })}
                 disabled={updateProjectMutation.isPending || project.status === 'Materials Ordered'}
-                className="w-full bg-info text-white hover:bg-info/90"
+                className="w-full bg-info text-background hover:bg-info/90"
               >
                 {updateProjectMutation.isPending ? (
                   <>
@@ -1489,7 +1489,7 @@ export default function ProjectDetail() {
           <ModuleCard title="Project Location" icon={MapPin}>
             <div className="p-4">
               <div className="mb-4 flex items-start gap-4 rounded-xl bg-muted p-3">
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-warn/12">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-warn/15">
                   <MapPin className="h-5 w-5 text-warn" />
                 </div>
                 <div>
@@ -1516,7 +1516,7 @@ export default function ProjectDetail() {
               <ModuleCard title="Scheduled Dates" icon={CalendarIcon}>
                 <div className="space-y-4 p-4">
                   {project.scheduled_start_date && (
-                    <div className="flex items-center gap-4 rounded-xl bg-brand-blue/12 p-3">
+                    <div className="flex items-center gap-4 rounded-xl bg-brand-blue/15 p-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-blue/15">
                         <CalendarIcon className="h-5 w-5 text-brand-blue" />
                       </div>

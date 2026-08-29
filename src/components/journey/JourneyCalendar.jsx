@@ -23,6 +23,10 @@ function fmtMoney(n) {
 }
 
 // ── Draggable chip ────────────────────────────────────────────────────────────
+// The chip fill is a per-region colour that comes from the data (RegionAssignment.color),
+// so it is an inline style, not a token, and its text stays white in both themes. Anything
+// layered ON the chip therefore needs an opaque fill too — a translucent StatusPill
+// (bg-warn/15) would blend into whatever arbitrary region colour sits underneath.
 function JobChip({ label, jobId, color, subtitle, installDate, onRemove, orderTotal, highValue, categories }) {
   return (
     <div
@@ -33,7 +37,7 @@ function JobChip({ label, jobId, color, subtitle, installDate, onRemove, orderTo
     >
       <div className="flex items-center gap-1 min-w-0">
         {highValue && (
-          <span className="shrink-0 bg-amber-400 text-amber-900 text-[9px] font-bold px-1 py-0.5 rounded">HIGH&nbsp;$</span>
+          <span className="shrink-0 bg-brand-gold-light text-brand-navy text-[9px] font-bold px-1 py-0.5 rounded">HIGH&nbsp;$</span>
         )}
         <span className="truncate flex-1 font-semibold">{label}</span>
         {onRemove && (
@@ -59,23 +63,25 @@ function JobChip({ label, jobId, color, subtitle, installDate, onRemove, orderTo
 function RegionPool({ region, jobs, highValueThreshold }) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(true);
+  // Literal hex fallback stays: this feeds a chip fill that always carries white text, so a
+  // theme-reactive token (which lightens in dark mode) would break that contrast contract.
   const color = region?.color || '#94a3b8';
 
   return (
     <div className="mb-3">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors text-left"
+        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-muted/60 transition-colors text-left"
       >
         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-        <span className="text-xs font-semibold text-slate-700 flex-1 truncate">{region.region_name}</span>
-        <span className="text-[10px] bg-slate-100 text-slate-500 rounded px-1.5 py-0.5 shrink-0">{jobs.length}</span>
-        {open ? <ChevronUp className="w-3 h-3 text-slate-400 shrink-0" /> : <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />}
+        <span className="text-xs font-semibold text-foreground flex-1 truncate">{region.region_name}</span>
+        <span className="text-[10px] bg-muted text-muted-foreground rounded px-1.5 py-0.5 shrink-0">{jobs.length}</span>
+        {open ? <ChevronUp className="w-3 h-3 text-muted-foreground shrink-0" /> : <ChevronDown className="w-3 h-3 text-muted-foreground shrink-0" />}
       </button>
       {open && (
         <div className="ml-2 mt-0.5 max-h-64 overflow-y-auto pr-1">
           {jobs.length === 0 ? (
-            <p className="text-[10px] text-slate-300 px-2 py-1 italic">{t('jcNoJobs')}</p>
+            <p className="text-[10px] text-muted-foreground/60 px-2 py-1 italic">{t('jcNoJobs')}</p>
           ) : (
             jobs.map(job => (
               <JobChip
@@ -106,12 +112,12 @@ function UnmatchedPool({ jobs, highValueThreshold }) {
     <div className="mb-3">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition-colors text-left"
+        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-muted/60 transition-colors text-left"
       >
-        <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-slate-300" />
-        <span className="text-xs font-semibold text-slate-400 flex-1">{t('jcNoRegionMatch')}</span>
-        <span className="text-[10px] bg-slate-100 text-slate-400 rounded px-1.5 py-0.5 shrink-0">{jobs.length}</span>
-        {open ? <ChevronUp className="w-3 h-3 text-slate-300 shrink-0" /> : <ChevronDown className="w-3 h-3 text-slate-300 shrink-0" />}
+        <span className="w-2.5 h-2.5 rounded-full shrink-0 bg-muted-foreground/40" />
+        <span className="text-xs font-semibold text-muted-foreground flex-1">{t('jcNoRegionMatch')}</span>
+        <span className="text-[10px] bg-muted text-muted-foreground rounded px-1.5 py-0.5 shrink-0">{jobs.length}</span>
+        {open ? <ChevronUp className="w-3 h-3 text-muted-foreground/60 shrink-0" /> : <ChevronDown className="w-3 h-3 text-muted-foreground/60 shrink-0" />}
       </button>
       {open && (
         <div className="ml-2 mt-0.5 max-h-48 overflow-y-auto pr-1">
@@ -122,7 +128,7 @@ function UnmatchedPool({ jobs, highValueThreshold }) {
               label={getJobName(job)}
               subtitle={[job.documentNumber, (job.crewName || '').trim()].filter(Boolean).join(' · ')}
               installDate={getJobScheduledStart(job)}
-              color="#94a3b8"
+              color="#94a3b8" /* same fixed chip fill as the region fallback — white chip text needs a theme-stable colour */
               orderTotal={getJobTotal(job)}
               highValue={getJobTotal(job) >= highValueThreshold}
               categories={getDistinctCategories(job._lineItems)}
@@ -143,8 +149,8 @@ function DayColumn({ date, scheduledOrders, regionByOrderId, onDrop, onUnschedul
   return (
     <div
       className={cn(
-        "flex-1 flex flex-col min-w-0 border-r border-slate-100 last:border-r-0 transition-colors",
-        dragOver && "bg-indigo-50 ring-2 ring-inset ring-indigo-300"
+        "flex-1 flex flex-col min-w-0 border-r border-border last:border-r-0 transition-colors",
+        dragOver && "bg-primary/5 ring-2 ring-inset ring-primary/40"
       )}
       onDragOver={e => { e.preventDefault(); setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
@@ -155,15 +161,15 @@ function DayColumn({ date, scheduledOrders, regionByOrderId, onDrop, onUnschedul
         if (jobId) onDrop(jobId, format(date, 'yyyy-MM-dd'));
       }}
     >
-      <div className={cn("text-center py-2 border-b border-slate-200 shrink-0 relative", isToday ? "bg-indigo-600" : "bg-slate-50")}>
-        <div className={cn("text-[10px] font-semibold uppercase tracking-wide", isToday ? "text-indigo-200" : "text-slate-400")}>
+      <div className={cn("text-center py-2 border-b border-border shrink-0 relative", isToday ? "bg-primary" : "bg-muted/50")}>
+        <div className={cn("text-[10px] font-semibold uppercase tracking-wide", isToday ? "text-primary-foreground/70" : "text-muted-foreground")}>
           {format(date, 'EEE')}
         </div>
-        <div className={cn("text-sm font-bold mt-0.5", isToday ? "text-white" : "text-slate-700")}>
+        <div className={cn("text-sm font-bold mt-0.5", isToday ? "text-primary-foreground" : "text-foreground")}>
           {format(date, 'd')}
         </div>
         {scheduledOrders.length > 0 && (
-          <div className={cn("text-[10px] mt-0.5", isToday ? "text-indigo-200" : "text-slate-400")}>
+          <div className={cn("text-[10px] mt-0.5", isToday ? "text-primary-foreground/70" : "text-muted-foreground")}>
             {t('jcJobs', { count: scheduledOrders.length })}
           </div>
         )}
@@ -173,7 +179,9 @@ function DayColumn({ date, scheduledOrders, regionByOrderId, onDrop, onUnschedul
             title={t('jcClearDay')}
             className={cn(
               "absolute top-1 right-1 rounded p-0.5 transition-colors",
-              isToday ? "text-indigo-300 hover:text-white hover:bg-indigo-500" : "text-slate-300 hover:text-red-500 hover:bg-red-50"
+              isToday
+                ? "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/20"
+                : "text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10"
             )}
           >
             <X className="w-3 h-3" />
@@ -183,8 +191,8 @@ function DayColumn({ date, scheduledOrders, regionByOrderId, onDrop, onUnschedul
 
       <div className="flex-1 p-1.5 overflow-y-auto min-h-0">
         {scheduledOrders.length === 0 ? (
-          <div className="h-full min-h-[3rem] flex items-center justify-center border-2 border-dashed border-slate-100 rounded-lg m-1">
-            <span className="text-[10px] text-slate-300">{t('jcDropHere')}</span>
+          <div className="h-full min-h-[3rem] flex items-center justify-center border-2 border-dashed border-border rounded-lg m-1">
+            <span className="text-[10px] text-muted-foreground/60">{t('jcDropHere')}</span>
           </div>
         ) : (
           scheduledOrders.map(jo => {
@@ -378,14 +386,14 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
     <div className="flex h-full overflow-hidden">
 
       {/* ── Left: Job Pool ── */}
-      <div className="w-56 shrink-0 border-r border-slate-200 bg-white flex flex-col overflow-hidden">
-        <div className="px-3 py-2.5 border-b border-slate-200 shrink-0">
+      <div className="w-56 shrink-0 border-r border-border bg-card flex flex-col overflow-hidden">
+        <div className="px-3 py-2.5 border-b border-border shrink-0">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">{t('jcJobPool')}</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t('jcJobPool')}</p>
             <button
               onClick={() => refetch()}
               disabled={isLoading}
-              className="p-1 rounded hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600"
+              className="p-1 rounded hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground"
               title={t('jcRefresh')}
             >
               {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
@@ -396,29 +404,29 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
               type="date"
               value={jobsFromInput}
               onChange={e => setJobsFromInput(e.target.value)}
-              className="w-full px-2 py-1 text-[11px] border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-300"
+              className="w-full px-2 py-1 text-[11px] bg-background text-foreground border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
             />
             <input
               type="date"
               value={jobsToInput}
               onChange={e => setJobsToInput(e.target.value)}
-              className="w-full px-2 py-1 text-[11px] border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-300"
+              className="w-full px-2 py-1 text-[11px] bg-background text-foreground border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
             />
-            <button type="submit" className="w-full py-1 bg-indigo-600 text-white rounded-md text-[10px] font-medium hover:bg-indigo-700">{t('jcSearch')}</button>
+            <button type="submit" className="w-full py-1 bg-primary text-primary-foreground rounded-md text-[10px] font-medium hover:bg-primary/90">{t('jcSearch')}</button>
           </form>
         </div>
 
         <div className="flex-1 overflow-y-auto px-2 py-2">
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-8 gap-2">
-              <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
-              <span className="text-[10px] text-slate-400">{t('jcLoadingJobs')}</span>
+              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+              <span className="text-[10px] text-muted-foreground">{t('jcLoadingJobs')}</span>
             </div>
           )}
           {fetchError && (
             <div className="flex flex-col items-center py-6 gap-1 text-center px-2">
-              <AlertCircle className="w-4 h-4 text-red-400" />
-              <span className="text-[10px] text-red-400">{t('jcFailedLoad')}</span>
+              <AlertCircle className="w-4 h-4 text-destructive" />
+              <span className="text-[10px] text-destructive">{t('jcFailedLoad')}</span>
             </div>
           )}
           {!isLoading && !fetchError && (
@@ -433,7 +441,7 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
               ))}
               <UnmatchedPool jobs={unmatchedJobs} highValueThreshold={highValueThreshold} />
               {rfmsJobs.length === 0 && (
-                <p className="text-[10px] text-slate-400 text-center mt-8 px-2">{t('jcNoJobsRange')}</p>
+                <p className="text-[10px] text-muted-foreground text-center mt-8 px-2">{t('jcNoJobsRange')}</p>
               )}
             </>
           )}
@@ -442,25 +450,26 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
 
       {/* ── Right: Calendar ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-slate-200 bg-white shrink-0">
-          <button onClick={() => setWeekStart(w => subWeeks(w, 1))} className="p-1 rounded hover:bg-slate-100">
-            <ChevronLeft className="w-4 h-4 text-slate-600" />
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-card shrink-0">
+          <button onClick={() => setWeekStart(w => subWeeks(w, 1))} className="p-1 rounded hover:bg-muted/60">
+            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
-          <button onClick={() => setWeekStart(w => addWeeks(w, 1))} className="p-1 rounded hover:bg-slate-100">
-            <ChevronRight className="w-4 h-4 text-slate-600" />
+          <button onClick={() => setWeekStart(w => addWeeks(w, 1))} className="p-1 rounded hover:bg-muted/60">
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
-          <span className="text-sm font-semibold text-slate-700">
+          <span className="text-sm font-semibold text-foreground">
             {format(weekStart, 'MMM d')} – {format(addDays(weekStart, 6), 'MMM d, yyyy')}
           </span>
           <button
             onClick={() => setWeekStart(startOfWeek(new Date(), { weekStartsOn: 0 }))}
-            className="ml-1 text-xs text-indigo-600 hover:underline"
+            className="ml-1 text-xs text-primary hover:underline"
           >
             {t('jcToday')}
           </button>
           <div className="ml-auto flex items-center gap-3 flex-wrap">
-            <label className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
-              <span className="text-[10px] text-amber-700 font-medium whitespace-nowrap">{t('jcHighValue')}</span>
+            {/* Threshold control is warn-toned because it sets the "high $" alert line, not for decoration. */}
+            <label className="flex items-center gap-1.5 bg-warn/10 border border-warn/30 rounded-lg px-2 py-1">
+              <span className="text-[10px] text-warn font-medium whitespace-nowrap">{t('jcHighValue')}</span>
               <input
                 type="number"
                 min="0"
@@ -469,13 +478,13 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
                 onChange={e => {
                   handleThresholdChange(Number(e.target.value));
                 }}
-                className="w-16 px-1 py-0.5 text-[11px] border border-amber-300 rounded focus:outline-none focus:ring-1 focus:ring-amber-400 bg-white"
+                className="w-16 px-1 py-0.5 text-[11px] border border-warn/40 rounded focus:outline-none focus:ring-1 focus:ring-warn bg-background text-foreground"
               />
             </label>
             {regions.map(r => (
               <div key={r.id} className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: r.color || '#94a3b8' }} />
-                <span className="text-[10px] text-slate-500">{r.region_name}</span>
+                <span className="text-[10px] text-muted-foreground">{r.region_name}</span>
               </div>
             ))}
           </div>

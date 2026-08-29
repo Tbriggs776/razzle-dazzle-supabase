@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
+import StatusPill from '@/components/common/StatusPill';
 
 export default function AlertGroupManager() {
   const queryClient = useQueryClient();
@@ -90,15 +91,15 @@ export default function AlertGroupManager() {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-indigo-600 animate-spin" /></div>;
+    return <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-800">Alert Groups</h2>
-          <p className="text-sm text-slate-500">Manage who receives alerts for each checkpoint event</p>
+          <h2 className="text-lg font-semibold text-foreground">Alert Groups</h2>
+          <p className="text-sm text-muted-foreground">Manage who receives alerts for each checkpoint event</p>
         </div>
         <Button onClick={handleNew} size="sm" className="gap-2">
           <Plus className="w-4 h-4" />
@@ -109,26 +110,30 @@ export default function AlertGroupManager() {
       {/* Alert group cards */}
       <div className="grid gap-3">
         {alertGroups.map(group => (
-          <div key={group.id} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+          <div key={group.id} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-medium text-slate-800">{group.label}</h3>
-                <code className="text-xs bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{group.name}</code>
-                {!group.enabled && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full">Disabled</span>}
+                <h3 className="font-medium text-foreground">{group.label}</h3>
+                <code className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">{group.name}</code>
+                {/* A disabled group means alerts are silently not going out — a status, so it
+                    takes the shared StatusPill (crit, matching the red it carried before). */}
+                {!group.enabled && <StatusPill tone="crit">Disabled</StatusPill>}
               </div>
-              {group.description && <p className="text-sm text-slate-500 mt-1">{group.description}</p>}
+              {group.description && <p className="text-sm text-muted-foreground mt-1">{group.description}</p>}
               <div className="flex items-center gap-3 mt-2">
-                <span className="flex items-center gap-1 text-xs text-slate-400">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Users className="w-3 h-3" />
                   {group.member_ids?.length || 0} members
                 </span>
-                {group.channels?.includes('sms') && <span className="flex items-center gap-1 text-xs text-slate-400"><MessageSquare className="w-3 h-3" /> SMS</span>}
-                {group.channels?.includes('email') && <span className="flex items-center gap-1 text-xs text-slate-400"><Mail className="w-3 h-3" /> Email</span>}
+                {group.channels?.includes('sms') && <span className="flex items-center gap-1 text-xs text-muted-foreground"><MessageSquare className="w-3 h-3" /> SMS</span>}
+                {group.channels?.includes('email') && <span className="flex items-center gap-1 text-xs text-muted-foreground"><Mail className="w-3 h-3" /> Email</span>}
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={() => setEditingGroup(group)}>Edit</Button>
-              <Button variant="ghost" size="sm" onClick={() => handleDelete(group.id)} className="text-red-500 hover:text-red-600">
+              {/* hover:text-destructive is not redundant — the ghost variant would otherwise
+                  flip this to the pink accent-foreground on hover. */}
+              <Button variant="ghost" size="sm" onClick={() => handleDelete(group.id)} className="text-destructive hover:text-destructive">
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
@@ -136,17 +141,18 @@ export default function AlertGroupManager() {
         ))}
 
         {alertGroups.length === 0 && !editingGroup && (
-          <div className="text-center py-12 text-slate-400">
+          <div className="text-center py-12 text-muted-foreground">
             <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>No alert groups yet. Create one to manage who gets notified.</p>
           </div>
         )}
       </div>
 
-      {/* Editor panel */}
+      {/* Editor panel — keeps its tinted border so the active edit surface stays distinct
+          from the plain group cards above it. */}
       {editingGroup && (
-        <div className="bg-white border border-indigo-200 rounded-xl p-5 space-y-4">
-          <h3 className="font-semibold text-slate-800">{editingGroup.id ? 'Edit Group' : 'New Alert Group'}</h3>
+        <div className="bg-card border border-primary/40 rounded-xl p-5 space-y-4">
+          <h3 className="font-semibold text-foreground">{editingGroup.id ? 'Edit Group' : 'New Alert Group'}</h3>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -170,11 +176,11 @@ export default function AlertGroupManager() {
             <div className="flex items-center gap-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox checked={editingGroup.channels.includes('sms')} onCheckedChange={() => toggleChannel('sms')} />
-                <span className="text-sm text-slate-700">SMS</span>
+                <span className="text-sm text-foreground">SMS</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <Checkbox checked={editingGroup.channels.includes('email')} onCheckedChange={() => toggleChannel('email')} />
-                <span className="text-sm text-slate-700">Email</span>
+                <span className="text-sm text-foreground">Email</span>
               </label>
             </div>
           </div>
@@ -182,16 +188,16 @@ export default function AlertGroupManager() {
           {/* Members */}
           <div className="space-y-2">
             <Label>Members ({editingGroup.member_ids.length} selected)</Label>
-            <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-lg divide-y divide-slate-100">
+            <div className="max-h-48 overflow-y-auto border border-border rounded-lg divide-y divide-border">
               {teamMembers.map(member => (
-                <label key={member.id} className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 cursor-pointer">
+                <label key={member.id} className="flex items-center gap-3 px-3 py-2 hover:bg-muted/60 cursor-pointer">
                   <Checkbox
                     checked={editingGroup.member_ids.includes(member.id)}
                     onCheckedChange={() => toggleMember(member.id)}
                   />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-700">{member.first_name} {member.last_name}</p>
-                    <p className="text-xs text-slate-400">{member.role}</p>
+                    <p className="text-sm font-medium text-foreground">{member.first_name} {member.last_name}</p>
+                    <p className="text-xs text-muted-foreground">{member.role}</p>
                   </div>
                 </label>
               ))}

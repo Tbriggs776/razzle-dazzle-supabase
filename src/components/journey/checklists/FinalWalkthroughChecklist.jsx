@@ -16,14 +16,14 @@ import { SignedImage } from '@/lib/fileUrl';
 function ChecklistRow({ label, checked, onChange, disabled, note, required, missing }) {
   return (
     <div>
-      <label className={cn("flex items-start gap-3 py-2 rounded-md px-1 -mx-1 transition-colors", !disabled && "cursor-pointer", missing && "bg-red-50 ring-1 ring-red-200")}>
+      <label className={cn("flex items-start gap-3 py-2 rounded-md px-1 -mx-1 transition-colors", !disabled && "cursor-pointer", missing && "bg-crit/10 ring-1 ring-crit/30")}>
         <Checkbox checked={checked} onCheckedChange={onChange} disabled={disabled} className="mt-0.5" />
         <div>
-          <span className={cn("text-sm", disabled ? "text-slate-400" : "text-slate-700")}>
+          <span className={cn("text-sm", disabled ? "text-muted-foreground" : "text-foreground")}>
             {label}
-            {required && <span className="text-red-500 ml-0.5">*</span>}
+            {required && <span className="text-destructive ml-0.5">*</span>}
           </span>
-          {note && <p className="text-xs text-slate-400 mt-0.5">{note}</p>}
+          {note && <p className="text-xs text-muted-foreground mt-0.5">{note}</p>}
         </div>
       </label>
     </div>
@@ -49,26 +49,26 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
   };
 
   return (
-    <div className={cn("space-y-2 rounded-md px-1 -mx-1 py-1 transition-colors", missing && "bg-red-50 ring-1 ring-red-200")}>
-      <Label className="text-sm font-medium text-slate-700">
+    <div className={cn("space-y-2 rounded-md px-1 -mx-1 py-1 transition-colors", missing && "bg-crit/10 ring-1 ring-crit/30")}>
+      <Label className="text-sm font-medium text-foreground">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-destructive ml-0.5">*</span>}
       </Label>
       <div className="flex items-center gap-2 flex-wrap">
         {photos.map((url, i) => (
           <div key={i} className="relative group">
-            <SignedImage src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer" />
+            <SignedImage src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-border cursor-pointer" />
             {!disabled && (
               <button
                 onClick={() => onChange(photos.filter((_, idx) => idx !== i))}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
               >×</button>
             )}
           </div>
         ))}
         {!disabled && (
-          <label className="w-16 h-16 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-colors">
-            {uploading ? <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" /> : <Camera className="w-4 h-4 text-slate-400" />}
+          <label className="w-16 h-16 border-2 border-dashed border-input rounded-lg flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/10 transition-colors">
+            {uploading ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Camera className="w-4 h-4 text-muted-foreground" />}
             <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleUpload} />
           </label>
         )}
@@ -84,13 +84,13 @@ function Section({ title, icon: Icon, children, warning, accent }) {
   return (
     <div className={cn(
       "rounded-xl border p-4 space-y-2",
-      warning ? "border-red-200 bg-red-50/50" :
-      accent ? "border-blue-200 bg-blue-50/30" :
-      "border-slate-200 bg-white"
+      warning ? "border-crit/30 bg-crit/5" :
+      accent ? "border-info/30 bg-info/5" :
+      "border-border bg-card"
     )}>
-      <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-        <Icon className={cn("w-4 h-4", warning ? "text-red-500" : accent ? "text-blue-500" : "text-indigo-500")} />
-        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
+      <div className="flex items-center gap-2 pb-2 border-b border-border">
+        <Icon className={cn("w-4 h-4", warning ? "text-crit" : accent ? "text-info" : "text-primary")} />
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       </div>
       {children}
     </div>
@@ -290,11 +290,11 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       {/* Status banners */}
       {isReviewPhase && (
         <div>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
-            <Lock className="w-5 h-5 text-amber-600 shrink-0" />
+          <div className="bg-warn/10 border border-warn/30 rounded-xl p-4 flex items-center gap-3">
+            <Lock className="w-5 h-5 text-warn shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-amber-800">HARD LOCK — Final Walkthrough Submitted, FM Final Sign-Off Required</p>
-              <p className="text-xs text-amber-600">
+              <p className="text-sm font-medium text-warn">HARD LOCK — Final Walkthrough Submitted, FM Final Sign-Off Required</p>
+              <p className="text-xs text-muted-foreground">
                 Payment submission stays disabled until the zone Field Manager verifies the checklist, photos, punch list, and customer signature, then approves in-app.
                 Submitted by {checkpoint.submitted_by_name} on {new Date(checkpoint.submitted_date).toLocaleString()}
               </p>
@@ -305,11 +305,11 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       )}
       {isPaymentPhase && (
         <div>
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3">
-            <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0" />
+          <div className="bg-info/10 border border-info/30 rounded-xl p-4 flex items-center gap-3">
+            <ShieldCheck className="w-5 h-5 text-info shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-800">FM Final Sign-Off Complete — Payment Submission Unlocked</p>
-              <p className="text-xs text-blue-600">
+              <p className="text-sm font-medium text-info">FM Final Sign-Off Complete — Payment Submission Unlocked</p>
+              <p className="text-xs text-muted-foreground">
                 Approved by {existingData.final_approved_by_name || 'Field Manager'}
                 {existingData.final_approved_date ? ` on ${new Date(existingData.final_approved_date).toLocaleString()}` : ''}.
                 Installer has been notified. Payment submission is now unlocked.
@@ -320,11 +320,11 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
         </div>
       )}
       {isCompleted && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-          <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+        <div className="bg-good/10 border border-good/30 rounded-xl p-4 flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-good shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-green-800">Job Complete — Payment Submitted</p>
-            <p className="text-xs text-green-600">
+            <p className="text-sm font-medium text-good">Job Complete — Payment Submitted</p>
+            <p className="text-xs text-muted-foreground">
               Payment submitted by {existingData.payment_submitted_by_name || 'Manager'}
               {existingData.payment_submitted_date ? ` on ${new Date(existingData.payment_submitted_date).toLocaleString()}` : ''}.
               Install Coordinator, Order Entry, and Field Manager have been notified. Customer has been notified.
@@ -333,11 +333,11 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
         </div>
       )}
       {status === 'Rejected' && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
-          <XCircle className="w-5 h-5 text-red-600 shrink-0" />
+        <div className="bg-crit/10 border border-crit/30 rounded-xl p-4 flex items-center gap-3">
+          <XCircle className="w-5 h-5 text-crit shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-red-800">Rejected — Revisions Needed</p>
-            <p className="text-xs text-red-600">{checkpoint.rejection_notes}</p>
+            <p className="text-sm font-medium text-crit">Rejected — Revisions Needed</p>
+            <p className="text-xs text-muted-foreground">{checkpoint.rejection_notes}</p>
           </div>
         </div>
       )}
@@ -370,7 +370,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
 
       {/* Quality Closeout — Hard Surface */}
       <Section title="Quality Closeout — Hard Surface (LVP / Laminate / Wood)" icon={CheckCircle2}>
-        <div className="ml-6 p-3 bg-slate-50 rounded-lg">
+        <div className="ml-6 p-3 bg-muted rounded-lg">
           <ChecklistRow label="Applies to this job?" checked={data.closeout_hard_surface.applies} onChange={v => update('closeout_hard_surface', 'applies', v)} disabled={readOnly} />
         </div>
         {data.closeout_hard_surface.applies && (
@@ -396,21 +396,21 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
 
       {/* Quality Closeout — Carpet (placeholder) */}
       <Section title="Quality Closeout — Carpet Module" icon={Layers}>
-        <div className="ml-6 p-3 bg-slate-50 rounded-lg">
+        <div className="ml-6 p-3 bg-muted rounded-lg">
           <ChecklistRow label="Applies to this job?" checked={data.closeout_carpet.applies} onChange={v => update('closeout_carpet', 'applies', v)} disabled={readOnly} />
         </div>
         {data.closeout_carpet.applies && (
-          <p className="text-xs text-slate-500 pl-7">To be defined: tack strip / smooth-edge install, pad/cushion verification, seam placement + seam-iron quality, stretch/power-stretch verification, transition placement.</p>
+          <p className="text-xs text-muted-foreground pl-7">To be defined: tack strip / smooth-edge install, pad/cushion verification, seam placement + seam-iron quality, stretch/power-stretch verification, transition placement.</p>
         )}
       </Section>
 
       {/* Quality Closeout — Tile (placeholder) */}
       <Section title="Quality Closeout — Tile Module" icon={Layers}>
-        <div className="ml-6 p-3 bg-slate-50 rounded-lg">
+        <div className="ml-6 p-3 bg-muted rounded-lg">
           <ChecklistRow label="Applies to this job?" checked={data.closeout_tile.applies} onChange={v => update('closeout_tile', 'applies', v)} disabled={readOnly} />
         </div>
         {data.closeout_tile.applies && (
-          <p className="text-xs text-slate-500 pl-7">To be defined: grout joint size + tile spacing per manufacturer spec, layout/pattern verification, 12-hour no-foot-traffic window after setting, 12-hour window after grouting, mortar coverage check.</p>
+          <p className="text-xs text-muted-foreground pl-7">To be defined: grout joint size + tile spacing per manufacturer spec, layout/pattern verification, 12-hour no-foot-traffic window after setting, 12-hour window after grouting, mortar coverage check.</p>
         )}
       </Section>
 
@@ -419,14 +419,14 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
         <ChecklistRow label="Installer / crew lead present" required checked={data.walkthrough.installer_present} missing={submitAttempted && missing.installer_present} onChange={v => update('walkthrough', 'installer_present', v)} disabled={readOnly} />
         <ChecklistRow label="Floor Daddy Field Manager present (onsite)" required checked={data.walkthrough.fm_present} missing={submitAttempted && missing.fm_present} onChange={v => update('walkthrough', 'fm_present', v)} disabled={readOnly} />
         <ChecklistRow label="Customer present" required checked={data.walkthrough.customer_present} missing={submitAttempted && missing.customer_present} onChange={v => update('walkthrough', 'customer_present', v)} disabled={readOnly} />
-        <div className="ml-6 p-3 bg-slate-50 rounded-lg space-y-2">
+        <div className="ml-6 p-3 bg-muted rounded-lg space-y-2">
           <ChecklistRow label="Blue-tape walkthrough completed" required checked={data.walkthrough.blue_tape_walkthrough_completed} missing={submitAttempted && missing.blue_tape_walkthrough_completed} onChange={v => update('walkthrough', 'blue_tape_walkthrough_completed', v)} disabled={readOnly} />
           {data.walkthrough.blue_tape_walkthrough_completed && (
             <PhotoUpload label="Blue-tape items photographed" required missing={submitAttempted && missing.blue_tape_photos} photos={data.walkthrough.blue_tape_photos} onChange={urls => update('walkthrough', 'blue_tape_photos', urls)} disabled={readOnly} />
           )}
         </div>
         <ChecklistRow label="Punch list created" required checked={data.walkthrough.punch_list_created} missing={submitAttempted && missing.punch_list_created} onChange={v => update('walkthrough', 'punch_list_created', v)} disabled={readOnly} />
-        <div className="ml-6 p-3 bg-slate-50 rounded-lg space-y-2">
+        <div className="ml-6 p-3 bg-muted rounded-lg space-y-2">
           <ChecklistRow label="Punch list completed" required checked={data.walkthrough.punch_list_completed} missing={submitAttempted && missing.punch_list_completed} onChange={v => update('walkthrough', 'punch_list_completed', v)} disabled={readOnly} />
           {data.walkthrough.punch_list_completed && (
             <PhotoUpload label="Completed punch-list items photographed" required missing={submitAttempted && missing.punch_list_photos} photos={data.walkthrough.punch_list_photos} onChange={urls => update('walkthrough', 'punch_list_photos', urls)} disabled={readOnly} />
@@ -444,7 +444,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       {/* Customer Sign-Off */}
       <Section title="Customer Sign-Off" icon={FileSignature} warning={!customerSignoffGateMet && isInstallerPhase} accent={customerSignoffGateMet}>
         {!customerSignoffGateMet && isInstallerPhase && (
-          <p className="text-xs text-red-600 font-medium">⚠️ GATE: Certificate of Completion must be signed by customer before submitting.</p>
+          <p className="text-xs text-crit font-medium">⚠️ GATE: Certificate of Completion must be signed by customer before submitting.</p>
         )}
         <ChecklistRow
           label="Certificate of Completion signed by customer"
@@ -454,7 +454,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
           onChange={v => update('customer_signoff', 'certificate_signed', v)}
           disabled={readOnly}
         />
-        <div className="ml-6 p-3 bg-slate-50 rounded-lg">
+        <div className="ml-6 p-3 bg-muted rounded-lg">
           <ChecklistRow
             label="On financed jobs — signer validated to match contract signer"
             checked={data.customer_signoff.signer_matches_contract}
@@ -475,16 +475,17 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
           onChange={v => update('five_star_review', 'review_request_made', v)}
           disabled={readOnly}
         />
-        <p className="text-xs text-slate-500 pl-7">If checked, the Razzle review team will be alerted to close the loop on job completion.</p>
+        <p className="text-xs text-muted-foreground pl-7">If checked, the Razzle review team will be alerted to close the loop on job completion.</p>
       </Section>
 
       {/* FM Gate — Review buttons */}
       {isReviewPhase && !installerMode && (
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-          <Button variant="outline" onClick={handleReject} disabled={saving} className="gap-2 text-red-600 border-red-200 hover:bg-red-50">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+          <Button variant="outline" onClick={handleReject} disabled={saving} className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive">
             <XCircle className="w-4 h-4" /> Reject
           </Button>
-          <Button onClick={handleApproveFinal} disabled={saving} className="gap-2 bg-blue-600 hover:bg-blue-700">
+          {/* text-background is intentional: matches the app-wide filled-semantic-button pattern (bg-info/bg-good + text-background). */}
+          <Button onClick={handleApproveFinal} disabled={saving} className="gap-2 bg-info text-background hover:bg-info/90">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
             Approve Final Walkthrough
           </Button>
@@ -495,7 +496,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       {isInstallerPhase && (
         <div className="flex items-center justify-end gap-2 pt-2">
           {!isValid && (
-            <p className="text-xs text-amber-600 mr-auto">
+            <p className="text-xs text-warn mr-auto">
               {missingCount} required field{missingCount === 1 ? '' : 's'} remaining
             </p>
           )}
@@ -510,9 +511,10 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       {isPaymentPhase && (
         <div className="flex items-center justify-end gap-2 pt-2">
           {installerMode ? (
-            <p className="text-xs text-slate-500 text-right">Payment submission must be completed by a manager.</p>
+            <p className="text-xs text-muted-foreground text-right">Payment submission must be completed by a manager.</p>
           ) : (
-            <Button onClick={handleSubmitForPayment} disabled={saving} className="gap-2 bg-green-600 hover:bg-green-700">
+            /* text-white is intentional: same filled-semantic-button pattern as the FM approve action above. */
+            <Button onClick={handleSubmitForPayment} disabled={saving} className="gap-2 bg-good text-background hover:bg-good/90">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <DollarSign className="w-4 h-4" />}
               Submit for Payment
             </Button>

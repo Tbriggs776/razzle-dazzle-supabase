@@ -87,7 +87,7 @@ export default function FleetVehicles() {
           <div className="grid gap-3">
             {filtered.map(v => (
               <div key={v.id} className="bg-card rounded-xl border border-border p-4 flex items-center gap-4 hover:shadow-md transition-all">
-                <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center flex-shrink-0">
                   <Car className="w-5 h-5 text-brand-blue" />
                 </div>
                 <div className="flex-1 min-w-0">

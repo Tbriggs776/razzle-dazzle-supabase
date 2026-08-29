@@ -4,10 +4,23 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, MapPin, Calendar, ChevronRight, Bell, CheckCircle2, AlertCircle, ClipboardList, HardHat, UserCog } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import PageHeader from '@/components/common/PageHeader';
+import StatusPill from '@/components/common/StatusPill';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 const STEP_LABELS = ['PIC', 'JSC', 'FPC', 'FWC'];
 const STEP_KEYS = ['pre_install_checklist', 'job_start_checklist', 'floor_prep_checklist', 'final_walkthrough_checklist'];
+
+// Checkpoint dot styling only — replaces the previous hardcoded hex fills so the
+// dots resolve in both themes. Any status outside this map falls back to neutral,
+// exactly as the old default branch did.
+const STEP_DOT_TONES = {
+  Completed: 'bg-good/20 text-good',
+  PrepApproved: 'bg-info/20 text-info',
+  SubmittedForApproval: 'bg-warn/20 text-warn',
+  Rejected: 'bg-crit/20 text-crit',
+};
+const STEP_DOT_NEUTRAL = 'bg-muted text-muted-foreground';
 
 export default function MyQueue() {
   const { t } = useLanguage();
@@ -98,22 +111,23 @@ export default function MyQueue() {
   if (userLoading || projectsLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="mb-4">
-        <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-          <Bell className="w-5 h-5 text-indigo-600" />
-          {t('mqTitle')}
-        </h1>
-        <p className="text-sm text-slate-500">
-          {t('mqSubtitle')}
-        </p>
-      </div>
+      <PageHeader
+        className="mb-4"
+        title={
+          <span className="flex items-center gap-2">
+            <Bell className="w-5 h-5 shrink-0 text-primary" />
+            {t('mqTitle')}
+          </span>
+        }
+        subtitle={t('mqSubtitle')}
+      />
 
       {/* Filter toggle */}
       <div className="flex items-center gap-2 mb-3">
@@ -121,7 +135,7 @@ export default function MyQueue() {
           onClick={() => setFilter('all')}
           className={cn(
             "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-            filter === 'all' ? "bg-indigo-50 text-indigo-600" : "text-slate-500 hover:bg-slate-50"
+            filter === 'all' ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/60"
           )}
         >
           <ClipboardList className="w-3.5 h-3.5" />
@@ -131,7 +145,7 @@ export default function MyQueue() {
           onClick={() => setFilter('pending')}
           className={cn(
             "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
-            filter === 'pending' ? "bg-amber-50 text-amber-700" : "text-slate-500 hover:bg-slate-50"
+            filter === 'pending' ? "bg-warn/15 text-warn" : "text-muted-foreground hover:bg-muted/60"
           )}
         >
           <AlertCircle className="w-3.5 h-3.5" />
@@ -140,13 +154,13 @@ export default function MyQueue() {
       </div>
 
       {displayedProjects.length === 0 ? (
-        <div className="bg-white border border-slate-200 rounded-xl py-12 text-center">
-          <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-3" />
-          <p className="text-slate-500">{t('mqNoProjects')}</p>
+        <div className="bg-card border border-border rounded-xl py-12 text-center">
+          <CheckCircle2 className="w-12 h-12 text-good mx-auto mb-3" />
+          <p className="text-muted-foreground">{t('mqNoProjects')}</p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-xl">
-          <div className="sticky top-0 z-10 grid grid-cols-12 gap-3 px-4 py-2.5 bg-slate-50 border-b border-slate-200 rounded-t-xl text-xs font-medium text-slate-500 uppercase tracking-wide">
+        <div className="bg-card border border-border rounded-xl">
+          <div className="sticky top-0 z-10 grid grid-cols-12 gap-3 px-4 py-2.5 bg-muted border-b border-border rounded-t-xl text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <div className="col-span-3">{t('mqColCustomer')}</div>
             <div className="col-span-1">{t('mqColCG')}</div>
             <div className="col-span-2">{t('mqColInstallDate')}</div>
@@ -172,41 +186,41 @@ export default function MyQueue() {
               <button
                 key={project.id}
                 onClick={() => navigate(`/JourneyProjectDetail?project_id=${project.id}`)}
-                className="w-full grid grid-cols-12 gap-3 px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition-colors text-left items-center"
+                className="w-full grid grid-cols-12 gap-3 px-4 py-3 border-b border-border hover:bg-muted/60 transition-colors text-left items-center"
               >
                 <div className="col-span-3">
-                  <p className="text-sm font-medium text-slate-800">
+                  <p className="text-sm font-medium text-foreground">
                     {customer?.first_name} {customer?.last_name || t('mqUnknown')}
                   </p>
-                  <p className="text-xs text-slate-400 flex items-center gap-1">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <MapPin className="w-3 h-3 shrink-0" />
                     {fullAddress || t('mqNoAddress')}
                   </p>
                 </div>
                 <div className="col-span-1">
                   {sale?.invoice_number ? (
-                    <span className="text-sm text-slate-600 font-mono">{sale.invoice_number}</span>
+                    <span className="text-sm text-muted-foreground font-mono">{sale.invoice_number}</span>
                   ) : (
-                    <span className="text-xs text-slate-400">—</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </div>
                 <div className="col-span-2">
                   {project.installation_date ? (
-                    <span className="text-sm text-slate-600 flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                       {new Date(project.installation_date).toLocaleDateString()}
                     </span>
                   ) : (
-                    <span className="text-xs text-slate-400">{t('mqNotScheduled')}</span>
+                    <span className="text-xs text-muted-foreground">{t('mqNotScheduled')}</span>
                   )}
                 </div>
                 <div className="col-span-3 space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                    <UserCog className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <UserCog className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                     <span className="truncate">{getMemberName(project.field_manager_id) || t('mqNoFieldManager')}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                    <HardHat className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <HardHat className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                     <span className="truncate">{project.installer_crew_name || t('mqNoInstallerCrew')}</span>
                   </div>
                 </div>
@@ -214,29 +228,35 @@ export default function MyQueue() {
                   {stepStatuses.map((status, i) => (
                     <div key={i} className="flex items-center gap-1.5">
                       <span
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold"
-                        style={{
-                          backgroundColor: status === 'Completed' ? '#86efac' : status === 'PrepApproved' ? '#93c5fd' : status === 'SubmittedForApproval' ? '#fcd34d' : status === 'Rejected' ? '#fca5a5' : '#e2e8f0',
-                          color: status === 'Completed' ? '#15803d' : status === 'PrepApproved' ? '#1d4ed8' : status === 'SubmittedForApproval' ? '#b45309' : status === 'Rejected' ? '#b91c1c' : '#94a3b8'
-                        }}
+                        className={cn(
+                          "w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold",
+                          STEP_DOT_TONES[status] || STEP_DOT_NEUTRAL
+                        )}
                         title={`${STEP_LABELS[i]}: ${status}`}
                       >
                         {STEP_LABELS[i].charAt(0)}
                       </span>
-                      {i < 3 && <span className="text-slate-200 text-xs">→</span>}
+                      {i < 3 && <span className="text-muted-foreground/40 text-xs">→</span>}
                     </div>
                   ))}
                 </div>
                 <div className="col-span-1 flex items-center justify-end gap-1">
                   {pendingCount > 0 ? (
-                    <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium flex items-center gap-1" title={t('mqPendingApproval', { count: pendingCount })}>
-                      <AlertCircle className="w-3 h-3" />
-                      {pendingCount}
+                    // Wrapper carries the title text StatusPill does not forward.
+                    <span className="inline-flex min-w-0" title={t('mqPendingApproval', { count: pendingCount })}>
+                      <StatusPill tone="warn" className="px-1.5">
+                        <AlertCircle className="w-3 h-3" />
+                        {pendingCount}
+                      </StatusPill>
                     </span>
                   ) : (
-                    <span className="text-xs text-slate-400 px-1.5 py-0.5 rounded-full bg-slate-100 truncate" title={project.status}>{project.status}</span>
+                    <span className="inline-flex min-w-0" title={project.status}>
+                      <StatusPill tone="neutral" className="min-w-0 px-1.5">
+                        <span className="truncate">{project.status}</span>
+                      </StatusPill>
+                    </span>
                   )}
-                  <ChevronRight className="w-4 h-4 text-slate-300 shrink-0" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/60 shrink-0" />
                 </div>
               </button>
             );

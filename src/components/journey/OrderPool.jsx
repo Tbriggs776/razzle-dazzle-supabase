@@ -68,7 +68,7 @@ export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
   return (
     <div className="flex flex-col h-full">
       <div className="space-y-2 mb-3">
-        <div className="flex gap-1 bg-slate-100 rounded-lg p-1 w-fit">
+        <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
           {[
             { id: 'order', label: 'Order Date' },
             { id: 'install', label: 'Install Date' },
@@ -77,7 +77,7 @@ export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
               key={opt.id}
               onClick={() => setDateField(opt.id)}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-                dateField === opt.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                dateField === opt.id ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {opt.label}
@@ -102,7 +102,7 @@ export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
           </Button>
         </div>
         <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400" />
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -114,12 +114,12 @@ export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
 
       {isLoading && (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
+          <Loader2 className="w-5 h-5 text-primary animate-spin" />
         </div>
       )}
 
       {!isLoading && rfmsResult && (
-        <div className="text-xs text-slate-400 mb-2">
+        <div className="text-xs text-muted-foreground mb-2">
           {filtered.length} untagged orders ({taggedOrderIds.size} already in Journey)
         </div>
       )}
@@ -134,28 +134,28 @@ export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
           return (
             <div
               key={orderId}
-              className="border border-slate-200 rounded-xl p-3 bg-white hover:border-indigo-200 transition-colors"
+              className="border border-border rounded-xl p-3 bg-card hover:border-primary/40 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm text-slate-700 truncate">
+                  <div className="font-medium text-sm text-foreground truncate">
                     {getOrderName(order)}
                   </div>
-                  <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                  <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                     <MapPin className="w-2.5 h-2.5" />
                     <span className="truncate">{address || '—'}</span>
                   </div>
                   {zip && (
-                    <div className="text-xs text-slate-400 mt-0.5">ZIP: {zip}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">ZIP: {zip}</div>
                   )}
                   {order.orderDate && (
-                    <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                       <Calendar className="w-2.5 h-2.5" />
                       Ordered: {order.orderDate?.split('T')[0]}
                     </div>
                   )}
                   {order.estimatedDeliveryDate && (
-                    <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                       <Calendar className="w-2.5 h-2.5" />
                       Install: {order.estimatedDeliveryDate?.split('T')[0]}
                     </div>
@@ -164,7 +164,7 @@ export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-7 text-xs shrink-0 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                  className="h-7 text-xs shrink-0 text-primary border-primary/30 hover:bg-primary/10"
                   disabled={isTagging}
                   onClick={() => onTagOrder(order)}
                 >
@@ -182,13 +182,13 @@ export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
         })}
 
         {!isLoading && rfmsResult && filtered.length === 0 && (
-          <div className="text-center py-8 text-slate-400 text-xs">
+          <div className="text-center py-8 text-muted-foreground text-xs">
             All orders are already in Journey or none match your search.
           </div>
         )}
 
         {!rfmsResult && !isLoading && (
-          <div className="text-center py-8 text-slate-400 text-xs">
+          <div className="text-center py-8 text-muted-foreground text-xs">
             Set date range and click Fetch to load RFMS orders.
           </div>
         )}

@@ -16,10 +16,16 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
         // Semantic soft fills — status color, kept separate from the pink brand accent.
-        good: "border-transparent bg-good/12 text-good",
+        //
+        // Opacity MUST be a multiple of 5. Tailwind v3's opacity scale has no 12,
+        // so the previous `bg-good/12` compiled to NOTHING and good/crit/info
+        // rendered as bare coloured text with no pill fill — app-wide, in every
+        // module, since the kit shipped. Only `warn` looked right because it
+        // happened to use /15. Verified against the built stylesheet, not by eye.
+        good: "border-transparent bg-good/15 text-good",
         warn: "border-transparent bg-warn/15 text-warn",
-        crit: "border-transparent bg-crit/12 text-crit",
-        info: "border-transparent bg-info/12 text-info",
+        crit: "border-transparent bg-crit/15 text-crit",
+        info: "border-transparent bg-info/15 text-info",
         neutral: "border-transparent bg-muted text-muted-foreground",
       },
     },

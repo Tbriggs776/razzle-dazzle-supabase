@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, MapPin, Calendar, ChevronRight, Users, UserPlus, Filter } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
+import PageHeader from '@/components/common/PageHeader';
 
 export default function ManagerView() {
   const { t } = useLanguage();
@@ -90,7 +91,7 @@ export default function ManagerView() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
       </div>
     );
   }
@@ -101,40 +102,42 @@ export default function ManagerView() {
     { key: 'order_entry_id', label: 'Order Entry', short: 'OE' },
   ];
 
+  // Assignment selects: a filled slot is a normal form control, an empty one is a
+  // warn-toned "needs assignment" state. Same two branches everywhere below.
+  const SELECT_BASE = 'w-full h-8 rounded-md border text-sm transition-colors';
+  const SELECT_FILLED = 'border-input bg-background text-foreground';
+  const SELECT_EMPTY = 'border-warn/40 bg-warn/10 text-warn';
+
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-800">{t('mvTitle')}</h1>
-          <p className="text-sm text-slate-500">{t('mvSubtitle')}</p>
-        </div>
-      </div>
+      <PageHeader className="mb-4" title={t('mvTitle')} subtitle={t('mvSubtitle')} />
 
-      {/* Stats */}
+      {/* Stats — hand-rolled rather than KpiTile: the value colour here IS the signal
+          (good = fully assigned, warn = gaps), and KpiTile has no colour-by-status slot. */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4">
-        <div className="bg-white border border-slate-200 rounded-xl p-3">
-          <div className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('mvTotalProjects')}</div>
-          <div className="text-2xl font-black text-slate-800">{stats.total}</div>
+        <div className="bg-card border border-border rounded-xl p-3">
+          <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t('mvTotalProjects')}</div>
+          <div className="text-2xl font-black text-foreground">{stats.total}</div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-3">
-          <div className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('mvFullyAssigned')}</div>
-          <div className="text-2xl font-black text-green-600">{stats.fullyAssigned}</div>
+        <div className="bg-card border border-border rounded-xl p-3">
+          <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t('mvFullyAssigned')}</div>
+          <div className="text-2xl font-black text-good">{stats.fullyAssigned}</div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-3">
-          <div className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('mvNoFM')}</div>
-          <div className="text-2xl font-black text-amber-600">{stats.unassignedFM}</div>
+        <div className="bg-card border border-border rounded-xl p-3">
+          <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t('mvNoFM')}</div>
+          <div className="text-2xl font-black text-warn">{stats.unassignedFM}</div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-3">
-          <div className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('mvNoIC')}</div>
-          <div className="text-2xl font-black text-amber-600">{stats.unassignedIC}</div>
+        <div className="bg-card border border-border rounded-xl p-3">
+          <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t('mvNoIC')}</div>
+          <div className="text-2xl font-black text-warn">{stats.unassignedIC}</div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-3">
-          <div className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('mvNoOE')}</div>
-          <div className="text-2xl font-black text-amber-600">{stats.unassignedOE}</div>
+        <div className="bg-card border border-border rounded-xl p-3">
+          <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t('mvNoOE')}</div>
+          <div className="text-2xl font-black text-warn">{stats.unassignedOE}</div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-3">
-          <div className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('mvNoInstaller')}</div>
-          <div className="text-2xl font-black text-amber-600">{stats.unassignedInst}</div>
+        <div className="bg-card border border-border rounded-xl p-3">
+          <div className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{t('mvNoInstaller')}</div>
+          <div className="text-2xl font-black text-warn">{stats.unassignedInst}</div>
         </div>
       </div>
 
@@ -144,20 +147,20 @@ export default function ManagerView() {
           onClick={() => setFilterUnassigned(f => !f)}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
             filterUnassigned
-              ? 'bg-amber-100 text-amber-700 border border-amber-200'
-              : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+              ? 'bg-warn/15 text-warn border border-warn/30'
+              : 'bg-card text-muted-foreground border border-border hover:bg-muted/60'
           }`}
         >
           <Filter className="w-3.5 h-3.5" />
           {filterUnassigned ? t('mvShowingIncomplete') : t('mvShowIncomplete')}
         </button>
-        <span className="text-xs text-slate-400">{t('mvOfProjects', { shown: filteredProjects.length, total: projects.length })}</span>
+        <span className="text-xs text-muted-foreground">{t('mvOfProjects', { shown: filteredProjects.length, total: projects.length })}</span>
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 z-10 grid grid-cols-12 gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-200 text-xs font-medium text-slate-500 uppercase tracking-wide">
+        <div className="sticky top-0 z-10 grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/60 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
           <div className="col-span-2">{t('mvColCustomer')}</div>
           <div className="col-span-1">{t('mvColCG')}</div>
           <div className="col-span-2">{t('mvColInstallDate')}</div>
@@ -179,46 +182,42 @@ export default function ManagerView() {
           return (
             <div
               key={project.id}
-              className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-slate-100 hover:bg-slate-50 transition-colors items-center"
+              className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-border hover:bg-muted/60 transition-colors items-center"
             >
               <div className="col-span-2">
-                <p className="text-sm font-medium text-slate-800">
+                <p className="text-sm font-medium text-foreground">
                   {customer?.first_name} {customer?.last_name || t('mvUnknown')}
                 </p>
-                <p className="text-xs text-slate-400 flex items-center gap-1">
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <MapPin className="w-3 h-3 shrink-0" />
                   {fullAddress || t('mvNoAddress')}
                 </p>
               </div>
               <div className="col-span-1">
                 {sale?.invoice_number ? (
-                  <span className="text-sm text-slate-600 font-mono">{sale.invoice_number}</span>
+                  <span className="text-sm text-muted-foreground font-mono">{sale.invoice_number}</span>
                 ) : (
-                  <span className="text-xs text-slate-400">—</span>
+                  <span className="text-xs text-muted-foreground/70">—</span>
                 )}
               </div>
               <div className="col-span-2">
                 {project.installation_date ? (
-                  <span className="text-sm text-slate-600 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                     {new Date(project.installation_date).toLocaleDateString()}
                   </span>
                 ) : (
-                  <span className="text-xs text-slate-400">{t('mvNotScheduled')}</span>
-                  )}
-                  </div>
+                  <span className="text-xs text-muted-foreground">{t('mvNotScheduled')}</span>
+                )}
+              </div>
 
-                  {/* Field Manager */}
-                  <div className="col-span-2">
-                  <select
+              {/* Field Manager */}
+              <div className="col-span-2">
+                <select
                   value={project.field_manager_id || ''}
                   onChange={e => handleAssign(project.id, 'field_manager_id', e.target.value)}
-                  className={`w-full h-8 rounded-md border px-2 text-sm transition-colors ${
-                  project.field_manager_id
-                    ? 'border-slate-200 bg-white text-slate-700'
-                    : 'border-amber-300 bg-amber-50 text-amber-600'
-                  }`}
-                  >
+                  className={`${SELECT_BASE} px-2 ${project.field_manager_id ? SELECT_FILLED : SELECT_EMPTY}`}
+                >
                   <option value="">{project.field_manager_id ? t('mvClear') : t('mvAssign')}</option>
                   {memberOptions.map(m => (
                     <option key={m.id} value={m.id}>
@@ -233,11 +232,7 @@ export default function ManagerView() {
                 <select
                   value={project.install_coordinator_id || ''}
                   onChange={e => handleAssign(project.id, 'install_coordinator_id', e.target.value)}
-                  className={`w-full h-8 rounded-md border px-2 text-sm transition-colors ${
-                    project.install_coordinator_id
-                      ? 'border-slate-200 bg-white text-slate-700'
-                      : 'border-amber-300 bg-amber-50 text-amber-600'
-                  }`}
+                  className={`${SELECT_BASE} px-2 ${project.install_coordinator_id ? SELECT_FILLED : SELECT_EMPTY}`}
                 >
                   <option value="">{project.install_coordinator_id ? t('mvClear') : t('mvAssign')}</option>
                   {memberOptions.map(m => (
@@ -253,11 +248,7 @@ export default function ManagerView() {
                 <select
                   value={project.order_entry_id || ''}
                   onChange={e => handleAssign(project.id, 'order_entry_id', e.target.value)}
-                  className={`w-full h-8 rounded-md border px-2 text-sm transition-colors ${
-                    project.order_entry_id
-                      ? 'border-slate-200 bg-white text-slate-700'
-                      : 'border-amber-300 bg-amber-50 text-amber-600'
-                  }`}
+                  className={`${SELECT_BASE} px-2 ${project.order_entry_id ? SELECT_FILLED : SELECT_EMPTY}`}
                 >
                   <option value="">{project.order_entry_id ? '—' : '—'}</option>
                   {memberOptions.map(m => (
@@ -273,11 +264,7 @@ export default function ManagerView() {
                 <select
                   value={project.installer_crew_id || ''}
                   onChange={e => handleAssignInstaller(project.id, e.target.value)}
-                  className={`w-full h-8 rounded-md border px-1 text-sm transition-colors ${
-                    project.installer_crew_id
-                      ? 'border-slate-200 bg-white text-slate-700'
-                      : 'border-amber-300 bg-amber-50 text-amber-600'
-                  }`}
+                  className={`${SELECT_BASE} px-1 ${project.installer_crew_id ? SELECT_FILLED : SELECT_EMPTY}`}
                 >
                   <option value="">{project.installer_crew_id ? t('mvClear') : t('mvAssign')}</option>
                   {installerOptions.map(i => (
@@ -291,7 +278,7 @@ export default function ManagerView() {
               <div className="col-span-1 flex items-center justify-end gap-2">
                 <button
                   onClick={() => navigate(`/JourneyProjectDetail?project_id=${project.id}`)}
-                  className="text-slate-300 hover:text-indigo-500 transition-colors"
+                  className="text-muted-foreground/60 hover:text-primary transition-colors"
                   title={t('mvViewProject')}
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -302,8 +289,8 @@ export default function ManagerView() {
         })}
 
         {filteredProjects.length === 0 && (
-          <div className="py-12 text-center text-slate-400">
-            <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+          <div className="py-12 text-center text-muted-foreground">
+            <Users className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
             <p>{filterUnassigned ? t('mvAllAssigned') : t('mvNoProjects')}</p>
           </div>
         )}

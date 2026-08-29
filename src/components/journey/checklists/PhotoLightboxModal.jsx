@@ -50,6 +50,9 @@ export default function PhotoLightboxModal({ urls, index, onClose }) {
 
   if (!urls?.length) return null;
 
+  // Deliberately NOT themed: this is a photo viewer, so the scrim stays black and the chrome
+  // stays white in both light and dark mode — the photograph is the surface being judged
+  // (moisture readings, prep evidence) and a theme-following background would tint it.
   return (
     <div
       id="lightbox-overlay"

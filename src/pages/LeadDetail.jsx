@@ -175,7 +175,7 @@ export default function LeadDetail() {
               href={`mailto:${lead.email}`}
               className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-blue/12">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-blue/15">
                 <Mail className="h-4 w-4 text-brand-blue" />
               </div>
               <div className="min-w-0">
@@ -189,7 +189,7 @@ export default function LeadDetail() {
               href={`tel:${lead.phone}`}
               className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-pink/12">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-pink/15">
                 <Phone className="h-4 w-4 text-brand-pink" />
               </div>
               <div className="min-w-0">

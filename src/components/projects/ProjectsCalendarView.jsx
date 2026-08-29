@@ -24,10 +24,10 @@ const STATUS_TONE = {
 // Soft-fill classes per tone — the Badge semantic variants applied to the tiny,
 // name-bearing calendar/day chips that can't use the (uppercasing) StatusPill.
 const TONE_CHIP = {
-  good: 'bg-good/12 text-good',
+  good: 'bg-good/15 text-good',
   warn: 'bg-warn/15 text-warn',
-  crit: 'bg-crit/12 text-crit',
-  info: 'bg-info/12 text-info',
+  crit: 'bg-crit/15 text-crit',
+  info: 'bg-info/15 text-info',
   neutral: 'bg-muted text-muted-foreground',
 };
 
@@ -217,7 +217,7 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
               >
                 <div className={cn(
                   'text-xs font-medium mb-1 w-6 h-6 flex items-center justify-center rounded-full',
-                  isToday ? 'bg-info text-white' : inMonth ? 'text-foreground' : 'text-muted-foreground'
+                  isToday ? 'bg-info text-background' : inMonth ? 'text-foreground' : 'text-muted-foreground'
                 )}>
                   {format(d, 'd')}
                 </div>

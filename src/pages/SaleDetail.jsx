@@ -696,7 +696,7 @@ export default function SaleDetail() {
           <Button
             onClick={() => setShowReplaceContractDialog(true)}
             variant="outline"
-            className="border-brand-blue/40 text-brand-blue hover:bg-brand-blue/12"
+            className="border-brand-blue/40 text-brand-blue hover:bg-brand-blue/15"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             Replace Contract
@@ -1157,7 +1157,7 @@ export default function SaleDetail() {
                           {workOrderNotes && (
                             <div>
                               <p className="text-xs font-medium text-muted-foreground mb-1">Work Order Notes</p>
-                              <div className="bg-brand-blue/12 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: workOrderNotes }} />
+                              <div className="bg-brand-blue/15 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: workOrderNotes }} />
                             </div>
                           )}
                         </div>
@@ -1265,7 +1265,7 @@ export default function SaleDetail() {
                   disabled={fetchingRFMS || !sale.invoice_number}
                   variant="outline"
                   size="sm"
-                  className="border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
+                  className="border-brand-blue/30 text-brand-blue hover:bg-brand-blue/15"
                 >
                   {fetchingRFMS ? (
                     <>
@@ -1480,7 +1480,7 @@ export default function SaleDetail() {
             <Button
               onClick={() => cancelSaleMutation.mutate()}
               disabled={cancelSaleMutation.isPending}
-              className="bg-warn text-white hover:bg-warn/90"
+              className="bg-warn text-background hover:bg-warn/90"
             >
               {cancelSaleMutation.isPending ? (
                 <>

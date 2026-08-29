@@ -374,7 +374,7 @@ export default function MyAppointmentResultsTable({ currentUser }) {
                   {task && (
                     <div className={cn(
                       'flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold',
-                      taskOverdue ? 'bg-crit/12 text-crit' : 'bg-warn/15 text-warn'
+                      taskOverdue ? 'bg-crit/15 text-crit' : 'bg-warn/15 text-warn'
                     )}>
                       {taskOverdue ? <AlertCircle className="h-3 w-3" /> : <Circle className="h-3 w-3" />}
                       <Clock className="h-3 w-3" />
@@ -394,7 +394,7 @@ export default function MyAppointmentResultsTable({ currentUser }) {
                     </span>
                   )}
                   {apt.not_sold_deal_size > 0 && (
-                    <span className="rounded-full bg-good/12 px-2 py-0.5 text-[11px] font-semibold text-good">
+                    <span className="rounded-full bg-good/15 px-2 py-0.5 text-[11px] font-semibold text-good">
                       Deal Size: ${Number(apt.not_sold_deal_size).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   )}
@@ -424,14 +424,14 @@ export default function MyAppointmentResultsTable({ currentUser }) {
                     className={cn(
                       'relative rounded-lg border p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-30',
                       unread > 0
-                        ? 'border-crit/30 bg-crit/12 text-crit hover:bg-crit/20'
+                        ? 'border-crit/30 bg-crit/15 text-crit hover:bg-crit/20'
                         : 'border-border text-muted-foreground hover:border-brand-blue/30 hover:bg-brand-blue/10 hover:text-brand-blue'
                     )}
                     title={unread > 0 ? `${unread} unread message${unread > 1 ? 's' : ''}` : 'Text / Email customer'}
                   >
                     <MessageSquare className="h-3.5 w-3.5" />
                     {unread > 0 && (
-                      <span className="absolute -right-1.5 -top-1.5 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-crit px-1 text-[10px] font-bold leading-none text-white">
+                      <span className="absolute -right-1.5 -top-1.5 flex h-[16px] min-w-[16px] items-center justify-center rounded-full bg-crit px-1 text-[10px] font-bold leading-none text-background">
                         {unread > 9 ? '9+' : unread}
                       </span>
                     )}

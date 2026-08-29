@@ -44,14 +44,14 @@ export default function JourneyNavToggle() {
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-start gap-2">
-        <Compass className="w-4 h-4 text-slate-700 mt-0.5" />
+        <Compass className="w-4 h-4 text-muted-foreground mt-0.5" />
         <div>
-          <Label className="text-sm font-medium text-slate-700">Show Journey Menu Item</Label>
-          <p className="text-xs text-slate-500">Toggle off to hide the Journey navigation item for admins.</p>
+          <Label className="text-sm font-medium text-foreground">Show Journey Menu Item</Label>
+          <p className="text-xs text-muted-foreground">Toggle off to hide the Journey navigation item for admins.</p>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        {saving && <Loader2 className="w-3.5 h-3.5 text-slate-400 animate-spin" />}
+        {saving && <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin" />}
         <Switch
           checked={enabled}
           onCheckedChange={(v) => {

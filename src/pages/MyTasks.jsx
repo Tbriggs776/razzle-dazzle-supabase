@@ -608,7 +608,7 @@ export default function MyTasks() {
                     window.location.href = `/ConsultantAppointmentView?id=${followUpDialog?.appointmentId}&action=sold`;
                   }}
                   disabled={!followUpNotes.trim() || saveFollowUpMutation.isPending}
-                  className="flex-1 bg-good text-white hover:bg-good/90"
+                  className="flex-1 bg-good text-background hover:bg-good/90"
                 >
                   <Trophy className="mr-2 h-4 w-4" />
                   Mark as Won

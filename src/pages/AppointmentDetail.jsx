@@ -884,7 +884,7 @@ export default function AppointmentDetail() {
                 <Button
                   variant="outline"
                   disabled
-                  className="h-11 px-5 border-brand-blue/30 text-brand-blue bg-brand-blue/12"
+                  className="h-11 px-5 border-brand-blue/30 text-brand-blue bg-brand-blue/15"
                 >
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Syncing with RFMS Measure Mobile...
@@ -929,7 +929,7 @@ export default function AppointmentDetail() {
                   variant="outline"
                   onClick={syncToRFMS}
                   disabled={syncingRFMS}
-                  className="h-11 px-5 border-brand-blue/30 text-brand-blue hover:bg-brand-blue/12"
+                  className="h-11 px-5 border-brand-blue/30 text-brand-blue hover:bg-brand-blue/15"
                 >
                   {syncingRFMS ? (
                     <>
@@ -1103,7 +1103,7 @@ export default function AppointmentDetail() {
               </div>
               {checklist?.heard_about_us && (
                 <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
                     <Activity className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div>
@@ -1171,7 +1171,7 @@ export default function AppointmentDetail() {
                 </div>
               )}
               {dc && (
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-brand-blue/12">
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-brand-blue/15">
                   <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
                     <Users className="w-5 h-5 text-brand-blue" />
                   </div>
@@ -1913,7 +1913,7 @@ export default function AppointmentDetail() {
                   return response.data;
                 })}
                 disabled={!!runningAction}
-                className="h-20 flex-col border-brand-blue/30 hover:bg-brand-blue/12"
+                className="h-20 flex-col border-brand-blue/30 hover:bg-brand-blue/15"
               >
                 {runningAction === 'Google Calendar Sync' ? (
                   <Loader2 className="w-5 h-5 mb-2 animate-spin" />

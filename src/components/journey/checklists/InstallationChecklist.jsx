@@ -12,11 +12,11 @@ import { toast } from 'sonner';
 
 function ChecklistRow({ label, checked, onChange, disabled, required, missing }) {
   return (
-    <label className={cn("flex items-start gap-3 py-2 rounded-md px-1 -mx-1 transition-colors", !disabled && "cursor-pointer", missing && "bg-red-50 ring-1 ring-red-200")}>
+    <label className={cn("flex items-start gap-3 py-2 rounded-md px-1 -mx-1 transition-colors", !disabled && "cursor-pointer", missing && "bg-crit/10 ring-1 ring-crit/30")}>
       <Checkbox checked={checked} onCheckedChange={onChange} disabled={disabled} className="mt-0.5" />
-      <span className={cn("text-sm", disabled ? "text-slate-400" : "text-slate-700")}>
+      <span className={cn("text-sm", disabled ? "text-muted-foreground/70" : "text-foreground")}>
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-crit ml-0.5">*</span>}
       </span>
     </label>
   );
@@ -41,26 +41,26 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
   };
 
   return (
-    <div className={cn("space-y-2 rounded-md px-1 -mx-1 py-1 transition-colors", missing && "bg-red-50 ring-1 ring-red-200")}>
-      <Label className="text-sm font-medium text-slate-700">
+    <div className={cn("space-y-2 rounded-md px-1 -mx-1 py-1 transition-colors", missing && "bg-crit/10 ring-1 ring-crit/30")}>
+      <Label className="text-sm font-medium text-foreground">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-crit ml-0.5">*</span>}
       </Label>
       <div className="flex items-center gap-2 flex-wrap">
         {photos.map((url, i) => (
           <div key={i} className="relative group">
-            <SignedImage src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer" />
+            <SignedImage src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-border cursor-pointer" />
             {!disabled && (
               <button
                 onClick={() => onChange(photos.filter((_, idx) => idx !== i))}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
               >×</button>
             )}
           </div>
         ))}
         {!disabled && (
-          <label className="w-16 h-16 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-colors">
-            {uploading ? <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" /> : <Camera className="w-4 h-4 text-slate-400" />}
+          <label className="w-16 h-16 border-2 border-dashed border-input rounded-lg flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/10 transition-colors">
+            {uploading ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Camera className="w-4 h-4 text-muted-foreground" />}
             <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleUpload} />
           </label>
         )}
@@ -76,13 +76,13 @@ function Section({ title, icon: Icon, children, warning, accent }) {
   return (
     <div className={cn(
       "rounded-xl border p-4 space-y-2",
-      warning ? "border-red-200 bg-red-50/50" :
-      accent ? "border-blue-200 bg-blue-50/30" :
-      "border-slate-200 bg-white"
+      warning ? "border-crit/30 bg-crit/10" :
+      accent ? "border-info/30 bg-info/10" :
+      "border-border bg-card"
     )}>
-      <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-        <Icon className={cn("w-4 h-4", warning ? "text-red-500" : accent ? "text-blue-500" : "text-indigo-500")} />
-        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
+      <div className="flex items-center gap-2 pb-2 border-b border-border">
+        <Icon className={cn("w-4 h-4", warning ? "text-crit" : accent ? "text-info" : "text-primary")} />
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       </div>
       {children}
     </div>
@@ -171,20 +171,20 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
     <div className="space-y-4">
       {/* Status banners */}
       {isCompleted && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-          <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+        <div className="bg-good/10 border border-good/30 rounded-xl p-4 flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-good shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-green-800">Installation Complete</p>
-            <p className="text-xs text-green-600">Install Coordinator has been notified. You're ready for the Final Walk Through.</p>
+            <p className="text-sm font-medium text-good">Installation Complete</p>
+            <p className="text-xs text-muted-foreground">Install Coordinator has been notified. You're ready for the Final Walk Through.</p>
           </div>
         </div>
       )}
       {status === 'Rejected' && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
-          <XCircle className="w-5 h-5 text-red-600 shrink-0" />
+        <div className="bg-crit/10 border border-crit/30 rounded-xl p-4 flex items-center gap-3">
+          <XCircle className="w-5 h-5 text-crit shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-red-800">Rejected — Revisions Needed</p>
-            <p className="text-xs text-red-600">{checkpoint.rejection_notes}</p>
+            <p className="text-sm font-medium text-crit">Rejected — Revisions Needed</p>
+            <p className="text-xs text-muted-foreground">{checkpoint.rejection_notes}</p>
           </div>
         </div>
       )}
@@ -202,13 +202,13 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
         icon={CheckCircle2}
         warning={isEditable && data.install_hard_surface.applies && !expansionGateMet}
       >
-        <div className="ml-6 p-3 bg-slate-50 rounded-lg">
+        <div className="ml-6 p-3 bg-muted rounded-lg">
           <ChecklistRow label="Does this apply to this job?" checked={data.install_hard_surface.applies} onChange={v => update('install_hard_surface', 'applies', v)} disabled={readOnly} />
         </div>
         {data.install_hard_surface.applies && (
           <>
             <ChecklistRow label="Are expansion gaps correct around the whole edge and around all fixed objects? (Follow the spec)" required checked={data.install_hard_surface.expansion_gaps_correct} missing={submitAttempted && missing.expansion_gaps_correct} onChange={v => update('install_hard_surface', 'expansion_gaps_correct', v)} disabled={readOnly} />
-            <div className={cn("rounded-lg p-3", !expansionGateMet ? "bg-red-50 border border-red-200" : "bg-slate-50")}>
+            <div className={cn("rounded-lg p-3", !expansionGateMet ? "bg-crit/10 border border-crit/30" : "bg-muted")}>
               <PhotoUpload
                 label="⛔ Upload photos of your expansion gaps / spacers — HARD UPLOAD GATE"
                 photos={data.install_hard_surface.expansion_gap_photos}
@@ -218,10 +218,10 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
                 missing={submitAttempted && missing.expansion_gap_photos}
               />
               {!expansionGateMet && (
-                <p className="text-xs text-red-600 font-medium mt-1">⚠️ The job cannot move forward until these are uploaded.</p>
+                <p className="text-xs text-crit font-medium mt-1">⚠️ The job cannot move forward until these are uploaded.</p>
               )}
               {expansionGateMet && (
-                <p className="text-xs text-green-600 mt-1">✓ Photos uploaded — gate cleared.</p>
+                <p className="text-xs text-good mt-1">✓ Photos uploaded — gate cleared.</p>
               )}
             </div>
             <ChecklistRow label="For laminate runs over 1,000 sq ft: Are T-molding transitions placed where required?" required checked={data.install_hard_surface.t_molding_transitions} missing={submitAttempted && missing.t_molding_transitions} onChange={v => update('install_hard_surface', 't_molding_transitions', v)} disabled={readOnly} />
@@ -232,21 +232,21 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
 
       {/* Installation — Carpet (Unlocks if the job includes carpet) */}
       <Section title="Installation — Carpet (Unlocks if the job includes carpet)" icon={Layers}>
-        <div className="ml-6 p-3 bg-slate-50 rounded-lg">
+        <div className="ml-6 p-3 bg-muted rounded-lg">
           <ChecklistRow label="Does this apply to this job?" checked={data.install_carpet.applies} onChange={v => update('install_carpet', 'applies', v)} disabled={readOnly} />
         </div>
         {data.install_carpet.applies && (
-          <p className="text-xs text-slate-500 pl-7">Carpet-specific checkpoints to be defined.</p>
+          <p className="text-xs text-muted-foreground pl-7">Carpet-specific checkpoints to be defined.</p>
         )}
       </Section>
 
       {/* Installation — Tile (Unlocks if the job includes tile) */}
       <Section title="Installation — Tile (Unlocks if the job includes tile)" icon={Layers}>
-        <div className="ml-6 p-3 bg-slate-50 rounded-lg">
+        <div className="ml-6 p-3 bg-muted rounded-lg">
           <ChecklistRow label="Does this apply to this job?" checked={data.install_tile.applies} onChange={v => update('install_tile', 'applies', v)} disabled={readOnly} />
         </div>
         {data.install_tile.applies && (
-          <p className="text-xs text-slate-500 pl-7">Tile-specific checkpoints to be defined.</p>
+          <p className="text-xs text-muted-foreground pl-7">Tile-specific checkpoints to be defined.</p>
         )}
       </Section>
 
@@ -254,11 +254,20 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
       {isEditable && (
         <div className="flex items-center justify-end gap-2 pt-2">
           {!valid && (
-            <p className="text-xs text-amber-600 mr-auto">
+            <p className="text-xs text-warn mr-auto">
               {missingCount} required field{missingCount === 1 ? '' : 's'} remaining
             </p>
           )}
-          <Button onClick={handleSubmit} disabled={saving || !valid} className="gap-2 bg-green-600 hover:bg-green-700">
+          {/* Affirmative "complete" action keeps its green reading, but on the semantic good
+              token so it tracks the theme. --good has no paired foreground token, so the label
+              colour is a choice: text-white here follows the existing app-wide filled-semantic-
+              button convention (MyTasks.jsx, ProjectDetail.jsx, and the two buttons in
+              FinalWalkthroughChecklist.jsx). NOTE it is not an accessible choice in dark mode —
+              white on --good (152 52% 54%) measures 2.13:1, vs 3.71:1 in light. text-background
+              would give 8.92:1 dark / 3.62:1 light, which is what JobStartChecklist.jsx's approve
+              button uses. Left as-is only because changing it here alone would split the
+              convention; it needs one kit-wide decision, not a per-file fix. */}
+          <Button onClick={handleSubmit} disabled={saving || !valid} className="gap-2 bg-good text-background hover:bg-good/90">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             Complete Installation
           </Button>

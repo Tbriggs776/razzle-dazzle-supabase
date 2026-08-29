@@ -26,7 +26,7 @@ export default function FieldManagerNotificationBadge({ checkpoint }) {
 
   return (
     <div className="flex items-center gap-2 mt-2 ml-8">
-      <div className="flex items-center gap-1.5 text-xs text-amber-600">
+      <div className="flex items-center gap-1.5 text-xs text-warn">
         <Bell className="w-3.5 h-3.5" />
         <span>
           {result?.error
@@ -41,7 +41,7 @@ export default function FieldManagerNotificationBadge({ checkpoint }) {
         size="sm"
         onClick={handleResend}
         disabled={sending}
-        className="h-6 px-2 py-0 text-xs gap-1 border-amber-200 text-amber-700 hover:bg-amber-50"
+        className="h-6 px-2 py-0 text-xs gap-1 border-warn/30 text-warn hover:bg-warn/10"
       >
         {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
         Resend

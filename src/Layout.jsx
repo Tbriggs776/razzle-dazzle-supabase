@@ -568,7 +568,7 @@ export default function Layout({ children, currentPageName }) {
                     <Icon className="w-[18px] h-[18px] shrink-0" />
                     <span className="flex-1 text-left text-[13.5px] font-medium">{item.name}</span>
                     {!isExpanded && moduleUnread > 0 && (
-                      <span className="min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-white text-[10px] font-bold">
+                      <span className="min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-background text-[10px] font-bold">
                         {moduleUnread}
                       </span>
                     )}
@@ -599,7 +599,7 @@ export default function Layout({ children, currentPageName }) {
                           >
                             <span className="flex-1 truncate">{subItem.name}</span>
                             {showBadge && (
-                              <span className="ml-auto min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-white text-[10px] font-bold">
+                              <span className="ml-auto min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-background text-[10px] font-bold">
                                 {subBadge}
                               </span>
                             )}

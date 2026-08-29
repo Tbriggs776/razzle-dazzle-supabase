@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 
 // "Needs Attention" row: severity icon + title + detail + trailing CTA verb (the whole point).
 const SEV = {
-  crit: { Icon: AlertTriangle, ic: 'bg-crit/12 text-crit' },
+  crit: { Icon: AlertTriangle, ic: 'bg-crit/15 text-crit' },
   warn: { Icon: Clock, ic: 'bg-warn/15 text-warn' },
-  info: { Icon: Info, ic: 'bg-info/12 text-info' },
+  info: { Icon: Info, ic: 'bg-info/15 text-info' },
 };
 
 export default function AlertRow({ severity = 'info', title, detail, cta, onCta, className }) {

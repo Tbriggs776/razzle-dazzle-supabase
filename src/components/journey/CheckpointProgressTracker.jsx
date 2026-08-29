@@ -40,18 +40,24 @@ export default function CheckpointProgressTracker({ checkpoints, activeStep, onS
 
         return (
           <React.Fragment key={step.key}>
+            {/* Each step is an interactive, disable-able control, so the tones stay as
+                hand-rolled classes on the <button> rather than a StatusPill — StatusPill
+                renders a Badge <div> and cannot carry onClick/disabled. The good/info/
+                warn/crit tokens below are the same ones StatusPill's tones resolve to. */}
             <button
               onClick={() => unlocked && onStepClick?.(step.key)}
               disabled={!unlocked}
               className={cn(
                 "flex items-center gap-2 px-3 py-2 rounded-xl transition-all text-sm font-medium shrink-0",
-                isActive && "ring-2 ring-indigo-400",
-                state === 'completed' && "bg-green-50 text-green-700",
-                state === 'in_progress' && "bg-blue-50 text-blue-700",
-                state === 'pending_approval' && "bg-amber-50 text-amber-700",
-                state === 'rejected' && "bg-red-50 text-red-700",
-                state === 'locked' && unlocked && "bg-slate-100 text-slate-600 hover:bg-slate-200",
-                state === 'locked' && !unlocked && "bg-slate-50 text-slate-300 cursor-not-allowed"
+                isActive && "ring-2 ring-primary",
+                // Opacity modifiers must be multiples of 5 — Tailwind emits no rule for
+                // /12, which would leave these three states with no fill at all.
+                state === 'completed' && "bg-good/15 text-good",
+                state === 'in_progress' && "bg-info/15 text-info",
+                state === 'pending_approval' && "bg-warn/15 text-warn",
+                state === 'rejected' && "bg-crit/15 text-crit",
+                state === 'locked' && unlocked && "bg-muted text-muted-foreground hover:bg-secondary hover:text-foreground",
+                state === 'locked' && !unlocked && "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
               )}
             >
               {state === 'completed' && <Check className="w-4 h-4" />}
@@ -63,7 +69,7 @@ export default function CheckpointProgressTracker({ checkpoints, activeStep, onS
               <span className="sm:hidden">{step.short}</span>
             </button>
             {index < STEPS.length - 1 && (
-              <ArrowRight className={cn("w-4 h-4 shrink-0", state === 'completed' ? 'text-green-400' : state === 'in_progress' ? 'text-blue-400' : 'text-slate-300')} />
+              <ArrowRight className={cn("w-4 h-4 shrink-0", state === 'completed' ? 'text-good/70' : state === 'in_progress' ? 'text-info/70' : 'text-muted-foreground/40')} />
             )}
           </React.Fragment>
         );

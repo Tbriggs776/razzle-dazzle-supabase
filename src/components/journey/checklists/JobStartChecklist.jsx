@@ -18,11 +18,11 @@ const money = (n) =>
 
 function ChecklistRow({ label, checked, onChange, disabled, required, missing }) {
   return (
-    <label className={cn("flex items-start gap-3 py-2 rounded-md px-1 -mx-1 transition-colors", !disabled && "cursor-pointer", missing && "bg-red-50 ring-1 ring-red-200")}>
+    <label className={cn("flex items-start gap-3 py-2 rounded-md px-1 -mx-1 transition-colors", !disabled && "cursor-pointer", missing && "bg-crit/10 ring-1 ring-crit/30")}>
       <Checkbox checked={checked} onCheckedChange={onChange} disabled={disabled} className="mt-0.5" />
-      <span className={cn("text-sm", disabled ? "text-slate-400" : "text-slate-700")}>
+      <span className={cn("text-sm", disabled ? "text-muted-foreground" : "text-foreground")}>
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-crit ml-0.5">*</span>}
       </span>
     </label>
   );
@@ -47,26 +47,26 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
   };
 
   return (
-    <div className={cn("space-y-2 rounded-md px-1 -mx-1 py-1 transition-colors", missing && "bg-red-50 ring-1 ring-red-200")}>
-      <Label className="text-sm font-medium text-slate-700">
+    <div className={cn("space-y-2 rounded-md px-1 -mx-1 py-1 transition-colors", missing && "bg-crit/10 ring-1 ring-crit/30")}>
+      <Label className="text-sm font-medium text-foreground">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-crit ml-0.5">*</span>}
       </Label>
       <div className="flex items-center gap-2 flex-wrap">
         {photos.map((url, i) => (
           <div key={i} className="relative group">
-            <SignedImage src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer" />
+            <SignedImage src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-border cursor-pointer" />
             {!disabled && (
               <button
                 onClick={() => onChange(photos.filter((_, idx) => idx !== i))}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
               >×</button>
             )}
           </div>
         ))}
         {!disabled && (
-          <label className="w-16 h-16 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-colors">
-            {uploading ? <Loader2 className="w-4 h-4 text-indigo-500 animate-spin" /> : <Camera className="w-4 h-4 text-slate-400" />}
+          <label className="w-16 h-16 border-2 border-dashed border-input rounded-lg flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/10 transition-colors">
+            {uploading ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Camera className="w-4 h-4 text-muted-foreground" />}
             <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleUpload} />
           </label>
         )}
@@ -80,10 +80,10 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
 
 function Section({ title, icon: Icon, children, warning }) {
   return (
-    <div className={cn("rounded-xl border p-4 space-y-2", warning ? "border-red-200 bg-red-50/50" : "border-slate-200 bg-white")}>
-      <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-        <Icon className={cn("w-4 h-4", warning ? "text-red-500" : "text-indigo-500")} />
-        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
+    <div className={cn("rounded-xl border p-4 space-y-2", warning ? "border-crit/30 bg-crit/5" : "border-border bg-card")}>
+      <div className="flex items-center gap-2 pb-2 border-b border-border">
+        <Icon className={cn("w-4 h-4", warning ? "text-crit" : "text-primary")} />
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       </div>
       {children}
     </div>
@@ -278,19 +278,19 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
           mode anywhere in this app; the money fact has to arrive on the way IN,
           not at submit. */}
       {collection?.gate_applies && collection?.satisfied === false && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <div className="rounded-xl border border-warn/30 bg-warn/10 p-4">
           <div className="flex items-start gap-3">
-            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-warn" />
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-amber-900">
+              <p className="text-sm font-semibold text-warn">
                 Collect {money(collection.amount_due)} before starting
               </p>
-              <p className="mt-0.5 text-xs text-amber-700">
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 {collection.collection_terms === 'financed'
                   ? 'Financed job — confirm the lender approval is on file rather than collecting cash.'
                   : 'The full balance is due before install begins. If it has already been taken, ask your coordinator to record it.'}
               </p>
-              <p className="mt-1 text-xs text-amber-600">
+              <p className="mt-1 text-xs text-muted-foreground">
                 This does not block you — submit the checklist either way.
               </p>
             </div>
@@ -301,36 +301,39 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
       {/* Status banner */}
       {checkpoint?.status === 'SubmittedForApproval' && (
         <div>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
-            <Clock className="w-5 h-5 text-amber-600 shrink-0" />
+          <div className="bg-warn/10 border border-warn/30 rounded-xl p-4 flex items-center gap-3">
+            <Clock className="w-5 h-5 text-warn shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-amber-800">Submitted for Approval</p>
-              <p className="text-xs text-amber-600">Submitted by {checkpoint.submitted_by_name} on {new Date(checkpoint.submitted_date).toLocaleString()}</p>
+              <p className="text-sm font-medium text-warn">Submitted for Approval</p>
+              <p className="text-xs text-muted-foreground">Submitted by {checkpoint.submitted_by_name} on {new Date(checkpoint.submitted_date).toLocaleString()}</p>
             </div>
           </div>
           {!installerMode && <FieldManagerNotificationBadge checkpoint={checkpoint} />}
         </div>
       )}
       {checkpoint?.status === 'Completed' && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-          <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+        <div className="bg-good/10 border border-good/30 rounded-xl p-4 flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-good shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-green-800">Completed & Approved</p>
-            <p className="text-xs text-green-600">Approved by {checkpoint.approved_by_name} on {new Date(checkpoint.approved_date).toLocaleString()}</p>
+            <p className="text-sm font-medium text-good">Completed & Approved</p>
+            <p className="text-xs text-muted-foreground">Approved by {checkpoint.approved_by_name} on {new Date(checkpoint.approved_date).toLocaleString()}</p>
           </div>
         </div>
       )}
       {checkpoint?.status === 'Rejected' && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
-          <XCircle className="w-5 h-5 text-red-600 shrink-0" />
+        <div className="bg-crit/10 border border-crit/30 rounded-xl p-4 flex items-center gap-3">
+          <XCircle className="w-5 h-5 text-crit shrink-0" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-red-800">Rejected — Revisions Needed</p>
-            <p className="text-xs text-red-600">{checkpoint.rejection_notes}</p>
+            <p className="text-sm font-medium text-crit">Rejected — Revisions Needed</p>
+            <p className="text-xs text-muted-foreground">{checkpoint.rejection_notes}</p>
           </div>
         </div>
       )}
+      {/* Solid destructive fill, not a tint: this is the one banner that must read as a stop
+          sign at arm's length in daylight. bg-destructive / text-destructive-foreground is a
+          defined pair in both themes, so it stays legible where a /10 tint would not. */}
       {asbestosHalt && !isReadOnly && (
-        <div className="bg-red-600 text-white rounded-xl p-4 flex items-center gap-3">
+        <div className="bg-destructive text-destructive-foreground rounded-xl p-4 flex items-center gap-3">
           <ShieldAlert className="w-5 h-5 shrink-0" />
           <p className="text-sm font-medium">HARD STOP — Asbestos suspected. Submitting will halt the job and alert the response team.</p>
         </div>
@@ -345,21 +348,21 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
         <ChecklistRow label="Who is the Crew Lead for this job?" required checked={data.arrival.crew_lead_confirmed} missing={submitAttempted && missing.crew_lead_confirmed} onChange={v => update('arrival', 'crew_lead_confirmed', v)} disabled={isReadOnly} />
         <div className="ml-6 grid grid-cols-1 sm:grid-cols-2 gap-3 pl-7">
           <div className="space-y-1">
-            <Label className="text-xs">Crew Lead Name <span className="text-red-500">*</span></Label>
-            <Input value={data.arrival.crew_lead_name} onChange={e => update('arrival', 'crew_lead_name', e.target.value)} disabled={isReadOnly} placeholder="Name" className={submitAttempted && missing.crew_lead_name ? 'border-red-400' : ''} />
-            {submitAttempted && missing.crew_lead_name && <p className="text-xs text-red-500">Required</p>}
+            <Label className="text-xs">Crew Lead Name <span className="text-crit">*</span></Label>
+            <Input value={data.arrival.crew_lead_name} onChange={e => update('arrival', 'crew_lead_name', e.target.value)} disabled={isReadOnly} placeholder="Name" className={submitAttempted && missing.crew_lead_name ? 'border-crit' : ''} />
+            {submitAttempted && missing.crew_lead_name && <p className="text-xs text-crit">Required</p>}
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Crew Lead Phone <span className="text-red-500">*</span></Label>
-            <Input value={data.arrival.crew_lead_phone} onChange={e => update('arrival', 'crew_lead_phone', e.target.value)} disabled={isReadOnly} placeholder="Phone" className={submitAttempted && missing.crew_lead_phone ? 'border-red-400' : ''} />
-            {submitAttempted && missing.crew_lead_phone && <p className="text-xs text-red-500">Required</p>}
+            <Label className="text-xs">Crew Lead Phone <span className="text-crit">*</span></Label>
+            <Input value={data.arrival.crew_lead_phone} onChange={e => update('arrival', 'crew_lead_phone', e.target.value)} disabled={isReadOnly} placeholder="Phone" className={submitAttempted && missing.crew_lead_phone ? 'border-crit' : ''} />
+            {submitAttempted && missing.crew_lead_phone && <p className="text-xs text-crit">Required</p>}
           </div>
         </div>
       </Section>
 
       {/* Section: Protect Yourself — Take Photos First */}
       <Section title="Protect Yourself — Take Photos First" icon={Camera}>
-        <p className="text-xs text-slate-500 italic -mt-1">Do this BEFORE you move or touch anything. These photos protect you if there is ever a problem or a claim.</p>
+        <p className="text-xs text-muted-foreground italic -mt-1">Do this BEFORE you move or touch anything. These photos protect you if there is ever a problem or a claim.</p>
         <PhotoUpload label='Take a "before" video and photos of the whole work area' required missing={submitAttempted && missing.before_video_photos} photos={data.documentation.before_video_photos} onChange={urls => update('documentation', 'before_video_photos', urls)} disabled={isReadOnly} />
         <PhotoUpload label="Take photos of all customer furniture and belongings before you move them" required missing={submitAttempted && missing.furniture_photos} photos={data.documentation.furniture_photos} onChange={urls => update('documentation', 'furniture_photos', urls)} disabled={isReadOnly} />
         <PhotoUpload label="Take detailed photos of the refrigerator and any other appliances you will move or touch (look for dents and scratches first)" required missing={submitAttempted && missing.appliance_photos} photos={data.documentation.appliance_photos} onChange={urls => update('documentation', 'appliance_photos', urls)} disabled={isReadOnly} />
@@ -371,19 +374,19 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
         <ChecklistRow label="Did you check all materials against the work order? (Right product, style, color, and amount)" required checked={data.verification.materials_verified} missing={submitAttempted && missing.materials_verified} onChange={v => update('verification', 'materials_verified', v)} disabled={isReadOnly} />
 
         {/* Material shortage conditional */}
-        <div className="ml-6 mt-1 p-3 bg-red-50 rounded-lg space-y-2">
+        <div className="ml-6 mt-1 p-3 bg-crit/10 rounded-lg space-y-2">
           <ChecklistRow label="⛔ Is any material missing or wrong? → Stop. Tell your Field Manager before you start." checked={data.verification.material_shortage} onChange={v => update('verification', 'material_shortage', v)} disabled={isReadOnly} />
           {data.verification.material_shortage && (
             <div className="grid grid-cols-2 gap-3 pl-7">
               <div className="space-y-1">
-                <Label className="text-xs">Shortage count <span className="text-red-500">*</span></Label>
-                <Input type="number" value={data.verification.shortage_count} onChange={e => update('verification', 'shortage_count', parseInt(e.target.value) || 0)} disabled={isReadOnly} className={submitAttempted && missing.shortage_count ? 'border-red-400' : ''} />
-                {submitAttempted && missing.shortage_count && <p className="text-xs text-red-500">Required</p>}
+                <Label className="text-xs">Shortage count <span className="text-crit">*</span></Label>
+                <Input type="number" value={data.verification.shortage_count} onChange={e => update('verification', 'shortage_count', parseInt(e.target.value) || 0)} disabled={isReadOnly} className={submitAttempted && missing.shortage_count ? 'border-crit' : ''} />
+                {submitAttempted && missing.shortage_count && <p className="text-xs text-crit">Required</p>}
               </div>
               <div className="space-y-1 col-span-2">
-                <Label className="text-xs">Shortage details (alerts Install Coordinator + Order Entry) <span className="text-red-500">*</span></Label>
-                <Textarea value={data.verification.shortage_notes} onChange={e => update('verification', 'shortage_notes', e.target.value)} disabled={isReadOnly} rows={2} className={submitAttempted && missing.shortage_notes ? 'border-red-400' : ''} />
-                {submitAttempted && missing.shortage_notes && <p className="text-xs text-red-500">Required</p>}
+                <Label className="text-xs">Shortage details (alerts Install Coordinator + Order Entry) <span className="text-crit">*</span></Label>
+                <Textarea value={data.verification.shortage_notes} onChange={e => update('verification', 'shortage_notes', e.target.value)} disabled={isReadOnly} rows={2} className={submitAttempted && missing.shortage_notes ? 'border-crit' : ''} />
+                {submitAttempted && missing.shortage_notes && <p className="text-xs text-crit">Required</p>}
               </div>
             </div>
           )}
@@ -398,10 +401,10 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
       {/* Section: Safety — Asbestos (STOP) */}
       <Section title="Safety — Asbestos (STOP)" icon={ShieldAlert} warning>
         <ChecklistRow label="Did you check the home for asbestos?" checked={data.safety.asbestos_checked} onChange={v => update('safety', 'asbestos_checked', v)} disabled={isReadOnly} />
-        <div className="ml-6 mt-1 p-3 bg-red-50 rounded-lg">
+        <div className="ml-6 mt-1 p-3 bg-crit/10 rounded-lg">
           <ChecklistRow label="⛔ Do you think there is asbestos? → STOP the job right away. Do not cut, sand, or move it. Call your Field Manager now." checked={data.safety.asbestos_suspected} onChange={v => update('safety', 'asbestos_suspected', v)} disabled={isReadOnly} />
           {data.safety.asbestos_suspected && (
-            <p className="text-xs text-red-600 pl-7 mt-1">
+            <p className="text-xs text-crit pl-7 mt-1">
               Installation stops until customer engages a licensed abatement company and provides a clearance certificate. Per signed acknowledgment, Floor Daddy does not proceed.
             </p>
           )}
@@ -422,7 +425,7 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
         {!isReadOnly && (
           <>
             {!isValid && (
-              <p className="text-xs text-amber-600 mr-auto">
+              <p className="text-xs text-warn mr-auto">
                 {missingCount} required field{missingCount === 1 ? '' : 's'} remaining
               </p>
             )}
@@ -434,18 +437,18 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
         )}
         {checkpoint?.status === 'SubmittedForApproval' && !installerMode && (
           <>
-            <Button variant="outline" onClick={handleReject} disabled={saving} className="gap-2 text-red-600 border-red-200 hover:bg-red-50">
+            <Button variant="outline" onClick={handleReject} disabled={saving} className="gap-2 text-crit border-crit/30 hover:bg-crit/10">
               <XCircle className="w-4 h-4" />
               Reject
             </Button>
-            <Button onClick={handleApprove} disabled={saving || asbestosHalt} className="gap-2 bg-green-600 hover:bg-green-700">
+            <Button onClick={handleApprove} disabled={saving || asbestosHalt} className="gap-2 bg-good text-background hover:bg-good/90">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
               Approve & Advance
             </Button>
           </>
         )}
         {checkpoint?.status === 'SubmittedForApproval' && asbestosHalt && !installerMode && (
-          <p className="text-xs text-red-600 mr-auto">Cannot approve — asbestos hard stop active</p>
+          <p className="text-xs text-crit mr-auto">Cannot approve — asbestos hard stop active</p>
         )}
       </div>
     </div>

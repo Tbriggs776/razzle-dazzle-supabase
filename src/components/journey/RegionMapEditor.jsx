@@ -49,6 +49,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+// Map-geometry palette. These are Leaflet path/marker colours painted onto an always-light
+// CARTO basemap and persisted on the region record, so they stay literal hex rather than
+// theme tokens — a token would resolve differently per theme and no longer match saved data.
 const REGION_COLORS = [
   '#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444',
   '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#6366F1'
@@ -145,41 +148,44 @@ function TodaysJobsPanel({ journeyOrders, regions }) {
   }, [todaysOrders, regions]);
 
   return (
-    <div className="absolute bottom-6 left-4 z-[1000] w-64 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
+    <div className="absolute bottom-6 left-4 z-[1000] w-64 bg-card text-card-foreground rounded-xl shadow-xl border border-border overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 transition-colors"
+        className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-muted/60 transition-colors"
       >
-        <CalendarDays className="w-4 h-4 text-indigo-500 shrink-0" />
-        <span className="text-xs font-bold text-slate-700 flex-1 text-left">
+        <CalendarDays className="w-4 h-4 text-primary shrink-0" />
+        <span className="text-xs font-bold text-foreground flex-1 text-left">
           Today's Jobs
         </span>
-        <span className="bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full px-2 py-0.5 shrink-0">
+        {/* Count chip, not a status — an accent-tinted counter, so a token swap rather than a StatusPill. */}
+        <span className="bg-primary/10 text-primary text-xs font-bold rounded-full px-2 py-0.5 shrink-0">
           {todaysOrders.length}
         </span>
-        {open ? <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" /> : <ChevronUp className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
+        {open ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" /> : <ChevronUp className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" />}
       </button>
 
       {open && (
-        <div className="border-t border-slate-100 max-h-72 overflow-y-auto">
+        <div className="border-t border-border max-h-72 overflow-y-auto">
           {todaysOrders.length === 0 ? (
-            <p className="text-[11px] text-slate-400 text-center py-4 italic">No jobs scheduled today</p>
+            <p className="text-[11px] text-muted-foreground text-center py-4 italic">No jobs scheduled today</p>
           ) : (
             grouped.map((group, gi) => {
+              // Region swatch colour comes from the saved region record (same literal hex the
+              // map polygons use); the unassigned fallback matches the map's grey marker.
               const color = group.region?.color || '#94a3b8';
               const name = group.region?.region_name || 'No Region';
               return (
-                <div key={gi} className="px-3 py-2 border-b border-slate-50 last:border-b-0">
+                <div key={gi} className="px-3 py-2 border-b border-border/60 last:border-b-0">
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
-                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{name}</span>
-                    <span className="ml-auto text-[10px] text-slate-400">{group.orders.length}</span>
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">{name}</span>
+                    <span className="ml-auto text-[10px] text-muted-foreground/70">{group.orders.length}</span>
                   </div>
                   {group.orders.map(jo => (
                     <div key={jo.id} className="flex items-start gap-2 py-1">
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-slate-700 truncate">{jo.customer_name || jo.invoice_number || jo.rfms_order_id}</p>
-                        {jo.zip_code && <p className="text-[10px] text-slate-400 truncate">{jo.zip_code}</p>}
+                        <p className="text-xs font-medium text-foreground truncate">{jo.customer_name || jo.invoice_number || jo.rfms_order_id}</p>
+                        {jo.zip_code && <p className="text-[10px] text-muted-foreground truncate">{jo.zip_code}</p>}
                       </div>
                     </div>
                   ))}
@@ -204,6 +210,8 @@ export default function RegionMapEditor({ regions, journeyOrders, onPolygonDrawn
     return region?.color || '#94A3B8';
   };
 
+  // Marker glyph is drawn straight into Leaflet's own DOM (no Tailwind class context) and sits
+  // on the always-light basemap, so the white ring stays a literal colour in both themes.
   const createOrderIcon = (color) => L.divIcon({
     className: '',
     html: `<div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>`,
@@ -225,6 +233,11 @@ export default function RegionMapEditor({ regions, journeyOrders, onPolygonDrawn
         subdomains="abcd"
         maxZoom={19}
       />
+
+      {/* NOTE ON POPUP TYPE: <Popup> content is portalled into Leaflet's own
+          .leaflet-popup-content-wrapper, which leaflet.css hard-codes to a white background
+          (the project adds no dark override). Theme tokens there would render light-on-white
+          in dark mode, so popup text deliberately keeps fixed light-surface colours. */}
 
       {/* Render saved regions */}
       {regions.map((region, idx) =>

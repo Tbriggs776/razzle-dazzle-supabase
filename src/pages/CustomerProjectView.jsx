@@ -327,7 +327,7 @@ export default function CustomerProjectView() {
                 </div>
 
                 <a href={`mailto:${projectManager.email}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group">
-                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center flex-shrink-0">
                     <Mail className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div className="min-w-0">
@@ -338,7 +338,7 @@ export default function CustomerProjectView() {
 
                 {projectManager.phone && (
                   <a href={`tel:${projectManager.phone}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group">
-                    <div className="w-10 h-10 rounded-lg bg-brand-pink/12 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-brand-pink/15 flex items-center justify-center flex-shrink-0">
                       <Phone className="w-5 h-5 text-brand-pink" />
                     </div>
                     <div>
@@ -382,7 +382,7 @@ export default function CustomerProjectView() {
                 </div>
 
                 <a href={`mailto:${installationManager.email}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group">
-                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center flex-shrink-0">
                     <Mail className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div className="min-w-0">
@@ -393,7 +393,7 @@ export default function CustomerProjectView() {
 
                 {installationManager.phone && (
                   <a href={`tel:${installationManager.phone}`} className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group">
-                    <div className="w-10 h-10 rounded-lg bg-brand-pink/12 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-brand-pink/15 flex items-center justify-center flex-shrink-0">
                       <Phone className="w-5 h-5 text-brand-pink" />
                     </div>
                     <div>

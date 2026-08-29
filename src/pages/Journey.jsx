@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, X, Menu, Map, LayoutGrid, Layers, LogOut, User, ChevronDown, ChevronRight, Navigation, Bell, HardHat } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Loader2, X, Menu, Map, LayoutGrid, Layers, LogOut, User, ChevronDown, ChevronRight, Navigation, Bell, HardHat, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import StatusPill from '@/components/common/StatusPill';
 import RegionMapEditor from '@/components/journey/RegionMapEditor';
@@ -204,6 +206,16 @@ function JourneyInner() {
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Journey replaces the app's own chrome with this sidebar, so without
+            this there is no route back — you are stranded in the module. */}
+        <Link
+          to={createPageUrl('Dashboard')}
+          className="flex items-center gap-2 border-b border-border px-5 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground shrink-0"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to Razzle Dazzle
+        </Link>
 
         {/* Nav items */}
         <nav className="flex-1 px-3 py-4 space-y-1">

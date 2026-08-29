@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 
+// Deliberately literal hex, not design tokens: these are DATA. The chosen value is
+// persisted to RegionAssignment.color and handed to Leaflet to fill the polygon on the
+// map, which cannot resolve CSS vars. They are region identity, not theme surface.
 const REGION_COLORS = [
   '#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444',
   '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#6366F1'
@@ -35,9 +38,9 @@ function RegionForm({ region, teamMembers, crews = [], onSave, onCancel }) {
   };
 
   return (
-    <div className="space-y-3 bg-slate-50 rounded-xl p-3 text-sm">
+    <div className="space-y-3 bg-muted rounded-xl p-3 text-sm">
       <div>
-        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('rsRegionName')}</label>
+        <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('rsRegionName')}</label>
         <Input
           value={form.region_name}
           onChange={e => set('region_name', e.target.value)}
@@ -47,7 +50,7 @@ function RegionForm({ region, teamMembers, crews = [], onSave, onCancel }) {
       </div>
 
       <div>
-        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('rsColor')}</label>
+        <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('rsColor')}</label>
         <div className="flex gap-1.5 flex-wrap">
           {REGION_COLORS.map(c => (
             <button
@@ -56,7 +59,8 @@ function RegionForm({ region, teamMembers, crews = [], onSave, onCancel }) {
               className="w-6 h-6 rounded-full border-2 transition-all"
               style={{
                 backgroundColor: c,
-                borderColor: form.color === c ? '#1e293b' : 'transparent',
+                // The swatch fill is data (above); the selection ring is chrome, so it tokenises.
+                borderColor: form.color === c ? 'hsl(var(--foreground))' : 'transparent',
                 transform: form.color === c ? 'scale(1.2)' : 'scale(1)'
               }}
             />
@@ -70,11 +74,11 @@ function RegionForm({ region, teamMembers, crews = [], onSave, onCancel }) {
         { key: 'order_entry_id', label: t('rsOrderEntry') },
       ].map(({ key, label }) => (
         <div key={key}>
-          <label className="text-xs font-medium text-slate-500 mb-1 block">{label}</label>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">{label}</label>
           <select
             value={form[key]}
             onChange={e => set(key, e.target.value)}
-            className="w-full h-8 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-700"
+            className="w-full h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground"
           >
             <option value="">{t('rsSelect')}</option>
             {memberOptions.map(m => (
@@ -87,11 +91,11 @@ function RegionForm({ region, teamMembers, crews = [], onSave, onCancel }) {
       ))}
 
       <div>
-        <label className="text-xs font-medium text-slate-500 mb-1 block">{t('rsPreferredInstaller')}</label>
+        <label className="text-xs font-medium text-muted-foreground mb-1 block">{t('rsPreferredInstaller')}</label>
         <select
           value={form.preferred_installer_crew_id}
           onChange={e => handleCrewChange(e.target.value)}
-          className="w-full h-8 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-700"
+          className="w-full h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground"
         >
           <option value="">{t('rsSelectCrew')}</option>
           {safeCrews.map(c => (
@@ -148,7 +152,7 @@ export default function RegionSidebar({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold text-slate-700 text-sm">{t('rsTitle')}</h2>
+        <h2 className="font-semibold text-foreground text-sm">{t('rsTitle')}</h2>
         <Button
           size="sm"
           className="h-7 text-xs"
@@ -176,26 +180,30 @@ export default function RegionSidebar({
         {regions.map((region, idx) => (
           <div
             key={region.id}
-            className="border border-slate-200 rounded-xl overflow-hidden bg-white"
+            className="border border-border rounded-xl overflow-hidden bg-card"
           >
             <div className="flex items-center gap-2 px-3 py-2.5">
+              {/* Region identity colour is data (see REGION_COLORS); the hex fallback
+                  mirrors REGION_COLORS[0] and the default the map draws with. */}
               <div
                 className="w-3 h-3 rounded-full flex-shrink-0"
                 style={{ backgroundColor: region.color || '#4F46E5' }}
               />
-              <span className="font-medium text-sm text-slate-700 flex-1 truncate">
+              <span className="font-medium text-sm text-foreground flex-1 truncate">
                 {region.region_name}
               </span>
-              <span className="text-xs text-slate-400 bg-slate-100 rounded px-1.5 py-0.5">
+              {/* A count chip, not a status — kept as a plain neutral chip rather than a
+                  StatusPill, whose tones and uppercase treatment would imply state. */}
+              <span className="text-xs text-muted-foreground bg-muted rounded px-1.5 py-0.5">
                 {t('rsJobsCount', { count: getOrderCount(region.id) })}
               </span>
-              <button onClick={() => toggle(region.id)} className="p-0.5 text-slate-400 hover:text-slate-600">
+              <button onClick={() => toggle(region.id)} className="p-0.5 text-muted-foreground hover:text-foreground">
                 {expanded[region.id] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </button>
             </div>
 
             {expanded[region.id] && (
-              <div className="px-3 pb-3 space-y-2 border-t border-slate-100 pt-2">
+              <div className="px-3 pb-3 space-y-2 border-t border-border pt-2">
                 {editingId === region.id ? (
                   <RegionForm
                     region={region}
@@ -206,18 +214,21 @@ export default function RegionSidebar({
                   />
                 ) : (
                   <>
-                    <div className="text-xs text-slate-500 space-y-1">
+                    <div className="text-xs text-muted-foreground space-y-1">
                       <div><span className="font-medium">{t('rsFieldManager')}:</span> {getMemberName(region.field_manager_id)}</div>
                       <div><span className="font-medium">{t('rsInstallCoordinator')}:</span> {getMemberName(region.install_coordinator_id)}</div>
                       <div><span className="font-medium">{t('rsOrderEntry')}:</span> {getMemberName(region.order_entry_id)}</div>
                       <div><span className="font-medium">{t('rsZips', { count: region.zip_codes?.length || 0 })}:</span>{' '}
                         {region.zip_codes?.length > 0
                           ? <span className="font-mono">{region.zip_codes.join(', ')}</span>
-                          : <span className="text-slate-400">{t('rsNoZips')}</span>
+                          : <span className="text-muted-foreground/60">{t('rsNoZips')}</span>
                         }
                       </div>
+                      {/* Inline warning, not a badge — the surrounding block is a stack of
+                          key/value lines, so a StatusPill here would break that rhythm.
+                          The warn token carries the same meaning. */}
                       {!region.polygon_coordinates?.length && (
-                        <div className="text-amber-600 font-medium">{t('rsNoPolygon')}</div>
+                        <div className="text-warn font-medium">{t('rsNoPolygon')}</div>
                       )}
                     </div>
                     <div className="flex gap-1.5">
@@ -240,7 +251,7 @@ export default function RegionSidebar({
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-6 w-6 p-0 text-red-500 hover:bg-red-50"
+                        className="h-6 w-6 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => onDeleteRegion(region.id)}
                       >
                         <Trash2 className="w-3 h-3" />
@@ -254,7 +265,7 @@ export default function RegionSidebar({
         ))}
 
         {regions.length === 0 && !creating && (
-          <div className="text-center py-8 text-slate-400 text-xs">
+          <div className="text-center py-8 text-muted-foreground text-xs">
             {t('rsNoRegions')}<br />{t('rsNoRegionsHint')}
           </div>
         )}

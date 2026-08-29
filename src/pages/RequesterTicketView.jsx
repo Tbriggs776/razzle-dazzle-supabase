@@ -486,7 +486,7 @@ export default function RequesterTicketView() {
                             size="sm"
                             onClick={() => approveCategoryMutation.mutate({ categoryIndex: idx })}
                             disabled={approveCategoryMutation.isPending || denyCategoryMutation.isPending}
-                            className="bg-good text-white hover:bg-good/90"
+                            className="bg-good text-background hover:bg-good/90"
                           >
                             Approve Resolved
                           </Button>

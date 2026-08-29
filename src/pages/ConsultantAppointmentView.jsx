@@ -1161,7 +1161,7 @@ export default function ConsultantAppointmentView() {
             <div className="space-y-4">
               {appointment.appointment_date && (
                 <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
                     <CalendarIcon className="w-5 h-5 text-brand-blue" />
                   </div>
                   <div>
@@ -1175,7 +1175,7 @@ export default function ConsultantAppointmentView() {
 
               {appointment.appointment_block && (
                 <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-brand-pink/12 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-brand-pink/15 flex items-center justify-center">
                     <Clock className="w-5 h-5 text-brand-pink" />
                   </div>
                   <div>
@@ -1227,7 +1227,7 @@ export default function ConsultantAppointmentView() {
                     href={`tel:${lead.phone}`}
                     className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-brand-blue/12 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
                       <Mail className="w-5 h-5 text-brand-blue" />
                     </div>
                     <div>

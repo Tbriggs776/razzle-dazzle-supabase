@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw, Mail, Phone, Loader2, Save, HardHat, UserPlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import StatusPill from '@/components/common/StatusPill';
 import { toast } from 'sonner';
 
 export default function InstallerManager() {
@@ -121,8 +122,8 @@ export default function InstallerManager() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-800">Installer Contact Info</h2>
-          <p className="text-sm text-slate-500">Manage email & phone for each RFMS crew. Installers receive notifications when their checkpoint is approved or rejected.</p>
+          <h2 className="text-lg font-semibold text-foreground">Installer Contact Info</h2>
+          <p className="text-sm text-muted-foreground">Manage email & phone for each RFMS crew. Installers receive notifications when their checkpoint is approved or rejected.</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setShowAddForm(s => !s)} size="sm" variant="outline" className="gap-2">
@@ -137,14 +138,14 @@ export default function InstallerManager() {
       </div>
 
       {showAddForm && (
-        <div className="bg-white border border-indigo-200 rounded-xl p-4 space-y-3">
+        <div className="bg-card border border-primary/30 rounded-xl p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <UserPlus className="w-4 h-4 text-indigo-600" />
-            <h3 className="text-sm font-semibold text-slate-800">Add Manual Crew</h3>
+            <UserPlus className="w-4 h-4 text-primary" />
+            <h3 className="text-sm font-semibold text-foreground">Add Manual Crew</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Crew Name <span className="text-red-500">*</span></label>
+              <label className="text-xs font-medium text-muted-foreground">Crew Name <span className="text-destructive">*</span></label>
               <Input
                 value={newCrew.crew_name}
                 onChange={e => setNewCrew(c => ({ ...c, crew_name: e.target.value }))}
@@ -153,7 +154,7 @@ export default function InstallerManager() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Email</label>
+              <label className="text-xs font-medium text-muted-foreground">Email</label>
               <Input
                 type="email"
                 value={newCrew.email}
@@ -163,7 +164,7 @@ export default function InstallerManager() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600">Phone</label>
+              <label className="text-xs font-medium text-muted-foreground">Phone</label>
               <Input
                 type="tel"
                 value={newCrew.phone}
@@ -183,35 +184,37 @@ export default function InstallerManager() {
       )}
 
       {isLoading && (
-        <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-indigo-600 animate-spin" /></div>
+        <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
       )}
 
       <div className="grid gap-2">
         {installers.map(installer => {
           const hasContact = installer.email || installer.phone;
+          // Background moved into the branches (it used to be a base `bg-white` that the
+          // "missing contact" branch overrode) so the winning fill is unambiguous.
           return (
-            <div key={installer.id} className={`bg-white border rounded-xl p-3 ${hasEdits(installer) ? 'border-indigo-300' : hasContact ? 'border-slate-200' : 'border-amber-200 bg-amber-50/30'}`}>
+            <div key={installer.id} className={`border rounded-xl p-3 ${hasEdits(installer) ? 'bg-card border-primary/50' : hasContact ? 'bg-card border-border' : 'bg-warn/5 border-warn/40'}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
-                  <HardHat className="w-4 h-4 text-indigo-600" />
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <HardHat className="w-4 h-4 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium text-slate-800 truncate">{installer.crew_name}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{installer.crew_name}</p>
                     {installer.crew_id?.startsWith('MANUAL-') && (
-                      <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Manual</span>
+                      <StatusPill tone="info" className="shrink-0 px-1.5 text-[10px]">Manual</StatusPill>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400 font-mono">{installer.crew_id}</p>
+                  <p className="text-xs text-muted-foreground font-mono">{installer.crew_id}</p>
                 </div>
                 {!hasContact && (
-                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">No contact info</span>
+                  <StatusPill tone="warn" className="shrink-0">No contact info</StatusPill>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-2 mt-2">
                 <div className="relative">
-                  <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                   <Input
                     type="email"
                     value={getEditValue(installer, 'email')}
@@ -221,7 +224,7 @@ export default function InstallerManager() {
                   />
                 </div>
                 <div className="relative">
-                  <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <Phone className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                   <Input
                     type="tel"
                     value={getEditValue(installer, 'phone')}
@@ -250,7 +253,7 @@ export default function InstallerManager() {
         })}
 
         {installers.length === 0 && !isLoading && (
-          <div className="text-center py-8 text-slate-400">
+          <div className="text-center py-8 text-muted-foreground">
             <HardHat className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p>No installers yet. Click "Sync Crews" to pull from RFMS, or "Add Manual Crew" to create one.</p>
           </div>
