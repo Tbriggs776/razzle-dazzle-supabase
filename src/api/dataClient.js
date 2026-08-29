@@ -571,6 +571,12 @@ const RPC_FUNCTIONS = {
   // the yard phone was getting English again on his own. An org admin can set it
   // for someone who cannot easily do it themselves, which is the real case: a crew
   // member on a phone, mid-job, in a language they cannot read the settings in.
+  // An applicant who lost their link. Keyed on the contact email ALREADY on the
+  // application, never the ROC number — Arizona ROC licences are public record, so
+  // resuming on one would let anyone who looked up a competitor open their
+  // in-progress application and read the W-9 and bank details on it.
+  // The response is identical whether or not an application exists.
+  requestInstallerApplicationLink: (p) => ['request_installer_application_link', { p_email: p.email }],
   myPreferredLanguage: () => ['my_preferred_language', {}],
   setPreferredLanguage: (p) => ['set_preferred_language', {
     p_language: p.language, p_user_id: p.userId ?? null,

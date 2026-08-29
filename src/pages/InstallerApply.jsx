@@ -36,6 +36,8 @@ export default function InstallerApply() {
   const [rocBusy, setRocBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [resumeEmail, setResumeEmail] = useState('');
+  const [resumeSent, setResumeSent] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
@@ -77,7 +79,8 @@ export default function InstallerApply() {
       } catch (e) { setError(e.message || 'Could not start the application.'); }
       setLoading(false);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Mount only. The disable directive that used to sit here is gone with the
+    // code it was suppressing — this effect no longer creates anything.
   }, []);
 
   // Creates the application the first time there is anything worth saving, and
@@ -217,6 +220,52 @@ export default function InstallerApply() {
       </section>
 
       {error && <div className="rounded-xl border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 px-4 py-3 text-sm flex items-start gap-2"><AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /><span>{error}</span></div>}
+
+      {/* Only shown to someone who arrived WITHOUT a token — i.e. they lost the
+          link. The link goes to the email already on the application; the ROC
+          number would be the obvious key and is the wrong one, because Arizona ROC
+          licences are public record. */}
+      {!token && (
+        <section className={card}>
+          <h2 className={sectionTitle}><Send className="w-4 h-4 text-primary" /> Already started?</h2>
+          <p className="text-sm text-muted-foreground">
+            If you began an application before, enter the email you used and we will
+            send your link back to you.
+          </p>
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+            <input
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              aria-label="The email you used before"
+              value={resumeEmail}
+              onChange={(e) => setResumeEmail(e.target.value)}
+              placeholder="you@yourcompany.com"
+              className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+            />
+            <button
+              type="button"
+              disabled={!resumeEmail.trim() || resumeSent}
+              onClick={async () => {
+                await base44.functions.invoke('requestInstallerApplicationLink', { email: resumeEmail.trim() });
+                // Deliberately unconditional: the server returns the same thing
+                // either way, so saying anything else here would leak what it
+                // carefully does not.
+                setResumeSent(true);
+              }}
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-input bg-background px-4 text-sm font-medium hover:bg-muted disabled:opacity-50"
+            >
+              Send my link
+            </button>
+          </div>
+          {resumeSent && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              If we have an application for that email, the link is on its way. Check
+              your inbox and your spam folder.
+            </p>
+          )}
+        </section>
+      )}
 
       {/* ROC license */}
       <section className={card}>
