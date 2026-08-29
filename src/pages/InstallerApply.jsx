@@ -67,24 +67,42 @@ export default function InstallerApply() {
         if (token) {
           const a = await base44.functions.invoke('getInstallerApplication', { token });
           hydrate(a?.data ?? a);
-        } else {
-          const res = await base44.functions.invoke('createInstallerApplication', { payload: {} });
-          const t = (res?.data ?? res)?.public_token;
-          if (t) { setToken(t); const p = new URLSearchParams(params); p.set('token', t); setParams(p, { replace: true }); }
         }
+        // NOTHING is created here any more. Mounting used to insert a blank
+        // application unconditionally, so every visit — a bounce, a bot, a
+        // recruiter checking the link still worked — left a row behind. 7 of the 8
+        // live rows were these orphans, which makes the applicant list useless for
+        // knowing who actually applied. The row is now created on the first real
+        // keystroke instead, in ensureToken() below.
       } catch (e) { setError(e.message || 'Could not start the application.'); }
       setLoading(false);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Creates the application the first time there is anything worth saving, and
+  // stamps the token into the URL so a refresh or a returned-to link resumes.
+  const ensureToken = useCallback(async () => {
+    if (token) return token;
+    const res = await base44.functions.invoke('createInstallerApplication', { payload: {} });
+    const t = (res?.data ?? res)?.public_token;
+    if (!t) throw new Error('Could not start the application.');
+    setToken(t);
+    const p = new URLSearchParams(params);
+    p.set('token', t);
+    setParams(p, { replace: true });
+    return t;
+  }, [token, params, setParams]);
+
   const persist = useCallback(async () => {
-    if (!token) return;
     setSaving(true);
-    try { await base44.functions.invoke('saveInstallerApplication', { token, payload: form }); }
+    try {
+      const t = await ensureToken();
+      await base44.functions.invoke('saveInstallerApplication', { token: t, payload: form });
+    }
     catch (e) { setError(e.message); }
     setSaving(false);
-  }, [token, form]);
+  }, [ensureToken, form]);
 
   const verifyRoc = async () => {
     const lic = (form.roc_license_no || '').trim();
@@ -115,10 +133,23 @@ export default function InstallerApply() {
 
   const hasFlooringClass = Array.isArray(roc?.classes) && roc.classes.some((c) => FLOORING_CLASSES.includes(c.class));
   const missingDocs = DOCS.filter((d) => d.required && !files[d.kind]).map((d) => d.label);
-  const canSubmit =
-    form.legal_business_name && form.entity_type && roc?.is_active &&
-    form.contact_name && form.contact_email && form.signatory_name &&
-    missingDocs.length === 0 && (!form.elect_direct_deposit || (form.bank_name && form.account_type));
+  // A named list, not a boolean. The button was disabled with no stated reason,
+  // and the commonest cause was roc.is_active — which is only set by a small
+  // Verify button nobody is told to press. So a fully completed application sat
+  // behind a greyed-out Submit, while the copy above it said an inactive licence
+  // was fine. That is how an applicant gives up.
+  const blockers = [
+    !form.legal_business_name && 'your legal business name',
+    !form.entity_type && 'your entity type',
+    !roc?.is_active && 'your ROC licence — press Verify next to the licence number',
+    !form.contact_name && 'a contact name',
+    !form.contact_email && 'a contact email',
+    !form.signatory_name && 'the name of whoever signs',
+    missingDocs.length > 0 && `these documents: ${missingDocs.join(', ')}`,
+    (form.elect_direct_deposit && !(form.bank_name && form.account_type))
+      && 'your bank name and account type for direct deposit',
+  ].filter(Boolean);
+  const canSubmit = blockers.length === 0;
 
   const submit = async () => {
     setSubmitting(true); setError('');
@@ -295,6 +326,16 @@ export default function InstallerApply() {
           {saving ? 'Saving…' : 'Progress saved to this link.'}
           {missingDocs.length > 0 && <span className="block text-amber-600 dark:text-amber-400 mt-0.5">Still needed: {missingDocs.join(', ')}</span>}
         </div>
+        {blockers.length > 0 && (
+          <div className="mb-3 rounded-lg border border-warn/40 bg-warn/10 p-3">
+            <p className="text-sm font-medium text-foreground">
+              Before you can submit, we still need:
+            </p>
+            <ul className="mt-1 list-disc pl-5 text-sm text-muted-foreground">
+              {blockers.map((b) => <li key={b}>{b}</li>)}
+            </ul>
+          </div>
+        )}
         <button onClick={submit} disabled={!canSubmit || submitting}
           className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm disabled:opacity-50 hover:opacity-90 transition">
           {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Submit application

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -51,18 +51,46 @@ export default function MyQueue() {
     enabled: !!user,
   });
 
+  // Fetch by the ids these projects actually reference, rather than the top 200 by
+  // -updated_date and hoping. The blanket window silently produced WRONG VALUES
+  // once the book outgrew it: a customer outside the 200 rendered as "No address",
+  // and a sale outside it reverted a signed pre-install checklist to "Pending".
+  // NULLS FIRST ordering made it worse by truncating scheduled jobs first — the
+  // exact rows a crew board is for. Chunked because PostgREST has a URL length
+  // limit on an $in list.
+  const customerIds = useMemo(
+    () => [...new Set(projects.map((p) => p.customer).filter(Boolean))], [projects]);
+  const saleIds = useMemo(
+    () => [...new Set(projects.map((p) => p.sale).filter(Boolean))], [projects]);
+
   const { data: customers = [] } = useQuery({
-    queryKey: ['journeyCustomers'],
-    queryFn: () => base44.entities.Customer.list('-updated_date', 200),
+    queryKey: ['journeyCustomersByIds', customerIds.join(',')],
+    queryFn: async () => {
+      if (!customerIds.length) return [];
+      const CHUNK = 25;
+      const chunks = [];
+      for (let i = 0; i < customerIds.length; i += CHUNK) chunks.push(customerIds.slice(i, i + CHUNK));
+      const res = await Promise.all(chunks.map((c) =>
+        base44.entities.Customer.filter({ id: { $in: c } }, '-updated_date', c.length)));
+      return res.flat();
+    },
+    enabled: customerIds.length > 0,
     staleTime: 5 * 60 * 1000,
-    enabled: !!user,
   });
 
   const { data: sales = [] } = useQuery({
-    queryKey: ['journeyProjectSales'],
-    queryFn: () => base44.entities.Sale.list('-updated_date', 200),
+    queryKey: ['journeyProjectSalesByIds', saleIds.join(',')],
+    queryFn: async () => {
+      if (!saleIds.length) return [];
+      const CHUNK = 25;
+      const chunks = [];
+      for (let i = 0; i < saleIds.length; i += CHUNK) chunks.push(saleIds.slice(i, i + CHUNK));
+      const res = await Promise.all(chunks.map((c) =>
+        base44.entities.Sale.filter({ id: { $in: c } }, '-updated_date', c.length)));
+      return res.flat();
+    },
+    enabled: saleIds.length > 0,
     staleTime: 5 * 60 * 1000,
-    enabled: !!user,
   });
 
   // Also load-bearing: every step dot falls back to 'Pending' when this is empty,
