@@ -70,6 +70,12 @@ const ENTITY_TABLE = {
   TicketLog: 'ticket_log',
   TicketMessage: 'ticket_message',
   TimeBlockSettings: 'time_block_settings',
+  // Approvals — the gate between process steps. A decision always requires a
+  // SECOND person; decide_approval refuses self-approval server-side.
+  Approval: 'approval',
+  Department: 'department',
+  DepartmentMember: 'department_member',
+  TaskLog: 'task_log',
   // In-app inbox. NOTE: no created_date column — pass an explicit sort
   // ('-created_at') or the client's default orderBy will 400.
   Notification: 'notification',
@@ -513,6 +519,22 @@ const RPC_FUNCTIONS = {
   // accountability record cannot be forged on someone else's behalf.
   markNotificationsRead:   (p) => ['mark_notifications_read', { p_ids: p.ids }],
   acknowledgeNotification: (p) => ['acknowledge_notification', { p_id: p.id }],
+  // Work routing. assign_task resolves an owner through resolve_owners()
+  // (on-call -> dept member -> role holder -> org admin) so work is never
+  // addressed to nobody, and notifies whoever it landed on.
+  assignTask:      (p) => ['assign_task', {
+    p_title: p.title, p_dept: p.dept ?? null, p_assigned_user: p.assignedUser ?? null,
+    p_subject_type: p.subjectType ?? null, p_subject_id: p.subjectId ?? null,
+    p_due_at: p.dueAt ?? null, p_priority: p.priority ?? 3, p_notes: p.notes ?? null,
+    p_role: p.role ?? null, p_rule_key: p.ruleKey ?? null, p_route: p.route ?? null,
+  }],
+  completeTask:    (p) => ['complete_task', { p_task_id: p.id, p_resolution: p.resolution ?? null }],
+  requestApproval: (p) => ['request_approval', {
+    p_subject_type: p.subjectType, p_subject_id: p.subjectId, p_kind: p.kind,
+    p_reason: p.reason, p_required_dept: p.requiredDept ?? null,
+    p_required_role: p.requiredRole ?? null, p_route: p.route ?? null,
+  }],
+  decideApproval:  (p) => ['decide_approval', { p_id: p.id, p_state: p.state, p_note: p.note ?? null }],
   resolveWorkflowException:(p) => ['resolve_workflow_exception', { p_id: p.id, p_note: p.note ?? null }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],

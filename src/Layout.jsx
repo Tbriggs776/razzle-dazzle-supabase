@@ -297,6 +297,7 @@ export default function Layout({ children, currentPageName }) {
       name: 'My Work', icon: Briefcase,
       subItems: [
         { name: 'Inbox', href: 'Inbox', pages: ['Inbox'] },
+        { name: 'Work', href: 'Work', pages: ['Work'] },
         { name: 'My Appointments', href: 'MyAppointments', pages: ['MyAppointments', 'AppointmentDetail', 'ChecklistDetail'] },
         { name: 'My Results', href: 'MyAppointmentResults', pages: ['MyAppointmentResults'] },
         { name: 'My Tasks', href: 'MyTasks', pages: ['MyTasks'] },
