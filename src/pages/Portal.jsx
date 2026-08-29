@@ -70,7 +70,13 @@ function StatusPill({ status, stage }) {
 // ── Jobs ────────────────────────────────────────────────────────────────────
 
 function JobsTab({ crewName }) {
-  const { data: jobs, isLoading, isError, error } = useQuery({
+  // `data: jobs = []`, not bare `data: jobs`. TanStack's default networkMode
+  // 'online' leaves a never-run query at status 'pending', fetchStatus 'paused'
+  // when the device is offline — isLoading is false there, isError is false, and
+  // data is undefined. A crew coming back to this page out of signal would hit
+  // `!jobs.length` on undefined, and with no error boundary that unmounts the
+  // whole app: a white screen, on a driveway, on a phone.
+  const { data: jobs = [], isLoading, isError, error } = useQuery({
     queryKey: ['myInstallerJobs'],
     queryFn: async () => unwrapInvoke(await base44.functions.invoke('myInstallerJobs')) || [],
     retry: false,

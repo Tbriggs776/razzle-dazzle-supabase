@@ -464,20 +464,17 @@ export default function Settings() {
     }
   };
 
+  // There is no `setupReminderCron` function — not in RPC_FUNCTIONS, not in
+  // EDGE_ALIASES, not in DEPLOYED_FUNCTIONS. Calling it sent dataClient into
+  // warnUnavailable(), which popped a sonner toast reading "Not available yet"
+  // at every admin who opened Settings, about a feature that is not missing:
+  // reminders run on a pg_cron schedule inside the database, exactly as the old
+  // comment here said. The call could only ever return a stub, so it is gone
+  // rather than mapped.
   useEffect(() => {
-    const checkCronStatus = async () => {
-      try {
-        const { data } = await base44.functions.invoke('setupReminderCron', { action: 'list' });
-        // Reminders run on pg_cron now (not an external cron service), so this returns null/stub.
-        setCronExists(data?.reminderCronExists ?? false);
-        setCronJobId(data?.reminderCronId ?? null);
-      } catch (error) {
-        console.error('Failed to check cron status:', error);
-      } finally {
-        setCheckingCron(false);
-      }
-    };
-    checkCronStatus();
+    setCronExists(false);
+    setCronJobId(null);
+    setCheckingCron(false);
   }, []);
 
   const saveMutation = useMutation({
@@ -574,40 +571,15 @@ export default function Settings() {
     setTimeout(() => setCopiedVariable(''), 2000);
   };
 
-  const setupCronJob = async () => {
-    try {
-      const res = await base44.functions.invoke('setupReminderCron', { action: cronExists && cronJobId ? 'delete' : 'create', cronJobId });
-      if (res?.stub || !res?.data) {
-        // Reminders now run on a database-managed daily schedule (pg_cron) — there is no manual
-        // cron to create/delete from the app.
-        toast.info('Appointment reminders already run automatically on a daily schedule (managed by the database). No manual cron setup is needed.');
-        setCronStatus(null);
-        return;
-      }
-      const data = res.data;
-      if (cronExists && cronJobId) {
-        if (data.success) {
-          setCronExists(false);
-          setCronJobId(null);
-          setCronStatus('deleted');
-        } else {
-          setCronStatus('error');
-        }
-      } else {
-        if (data.success) {
-          setCronExists(true);
-          setCronJobId(data.cronJobId);
-          setCronStatus('success');
-        } else {
-          setCronStatus('error');
-        }
-      }
-      setTimeout(() => setCronStatus(null), 5000);
-    } catch (error) {
-      console.error('Failed to setup/delete cron:', error);
-      setCronStatus('error');
-      setTimeout(() => setCronStatus(null), 5000);
-    }
+  // Was an invoke of `setupReminderCron`, which does not exist in any function
+  // map — so it fell into dataClient's warnUnavailable() and toasted "Not
+  // available yet" before reaching the branch below, which was already the only
+  // reachable outcome. Reminders are scheduled by pg_cron inside the database;
+  // there is no per-tenant cron for this page to create or delete. The whole
+  // create/delete/error tree it used to switch on has gone with it.
+  const setupCronJob = () => {
+    toast.info('Appointment reminders already run automatically on a daily schedule (managed by the database). No manual cron setup is needed.');
+    setCronStatus(null);
   };
 
   const testReminders = async () => {

@@ -47,20 +47,21 @@ export default function Appointments() {
     queryFn: () => base44.entities.Appointment.list(`-${sortBy}`)
   });
 
-  // Real-time subscription for appointment updates
+  // Real-time subscription for appointment updates.
+  //
+  // These handlers used to setQueryData(['appointments'], …) — an EXACT-key
+  // write, while the list above reads ['appointments', sortBy]. So they
+  // maintained a cache entry nothing rendered, and the board never moved: with
+  // refetchOnWindowFocus off globally, a CSR watching Appointments would not see
+  // another CSR's booking, reschedule or cancellation until they reloaded. Two
+  // people double-booking the same slot is exactly what this was meant to stop.
+  //
+  // Invalidating by prefix instead of patching one key: it matches every sort
+  // order, it cannot drift when a new sort is added, and the realtime payload
+  // does not have to be shaped like the list row.
   useEffect(() => {
-    const unsubscribe = base44.entities.Appointment.subscribe((event) => {
-      if (event.type === 'update') {
-        queryClient.setQueryData(['appointments'], (old = []) => 
-          old.map(apt => apt.id === event.id ? event.data : apt)
-        );
-      } else if (event.type === 'create') {
-        queryClient.setQueryData(['appointments'], (old = []) => [event.data, ...old]);
-      } else if (event.type === 'delete') {
-        queryClient.setQueryData(['appointments'], (old = []) => 
-          old.filter(apt => apt.id !== event.id)
-        );
-      }
+    const unsubscribe = base44.entities.Appointment.subscribe(() => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
     });
 
     return unsubscribe;

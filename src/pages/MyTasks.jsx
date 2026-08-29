@@ -25,6 +25,20 @@ export default function MyTasks() {
   const [followUpNotes, setFollowUpNotes] = useState('');
   const [newTaskDueDate, setNewTaskDueDate] = useState('');
   const [markAsWonOrLost, setMarkAsWonOrLost] = useState(false);
+
+  // Closing the follow-up dialog has to clear the FIELDS, not just the dialog.
+  // Only `followUpDialog` was reset on cancel, so opening it for the next
+  // customer showed the previous customer's notes, method and due date — and a
+  // DC who did not notice would save one customer's conversation onto another's
+  // record. onSuccess already did this correctly; cancel/Esc/click-outside did
+  // not, which is the path taken most often.
+  const closeFollowUp = () => {
+    setFollowUpDialog(null);
+    setFollowUpNotes('');
+    setFollowUpMethod('call');
+    setNewTaskDueDate('');
+    setMarkAsWonOrLost(false);
+  };
   const [sortNewest, setSortNewest] = useState(true); // true = newest first, false = oldest first
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [selectedDC, setSelectedDC] = useState('my'); // 'my' | specific DC ID | 'all'
@@ -249,11 +263,7 @@ export default function MyTasks() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myTasks'] });
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
-      setFollowUpDialog(null);
-      setFollowUpNotes('');
-      setFollowUpMethod('call');
-      setNewTaskDueDate('');
-      setMarkAsWonOrLost(false);
+      closeFollowUp();
     }
   });
 
@@ -512,6 +522,10 @@ export default function MyTasks() {
                           if (isCompleted) {
                             uncompleteMutation.mutate(task.id);
                           } else {
+                            setFollowUpNotes('');
+                            setFollowUpMethod('call');
+                            setNewTaskDueDate('');
+                            setMarkAsWonOrLost(false);
                             setFollowUpDialog({
                               taskId: task.id,
                               appointmentId: task.appointment,
@@ -580,7 +594,7 @@ export default function MyTasks() {
       </div>
 
       {/* Follow-Up Dialog */}
-      <Dialog open={!!followUpDialog} onOpenChange={(open) => !open && setFollowUpDialog(null)}>
+      <Dialog open={!!followUpDialog} onOpenChange={(open) => !open && closeFollowUp()}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Log Follow-Up</DialogTitle>

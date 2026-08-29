@@ -265,7 +265,12 @@ export function TaskDetailSheet({ task, open, onOpenChange, currentUserId }) {
     },
     onSuccess: (d) => {
       refresh();
-      setSeededFor(null);   // re-seed from the saved row
+      // NOT setSeededFor(null). That was meant to "re-seed from the saved row",
+      // but `task` is a snapshot captured when the row was clicked
+      // (setOpenTask(t) in Work.jsx) and it does not change when refresh()
+      // refetches the list. So re-seeding read the PRE-EDIT values back into the
+      // fields, and the rename the user had just saved successfully appeared to
+      // revert in front of them. The local state already equals what was saved.
       toast.success(d?.changed ? 'Updated' : 'Nothing to change',
         d?.changes ? { description: d.changes } : undefined);
     },

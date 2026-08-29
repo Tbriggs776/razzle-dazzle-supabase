@@ -49,13 +49,19 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
 
   const [formData, setFormData] = useState({});
 
+  // Keyed on the checklist ID, not the whole object — the comment below already
+  // said "on load", but depending on `checklist` meant it ran again on every
+  // autosave refetch. Two consequences, both mid-call: the form was re-seeded
+  // from the server, dropping anything typed during the 1s debounce and round
+  // trip, and every accordion section sprang back open under the setter.
   React.useEffect(() => {
     if (checklist) {
       setFormData(checklist);
       // Auto-expand all sections on load
       setExpandedItems(['intro', 'contact', 'property', 'reason', 'valueadds', 'preferences', 'financing', 'budget', 'scheduling', 'marketing', 'verification', 'outro', 'finalcategories']);
     }
-  }, [checklist]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checklist?.id]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.AppointmentSettingChecklist.create(data),
@@ -76,7 +82,9 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
       return base44.entities.AppointmentSettingChecklist.update(checklist.id, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['checklist', lookupId] });
+      // No invalidate of ['checklist', lookupId]: this is an autosave, so the
+      // client already holds what it just sent, and refetching the row the form
+      // is bound to is what triggered the re-seed above.
       setHasChanges(false);
       if (onChecklistUpdate) {
         onChecklistUpdate();

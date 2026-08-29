@@ -56,11 +56,17 @@ export default function ChecklistV2Detail() {
     enabled: !!checklistId
   });
 
+  // Keyed on the checklist ID, not the whole object. Depending on `checklist`
+  // meant every autosave refetch produced a new object identity and re-seeded
+  // the entire form from the server — so anything the CSR typed during the
+  // 800ms debounce plus the round trip was silently reverted under their
+  // cursor, mid-call, on the screen they book appointments from.
   useEffect(() => {
     if (checklist) {
       setFormData(checklist);
     }
-  }, [checklist]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checklist?.id]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.ChecklistV2.create(data),
@@ -76,7 +82,10 @@ export default function ChecklistV2Detail() {
   const updateMutation = useMutation({
     mutationFn: (data) => base44.entities.ChecklistV2.update(checklist.id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['checklistv2', checklistId] });
+      // Deliberately does NOT invalidate ['checklistv2', checklistId]: this is an
+      // autosave, so the client already holds the value it just sent. Refetching
+      // the row the form is bound to is how the clobber above got triggered in
+      // the first place.
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
     }

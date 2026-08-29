@@ -112,11 +112,20 @@ export default function SubmitTicket() {
         base44.functions.invoke('shortenUrl', { originalURL: requesterFullUrl })
       ]);
 
-      // Update ticket with shortened URLs
-      await base44.entities.Ticket.update(ticket.id, {
-        dc_short_url: dcUrlResponse.data.shortURL,
-        requester_short_url: requesterUrlResponse.data.shortURL
-      });
+      // The Ticket and its 'Ticket Created' log are ALREADY committed by this
+      // point. `dcUrlResponse.data.shortURL` threw whenever Short.io returned a
+      // non-2xx — data is null then — so a link-shortener hiccup aborted the
+      // rest of this handler: no SMS to the consultant, and the caller saw a
+      // raw "Cannot read properties of null" over a ticket that does exist.
+      //
+      // A short link is a convenience; the full URL works without it. Write
+      // whichever ones resolved and carry on.
+      const shortUrls = {};
+      if (dcUrlResponse.data?.shortURL) shortUrls.dc_short_url = dcUrlResponse.data.shortURL;
+      if (requesterUrlResponse.data?.shortURL) shortUrls.requester_short_url = requesterUrlResponse.data.shortURL;
+      if (Object.keys(shortUrls).length) {
+        await base44.entities.Ticket.update(ticket.id, shortUrls);
+      }
 
       // Send SMS to assigned DC if settings enabled
       const smsSettings = await base44.entities.SMSSettings.list();
@@ -128,7 +137,10 @@ export default function SubmitTicket() {
         const message = (settings.dc_ticket_assigned_template || '')
           .replace('{dc_first_name}', assignedMember.first_name)
           .replace('{order_number}', ticketData.order_number)
-          .replace('{ticket_url}', dcUrlResponse.data.shortURL);
+          // Falls back to the full URL: a long link in a text is worse than a
+          // short one, and infinitely better than throwing before the consultant
+          // is told a ticket exists at all.
+          .replace('{ticket_url}', dcUrlResponse.data?.shortURL || dcFullUrl);
 
         const res = await base44.functions.invoke('sendSMS', { to: assignedMember.phone, message });
         const failed = invokeFailure(res);
