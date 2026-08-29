@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
+import { invokeFailure } from '@/lib/invokeResult';
 import BrandLogo from '@/components/BrandLogo';
 import {
   Loader2, Check, ShieldCheck, HardHat, BadgeCheck, AlertTriangle,
@@ -68,6 +69,11 @@ export default function InstallerApply() {
       try {
         if (token) {
           const a = await base44.functions.invoke('getInstallerApplication', { token });
+          // invoke() resolves with { data, error } instead of throwing, so without
+          // this the failed read fell through to hydrate(null) and the applicant
+          // was shown an EMPTY form for an application that already exists — and
+          // would have typed the whole thing again.
+          if (invokeFailure(a)) throw new Error('We could not open your saved application. Please refresh to try again.');
           hydrate(a?.data ?? a);
         }
         // NOTHING is created here any more. Mounting used to insert a blank
@@ -88,6 +94,7 @@ export default function InstallerApply() {
   const ensureToken = useCallback(async () => {
     if (token) return token;
     const res = await base44.functions.invoke('createInstallerApplication', { payload: {} });
+    if (invokeFailure(res)) throw new Error('Could not start the application. Please check your connection and try again.');
     const t = (res?.data ?? res)?.public_token;
     if (!t) throw new Error('Could not start the application.');
     setToken(t);
@@ -101,7 +108,16 @@ export default function InstallerApply() {
     setSaving(true);
     try {
       const t = await ensureToken();
-      await base44.functions.invoke('saveInstallerApplication', { token: t, payload: form });
+      const res = await base44.functions.invoke('saveInstallerApplication', { token: t, payload: form });
+      // The footer says "Progress saved to this link" whatever happens here. It was
+      // saying it after failed saves too, which is the one message an applicant acts
+      // on — they close the tab believing their work is on the link.
+      if (invokeFailure(res)) throw new Error('Your changes were not saved. Check your connection and try again.');
+      if ((res?.data ?? res) === false) throw new Error('Your changes were not saved — this application link is no longer editable.');
+      // Clear a previous failure. Without this one transient blip pinned "your
+      // changes were not saved" above the form for the rest of the session while
+      // every later autosave was in fact succeeding.
+      setError('');
     }
     catch (e) { setError(e.message); }
     setSaving(false);
@@ -113,6 +129,11 @@ export default function InstallerApply() {
     setRocBusy(true); setError('');
     try {
       const r = await base44.functions.invoke('rocLookup', { license: lic });
+      // A failed lookup returns data:null, which read as "no record" and put up
+      // "No active AZ license found for that number" — telling a contractor their
+      // real licence does not exist, and leaving Submit blocked on the one blocker
+      // they cannot clear. Say the check failed instead.
+      if (invokeFailure(r)) throw new Error('We could not check that licence just now. Please try Verify again in a moment.');
       const rec = Array.isArray(r?.data) ? r.data[0] : Array.isArray(r) ? r[0] : (r?.data ?? r);
       setRoc(rec || { notFound: true });
       if (rec?.business_name && !form.legal_business_name) set('legal_business_name', rec.business_name);
@@ -157,8 +178,14 @@ export default function InstallerApply() {
   const submit = async () => {
     setSubmitting(true); setError('');
     try {
-      await base44.functions.invoke('saveInstallerApplication', { token, payload: form });
+      const saveRes = await base44.functions.invoke('saveInstallerApplication', { token, payload: form });
+      // Submitting on top of a save that silently failed would file the applicant's
+      // PREVIOUS answers for review while showing them the confirmation screen for
+      // the ones on screen. Stop before the submit instead.
+      if (invokeFailure(saveRes)) throw new Error('We could not save your latest answers, so nothing was submitted. Please try again.');
+      if ((saveRes?.data ?? saveRes) === false) throw new Error('This application can no longer be edited, so nothing was submitted. Please contact us.');
       const r = await base44.functions.invoke('submitInstallerApplication', { token });
+      if (invokeFailure(r)) throw new Error('Your application was not submitted. Please try again.');
       if ((r?.data ?? r) === false) throw new Error('Could not submit — the application may already be submitted.');
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -247,10 +274,25 @@ export default function InstallerApply() {
               type="button"
               disabled={!resumeEmail.trim() || resumeSent}
               onClick={async () => {
-                await base44.functions.invoke('requestInstallerApplicationLink', { email: resumeEmail.trim() });
-                // Deliberately unconditional: the server returns the same thing
-                // either way, so saying anything else here would leak what it
-                // carefully does not.
+                const res = await base44.functions.invoke('requestInstallerApplicationLink', { email: resumeEmail.trim() });
+                // Deliberately unconditional ON THE RESULT: the server returns the
+                // same thing either way, so saying anything else here would leak
+                // what it carefully does not.
+                //
+                // A failed CALL is different, and safe to report: the server never
+                // got as far as looking the address up, so this distinguishes
+                // nothing about who has applied. Without it, someone whose request
+                // never left the browser is told the link is on its way and waits
+                // for an email that was never queued.
+                if (invokeFailure(res)) {
+                  setError('We could not send that link just now. Please try again in a moment.');
+                  return;
+                }
+                // Clear the previous failure, or a successful retry renders "the
+                // link is on its way" directly beneath a stale red banner saying
+                // it could not be sent — and the button is then disabled, so the
+                // applicant can never find out which is true.
+                setError('');
                 setResumeSent(true);
               }}
               className="inline-flex min-h-11 items-center justify-center rounded-lg border border-input bg-background px-4 text-sm font-medium hover:bg-muted disabled:opacity-50"

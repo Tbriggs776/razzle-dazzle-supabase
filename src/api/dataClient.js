@@ -698,8 +698,30 @@ const functions = {
       // { stub:true }: that resurrected fake-success (e.g. "report sent!" when it wasn't).
       // The genuine "not configured" path is the function returning 200 + { stub:true } in its
       // body, which flows through the success branch above untouched.
-      console.warn(`[dataClient] functions.invoke('${name}') failed.`, err?.message || err);
-      return { data: null, error: err instanceof Error ? err : new Error(String(err?.message || err)) };
+      // Recover the FUNCTION'S OWN message from the response body. supabase-js
+      // reports every non-2xx as the generic "Edge Function returned a non-2xx
+      // status code" and hides the body on err.context, so an actionable 400 like
+      // "E-sign is disabled for Design Modifications. Enable it in E-Sign settings"
+      // reached the user as infrastructure jargon. UserAccess already unwrapped
+      // this by hand (readEdgeFailure); doing it here means every caller gets it.
+      let message = err?.message || 'The request failed';
+      let status = typeof err?.status === 'number' ? err.status : null;
+      const ctx = err?.context;
+      if (ctx && typeof ctx === 'object') {
+        if (typeof ctx.status === 'number') status = ctx.status;
+        try {
+          const body = await (typeof ctx.clone === 'function' ? ctx.clone() : ctx).json();
+          if (body?.error) message = String(body.error);
+          else if (body?.message) message = String(body.message);
+        } catch {
+          /* body already consumed or not JSON — keep the generic message */
+        }
+      }
+      console.warn(`[dataClient] functions.invoke('${name}') failed.`, message);
+      const wrapped = err instanceof Error ? err : new Error(message);
+      wrapped.message = message;
+      if (status != null) wrapped.status = status;
+      return { data: null, error: wrapped };
     }
   },
 };

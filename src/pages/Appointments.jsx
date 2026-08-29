@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { deliveryNote, invokeFailure } from '@/lib/invokeResult';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -101,8 +103,11 @@ export default function Appointments() {
       // Generate short URLs for lead and consultant tracking
       let shortUrlsUpdated = false;
       try {
-        const appUrl = await base44.functions.invoke('getAppUrl');
-        const baseUrl = appUrl.data.url;
+        const appUrlRes = await base44.functions.invoke('getAppUrl');
+        const baseUrl = appUrlRes.data?.url;
+        if (!baseUrl) {
+          throw new Error(invokeFailure(appUrlRes) || 'the app address is unavailable');
+        }
         // LeadAppointmentView is anon → link by the unguessable public_token (NO4);
         // ConsultantAppointmentView is staff-only, so it stays keyed by id.
         const leadViewUrl = `${baseUrl}/LeadAppointmentView?id=${appointment.public_token}`;
@@ -114,8 +119,8 @@ export default function Appointments() {
         ]);
         
         const updateData = {};
-        if (leadShortUrl.data.shortURL) updateData.lead_short_url = leadShortUrl.data.shortURL;
-        if (consultantShortUrl.data.shortURL) updateData.consultant_short_url = consultantShortUrl.data.shortURL;
+        if (leadShortUrl.data?.shortURL) updateData.lead_short_url = leadShortUrl.data.shortURL;
+        if (consultantShortUrl.data?.shortURL) updateData.consultant_short_url = consultantShortUrl.data.shortURL;
         
         if (Object.keys(updateData).length > 0) {
           await base44.entities.Appointment.update(appointment.id, updateData);
@@ -129,12 +134,19 @@ export default function Appointments() {
       if (data.assigned_csr) {
        try {
          const csr = teamMembers.find(m => m.id === data.assigned_csr);
-         await base44.functions.invoke('syncCalendarEvent', {
+         const calRes = await base44.functions.invoke('syncCalendarEvent', {
            appointmentId: appointment.id,
            action: 'create',
            appUrl: window.location.origin,
            csrEmail: csr?.email
          });
+         // The appointment is already saved — never throw here, just say what
+         // did not happen and let the dialog close.
+         const calNote = deliveryNote(calRes, {
+           saved: 'Appointment saved',
+           sent: 'it was not added to the calendar'
+         });
+         if (calNote) toast.warning(calNote);
        } catch (error) {
          console.error('Calendar sync failed:', error);
        }
@@ -144,28 +156,47 @@ export default function Appointments() {
       if (shortUrlsUpdated) {
         try {
           // Send SMS to lead
-          await base44.functions.invoke('sendAppointmentSMS', {
+          const leadSmsRes = await base44.functions.invoke('sendAppointmentSMS', {
             appointmentId: appointment.id,
             type: 'lead'
           });
+          const leadNote = deliveryNote(leadSmsRes, {
+            saved: 'Appointment saved',
+            sent: 'the text to the customer did not go out'
+          });
+          if (leadNote) toast.warning(leadNote);
 
           // Send SMS to consultant if assigned
           if (data.assigned_dc) {
-            await base44.functions.invoke('sendAppointmentSMS', {
+            const dcSmsRes = await base44.functions.invoke('sendAppointmentSMS', {
               appointmentId: appointment.id,
               type: 'consultant'
             });
+            const dcNote = deliveryNote(dcSmsRes, {
+              saved: 'Appointment saved',
+              sent: 'the text to the consultant did not go out'
+            });
+            if (dcNote) toast.warning(dcNote);
           }
         } catch (error) {
           console.error('SMS notification failed:', error);
         }
+      } else {
+        // Without the short links the block above never runs at all, so nobody
+        // was texted. The appointment itself is saved.
+        toast.warning('Appointment saved, but no confirmation texts went out — the appointment links could not be created');
       }
 
       // Sync to RFMS Measure Mobile
       try {
-        await base44.functions.invoke('sendToRFMS', {
+        const rfmsRes = await base44.functions.invoke('sendToRFMS', {
           appointmentId: appointment.id
         });
+        const rfmsNote = deliveryNote(rfmsRes, {
+          saved: 'Appointment saved',
+          sent: 'it was not sent to RFMS'
+        });
+        if (rfmsNote) toast.warning(rfmsNote);
       } catch (error) {
         console.error('RFMS sync failed:', error);
       }

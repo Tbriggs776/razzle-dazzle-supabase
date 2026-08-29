@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
+import { deliveryNote, invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calculator, Package, ArrowRight, Ticket as TicketIcon, Plus, Loader2, CheckCircle2, AlertCircle, Pencil, Trash2, Sparkles, ExternalLink, Clock } from 'lucide-react';
@@ -141,22 +142,27 @@ export default function OrderProcessing() {
           // Generate DC URL if assigned
           if (ticket.assigned_dc) {
             const dcTicketViewUrl = `${window.location.origin}/DesignConsultantTicketView?id=${ticket.id}`;
-            const { data: dcShortUrlData } = await base44.functions.invoke('shortenUrl', {
+            const dcShortUrlRes = await base44.functions.invoke('shortenUrl', {
               originalURL: dcTicketViewUrl
             });
-            if (dcShortUrlData.shortURL) {
-              updates.dc_short_url = dcShortUrlData.shortURL;
+            if (dcShortUrlRes.data?.shortURL) {
+              updates.dc_short_url = dcShortUrlRes.data.shortURL;
+            } else {
+              // The ticket is already saved and the DC text below only fires when
+              // there is a link, so a failure here means nobody gets notified.
+              const why = invokeFailure(dcShortUrlRes) || invokeNotSent(dcShortUrlRes) || 'the link could not be created';
+              toast.warning(`Ticket created, but the design consultant was not texted — ${why}`);
             }
           }
 
           // Generate Requester URL if requester exists
           if (data.requester) {
             const requesterTicketViewUrl = `${window.location.origin}/RequesterTicketView?id=${ticket.id}`;
-            const { data: requesterShortUrlData } = await base44.functions.invoke('shortenUrl', {
+            const requesterShortUrlRes = await base44.functions.invoke('shortenUrl', {
               originalURL: requesterTicketViewUrl
             });
-            if (requesterShortUrlData.shortURL) {
-              updates.requester_short_url = requesterShortUrlData.shortURL;
+            if (requesterShortUrlRes.data?.shortURL) {
+              updates.requester_short_url = requesterShortUrlRes.data.shortURL;
             }
           }
 
@@ -183,18 +189,26 @@ export default function OrderProcessing() {
                       .replace(/{ticket_url}/g, updates.dc_short_url)
                       .replace(/{requester_first_name}/g, requester?.first_name || '');
 
-                    const { data: smsResult } = await base44.functions.invoke('sendSMS', {
+                    const smsRes = await base44.functions.invoke('sendSMS', {
                       to: dc.phone,
                       message
                     });
+                    const smsResult = smsRes.data || {};
+                    // The ticket is already committed — say the text did not go
+                    // out, but let the success path finish.
+                    const smsNote = deliveryNote(smsRes, {
+                      saved: 'Ticket created',
+                      sent: 'the text to the design consultant did not go out'
+                    });
+                    if (smsNote) toast.warning(smsNote);
 
                     // Log SMS result
                     await base44.entities.TicketLog.create({
                       ticket: ticket.id,
-                      action: smsResult.success ? 'SMS Sent to DC' : 'SMS Failed to DC',
-                      details: smsResult.success
-                        ? `Sent to ${dc.first_name} ${dc.last_name} at ${dc.phone} (Status: ${smsResult.twilioStatus})`
-                        : `Failed to send to ${dc.first_name} ${dc.last_name} at ${dc.phone} (Error: ${smsResult.error || 'Unknown'})`,
+                      action: smsNote ? 'SMS Failed to DC' : 'SMS Sent to DC',
+                      details: smsNote
+                        ? `Failed to send to ${dc.first_name} ${dc.last_name} at ${dc.phone} (Error: ${smsResult.error || invokeFailure(smsRes) || invokeNotSent(smsRes) || 'Unknown'})`
+                        : `Sent to ${dc.first_name} ${dc.last_name} at ${dc.phone} (Status: ${smsResult.twilioStatus})`,
                       user_email: user.email,
                       user_name: user.full_name
                     });
@@ -215,21 +229,28 @@ export default function OrderProcessing() {
             // Send SMS to CC members
             if (data.cc_members && data.cc_members.length > 0) {
               const allMembers = await base44.entities.TeamMember.list();
+              let ccNote = null;
               for (const memberId of data.cc_members) {
                 const member = allMembers.find(m => m.id === memberId);
                 if (member && member.phone) {
                   try {
                     const ccMessage = `Hi ${member.first_name}! A new order processing ticket has been created for Order #${ticket.order_number}. View ticket: ${updates.dc_short_url || ''}`;
-                    const { data: smsResult } = await base44.functions.invoke('sendSMS', {
+                    const ccRes = await base44.functions.invoke('sendSMS', {
                       to: member.phone,
                       message: ccMessage
                     });
+                    const smsResult = ccRes.data || {};
+                    const thisNote = deliveryNote(ccRes, {
+                      saved: 'Ticket created',
+                      sent: 'at least one CC notification did not go out'
+                    });
+                    if (thisNote && !ccNote) ccNote = thisNote;
                     await base44.entities.TicketLog.create({
                       ticket: ticket.id,
-                      action: smsResult.success ? 'SMS Sent to CC' : 'SMS Failed to CC',
-                      details: smsResult.success
-                        ? `CC notification sent to ${member.first_name} ${member.last_name} at ${member.phone}`
-                        : `Failed to CC ${member.first_name} ${member.last_name} (Error: ${smsResult.error || 'Unknown'})`,
+                      action: thisNote ? 'SMS Failed to CC' : 'SMS Sent to CC',
+                      details: thisNote
+                        ? `Failed to CC ${member.first_name} ${member.last_name} (Error: ${smsResult.error || invokeFailure(ccRes) || invokeNotSent(ccRes) || 'Unknown'})`
+                        : `CC notification sent to ${member.first_name} ${member.last_name} at ${member.phone}`,
                       user_email: user.email,
                       user_name: user.full_name
                     });
@@ -238,6 +259,8 @@ export default function OrderProcessing() {
                   }
                 }
               }
+              // One line for the whole CC list — the ticket itself is saved either way.
+              if (ccNote) toast.warning(ccNote);
             }
             }
             } catch (error) {
@@ -344,17 +367,24 @@ export default function OrderProcessing() {
                 .replace(/{denier_name}/g, user.full_name)
                 .replace(/{ticket_url}/g, ticket.dc_short_url || '');
 
-              const { data: smsResult } = await base44.functions.invoke('sendSMS', {
+              const smsRes = await base44.functions.invoke('sendSMS', {
                 to: dc.phone,
                 message
               });
+              const smsResult = smsRes.data || {};
+              // The denial is already saved; only the notification can fail here.
+              const smsNote = deliveryNote(smsRes, {
+                saved: 'Resolution denied',
+                sent: 'the text to the design consultant did not go out'
+              });
+              if (smsNote) toast.warning(smsNote);
 
               await base44.entities.TicketLog.create({
                 ticket: ticketId,
-                action: smsResult.success ? 'SMS Sent to DC' : 'SMS Failed to DC',
-                details: smsResult.success
-                  ? `Notified about denied resolution: ${categoryName} (Status: ${smsResult.twilioStatus})`
-                  : `Failed to notify about denied resolution: ${categoryName} (Error: ${smsResult.error || 'Unknown'})`,
+                action: smsNote ? 'SMS Failed to DC' : 'SMS Sent to DC',
+                details: smsNote
+                  ? `Failed to notify about denied resolution: ${categoryName} (Error: ${smsResult.error || invokeFailure(smsRes) || invokeNotSent(smsRes) || 'Unknown'})`
+                  : `Notified about denied resolution: ${categoryName} (Status: ${smsResult.twilioStatus})`,
                 user_email: user.email,
                 user_name: user.full_name
               });
@@ -426,29 +456,40 @@ export default function OrderProcessing() {
         .replace(/{order_number}/g, ticket.order_number)
         .replace(/{ticket_url}/g, ticket.dc_short_url || '');
 
-      const { data: smsResult } = await base44.functions.invoke('sendSMS', {
+      const smsRes = await base44.functions.invoke('sendSMS', {
         to: dc.phone,
         message
       });
+      const smsResult = smsRes.data || {};
+      const failed = invokeFailure(smsRes);
+      const notSent = failed ? null : invokeNotSent(smsRes);
 
       const user = await base44.auth.me();
       await base44.entities.TicketLog.create({
         ticket: ticketId,
-        action: smsResult.success ? 'Reminder SMS Sent to DC' : 'Reminder SMS Failed to DC',
-        details: smsResult.success
-          ? `Sent by ${user.full_name} to ${dc.phone} (Status: ${smsResult.twilioStatus})`
-          : `Failed to send to ${dc.phone} (Error: ${smsResult.error || 'Unknown'})`,
+        action: (failed || notSent) ? 'Reminder SMS Failed to DC' : 'Reminder SMS Sent to DC',
+        details: (failed || notSent)
+          ? `Failed to send to ${dc.phone} (Error: ${smsResult.error || failed || notSent})`
+          : `Sent by ${user.full_name} to ${dc.phone} (Status: ${smsResult.twilioStatus})`,
         user_email: user.email,
         user_name: user.full_name
       });
 
-      if (!smsResult.success) {
-        throw new Error(smsResult.error || 'Failed to send SMS');
+      // Sending the reminder IS the action here, so a real failure should throw
+      // and offer a retry. "Nothing was sent" is not a failure — it comes back
+      // below so onSuccess can say so plainly instead of claiming a send.
+      if (failed) {
+        throw new Error(failed);
       }
+      return { notSent };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['ticketLogs'] });
-      toast.success('Reminder sent to DC');
+      if (result?.notSent) {
+        toast.warning(`No reminder was sent — ${result.notSent}`);
+      } else {
+        toast.success('Reminder sent to DC');
+      }
     },
     onError: (error) => {
       toast.error(error.message || 'Failed to send reminder');

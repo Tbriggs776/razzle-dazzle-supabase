@@ -3,54 +3,101 @@
  *
  * `base44.functions.invoke()` returns `{ data, error }` and NEVER THROWS, so every
  * try/catch wrapped around it is dead code and every call site that ignores the
- * result reports success when the call failed. That much was already known.
+ * result reports success when the call failed.
  *
- * What a first sweep got wrong — and it is the reason these helpers exist rather
- * than a rule applied 136 times by hand — is that this codebase has THREE distinct
- * "it didn't work" signals, not one:
+ * There are FOUR "it didn't work" signals in this codebase, and they need opposite
+ * handling, which is the whole reason this file exists:
  *
- *   res.error            transport / non-2xx. A real failure.
- *   res.data.ok === false  explicit failure from an RPC.   (46 uses)
- *   res.data.skipped     HTTP 200, but nothing was sent.   (48 uses)
- *   res.data.stub        the integration isn't configured. (28 uses)
+ *   res.error                transport / non-2xx.            A real failure.
+ *   res.data.ok === false    explicit failure from an RPC.   A real failure.
+ *   res.data.success === false  smsDispatch's `direct` branch. A real failure.
+ *   res.data.skipped         HTTP 200, nothing was sent.     NOT a failure.
+ *   res.data.stub            integration not configured.     NOT a failure.
  *
- * `skipped` is the MOST common one and is exactly the case we care about most:
- * smsDispatch and emailDispatch return 200 with `{ skipped: 'disabled' }` or
- * `{ skipped: 'no recipient phone' }`. A guard that only checks `error` and `ok`
- * passes straight through it, so SMS switched off in Settings still reports a
- * cheerful success — the original bug, untouched.
+ * ── TWO THINGS LEARNED THE HARD WAY, both from real regressions ─────────────
  *
- * The split matters because the two categories need OPPOSITE handling:
+ * 1. `success` is a THIRD failure signal and it is not interchangeable with `ok`.
+ *    smsDispatch's `direct` branch returns HTTP 200 with
+ *      { success: d.ok === true, twilioStatus, error: d.error ?? d.skipped }
+ *    so a failed text arrives as 200 { success:false } with no `ok` and no
+ *    top-level `skipped`. A guard that checked only error/ok reported that as a
+ *    SUCCESS and wrote "SMS Sent" into the ticket log.
+ *
+ * 2. THAT SAME BRANCH FLATTENS `skipped` INTO `error`
+ *    (`error: d.error ?? d.skipped`). So "SMS is switched off" — a not-sent —
+ *    arrives as `data.error = 'disabled'` and naive code throws a hard
+ *    `toast.error('disabled')` at the user for a routine configuration state.
+ *    Hence NOT_SENT_REASONS below: an `error` whose value is a known skip token is
+ *    a not-sent, not a failure, and is checked FIRST.
+ *
+ * The split matters because the two categories need opposite handling:
  *   - a failure should throw / block / offer a retry.
- *   - a not-sent is not an error and must NEVER be thrown, or an unconfigured
- *     integration becomes a hard error the user cannot act on. It still has to be
- *     said out loud, because a false "sent!" is worse than either.
+ *   - a not-sent must NEVER be thrown (an unconfigured integration would become a
+ *     hard error the user cannot act on) but must still be said out loud, because
+ *     a false "sent!" is worse than either.
  */
 
-/**
- * Why this call failed, or null if it didn't.
- * Use in a queryFn (`if (msg) throw new Error(msg)`) or a handler (toast + return).
- */
-export function invokeFailure(res) {
-  if (!res) return 'No response from the server';
-  if (res.error) return res.error.message || 'The request failed';
-  const d = res.data;
-  if (d && d.ok === false) return d.reason || d.error || 'The request failed';
-  if (d && typeof d.error === 'string' && d.error) return d.error;
-  return null;
+// Values that mean "nothing went out", wherever they surface — `skipped`, or
+// flattened into `error` by smsDispatch. An explicit list, not a regex: guessing
+// wrong in this direction silently swallows a real failure.
+const NOT_SENT_REASONS = new Set([
+  'disabled',
+  'sms_disarmed',
+  'quiet_hours',
+  'suppressed',
+  'invalid_phone',
+  'above threshold',
+  'no recipients',
+  'no recipient phone',
+  'no recipient',
+  'reminders disabled',
+  'not configured',
+  'no appointment date set, skipping',
+]);
+
+function skipToken(v) {
+  if (typeof v !== 'string') return null;
+  const t = v.trim().toLowerCase();
+  return NOT_SENT_REASONS.has(t) ? t : null;
 }
 
 /**
  * The call succeeded, but nothing actually went out. Returns a short human reason,
  * or null when something really was sent.
  *
- * NOT a failure. Do not throw on it — tell the user plainly instead.
+ * NOT a failure. Do not throw on it — say it out loud instead.
+ * Checked BEFORE invokeFailure by every caller below, because a flattened skip
+ * arrives in the same field a real error would.
  */
 export function invokeNotSent(res) {
   if (!res) return null;
   if (res.stub || (res.data && res.data.stub)) return 'that integration is not set up yet';
-  const skipped = res.data && res.data.skipped;
-  if (skipped) return typeof skipped === 'string' ? skipped : 'nothing to send';
+  const d = res.data;
+  if (!d) return null;
+  if (d.skipped) return typeof d.skipped === 'string' ? d.skipped : 'nothing to send';
+  // The flattened case: smsDispatch put the skip reason in `error`.
+  const flattened = skipToken(d.error) || skipToken(d.twilioStatus);
+  if (flattened) return flattened;
+  return null;
+}
+
+/**
+ * Why this call failed, or null if it didn't.
+ * Returns null for a not-sent, so a caller that checks failure first still cannot
+ * turn an unconfigured integration into a hard error.
+ */
+export function invokeFailure(res) {
+  if (!res) return 'No response from the server';
+  // A not-sent is never a failure, whichever field it arrived in.
+  if (invokeNotSent(res)) return null;
+  if (res.error) return res.error.message || 'The request failed';
+  const d = res.data;
+  if (!d) return null;
+  if (d.ok === false) return d.reason || d.error || 'The request failed';
+  // smsDispatch's `direct` branch. Only a failure once the skip check above has
+  // ruled out "switched off".
+  if (d.success === false) return d.error || 'The request failed';
+  if (typeof d.error === 'string' && d.error) return d.error;
   return null;
 }
 
@@ -68,10 +115,10 @@ export function unwrapInvoke(res, fallbackMessage) {
  * For a write that ALSO notifies. Returns the sentence to show, or null.
  *
  * The hard rule this exists to enforce: when the record was saved and only the
- * notification failed, the SUCCESS PATH MUST STILL RUN. Throwing there leaves the
+ * notification failed, THE SUCCESS PATH MUST STILL RUN. Throwing there leaves the
  * dialog open with the form populated while the row is already committed, and the
  * user's natural retry creates a duplicate record and a second customer email —
- * which is worse than the silent failure it replaced.
+ * worse than the silent failure it replaced.
  */
 export function deliveryNote(res, { saved, sent }) {
   const failed = invokeFailure(res);

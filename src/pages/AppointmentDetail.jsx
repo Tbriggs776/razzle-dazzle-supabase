@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import { invokeFailure, invokeNotSent, deliveryNote } from '@/lib/invokeResult';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -130,11 +131,19 @@ export default function AppointmentDetail() {
     if (!appointment.consultant_short_url) {
       setGeneratingConsultantShortUrl(true);
       try {
-        const { data } = await base44.functions.invoke('shortenUrl', {
+        const res = await base44.functions.invoke('shortenUrl', {
           originalURL: consultantViewUrl
         });
-        
-        if (data.shortURL) {
+        const shortenProblem = invokeFailure(res) || invokeNotSent(res);
+        const data = res?.data;
+
+        // Only warn when there is genuinely nothing usable. shortenUrl's
+        // unconfigured path still returns a shortURL (the original), and the old
+        // code persisted it so it stopped asking — short-circuiting before that
+        // meant a warning toast on EVERY copy click while the shortener is off.
+        if (shortenProblem && !data?.shortURL) {
+          toast.warning(`Could not shorten the link — ${shortenProblem}. The full link was copied instead.`);
+        } else if (data?.shortURL) {
           urlToCopy = data.shortURL;
           await base44.entities.Appointment.update(appointmentId, {
             consultant_short_url: data.shortURL
@@ -159,14 +168,25 @@ export default function AppointmentDetail() {
     setSyncingRFMS(true);
     setRfmsSyncError(null);
     try {
-      const { data } = await base44.functions.invoke('sendToRFMS', {
+      const res = await base44.functions.invoke('sendToRFMS', {
         appointmentId
       });
-      
-      if (data.success) {
+      const failed = invokeFailure(res);
+      const notSent = invokeNotSent(res);
+      const data = res?.data;
+
+      if (failed) {
+        setRfmsSyncError(failed);
+        toast.error(`Could not sync with RFMS — ${failed}`);
+      } else if (notSent) {
+        // NOT setRfmsSyncError. That state drives a destructive-red banner with a
+        // "Retry RFMS Sync" button, so an unconfigured integration would become a
+        // permanent error with a retry that can never succeed. Say it once and
+        // leave the UI alone.
+        toast.warning(`Nothing was sent to RFMS — ${notSent}`);
+      } else if (data?.success) {
+        setRfmsSyncError(null);
         queryClient.invalidateQueries({ queryKey: ['appointmentDetail', appointmentId] });
-      } else if (data.error) {
-        setRfmsSyncError(data.error);
       }
     } catch (error) {
       console.error('RFMS sync failed:', error);
@@ -183,13 +203,28 @@ export default function AppointmentDetail() {
     const startTime = Date.now();
     
     try {
-      const result = await actionFn();
+      const res = await actionFn();
       const duration = Date.now() - startTime;
-      
-      setActionResults([
-        { type: 'success', message: `✓ ${actionName} completed in ${duration}ms` },
-        { type: 'info', message: 'Result:', data: result }
-      ]);
+      const failed = invokeFailure(res);
+      const notSent = invokeNotSent(res);
+      const payload = res?.data ?? res;
+
+      if (failed) {
+        setActionResults([
+          { type: 'error', message: `✗ ${actionName} failed after ${duration}ms` },
+          { type: 'error', message: failed, data: payload }
+        ]);
+      } else if (notSent) {
+        setActionResults([
+          { type: 'info', message: `${actionName} ran in ${duration}ms, but nothing was sent — ${notSent}` },
+          { type: 'info', message: 'Result:', data: payload }
+        ]);
+      } else {
+        setActionResults([
+          { type: 'success', message: `✓ ${actionName} completed in ${duration}ms` },
+          { type: 'info', message: 'Result:', data: payload }
+        ]);
+      }
     } catch (error) {
       const duration = Date.now() - startTime;
       setActionResults([
@@ -209,11 +244,19 @@ export default function AppointmentDetail() {
     if (!appointment.lead_short_url) {
       setGeneratingLeadShortUrl(true);
       try {
-        const { data } = await base44.functions.invoke('shortenUrl', {
+        const res = await base44.functions.invoke('shortenUrl', {
           originalURL: leadViewUrl
         });
-        
-        if (data.shortURL) {
+        const shortenProblem = invokeFailure(res) || invokeNotSent(res);
+        const data = res?.data;
+
+        // Only warn when there is genuinely nothing usable. shortenUrl's
+        // unconfigured path still returns a shortURL (the original), and the old
+        // code persisted it so it stopped asking — short-circuiting before that
+        // meant a warning toast on EVERY copy click while the shortener is off.
+        if (shortenProblem && !data?.shortURL) {
+          toast.warning(`Could not shorten the link — ${shortenProblem}. The full link was copied instead.`);
+        } else if (data?.shortURL) {
           urlToCopy = data.shortURL;
           await base44.entities.Appointment.update(appointmentId, {
             lead_short_url: data.shortURL
@@ -518,7 +561,12 @@ export default function AppointmentDetail() {
         if (notifications.length > 0) {
           console.time('⏱️ Send Notifications');
           try {
-            await Promise.all(notifications);
+            const results = await Promise.all(notifications);
+            // The record is already saved — never throw here, just say what didn't go out.
+            const note = results
+              .map(res => deliveryNote(res, { saved: 'Appointment updated', sent: 'the notification did not go out' }))
+              .find(Boolean);
+            if (note) toast.warning(note);
           } catch (error) {
             console.error('Notification failed:', error);
           }
@@ -567,6 +615,9 @@ export default function AppointmentDetail() {
             appointmentId,
             action,
             appUrl: window.location.origin
+          }).then(res => {
+            const note = deliveryNote(res, { saved: 'Appointment saved', sent: 'the calendar was not updated' });
+            if (note) toast.warning(note);
           }).catch(error => {
             console.error('Calendar sync failed:', error);
           });
@@ -614,14 +665,42 @@ export default function AppointmentDetail() {
             appUrl: window.location.origin
           });
           
-          // Log success
-          await base44.entities.AppointmentLog.create({
-            appointment: appointmentId,
-            action: 'Calendar Synced',
-            details: 'Google Calendar updated for reschedule',
-            user_email: user.email,
-            user_name: user.full_name
+          // The reschedule is already saved — report what didn't happen, never throw.
+          const syncNote = deliveryNote(syncResult, {
+            saved: 'Appointment rescheduled',
+            sent: 'the calendar was not updated'
           });
+
+          if (syncNote) {
+            toast.warning(syncNote);
+            // "Not configured" is not a failure, and the audit trail should not
+            // say it was. syncCalendarEvent returns { stub: true } when Google is
+            // off, which would otherwise be filed forever as "Calendar Sync
+            // Failed".
+            const syncFailed = invokeFailure(syncResult);
+            // Guarded: an unguarded throw here would fall into the outer catch,
+            // which writes its OWN log row — two entries for one reschedule.
+            try {
+              await base44.entities.AppointmentLog.create({
+                appointment: appointmentId,
+                action: syncFailed ? 'Calendar Sync Failed' : 'Calendar Sync Skipped',
+                details: syncNote,
+                user_email: user.email,
+                user_name: user.full_name
+              });
+            } catch (logErr) {
+              console.error('Could not write the calendar-sync log entry', logErr);
+            }
+          } else {
+            // Log success
+            await base44.entities.AppointmentLog.create({
+              appointment: appointmentId,
+              action: 'Calendar Synced',
+              details: 'Google Calendar updated for reschedule',
+              user_email: user.email,
+              user_name: user.full_name
+            });
+          }
         } catch (error) {
           console.error('Calendar sync failed:', error);
           
@@ -654,7 +733,15 @@ export default function AppointmentDetail() {
           );
         }
 
-        await Promise.all(smsCalls);
+        const smsResults = await Promise.all(smsCalls);
+        // Already saved — a text that didn't go out is a warning, not a failure.
+        const smsNote = smsResults
+          .map(res => deliveryNote(res, {
+            saved: 'Appointment rescheduled',
+            sent: 'the text message did not go out'
+          }))
+          .find(Boolean);
+        if (smsNote) toast.warning(smsNote);
       } catch (error) {
         console.error('SMS notification failed:', error);
       }
@@ -672,11 +759,16 @@ export default function AppointmentDetail() {
           // Delete from Google Calendar first (non-blocking — don't prevent deletion on calendar errors)
           if (appointment.google_calendar_event_id || appointment.assigned_csr) {
             try {
-              await base44.functions.invoke('syncCalendarEvent', {
+              const calRes = await base44.functions.invoke('syncCalendarEvent', {
                 appointmentId,
                 action: 'delete',
                 appUrl: window.location.origin
               });
+              // Deliberately non-blocking — say what happened, never stop the deletion.
+              const calProblem = invokeFailure(calRes) || invokeNotSent(calRes);
+              if (calProblem) {
+                toast.warning(`The calendar event could not be removed — ${calProblem}`);
+              }
             } catch (error) {
               console.error('Calendar delete failed (proceeding with appointment deletion):', error);
             }
@@ -747,7 +839,15 @@ export default function AppointmentDetail() {
         );
       }
 
-      await Promise.all(smsCalls);
+      const smsResults = await Promise.all(smsCalls);
+      // The cancellation is already saved — a text that didn't go out is a warning, not a failure.
+      const smsNote = smsResults
+        .map(res => deliveryNote(res, {
+          saved: 'Appointment cancelled',
+          sent: 'the text message did not go out'
+        }))
+        .find(Boolean);
+      if (smsNote) toast.warning(smsNote);
     } catch (error) {
       console.error('SMS notification failed:', error);
     }
@@ -758,6 +858,12 @@ export default function AppointmentDetail() {
         appointmentId,
         action: 'delete',
         appUrl: window.location.origin
+      }).then(res => {
+        const note = deliveryNote(res, {
+          saved: 'Appointment cancelled',
+          sent: 'the calendar event was not removed'
+        });
+        if (note) toast.warning(note);
       }).catch(error => {
         console.error('Calendar sync (cancel) failed:', error);
       });
@@ -1910,7 +2016,7 @@ export default function AppointmentDetail() {
                     action: appointment.google_calendar_event_id ? 'update' : 'create',
                     appUrl: window.location.origin
                   });
-                  return response.data;
+                  return response;
                 })}
                 disabled={!!runningAction}
                 className="h-20 flex-col border-brand-blue/30 hover:bg-brand-blue/15"
@@ -1930,7 +2036,7 @@ export default function AppointmentDetail() {
                     appointmentId,
                     type: 'lead'
                   });
-                  return response.data;
+                  return response;
                 })}
                 disabled={!!runningAction}
                 className="h-20 flex-col border-green-200 hover:bg-green-50 dark:border-green-500/30 dark:hover:bg-green-500/10"
@@ -1950,7 +2056,7 @@ export default function AppointmentDetail() {
                     appointmentId,
                     type: 'consultant'
                   });
-                  return response.data;
+                  return response;
                 })}
                 disabled={!!runningAction || !appointment.assigned_dc}
                 className="h-20 flex-col border-primary/30 hover:bg-primary/10"
@@ -1969,7 +2075,7 @@ export default function AppointmentDetail() {
                   const response = await base44.functions.invoke('sendToRFMS', {
                     appointmentId
                   });
-                  return response.data;
+                  return response;
                 })}
                 disabled={!!runningAction}
                 className="h-20 flex-col border-purple-200 hover:bg-purple-50 dark:border-purple-500/30 dark:hover:bg-purple-500/10"
@@ -1990,7 +2096,7 @@ export default function AppointmentDetail() {
                     entityId: appointmentId,
                     appUrl: window.location.origin
                   });
-                  return response.data;
+                  return response;
                 })}
                 disabled={!!runningAction}
                 className="h-20 flex-col border-orange-200 hover:bg-orange-50 dark:border-orange-500/30 dark:hover:bg-orange-500/10"

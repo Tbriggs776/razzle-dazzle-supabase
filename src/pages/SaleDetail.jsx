@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { SignedImage, resolveFileUrl } from '@/lib/fileUrl';
+import { invokeFailure, invokeNotSent, deliveryNote } from '@/lib/invokeResult';
 import { cn } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -258,31 +259,48 @@ export default function SaleDetail() {
       // Send SMS and email notifications to customer
       if (trackerUrl && customer?.phone) {
         try {
-          await base44.functions.invoke('sendAppointmentSMS', {
+          const smsRes = await base44.functions.invoke('sendAppointmentSMS', {
             appointmentId: sale.appointment,
             type: 'customer_project_created',
             customerId: sale.customer
           });
 
-          // Log the activity
-          const user = await base44.auth.me();
-          await base44.entities.ProjectLog.create({
-            project: newProject.id,
-            action: 'SMS Sent',
-            details: `Project tracker SMS sent to ${customer.first_name} ${customer.last_name} (${customer.phone})`,
-            user_email: user?.email,
-            user_name: user?.full_name
+          // A 200 here does not mean a text went out — the dispatcher answers
+          // { skipped: 'disabled' } / { skipped: 'no recipient phone' } with a 200.
+          // The project is already created, so this only warns; the "SMS Sent"
+          // activity entry is written ONLY when something really was sent.
+          const smsNote = deliveryNote(smsRes, {
+            saved: 'Project created',
+            sent: 'the text to the customer did not go out',
           });
+          if (smsNote) {
+            toast.warning(smsNote);
+          } else {
+            // Log the activity
+            const user = await base44.auth.me();
+            await base44.entities.ProjectLog.create({
+              project: newProject.id,
+              action: 'SMS Sent',
+              details: `Project tracker SMS sent to ${customer.first_name} ${customer.last_name} (${customer.phone})`,
+              user_email: user?.email,
+              user_name: user?.full_name
+            });
+          }
         } catch (error) {
           console.error('Failed to send project notification SMS:', error);
         }
 
         try {
-          await base44.functions.invoke('sendNotificationEmail', {
+          const emailRes = await base44.functions.invoke('sendNotificationEmail', {
             type: 'project_created',
             entityId: newProject.id,
             appUrl: window.location.origin
           });
+          const emailNote = deliveryNote(emailRes, {
+            saved: 'Project created',
+            sent: 'the email to the customer did not go out',
+          });
+          if (emailNote) toast.warning(emailNote);
         } catch (error) {
           console.error('Failed to send project email:', error);
         }
@@ -348,12 +366,26 @@ export default function SaleDetail() {
     queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
 
     try {
-      const { data } = await base44.functions.invoke('extractContractData', {
+      const res = await base44.functions.invoke('extractContractData', {
         contractUrl: sale.contract_file_url,
         saleId: saleId
       });
 
-      if (data.success) {
+      // The status row was flipped to 'processing' before the call. If the call
+      // failed, put it back to 'error' so the button offers a retry instead of
+      // spinning on 'processing' forever.
+      const failed = invokeFailure(res);
+      if (failed) {
+        await base44.entities.Sale.update(saleId, {
+          contract_extraction_status: 'error'
+        });
+        queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
+        toast.error(`Could not read the contract — ${failed}`);
+        return;
+      }
+
+      const data = res.data;
+      if (data?.success) {
         queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
 
         // After successful extraction, fetch RFMS data if invoice number exists
@@ -375,6 +407,24 @@ export default function SaleDetail() {
             console.error('Failed to fetch RFMS data after extraction:', rfmsError);
           }
         }
+      } else {
+        // Nothing was extracted — usually the reader isn't set up yet, which is
+        // not an error to throw, just something to say plainly. Either way the
+        // row must not be left stuck on 'processing' with no way forward.
+        const notSent = invokeNotSent(res);
+        // The status must move off 'processing' either way, or the button at the
+        // bottom of the page stays disabled forever. But 'error' would be a lie
+        // for an unconfigured reader — 'pending' says "not done yet", which is
+        // true, and leaves it retryable once the integration is switched on.
+        await base44.entities.Sale.update(saleId, {
+          contract_extraction_status: notSent ? 'pending' : 'error'
+        });
+        queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
+        if (notSent) {
+          toast.info(`Nothing was read from the contract — ${notSent}.`);
+        } else {
+          toast.error('Nothing could be read from the contract.');
+        }
       }
     } catch (error) {
       console.error('Failed to extract contract data:', error);
@@ -389,20 +439,26 @@ export default function SaleDetail() {
   const handleSendSalesEmail = async () => {
     setSendingEmail(true);
     try {
-      const { data } = await base44.functions.invoke('sendSaleConfirmationEmail', {
+      const res = await base44.functions.invoke('sendSaleConfirmationEmail', {
         saleId,
         appUrl: window.location.origin
       });
-      if (data?.error) {
-        toast.error(`Failed to send email: ${data.error}`);
-      } else if (data?.skipped) {
-        toast.info(`Email not sent (${data.skipped}).`);
-      } else {
-        // emailDispatch returns `recipients`, not `recipientCount`.
-        toast.success(`Email sent to ${data?.recipients ?? 0} recipient(s)`);
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(`Could not send the email — ${failed}`);
+        return;
       }
+      // A 200 with { skipped: … } means email is switched off or there is no
+      // address on file. Nothing went out, so don't claim it did.
+      const notSent = invokeNotSent(res);
+      if (notSent) {
+        toast.info(`No email was sent — ${notSent}.`);
+        return;
+      }
+      // emailDispatch returns `recipients`, not `recipientCount`.
+      toast.success(`Email sent to ${res.data?.recipients ?? 0} recipient(s)`);
     } catch (error) {
-      toast.error(`Failed to send email: ${error.message}`);
+      toast.error(`Could not send the email — ${error.message}`);
     } finally {
       setSendingEmail(false);
     }
@@ -419,7 +475,7 @@ export default function SaleDetail() {
       const totalCost = lines.reduce((sum, item) => sum + (item.unitCost * item.quantity), 0);
       const orderTotal = lines.reduce((sum, item) => sum + (item.total || 0), 0);
       const gpPercent = orderTotal > 0 ? ((orderTotal - totalCost) / orderTotal * 100) : 0;
-      const { data } = await base44.functions.invoke('sendLowGPAlert', {
+      const res = await base44.functions.invoke('sendLowGPAlert', {
         saleId,
         customerName: customerName,
         consultantName: consultantName,
@@ -428,13 +484,29 @@ export default function SaleDetail() {
         orderTotal,
         invoiceNumber: sale.invoice_number
       });
-      if (data.sent > 0) {
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(`Could not send the GP alert — ${failed}`);
+        return;
+      }
+      const notSent = invokeNotSent(res);
+      // 'above threshold' is not an exception, it is the NORMAL answer for a
+      // healthy job — smsDispatch low_gp returns it on the happy path. Falling
+      // through keeps the informative branch below, which names the actual GP%.
+      // Reporting it as a bare "No alert sent — above threshold." threw away the
+      // one number the user opened this for.
+      if (notSent && notSent !== 'above threshold') {
+        toast.info(`No alert sent — ${notSent}.`);
+        return;
+      }
+      const data = res.data;
+      if (data?.sent > 0) {
         toast.success(`GP alert sent to ${data.sent} recipient(s). GP%: ${gpPercent.toFixed(1)}%`);
       } else {
-        toast(`No alert sent. ${data.message || `GP ${gpPercent.toFixed(1)}% is above the configured threshold.`}`);
+        toast(`No alert sent. ${data?.message || `GP ${gpPercent.toFixed(1)}% is above the configured threshold.`}`);
       }
     } catch (error) {
-      toast.error(`Failed to send GP alert: ${error.message}`);
+      toast.error(`Could not send the GP alert — ${error.message}`);
     } finally {
       setSendingGPAlert(false);
     }
@@ -449,13 +521,26 @@ export default function SaleDetail() {
     console.log('Fetching RFMS order for invoice:', sale.invoice_number);
     setFetchingRFMS(true);
     try {
-      const { data } = await base44.functions.invoke('testOrderDirect', {
+      const res = await base44.functions.invoke('testOrderDirect', {
         invoiceNumber: sale.invoice_number
       });
 
-      console.log('RFMS function response:', data);
+      console.log('RFMS function response:', res?.data);
 
-      if (data.success) {
+      const failed = invokeFailure(res);
+      if (failed) {
+        console.error('RFMS fetch failed:', res);
+        toast.error(`Could not fetch the RFMS order — ${failed}`);
+        return;
+      }
+      const notSent = invokeNotSent(res);
+      if (notSent) {
+        toast.info(`No RFMS data came back — ${notSent}.`);
+        return;
+      }
+
+      const data = res.data;
+      if (data?.success) {
         console.log('Updating sale with RFMS data');
         await base44.entities.Sale.update(saleId, {
           rfms_order_data: data.order,
@@ -487,7 +572,7 @@ export default function SaleDetail() {
         toast.success('RFMS order data fetched successfully!');
       } else {
         console.error('RFMS fetch failed:', data);
-        toast.error(`Failed to fetch RFMS order: ${data.error || 'Unknown error'}`);
+        toast.error(`Could not fetch the RFMS order — ${data?.error || 'nothing came back for that invoice'}`);
       }
     } catch (error) {
       console.error('RFMS fetch error:', error);

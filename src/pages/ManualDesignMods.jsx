@@ -13,6 +13,8 @@ import { ArrowLeft, Plus, Loader2, Trash2, Send, CheckCircle2, Clock, ExternalLi
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { SignedFileLink } from '@/lib/fileUrl';
+import { toast } from 'sonner';
+import { invokeFailure, invokeNotSent, deliveryNote } from '@/lib/invokeResult';
 
 const STATUS_STYLES = {
   draft: 'bg-secondary text-muted-foreground border-border',
@@ -84,12 +86,16 @@ export default function ManualDesignMods() {
         created_by_name: currentUser?.full_name || currentUser?.email || ''
       });
       
-      // Auto-send for signature
-      await base44.functions.invoke('sendDesignModEmail', {
+      // Auto-send for signature. The row is already committed, so a delivery problem must
+      // NOT throw — onSuccess has to run or the form stays populated and a retry creates a
+      // duplicate mod and a second customer email. Say what happened and carry on.
+      const res = await base44.functions.invoke('sendDesignModEmail', {
         designModId: mod.id,
         appUrl: window.location.origin
       });
-      
+      const note = deliveryNote(res, { saved: 'Design mod created', sent: 'the email did not go out' });
+      if (note) toast.warning(note);
+
       return mod;
     },
     onSuccess: () => {
@@ -116,10 +122,17 @@ export default function ManualDesignMods() {
   const handleResend = async (mod) => {
     setSendingId(mod.id);
     try {
-      await base44.functions.invoke('sendDesignModEmail', {
+      const res = await base44.functions.invoke('sendDesignModEmail', {
         designModId: mod.id,
         appUrl: window.location.origin
       });
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(`Could not send the email — ${failed}`);
+        return;
+      }
+      const notSent = invokeNotSent(res);
+      if (notSent) toast.warning(`The email was not sent — ${notSent}`);
       queryClient.invalidateQueries({ queryKey: ['designMods'] });
     } finally {
       setSendingId(null);
@@ -164,7 +177,11 @@ export default function ManualDesignMods() {
         product_info: data.product_info,
         status: 'draft'
       });
-      await base44.functions.invoke('sendPreInstallEmail', { checklistId: record.id });
+      // The checklist row is already committed — never throw here, or onSuccess is skipped and
+      // a retry creates a duplicate checklist and a second customer email.
+      const res = await base44.functions.invoke('sendPreInstallEmail', { checklistId: record.id });
+      const note = deliveryNote(res, { saved: 'Checklist created', sent: 'the email did not go out' });
+      if (note) toast.warning(note);
       return record;
     },
     onSuccess: () => {
@@ -181,7 +198,14 @@ export default function ManualDesignMods() {
   const piResend = async (record) => {
     setSendingId(record.id);
     try {
-      await base44.functions.invoke('sendPreInstallEmail', { checklistId: record.id });
+      const res = await base44.functions.invoke('sendPreInstallEmail', { checklistId: record.id });
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(`Could not send the email — ${failed}`);
+        return;
+      }
+      const notSent = invokeNotSent(res);
+      if (notSent) toast.warning(`The email was not sent — ${notSent}`);
       queryClient.invalidateQueries({ queryKey: ['standalonePreInstallChecklists'] });
     } finally {
       setSendingId(null);
@@ -212,10 +236,14 @@ export default function ManualDesignMods() {
         deposit_amount: data.deposit_amount ? parseFloat(data.deposit_amount) : 0,
         status: 'draft'
       });
-      await base44.functions.invoke('sendManualSalesContractEmail', {
+      // The contract row is already committed — never throw here, or onSuccess is skipped and
+      // a retry creates a duplicate contract and a second customer email.
+      const res = await base44.functions.invoke('sendManualSalesContractEmail', {
         contractId: contract.id,
         appUrl: window.location.origin
       });
+      const note = deliveryNote(res, { saved: 'Contract created', sent: 'the email did not go out' });
+      if (note) toast.warning(note);
       return contract;
     },
     onSuccess: () => {
@@ -237,10 +265,17 @@ export default function ManualDesignMods() {
   const scResend = async (contract) => {
     setSendingId(contract.id);
     try {
-      await base44.functions.invoke('sendManualSalesContractEmail', {
+      const res = await base44.functions.invoke('sendManualSalesContractEmail', {
         contractId: contract.id,
         appUrl: window.location.origin
       });
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(`Could not send the email — ${failed}`);
+        return;
+      }
+      const notSent = invokeNotSent(res);
+      if (notSent) toast.warning(`The email was not sent — ${notSent}`);
       queryClient.invalidateQueries({ queryKey: ['manualSalesContracts'] });
     } finally {
       setSendingId(null);

@@ -3,6 +3,8 @@ import { base44 } from '@/api/base44Client';
 import DateRangePicker from '@/components/dashboard/DateRangePicker';
 import { Loader2, RefreshCw, Settings, TrendingDown, TrendingUp, DollarSign, Users, Target, CalendarDays, ShoppingBag } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, LineChart, Line, ComposedChart, ReferenceLine } from 'recharts';
+import { toast } from 'sonner';
+import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 
 const COLORS = ['#4F46E5', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
@@ -54,6 +56,16 @@ export default function MarketingPerformance() {
     setGhlLoading(true);
     try {
       const r = await base44.functions.invoke('getGHLLeadCount', {});
+      // A failure here used to land as an empty list, which reads on screen as "0 leads" —
+      // real-looking data. Say it failed instead.
+      const failed = invokeFailure(r);
+      if (failed) {
+        toast.error(`Could not load the lead counts — ${failed}`);
+        setAllDateAdded([]);
+        return;
+      }
+      const notLoaded = invokeNotSent(r);
+      if (notLoaded) toast.warning(`Lead counts are unavailable — ${notLoaded}`);
       setAllDateAdded(r.data?.dateAddedList ?? []);
       setGhlSyncedAt(r.data?.synced_at ? new Date(r.data.synced_at) : null);
     } catch (e) {
@@ -67,7 +79,15 @@ export default function MarketingPerformance() {
   const refreshGHL = async () => {
     setGhlLoading(true);
     try {
-      await base44.functions.invoke('syncGHLContacts', {});
+      const res = await base44.functions.invoke('syncGHLContacts', {});
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(`Could not sync the leads — ${failed}`);
+        setGhlLoading(false);
+        return;
+      }
+      const notSynced = invokeNotSent(res);
+      if (notSynced) toast.warning(`Nothing was synced — ${notSynced}`);
       await loadGHLLeads();
     } catch (e) {
       setGhlLoading(false);
@@ -108,6 +128,14 @@ export default function MarketingPerformance() {
     setBudgetLoading(true);
     try {
       const r = await base44.functions.invoke('getMarketingBudget', { spreadsheet_id: spreadsheetId, sheet_name: 'OtherChannels' });
+      const failed = invokeFailure(r);
+      if (failed) {
+        toast.error(`Could not load the marketing budget — ${failed}`);
+        setMarketingBudget([]);
+        return;
+      }
+      const notLoaded = invokeNotSent(r);
+      if (notLoaded) toast.warning(`The marketing budget is unavailable — ${notLoaded}`);
       setMarketingBudget(r.data?.entries ?? []);
     } catch (e) {
       setMarketingBudget([]);
@@ -123,6 +151,16 @@ export default function MarketingPerformance() {
     setAdSpendError(null);
     try {
       const r = await base44.functions.invoke('getAdSpend', { spreadsheet_id: spreadsheetId });
+      // Route a failure into the error panel that already exists below (with its Retry button)
+      // rather than showing an empty spend table that looks like a real zero.
+      const failed = invokeFailure(r);
+      if (failed) {
+        setAdSpendError(failed);
+        setAdSpendEntries([]);
+        return;
+      }
+      const notLoaded = invokeNotSent(r);
+      if (notLoaded) toast.warning(`No ad spend was loaded — ${notLoaded}`);
       setAdSpendEntries(r.data?.entries ?? []);
       setAdSpendHeaders(r.data?.headers ?? []);
     } catch (e) {

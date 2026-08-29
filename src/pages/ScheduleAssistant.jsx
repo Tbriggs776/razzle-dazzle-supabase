@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { deliveryNote } from '@/lib/invokeResult';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Button } from "@/components/ui/button";
@@ -164,15 +165,28 @@ export default function ScheduleAssistant() {
       if (options.notifyConsultant && updates.assigned_dc) {
         console.time('⏱️ Send SMS Notifications');
         try {
-          await base44.functions.invoke('sendAppointmentSMS', {
+          // The appointment row is already updated above, so a notification
+          // problem must never throw — it only gets said out loud.
+          const consultantRes = await base44.functions.invoke('sendAppointmentSMS', {
             appointmentId,
             type: 'consultant'
           });
+          const consultantNote = deliveryNote(consultantRes, {
+            saved: 'Appointment updated',
+            sent: 'the text to the consultant did not go out'
+          });
+          if (consultantNote) toast.warning(consultantNote);
+
           // Notify lead about their assigned consultant
-          await base44.functions.invoke('sendAppointmentSMS', {
+          const leadRes = await base44.functions.invoke('sendAppointmentSMS', {
             appointmentId,
             type: 'lead_consultant_assigned'
           });
+          const leadNote = deliveryNote(leadRes, {
+            saved: 'Appointment updated',
+            sent: 'the customer was not told who is coming'
+          });
+          if (leadNote) toast.warning(leadNote);
         } catch (error) {
           console.error('Failed to send consultant SMS:', error);
         }
@@ -180,10 +194,15 @@ export default function ScheduleAssistant() {
       } else if (options.notifyCustomer) {
         console.time('⏱️ Send Customer SMS');
         try {
-          await base44.functions.invoke('sendAppointmentSMS', {
+          const customerRes = await base44.functions.invoke('sendAppointmentSMS', {
             appointmentId,
             type: 'lead'
           });
+          const customerNote = deliveryNote(customerRes, {
+            saved: 'Appointment updated',
+            sent: 'the text to the customer did not go out'
+          });
+          if (customerNote) toast.warning(customerNote);
         } catch (error) {
           console.error('Failed to send customer SMS:', error);
         }
@@ -193,11 +212,16 @@ export default function ScheduleAssistant() {
       if (options.syncCalendar) {
         console.time('⏱️ Sync Google Calendar');
         try {
-          await base44.functions.invoke('syncCalendarEvent', {
+          const calRes = await base44.functions.invoke('syncCalendarEvent', {
             appointmentId,
             action: 'update',
             appUrl: window.location.origin
           });
+          const calNote = deliveryNote(calRes, {
+            saved: 'Appointment updated',
+            sent: 'the calendar was not updated'
+          });
+          if (calNote) toast.warning(calNote);
         } catch (error) {
           console.error('Failed to sync calendar:', error);
         }

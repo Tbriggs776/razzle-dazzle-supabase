@@ -42,6 +42,7 @@ import ChecklistDisplay from '@/components/appointments/ChecklistDisplay';
 import ChecklistV2Display from '@/components/appointments/ChecklistV2Display';
 import CreateQuoteDialog from '@/components/appointments/CreateQuoteDialog';
 import { toast } from 'sonner';
+import { invokeFailure, invokeNotSent, deliveryNote } from '@/lib/invokeResult';
 import { SignedImage } from '@/lib/fileUrl';
 
 const statusColors = {
@@ -318,6 +319,10 @@ export default function ConsultantAppointmentView() {
               type: 'lead_not_sold'
             }).then(res => {
               console.log('📱 SMS Response:', res.data);
+              // The status change above is already saved — a text that never went out
+              // is said out loud, but must never undo or block the save.
+              const note = deliveryNote(res, { saved: 'Status saved', sent: 'the customer text did not go out' });
+              if (note) toast.warning(note);
             }).catch(err => {
               console.error('❌ SMS Failed:', err);
             }),
@@ -327,6 +332,8 @@ export default function ConsultantAppointmentView() {
               appUrl: window.location.origin
             }).then(res => {
               console.log('📧 Email Response:', res.data);
+              const note = deliveryNote(res, { saved: 'Status saved', sent: 'the team email did not go out' });
+              if (note) toast.warning(note);
             }).catch(err => {
               console.error('❌ Email Failed:', err);
             })
@@ -363,7 +370,7 @@ export default function ConsultantAppointmentView() {
         // Atomic + idempotent: customer + sale + project created and the appointment flipped to
         // 'Sold' in ONE transaction (convert_to_sale RPC). A retry after a partial failure returns
         // the existing sale instead of double-creating the whole chain.
-        const { data: conv, error: convErr } = await base44.functions.invoke('convertToSale', {
+        const convRes = await base44.functions.invoke('convertToSale', {
           appointmentId,
           appointmentUpdate: updateData.notes ? { notes: updateData.notes } : {},
           customer: {
@@ -401,8 +408,12 @@ export default function ConsultantAppointmentView() {
             pre_install_product_info: preInstallData?.productInfo || null,
           },
         });
-        if (convErr || !conv?.sale_id) {
-          throw new Error(convErr?.message || 'Failed to record the sale. Nothing was saved — please try again.');
+        // Nothing has been written yet for a 'Sold' — the RPC is the write — so a failure
+        // here can safely throw and let the user retry.
+        const convFailed = invokeFailure(convRes);
+        const conv = convRes?.data;
+        if (convFailed || !conv?.sale_id) {
+          throw new Error(convFailed || 'Failed to record the sale. Nothing was saved — please try again.');
         }
         const saleId = conv.sale_id;
         const newProjectId = conv.project_id;
@@ -432,43 +443,51 @@ export default function ConsultantAppointmentView() {
 
         // Send SMS to customer confirming the sale
         try {
-          await base44.functions.invoke('sendAppointmentSMS', {
+          const res = await base44.functions.invoke('sendAppointmentSMS', {
             appointmentId,
             customerId,
             type: 'customer_sale_confirmation'
           });
+          const note = deliveryNote(res, { saved: 'Sale recorded', sent: 'the customer text did not go out' });
+          if (note) toast.warning(note);
         } catch (error) {
           console.error('Failed to send customer SMS:', error);
         }
 
         // Send sale confirmation email to team (CC list)
         try {
-          await base44.functions.invoke('sendNotificationEmail', {
+          const res = await base44.functions.invoke('sendNotificationEmail', {
             type: 'sale_confirmed',
             entityId: saleId,
             appUrl: window.location.origin
           });
+          const note = deliveryNote(res, { saved: 'Sale recorded', sent: 'the team email did not go out' });
+          if (note) toast.warning(note);
         } catch (error) {
           console.error('Failed to send sale confirmation email:', error);
         }
 
         // Send SMS and email for project creation
         try {
-          await base44.functions.invoke('sendAppointmentSMS', {
+          const res = await base44.functions.invoke('sendAppointmentSMS', {
             appointmentId,
             type: 'customer_project_created',
             customerId
           });
+          const note = deliveryNote(res, { saved: 'Sale recorded', sent: 'the project text to the customer did not go out' });
+          if (note) toast.warning(note);
         } catch (error) {
           console.error('Failed to send project SMS:', error);
         }
 
         try {
-          await base44.functions.invoke('sendNotificationEmail', {
+          const res = await base44.functions.invoke('sendNotificationEmail', {
             type: 'project_created',
             entityId: newProjectId,
             appUrl: window.location.origin
           });
+          const note = deliveryNote(res, { saved: 'Sale recorded', sent: 'the project email did not go out' });
+          if (note) toast.warning(note);
         } catch (error) {
           console.error('Failed to send project email:', error);
         }
@@ -647,7 +666,11 @@ export default function ConsultantAppointmentView() {
         product_info: standaloneProductInfo,
         status: 'draft'
       });
-      await base44.functions.invoke('sendPreInstallEmail', { checklistId: record.id });
+      const res = await base44.functions.invoke('sendPreInstallEmail', { checklistId: record.id });
+      // The checklist record is already created. If only the email fell over, say so but
+      // still mark this done — sending again would create a second record and a second email.
+      const note = deliveryNote(res, { saved: 'Checklist created', sent: 'the email did not go out' });
+      if (note) toast.warning(note);
       setStandaloneSent(true);
     } catch (err) {
       console.error('Failed to send checklist:', err);
@@ -818,11 +841,14 @@ export default function ConsultantAppointmentView() {
                        user_name: userName
                      });
 
-                     // Send SMS notification
-                     await base44.functions.invoke('sendAppointmentSMS', {
+                     // Send SMS notification. The status change above is already saved, so a
+                     // text that never went out is reported without blocking the refresh below.
+                     const smsRes = await base44.functions.invoke('sendAppointmentSMS', {
                        appointmentId,
                        type: 'consultant_on_my_way'
                      });
+                     const smsNote = deliveryNote(smsRes, { saved: "You're marked en route", sent: 'the customer was not texted' });
+                     if (smsNote) toast.warning(smsNote);
 
                      // Refresh appointment data
                      queryClient.invalidateQueries({ queryKey: ['appointment', appointmentId] });
@@ -931,10 +957,12 @@ export default function ConsultantAppointmentView() {
 
                         // Send SMS notification to customer
                         try {
-                          await base44.functions.invoke('sendAppointmentSMS', {
+                          const arrivedRes = await base44.functions.invoke('sendAppointmentSMS', {
                             appointmentId,
                             type: 'consultant_arrived'
                           });
+                          const arrivedNote = deliveryNote(arrivedRes, { saved: "You're marked on site", sent: 'the customer was not texted' });
+                          if (arrivedNote) toast.warning(arrivedNote);
                         } catch (error) {
                           console.error('Failed to send arrival SMS:', error);
                         }
@@ -979,6 +1007,18 @@ export default function ConsultantAppointmentView() {
                        type: 'lead_not_sold'
                      });
                      console.log('🧪 SMS Response:', response.data);
+                     // Nothing was written here — this button only sends. Report the outcome
+                     // instead of spinning and going quiet.
+                     const failed = invokeFailure(response);
+                     if (failed) {
+                       toast.error(`Could not send the test message — ${failed}`);
+                       return;
+                     }
+                     const notSent = invokeNotSent(response);
+                     if (notSent) {
+                       toast.warning(`Nothing was sent — ${notSent}`);
+                       return;
+                     }
                    } catch (error) {
                      console.error('🧪 SMS Test Failed:', error);
                    } finally {

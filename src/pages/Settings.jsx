@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -653,7 +654,28 @@ export default function Settings() {
     
     setTestingEmail(emailType);
     try {
-      const { data } = await base44.functions.invoke('sendTestEmail', { emailType });
+      const res = await base44.functions.invoke('sendTestEmail', { emailType });
+      // The check above reads the divert address out of the UNSAVED form, while the
+      // server reads it out of the database — so the commonest way this fails is an
+      // admin typing an address and testing before pressing Save. That came back as
+      // a 400 and still toasted "Test email sent!", and they went looking in an
+      // inbox nothing had been sent to.
+      const failed = invokeFailure(res);
+      if (failed) {
+        // Report what actually went wrong. Asserting "save first" for every
+        // failure sends an admin to press Save at an Unauthorized or a dropped
+        // connection, which will not help. Keep the hint as a secondary clause,
+        // because an unsaved address IS the commonest cause.
+        toast.error(`Could not send the test email — ${failed}`, {
+          description: 'If you have just changed the address, save your settings first.',
+        });
+        return;
+      }
+      const notSent = invokeNotSent(res);
+      if (notSent) {
+        toast.warning(`No test email went out — ${notSent}.`);
+        return;
+      }
       toast.success(`Test email sent to ${formData.divert_emails_to}!`);
     } catch (error) {
       toast.error('Test failed: ' + error.message);
@@ -839,7 +861,22 @@ export default function Settings() {
                   onClick={async () => {
                     setSendingPastDueAlert(true);
                     try {
-                      await base44.functions.invoke('sendPastDueProjectsAlert', {});
+                      const res = await base44.functions.invoke('sendPastDueProjectsAlert', {});
+                      // This one is a text-message dispatcher: it answers 200 with
+                      // { skipped: 'no recipients' } / { skipped: 'nothing past due' }
+                      // when it sends nothing at all. "Alert sent!" was printed for
+                      // those too — including the case where nobody above is ticked,
+                      // which is exactly the mistake this button exists to catch.
+                      const failed = invokeFailure(res);
+                      if (failed) {
+                        toast.error('Could not send the alert. Please try again.');
+                        return;
+                      }
+                      const notSent = invokeNotSent(res);
+                      if (notSent) {
+                        toast.warning(`No alert went out — ${notSent}.`);
+                        return;
+                      }
                       toast.success('Alert sent!');
                     } catch (e) {
                       toast.error('Failed: ' + e.message);
@@ -916,8 +953,22 @@ export default function Settings() {
                   onClick={async () => {
                     setSendingPendingCancellationAlert(true);
                     try {
-                      const { data } = await base44.functions.invoke('sendPendingCancellationAlert', {});
-                      toast.success(`Alert sent! ${data.jobCount} job(s) included.`);
+                      const res = await base44.functions.invoke('sendPendingCancellationAlert', {});
+                      // Same dispatcher, same 200-with-{ skipped } answer for
+                      // 'no recipients' and 'none pending'. It also used to read
+                      // data.jobCount off a null data on a real failure, so the
+                      // admin was shown a type error instead of what went wrong.
+                      const failed = invokeFailure(res);
+                      if (failed) {
+                        toast.error('Could not send the alert. Please try again.');
+                        return;
+                      }
+                      const notSent = invokeNotSent(res);
+                      if (notSent) {
+                        toast.warning(`No alert went out — ${notSent}.`);
+                        return;
+                      }
+                      toast.success(`Alert sent! ${res.data.jobCount} job(s) included.`);
                     } catch (e) {
                       toast.error('Failed: ' + e.message);
                     } finally {
@@ -1077,8 +1128,22 @@ export default function Settings() {
                   variant="outline"
                   onClick={async () => {
                     try {
-                      const { data } = await base44.functions.invoke('sendUnassignedDCAlerts', {});
-                      toast.success(`Done! Sent to ${data.sent} number(s).`);
+                      const res = await base44.functions.invoke('sendUnassignedDCAlerts', {});
+                      // { skipped: 'no recipients' } / { skipped: 'none unassigned' }
+                      // both arrive as a 200. The old line read data.sent through it
+                      // and reported "Done! Sent to 0 number(s)." — which reads as a
+                      // success, and on a real failure threw on a null data instead.
+                      const failed = invokeFailure(res);
+                      if (failed) {
+                        toast.error('Could not send the alert. Please try again.');
+                        return;
+                      }
+                      const notSent = invokeNotSent(res);
+                      if (notSent) {
+                        toast.warning(`No alert went out — ${notSent}.`);
+                        return;
+                      }
+                      toast.success(`Done! Sent to ${res.data.sent} number(s).`);
                     } catch (e) {
                       toast.error('Failed: ' + e.message);
                     }

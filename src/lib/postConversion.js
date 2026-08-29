@@ -1,4 +1,6 @@
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
+import { deliveryNote } from '@/lib/invokeResult';
 
 // Post-conversion notifications for a lead -> appointment conversion (ChecklistDetail /
 // ChecklistV2Detail). Reimplements the notification subset of base44's unported
@@ -36,16 +38,28 @@ export async function runPostConversion({ appointmentId, hasDC }) {
   }
 
   // 2) SMS the lead, and the consultant if one is assigned.
+  //    The appointment is already committed by the caller and this runs non-blocking, so nothing
+  //    here may throw. But SMS switched off in Settings comes back as a cheerful HTTP 200 with
+  //    { skipped: 'disabled' } — say plainly that the text never went, so someone can call instead.
   try {
-    await base44.functions.invoke('sendAppointmentSMS', { appointmentId, type: 'lead' });
-    if (hasDC) await base44.functions.invoke('sendAppointmentSMS', { appointmentId, type: 'consultant' });
+    const leadRes = await base44.functions.invoke('sendAppointmentSMS', { appointmentId, type: 'lead' });
+    const leadNote = deliveryNote(leadRes, { saved: 'Appointment created', sent: 'the text to the customer did not go out' });
+    if (leadNote) toast.warning(leadNote);
+
+    if (hasDC) {
+      const dcRes = await base44.functions.invoke('sendAppointmentSMS', { appointmentId, type: 'consultant' });
+      const dcNote = deliveryNote(dcRes, { saved: 'Appointment created', sent: 'the text to the consultant did not go out' });
+      if (dcNote) toast.warning(dcNote);
+    }
   } catch (e) {
     console.error('Post-conversion SMS failed:', e);
   }
 
   // 3) Internal "appointment created" email.
   try {
-    await base44.functions.invoke('sendNotificationEmail', { type: 'appointment_created', entityId: appointmentId, appUrl: window.location.origin });
+    const res = await base44.functions.invoke('sendNotificationEmail', { type: 'appointment_created', entityId: appointmentId, appUrl: window.location.origin });
+    const note = deliveryNote(res, { saved: 'Appointment created', sent: 'the team was not notified by email' });
+    if (note) toast.warning(note);
   } catch (e) {
     console.error('Post-conversion email failed:', e);
   }

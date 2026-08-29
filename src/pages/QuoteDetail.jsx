@@ -18,6 +18,7 @@ import { generateReceiptPDF } from '@/utils/generateReceiptPDF';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useSignedUrl } from '@/lib/fileUrl';
+import { invokeFailure, invokeNotSent, deliveryNote } from '@/lib/invokeResult';
 import PageHeader from '@/components/common/PageHeader';
 import StatusPill from '@/components/common/StatusPill';
 import KpiTile from '@/components/dashboard/KpiTile';
@@ -249,16 +250,30 @@ export default function QuoteDetail() {
         await base44.entities.Project.update(newProject.id, { project_tracker_url: trackerUrl });
       } catch {}
 
-      // Send confirmation notifications (non-blocking)
+      // Send confirmation notifications (non-blocking). The sale, project and
+      // customer are already committed at this point, so a notification that did
+      // not go out is a WARNING ONLY — never a throw. Throwing here would skip
+      // onSuccess, leave the dialog open on a converted quote, and the retry
+      // would look like a second conversion to whoever is standing there.
       try {
         const notifCalls = [
-          base44.functions.invoke('sendNotificationEmail', { type: 'sale_confirmed', entityId: sale.id, appUrl: window.location.origin }).catch(() => {}),
-          base44.functions.invoke('sendNotificationEmail', { type: 'project_created', entityId: newProject.id, appUrl: window.location.origin }).catch(() => {})
+          base44.functions.invoke('sendNotificationEmail', { type: 'sale_confirmed', entityId: sale.id, appUrl: window.location.origin }).catch((e) => ({ error: e })),
+          base44.functions.invoke('sendNotificationEmail', { type: 'project_created', entityId: newProject.id, appUrl: window.location.origin }).catch((e) => ({ error: e }))
         ];
         if (quote.appointment) {
-          notifCalls.push(base44.functions.invoke('sendAppointmentSMS', { appointmentId: quote.appointment, customerId: customer.id, type: 'customer_sale_confirmation' }).catch(() => {}));
+          notifCalls.push(base44.functions.invoke('sendAppointmentSMS', { appointmentId: quote.appointment, customerId: customer.id, type: 'customer_sale_confirmation' }).catch((e) => ({ error: e })));
         }
-        await Promise.all(notifCalls);
+        const notifResults = await Promise.all(notifCalls);
+        // A 200 is not delivery — the dispatchers answer { skipped: 'disabled' }
+        // or { skipped: 'no recipient phone' } with a 200.
+        const problem = notifResults.find((r) => invokeFailure(r) || invokeNotSent(r));
+        if (problem) {
+          const note = deliveryNote(problem, {
+            saved: 'Sale created',
+            sent: 'the confirmation to the customer did not go out',
+          });
+          if (note) toast.warning(note);
+        }
       } catch {}
 
       // Email receipt to customer if requested and deposit info present
@@ -277,6 +292,14 @@ export default function QuoteDetail() {
           quoteAmount: convertAmount ? parseFloat(convertAmount) : null,
           locationAddress: quote.location_address || '',
           receiptNumber: `R-${quoteId.slice(-6).toUpperCase()}`
+        }).then((res) => {
+          // The dialog promised the customer would get this receipt, so say so
+          // when they didn't. Still fire-and-forget — the sale is already saved.
+          const note = deliveryNote(res, {
+            saved: 'Sale created',
+            sent: 'the receipt email to the customer did not go out',
+          });
+          if (note) toast.warning(note);
         }).catch(() => {});
       }
 
