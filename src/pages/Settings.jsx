@@ -58,61 +58,7 @@ const AVAILABLE_VARIABLES = {
   ]
 };
 
-const ALL_PAGES = [
-  { name: 'Inbox', key: 'Inbox' },
-  { name: 'Work', key: 'Work' },
-  { name: 'Routing', key: 'Routing' },
-  { name: 'My Appointments', key: 'MyAppointments' },
-  { name: 'My Tasks', key: 'MyTasks' },
-  { name: 'My Sales', key: 'MySales' },
-  { name: 'Leads', key: 'Leads' },
-  { name: 'Lead Detail', key: 'LeadDetail' },
-  { name: 'Customers', key: 'Customers' },
-  { name: 'Customer Detail', key: 'CustomerDetail' },
-  { name: 'Checklists', key: 'AppointmentSettingChecklists' },
-  { name: 'Checklist Detail', key: 'ChecklistDetail' },
-  { name: 'Appointments', key: 'Appointments' },
-  { name: 'Appointment Detail', key: 'AppointmentDetail' },
-  { name: 'Recordings', key: 'Recordings' },
-  { name: 'Recording Detail', key: 'RecordingDetail' },
-  { name: 'Communication Hub', key: 'CommunicationHub' },
-  { name: 'Schedule Assistant', key: 'ScheduleAssistant' },
-  { name: 'Sales', key: 'Sales' },
-  { name: 'Sale Detail', key: 'SaleDetail' },
-  { name: 'Projects', key: 'Projects' },
-  { name: 'Project Detail', key: 'ProjectDetail' },
-  { name: 'Claims & Inspections', key: 'ClaimsDashboard' },
-  { name: 'Order Processing', key: 'OrderProcessing' },
-  { name: 'User Access', key: 'UserAccess' },
-  { name: 'Job Flow', key: 'JobFlow' },
-  { name: 'Ordering Team', key: 'OrderingTeam' },
-  { name: 'Install Team', key: 'InstallTeam' },
-  { name: 'Speed to Install', key: 'SpeedToInstall' },
-  { name: 'Installer Applications', key: 'InstallerApplications' },
-  { name: 'Finance', key: 'Finance' },
-  { name: 'Submit Ticket', key: 'SubmitTicket' },
-  { name: 'Invoice Calculations', key: 'InvoiceCalculator' },
-  { name: 'Document Center (Design Mods, Pre-Install, Sales Contracts)', key: 'ManualDesignMods' },
-  { name: 'Reports - Appointments', key: 'AppointmentReports' },
-  { name: 'Reports - Sales', key: 'SalesReports' },
-  { name: 'Team Members', key: 'TeamMembers' },
-  { name: 'Team Member Detail', key: 'TeamMemberDetail' },
-  { name: 'Design Consultants', key: 'DesignConsultants' },
-  { name: 'Customer Service Reps', key: 'CustomerServiceReps' },
-  { name: 'System Logs', key: 'Logs' },
-  { name: 'Settings', key: 'Settings' },
-  { name: 'Fleet Dashboard', key: 'Fleet' },
-  { name: 'Fleet — Vehicles', key: 'FleetVehicles' },
-  { name: 'Fleet — Drivers', key: 'FleetDrivers' },
-  { name: 'Fleet — Maintenance', key: 'FleetMaintenance' },
-  { name: 'Reports — Order Processing', key: 'OrderProcessingReports' },
-  { name: 'Reports — Cash Flow', key: 'CashFlowProjection' },
-  { name: 'My Quotes', key: 'MyQuotes' },
-  { name: 'Reports — Contract vs RFMS', key: 'ContractDiscrepancy' },
-  { name: 'Reports — Sales Manager Dashboard', key: 'AppointmentRehashReport' },
-];
 
-const ALL_ROLES = ['Admin', 'Design Consultant', 'Customer Service Rep', 'Order Processor', 'Sales Manager', 'Finance Manager', 'Operations', 'Customer Experience Coordinator'];
 
 export default function Settings() {
   const queryClient = useQueryClient();
@@ -192,11 +138,6 @@ export default function Settings() {
     }
   });
 
-  const { data: rolePermissions = [] } = useQuery({
-    queryKey: ['rolePermissions'],
-    queryFn: () => base44.entities.RolePermissions.list(),
-    enabled: currentUser?.role === 'admin'
-  });
 
   const { data: timeBlockSettings, isLoading: loadingTimeBlocks } = useQuery({
     queryKey: ['timeBlockSettings'],
@@ -721,10 +662,6 @@ export default function Settings() {
     }
   };
 
-  const getRolePages = (role) => {
-    const permission = rolePermissions.find(rp => rp.role === role);
-    return permission?.accessible_pages || [];
-  };
 
   if (isLoading) {
     return (
