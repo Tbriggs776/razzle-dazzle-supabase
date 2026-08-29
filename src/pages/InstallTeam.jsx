@@ -38,6 +38,8 @@ import {
   fmtDate,
   money,
   today,
+  isoDay,
+  dayDiff,
   LINE_STATUSES,
   STATUS_HELP,
   STATUS_TONE,
@@ -100,6 +102,14 @@ function StatusTooltip({ active, payload }) {
   );
 }
 
+// Exception codes rendered for humans. Raised by the workflow engine when it can
+// neither safely pass nor safely block a job.
+const EXCEPTION_LABELS = {
+  E9_COD_UNCOLLECTED: 'Balance outstanding',
+  E10_COD_WAIVED: 'Collection waived',
+  E11_LIVE_PROJECT_ON_CANCELLED_SALE: 'Live job, cancelled sale',
+};
+
 export default function InstallTeam() {
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ['ops', 'installTeam', 'projects'],
@@ -148,6 +158,21 @@ export default function InstallTeam() {
 
   // Collection state for Gate 1. A sale missing here is UNKNOWN, not unpaid.
   const { balances } = useBalances();
+
+  // Open workflow exceptions. Explicit sort: this table has no created_date, and
+  // the data client's default orderBy would 400 against it.
+  const { data: openExceptions = [] } = useQuery({
+    queryKey: ['openWorkflowExceptions'],
+    queryFn: () => base44.entities.WorkflowException.filter({ resolved_at: null }, '-last_seen_at'),
+    staleTime: 60000,
+  });
+
+  const nameForSubject = (x) => {
+    if (x.subject_type !== 'project') return null;
+    const p = projects.find((pr) => pr.id === x.subject_id);
+    const c = p ? customers.find((cu) => cu.id === p.customer) : null;
+    return c ? `${c.first_name} ${c.last_name}` : null;
+  };
 
   // The same source data run through the stage engine. The board answers "what is
   // on the calendar"; the flow answers "who owns this job right now" — which is
@@ -523,6 +548,37 @@ export default function InstallTeam() {
             </div>
           </div>
         </ModuleCard>
+
+        {/* Workflow exceptions — things the engine could neither pass nor block
+            safely, so a human has to look. Until this existed, every exception
+            the gates raised was written to a table no screen read: the system
+            "observed" into a void. */}
+        {openExceptions.length > 0 && (
+          <ModuleCard
+            title="Needs a human"
+            subtitle="Raised by the workflow engine — not blocking anything, but not resolving on its own"
+            icon={AlertTriangle}
+          >
+            {openExceptions.map((x) => (
+              <div key={x.id} className="flex items-start justify-between gap-4 px-4 py-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusPill tone={x.severity === 'crit' ? 'crit' : 'warn'}>
+                      {EXCEPTION_LABELS[x.code] || x.code}
+                    </StatusPill>
+                    <span className="text-sm font-medium text-foreground">
+                      {nameForSubject(x) || x.subject_id}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{x.detail}</p>
+                </div>
+                <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground">
+                  {x.first_seen_at ? `${dayDiff(isoDay(x.first_seen_at), today())}d open` : ''}
+                </span>
+              </div>
+            ))}
+          </ModuleCard>
+        )}
 
         {board.rows.length === 0 ? (
           <ModuleCard title="Install board" subtitle="Every active project, soonest first" icon={CalendarRange}>

@@ -70,6 +70,10 @@ const ENTITY_TABLE = {
   TicketLog: 'ticket_log',
   TicketMessage: 'ticket_message',
   TimeBlockSettings: 'time_block_settings',
+  // Workflow defects the engine raises for a human (E1-E11). NOTE: no
+  // created_date column — pass an explicit sort ('-last_seen_at') or the
+  // client's '-created_date' default will 400.
+  WorkflowException: 'workflow_exception',
 };
 
 // base44 sort strings look like "-created_date" (desc) or "created_date" (asc).

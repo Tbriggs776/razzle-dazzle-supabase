@@ -168,22 +168,37 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
       if (step_key === 'job_start_checklist') {
         const { data: bal } = await s
           .from('sale_balance')
-          .select('sale_id, balance_due, amount_paid, fully_collected, is_cancelled, collection_terms, collect_exempt')
+          .select('sale_id, gross_amount, balance_due, amount_paid, fully_collected, is_cancelled, collection_terms, collect_exempt')
           .eq('sale_id', project?.sale ?? '__none__')
           .maybeSingle();
 
         // No sale (manual project), no balance row, or a cancelled sale: never
         // invent a debt. E11 already flags live-project-on-cancelled-sale.
-        if (bal && !bal.is_cancelled && bal.fully_collected === false) {
+        //
+        // An UNPRICED sale is excluded too. sale_balance forces
+        // fully_collected=false when sale_amount <= 0 while balance_due goes
+        // NEGATIVE once a deposit exists, so this block would have alerted
+        // "-$11,460.00 outstanding" and raised a crit that no payment could ever
+        // clear. An unpriced sale is a Sales data problem — flow.js already
+        // raises 'sale_unpriced' owned by Sales for it.
+        if (bal && !bal.is_cancelled && Number(bal.gross_amount) > 0 && bal.fully_collected === false) {
           codHold = true;
-          amountDue = Number(bal.balance_due) || 0;
+          // Clamped, and clamped the SAME way install_collection_status clamps,
+          // so the crew's banner and the coordinator's alert can never quote
+          // two different numbers for one hold.
+          amountDue = Math.max(0, Number(bal.balance_due) || 0);
 
           // Idempotent: one open exception per project (partial unique index).
           const { data: open } = await s.from('workflow_exception')
             .select('id').eq('code', 'E9_COD_UNCOLLECTED')
             .eq('subject_type', 'project').eq('subject_id', project_id)
             .is('resolved_at', null).maybeSingle();
-          const detail = `Install started with ${fmtUsd(amountDue)} outstanding of ${fmtUsd(Number(bal.amount_paid) + amountDue)}. Terms: ${bal.collection_terms || 'cod'}. Observe-only — the crew was NOT stopped.`;
+          // No dollar figures in the detail. workflow_exception is readable by
+          // every ops role, which is wider than the payment ledger's own RLS —
+          // writing the balance and contract total here published them to
+          // people RLS deliberately denies the ledger to. Whoever is entitled to
+          // the number reads it from sale_balance.
+          const detail = `Install started with a balance outstanding. Terms: ${bal.collection_terms || 'cod'}. Observe-only — the crew was NOT stopped.`;
           if (open) {
             await s.from('workflow_exception')
               .update({ last_seen_at: nowIso, detail }).eq('id', open.id);
@@ -198,10 +213,27 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
           // Wording is deliberately "balance"/"COD", never "payment" — in this
           // same function submit_for_payment means INSTALLER pay, and a crew
           // reading "payment hold" hears "we are not getting paid".
+          //
+          // The recipient chain MUST terminate somewhere real. On this database
+          // today there are zero region_assignment rows, zero alert_group rows
+          // and zero projects with a field_manager_id — so every configured path
+          // resolves empty and the loop would run zero times. An observe-only
+          // gate that alerts nobody observes into a void, which is worse than no
+          // gate at all because it looks like coverage. Org admins are the
+          // backstop; they always exist.
           const icIds = [region?.install_coordinator_id, project?.field_manager_id].filter(Boolean);
           let icRecs: any[] = [];
           if (icIds.length) { const { data } = await s.from('team_member').select('*').in('id', icIds); icRecs = data || []; }
           if (!icRecs.length) icRecs = await alertMembers(s, 'cod_uncollected');
+          if (!icRecs.length) {
+            const { data } = await s.from('app_user')
+              .select('team_member:team_member_id(id, first_name, email, phone)')
+              .eq('is_org_admin', true).eq('is_active', true);
+            icRecs = (data || []).map((r: any) => r.team_member).filter((m: any) => m?.email);
+          }
+          // If even that is empty the exception row is still written above, so
+          // the record survives — but say so in the logs rather than silently.
+          if (!icRecs.length) console.error(`[gate2] COD hold on ${project_id} reached NO recipients — configure an install coordinator, an alert group, or an org admin.`);
           for (const m of icRecs) {
             await qEmail(s, cfg, m.email, `[Ops Team] Balance outstanding at install start — ${customerName}`,
               `Hi ${m.first_name || 'there'},\n\nThe Job Start Checklist was submitted for ${customerName} with ${fmtUsd(amountDue)} still outstanding.\n\nThe crew was NOT stopped — this is a record, not a block.\n\nThe balance is due before install starts. Collect it, or record what was already taken, here: ${url}`);
