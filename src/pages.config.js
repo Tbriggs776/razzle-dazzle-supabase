@@ -14,9 +14,6 @@
  *   import Settings from './pages/Settings';
  *   
  *   export const PAGES = {
-    "Routing": Routing,
-    "Work": Work,
-    "Inbox": Inbox,
  *       "HomePage": HomePage,
  *       "Dashboard": Dashboard,
  *       "Settings": Settings,
@@ -104,6 +101,9 @@ import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
+    "Inbox": Inbox,
+    "Work": Work,
+    "Routing": Routing,
     "AppointmentDetail": AppointmentDetail,
     "AppointmentReports": AppointmentReports,
     "AppointmentSettingChecklists": AppointmentSettingChecklists,
