@@ -540,6 +540,14 @@ const RPC_FUNCTIONS = {
     p_required_role: p.requiredRole ?? null, p_route: p.route ?? null,
   }],
   decideApproval:  (p) => ['decide_approval', { p_id: p.id, p_state: p.state, p_note: p.note ?? null }],
+  // Task management. assignableUsers is deliberately NOT userAdmin (which is
+  // org-admin gated) — any user creating a task needs a picker, and this
+  // returns names only, never emails or roster metadata.
+  assignableUsers: () => ['assignable_users', {}],
+  reassignTask:    (p) => ['reassign_task', {
+    p_task_id: p.id, p_user_id: p.userId ?? null, p_dept: p.dept ?? null, p_note: p.note ?? null,
+  }],
+  addTaskNote:     (p) => ['add_task_note', { p_task_id: p.id, p_note: p.note }],
   // Threads. Writes go through RPCs so authorship and audience cannot be
   // forged, and thread_message is UPDATE/DELETE-revoked: a conversation that
   // can be rewritten later is worthless in the dispute it exists for.

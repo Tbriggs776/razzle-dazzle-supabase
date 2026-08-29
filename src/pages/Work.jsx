@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
-  Loader2, CheckCircle2, ClipboardList, ShieldCheck, Users, AlertTriangle, Clock,
+  Loader2, CheckCircle2, ClipboardList, ShieldCheck, Users, AlertTriangle, Clock, Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,7 @@ import PageHeader from '@/components/common/PageHeader';
 import StatusPill from '@/components/common/StatusPill';
 import ModuleCard from '@/components/dashboard/ModuleCard';
 import KpiTile from '@/components/dashboard/KpiTile';
+import { NewTaskDialog, TaskDetailSheet } from '@/components/work/TaskDialogs';
 
 const DEPT_LABEL = {
   sales: 'Sales', ordering: 'Order Processing', scheduling: 'Install Coordination',
@@ -34,6 +35,8 @@ export default function Work() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [decide, setDecide] = useState(null);   // the approval being decided
+  const [newTaskOpen, setNewTaskOpen] = useState(false);
+  const [openTask, setOpenTask] = useState(null);   // the task being managed
   const [note, setNote] = useState('');
 
   const { data: me } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
@@ -104,8 +107,8 @@ export default function Work() {
     const due = t.due_at ? new Date(t.due_at) : null;
     const late = due && isPast(due);
     return (
-      <div className="flex items-start justify-between gap-4 px-4 py-3">
-        <div className="min-w-0 flex-1">
+      <div className="flex items-start justify-between gap-4 px-4 py-3 transition-colors hover:bg-muted/50">
+        <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setOpenTask(t)}>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-foreground">
               {t.created_reason?.title || t.notes || 'Task'}
@@ -118,7 +121,7 @@ export default function Work() {
             {t.subject_type ? ` · ${t.subject_type} ${t.subject_id}` : ''}
             {showOwner && t.assigned_role ? ` · ${t.assigned_role}` : ''}
           </p>
-        </div>
+        </button>
         <div className="flex shrink-0 items-center gap-2">
           {t.subject_type === 'project' && t.subject_id && (
             <Button size="sm" variant="ghost"
@@ -146,6 +149,12 @@ export default function Work() {
         <PageHeader
           title="Work"
           subtitle="What is on you, what needs a decision, and what every department is holding"
+          actions={
+            <Button onClick={() => setNewTaskOpen(true)}>
+              <Plus className="mr-1.5 h-4 w-4" />
+              New task
+            </Button>
+          }
         />
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -246,6 +255,15 @@ export default function Work() {
           })}
         </ModuleCard>
       </div>
+
+      <NewTaskDialog open={newTaskOpen} onOpenChange={setNewTaskOpen} />
+
+      <TaskDetailSheet
+        task={openTask}
+        open={!!openTask}
+        onOpenChange={(o) => !o && setOpenTask(null)}
+        currentUserId={myId}
+      />
 
       <Dialog open={!!decide} onOpenChange={(o) => !o && setDecide(null)}>
         <DialogContent className="max-w-md">
