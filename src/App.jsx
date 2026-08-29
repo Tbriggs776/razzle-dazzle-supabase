@@ -44,6 +44,7 @@ import JourneyProjectDetailPage from './pages/JourneyProjectDetail';
 import MarketingPerformancePage from './pages/MarketingPerformance';
 import DCPerformanceMatrixPage from './pages/DCPerformanceMatrix';
 import PortalPage from './pages/Portal';
+import LeadQueuePage from './pages/LeadQueue';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { usePortalContext } from '@/lib/usePortal';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -175,6 +176,7 @@ const AuthenticatedApp = () => {
       <Route path="/MarketingPerformance" element={<LayoutWrapper currentPageName="MarketingPerformance"><MarketingPerformancePage /></LayoutWrapper>} />
       <Route path="/DCPerformanceMatrix" element={<LayoutWrapper currentPageName="DCPerformanceMatrix"><DCPerformanceMatrixPage /></LayoutWrapper>} />
       <Route path="/Integrations" element={<LayoutWrapper currentPageName="Integrations"><IntegrationsPage /></LayoutWrapper>} />
+      <Route path="/LeadQueue" element={<LayoutWrapper currentPageName="LeadQueue"><LeadQueuePage /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

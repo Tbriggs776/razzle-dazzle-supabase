@@ -37,6 +37,8 @@ const ENTITY_TABLE = {
   InspectionReport: 'inspection_report',
   Installer: 'installer',
   InstallerMember: 'installer_member',
+  LeadDisposition: 'lead_disposition',
+  LeadSourceChannel: 'lead_source_channel',
   JourneyOrder: 'journey_order',
   Lead: 'lead',
   Log: 'log',
@@ -584,6 +586,19 @@ const RPC_FUNCTIONS = {
   // violation. This matches on phone → email → GHL id → CallRail id and returns
   // { lead_id, created, matched_on }.
   upsertLead: (p) => ['upsert_lead', { p_lead: p.lead ?? p }],
+  // ── CSR lead queue (Pillars slice 4) ──────────────────────────────────────
+  // Attempts are counted from `communication`, so logLeadAttempt writes a real
+  // outbound row rather than incrementing anything.
+  leadQueue:        (p) => ['lead_queue', { p_scope: p?.scope ?? 'mine' }],
+  claimNextLead:    () => ['claim_next_lead', {}],
+  logLeadAttempt:   (p) => ['log_lead_attempt', {
+    p_lead_id: p.leadId, p_channel: p.channel, p_outcome: p.outcome, p_note: p.note ?? null,
+  }],
+  dispositionLead:  (p) => ['disposition_lead', {
+    p_lead_id: p.leadId, p_disposition: p.disposition,
+    p_recall_date: p.recallDate ?? null, p_note: p.note ?? null,
+  }],
+  reopenLead:       (p) => ['reopen_lead', { p_lead_id: p.leadId }],
   // ── Subcontractor portal ──────────────────────────────────────────────────
   // Every one of these derives the caller's installer server-side. None of them
   // takes an installer_id, which is deliberate: there is no argument through

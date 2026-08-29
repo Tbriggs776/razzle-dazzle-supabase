@@ -333,6 +333,7 @@ export default function Layout({ children, currentPageName }) {
     {
       name: 'CRM', icon: Users,
       subItems: [
+        { name: 'Lead Queue', href: 'LeadQueue', pages: ['LeadQueue'] },
         { name: 'Leads', href: 'Leads', pages: ['Leads', 'LeadDetail'] },
         { name: 'Customers', href: 'Customers', pages: ['Customers', 'CustomerDetail'] },
         { name: 'Appointments', href: 'Appointments', pages: ['Appointments'] },

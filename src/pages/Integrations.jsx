@@ -22,6 +22,21 @@ const STATUS = {
   disabled: { label: 'Disabled', cls: 'bg-secondary text-muted-foreground border-border' },
 };
 
+// Groups on group_label, not category: `category` is the specific line under each
+// provider's name (Messaging, ERP, AI · LLM …) and there are almost as many of
+// those as there are providers, so grouping on it produced twelve headings for
+// thirteen cards. group_label is the coarse family, and sort_order keeps each
+// family's members contiguous — so a Map of first-seen order is the right order.
+function groupByCategory(rows) {
+  const m = new Map();
+  for (const r of rows) {
+    const c = r.group_label || r.category || 'Other';
+    if (!m.has(c)) m.set(c, []);
+    m.get(c).push(r);
+  }
+  return [...m.entries()];
+}
+
 function StatusBadge({ status }) {
   const s = STATUS[status] || STATUS.not_configured;
   return <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${s.cls}`}>{s.label}</span>;
@@ -278,9 +293,25 @@ export default function Integrations() {
         ) : error ? (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">{error}</div>
         ) : (
-          <div className="space-y-5">
-            {integrations.map((integ) => (
-              <IntegrationCard key={integ.key} integ={integ} onChanged={load} />
+          // Grouped by category. Flat was fine at eight providers; at thirteen the
+          // telephony and advertising credentials are impossible to find in one
+          // undifferentiated column.
+          <div className="space-y-10">
+            {groupByCategory(integrations).map(([category, rows]) => (
+              <section key={category}>
+                <div className="flex items-baseline gap-3 mb-4">
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{category}</h2>
+                  <span className="h-px flex-1 bg-border" />
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {rows.filter((r) => r.is_enabled && r.status === 'verified').length}/{rows.length} verified
+                  </span>
+                </div>
+                <div className="space-y-5">
+                  {rows.map((integ) => (
+                    <IntegrationCard key={integ.key} integ={integ} onChanged={load} />
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         )}
