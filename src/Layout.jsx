@@ -400,6 +400,7 @@ export default function Layout({ children, currentPageName }) {
       name: 'System', icon: SettingsIcon,
       subItems: [
         { name: 'User Access', href: 'UserAccess', pages: ['UserAccess'] },
+        { name: 'Routing', href: 'Routing', pages: ['Routing'] },
         { name: 'Settings', href: 'Settings', pages: ['Settings'] },
         { name: 'Integrations', href: 'Integrations', pages: ['Integrations'] },
         { name: 'System Logs', href: 'Logs', pages: ['Logs'] },

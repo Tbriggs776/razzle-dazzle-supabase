@@ -61,6 +61,7 @@ const AVAILABLE_VARIABLES = {
 const ALL_PAGES = [
   { name: 'Inbox', key: 'Inbox' },
   { name: 'Work', key: 'Work' },
+  { name: 'Routing', key: 'Routing' },
   { name: 'My Appointments', key: 'MyAppointments' },
   { name: 'My Tasks', key: 'MyTasks' },
   { name: 'My Sales', key: 'MySales' },

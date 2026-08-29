@@ -549,6 +549,15 @@ const RPC_FUNCTIONS = {
     p_file_urls: p.fileUrls ?? [], p_approval_id: p.approvalId ?? null,
   }],
   closeThread: (p) => ['close_thread', { p_thread_id: p.threadId }],
+  // Routing admin. Department membership has a composite key, so it goes
+  // through one org-admin-gated function rather than the generic entity client.
+  setDepartmentMember: (p) => ['set_department_member', {
+    p_dept: p.dept, p_user_id: p.userId, p_is_member: p.isMember ?? true,
+    p_is_on_call: p.isOnCall ?? null, p_is_lead: p.isLead ?? null,
+  }],
+  // One call that reports every routing gap: unstaffed rules, roles named by a
+  // rule that do not exist, roster members with no login, alert groups, SMS.
+  routingHealth: () => ['routing_health', {}],
   resolveWorkflowException:(p) => ['resolve_workflow_exception', { p_id: p.id, p_note: p.note ?? null }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],

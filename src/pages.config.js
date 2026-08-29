@@ -14,6 +14,7 @@
  *   import Settings from './pages/Settings';
  *   
  *   export const PAGES = {
+    "Routing": Routing,
     "Work": Work,
     "Inbox": Inbox,
  *       "HomePage": HomePage,
@@ -51,6 +52,7 @@
  */
 import Inbox from './pages/Inbox';
 import Work from './pages/Work';
+import Routing from './pages/Routing';
 import AppointmentDetail from './pages/AppointmentDetail';
 import AppointmentReports from './pages/AppointmentReports';
 import AppointmentSettingChecklists from './pages/AppointmentSettingChecklists';
