@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { deliveryNote } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, User, Calendar, Loader2, Building2, HardHat, Globe } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Loader2, Building2, HardHat, Globe } from 'lucide-react';
 import CheckpointProgressTracker from '@/components/journey/CheckpointProgressTracker';
 import JobStartChecklist from '@/components/journey/checklists/JobStartChecklist';
 import PreInstallChecklistView from '@/components/journey/checklists/PreInstallChecklistView';

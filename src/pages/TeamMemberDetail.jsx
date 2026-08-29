@@ -20,7 +20,6 @@ import {
   XCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import TeamMemberForm from '@/components/team/TeamMemberForm';
 

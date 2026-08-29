@@ -11,7 +11,7 @@ import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Loader2, Save, Brain, User, Home, Wrench, Lightbulb, Heart, DollarSign, BarChart3, Calendar, Megaphone, CheckCircle2, Info, Camera, X, ImageIcon } from 'lucide-react';
+import { Loader2, Brain, User, Home, Wrench, Lightbulb, Heart, DollarSign, BarChart3, Calendar, Megaphone, CheckCircle2, Info, Camera, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SignedImage } from '@/lib/fileUrl';
 

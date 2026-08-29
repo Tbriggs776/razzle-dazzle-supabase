@@ -27,7 +27,11 @@ export async function verifySvix(
   let keyBytes: Uint8Array;
   try { keyBytes = decodeBase64(raw); } catch (_) { return false; }
   const key = await crypto.subtle.importKey(
-    'raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
+    // `keyBytes as BufferSource`: since TS 5.7 Uint8Array is generic over its
+    // backing buffer, so a plain Uint8Array no longer satisfies BufferSource on
+    // paper. It always has at runtime — this is a lib-definition change, not a
+    // behaviour one, and the cast keeps `deno check` usable as a gate.
+    'raw', keyBytes as BufferSource, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
   );
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${id}.${timestamp}.${rawBody}`));
   const expected = encodeBase64(new Uint8Array(sig));

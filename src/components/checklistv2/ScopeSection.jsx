@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Ruler, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Ruler, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const FLOORING_OPTIONS = ['Carpet', 'LVP', 'Laminate', 'Tile', 'Hardwood', 'Sheet Vinyl', 'Open to Options'];

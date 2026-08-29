@@ -11,7 +11,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ExternalLink, TrendingUp, DollarSign, Target, ArrowUpRight, ArrowDownRight, ArrowRight, Download, Copy, Check } from 'lucide-react';
-import { subDays, startOfMonth, startOfWeek, format, eachDayOfInterval, parseISO, subMonths, endOfMonth } from 'date-fns';
+import { subDays, startOfMonth, startOfWeek, format, eachDayOfInterval, parseISO } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 

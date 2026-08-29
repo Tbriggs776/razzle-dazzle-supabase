@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/dataClient';
 import { getIntegrations, setSecret, clearSecret, setIntegration, testIntegration } from '@/lib/integrationsApi';
-import { Plug, Loader2, Check, X, AlertTriangle, Save, Zap, ShieldCheck, FileSignature } from 'lucide-react';
+import { Plug, Loader2, Check, AlertTriangle, Save, Zap, ShieldCheck, FileSignature } from 'lucide-react';
 
 function Toggle({ on, onClick, label }) {
   return (

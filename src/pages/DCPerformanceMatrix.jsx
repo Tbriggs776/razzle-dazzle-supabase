@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, DollarSign } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { format, startOfMonth } from 'date-fns';
 import { buildCatalogCostMap, computeCatalogGP } from '@/lib/catalogCost';
 import AvailabilityGrid from '@/components/reports/AvailabilityGrid';

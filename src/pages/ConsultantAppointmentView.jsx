@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
@@ -24,19 +24,16 @@ import {
   Upload,
   Navigation,
   List,
-  Camera,
   Check,
   Trophy,
   X,
   Send,
-  Pen,
-  DollarSign
+  Pen
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format, addWeeks, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CameraCapture } from '@/components/ui/camera-capture';
-import AudioRecorder from '@/components/AudioRecorder';
 import PreInstallChecklistModal from '@/components/PreInstallChecklistModal';
 import ChecklistDisplay from '@/components/appointments/ChecklistDisplay';
 import ChecklistV2Display from '@/components/appointments/ChecklistV2Display';

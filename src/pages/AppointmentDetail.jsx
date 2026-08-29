@@ -22,7 +22,6 @@ import {
   Pencil, 
   Trash2, 
   Loader2,
-  FileText,
   Mail,
   Link as LinkIcon,
   Check,
@@ -30,7 +29,6 @@ import {
   DollarSign,
   AlertCircle,
   Settings,
-  Download,
   CheckCircle2,
   Circle
 } from 'lucide-react';
@@ -40,7 +38,6 @@ import { cn } from '@/lib/utils';
 import AppointmentForm from '@/components/appointments/AppointmentForm';
 import { useRecording } from '@/Layout';
 import AppointmentProgressTracker from '@/components/appointments/AppointmentProgressTracker';
-import AppointmentAudioSection from '@/components/appointments/AppointmentAudioSection';
 import SalePhotosSection from '@/components/appointments/SalePhotosSection';
 import AppointmentDetailsCard from '@/components/appointments/AppointmentDetailsCard';
 import LeadInfoCard from '@/components/appointments/LeadInfoCard';

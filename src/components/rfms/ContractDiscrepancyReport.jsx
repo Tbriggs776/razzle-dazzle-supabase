@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, AlertTriangle, Download, RefreshCw } from 'lucide-react';
 import { format, startOfMonth, startOfYear, subDays, subMonths, endOfMonth } from 'date-fns';
 

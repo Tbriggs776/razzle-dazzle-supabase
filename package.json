@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --quiet",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:functions": "deno check --node-modules-dir=auto supabase/functions/*/index.ts",
+    "check": "npm run lint && npm run check:functions && npm run build"
   },
   "dependencies": {
     "@bytescale/sdk": "^3.0.0",

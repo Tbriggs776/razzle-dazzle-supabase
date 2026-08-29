@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { invokeFailure } from '@/lib/invokeResult';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Plus, Loader2, MapPin, Calendar, Tag } from 'lucide-react';
+import { Search, Plus, Loader2, MapPin, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
 
 export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
   const [dateFrom, setDateFrom] = useState(() => {

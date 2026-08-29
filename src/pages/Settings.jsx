@@ -12,7 +12,6 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings as SettingsIcon, Save, Loader2, MessageSquare, Shield, Palette, Users, Phone, Send, FileText, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import EmailInput from '@/components/ui/email-input';
 import NotificationTemplates from '@/components/settings/NotificationTemplates';
 import TagManager from '@/components/tags/TagManager';

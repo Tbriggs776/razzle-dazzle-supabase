@@ -115,7 +115,13 @@ function makeEntity(service: SupabaseClient, entityName: string) {
 
 export function createClientFromRequest(req: Request) {
   const service = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false } });
-  const entities = new Proxy({}, { get: (_t, name: string) => makeEntity(service, name) });
+  // Typed as Record<string, any> because the whole point is that ANY entity name
+  // resolves through the proxy at runtime. Left as `{}`, every real call site
+  // (base44.asServiceRole.entities.Log, .Appointment, …) is a type error, which
+  // buried the two genuine ones this file used to have among the noise.
+  const entities = new Proxy({}, {
+    get: (_t, name: string) => makeEntity(service, name),
+  }) as Record<string, any>;
 
   const authHeader = req.headers.get('Authorization') || '';
   const jwt = authHeader.replace(/^Bearer\s+/i, '');

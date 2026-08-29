@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { deliveryNote } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, MapPin, Calendar, ChevronRight, Users, UserPlus, Filter } from 'lucide-react';
+import { Loader2, MapPin, Calendar, ChevronRight, Users, Filter } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import PageHeader from '@/components/common/PageHeader';
 

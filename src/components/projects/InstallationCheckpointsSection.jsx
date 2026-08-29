@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, CheckCircle2, Circle, Camera, X, Plus, ChevronDown, ChevronRight, Clock } from 'lucide-react';
+import { Loader2, CheckCircle2, Circle, Camera, X, ChevronDown, ChevronRight, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { SignedImage, openSignedFile } from '@/lib/fileUrl';

@@ -1,10 +1,8 @@
 import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
 import { Loader2, MapPin, Calendar, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import PageHeader from '@/components/common/PageHeader';
 import StatusPill from '@/components/common/StatusPill';

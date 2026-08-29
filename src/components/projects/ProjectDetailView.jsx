@@ -2,40 +2,24 @@ import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { toast } from 'sonner';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  ArrowLeft, 
-  Calendar as CalendarIcon, 
-  User,
-  Mail,
-  Phone,
-  Loader2,
+  ArrowLeft,
   FileText,
-  DollarSign,
   Edit,
   CheckCircle2,
   Circle,
-  MapPin,
-  UserPlus,
   Copy,
-  Link as LinkIcon,
   ExternalLink,
-  Trash2,
-  Download,
-  MessageSquare,
-  Activity,
-  Image,
-  Upload,
-  X
+  Trash2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import OrderProcessorTools from './OrderProcessorTools';
 import PhotoLightbox from '@/components/PhotoLightbox';
 
 const statusColors = {

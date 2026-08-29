@@ -40,7 +40,9 @@ async function currentUser(req: Request) {
 }
 async function sha256hex(input: string | Uint8Array): Promise<string> {
   const bytes = typeof input === 'string' ? new TextEncoder().encode(input) : input;
-  const d = await crypto.subtle.digest('SHA-256', bytes);
+  // `as BufferSource`: same TS 5.7 Uint8Array-generics change as _shared/svix.ts.
+  // Runtime behaviour is unchanged; this keeps `deno check` clean enough to be a gate.
+  const d = await crypto.subtle.digest('SHA-256', bytes as BufferSource);
   return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 const clientIp = (req: Request) => (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || req.headers.get('cf-connecting-ip') || null;

@@ -10,7 +10,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { AlertTriangle, Plus, ChevronDown, ChevronUp, Trash2, Send, Loader2, X, Package, CheckCircle2, CalendarIcon } from 'lucide-react';
 import { format as formatDate } from 'date-fns';
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
