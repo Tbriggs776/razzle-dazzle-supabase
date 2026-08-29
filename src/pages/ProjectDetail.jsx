@@ -1260,7 +1260,10 @@ export default function ProjectDetail() {
                       onClick={() => {
                         setUpdatingStatus('clear');
                         const wasOnHold = project.installation_date_status && ['pending payment','pending contract','on hold','pending cancellation'].includes(project.installation_date_status);
-                        updateProjectMutation.mutate({ installation_date_status: '', ...(wasOnHold ? { hold_cleared_date: new Date().toISOString() } : {}) });
+                        // null, NOT '' — see OrderProcessorTools. An empty string
+                        // leaves job_stage.on_hold true and the job never gets
+                        // another task, while the boards show it moving.
+                        updateProjectMutation.mutate({ installation_date_status: null, ...(wasOnHold ? { hold_cleared_date: new Date().toISOString() } : {}) });
                       }}
                       disabled={updateProjectMutation.isPending}
                       variant="outline"

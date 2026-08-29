@@ -534,6 +534,10 @@ const RPC_FUNCTIONS = {
     p_role: p.role ?? null, p_rule_key: p.ruleKey ?? null, p_route: p.route ?? null,
   }],
   completeTask:    (p) => ['complete_task', { p_task_id: p.id, p_resolution: p.resolution ?? null }],
+  // Completion lives in `state`, not `status` — trg_task_legacy_status derives
+  // status FROM state on every write. Writing status directly is a silent no-op,
+  // which is what MyTasks did until 0076. Always go through these two.
+  reopenTask:      (p) => ['reopen_task', { p_task_id: p.id, p_reason: p.reason ?? null }],
   requestApproval: (p) => ['request_approval', {
     p_subject_type: p.subjectType, p_subject_id: p.subjectId, p_kind: p.kind,
     p_reason: p.reason, p_required_dept: p.requiredDept ?? null,

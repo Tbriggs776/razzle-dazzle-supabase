@@ -197,7 +197,10 @@ export default function OrderProcessorTools({
             <Button
               onClick={() => {
                 setUpdatingStatus('clear');
-                updateProjectMutation.mutate({ installation_date_status: '' });
+                // null, NOT ''. job_stage.on_hold tests IS NOT NULL, so an empty
+                // string reads as still-on-hold and the reconciler skips the job
+                // forever — while flow.js trims and shows the boards as healthy.
+                updateProjectMutation.mutate({ installation_date_status: null });
               }}
               disabled={updateProjectMutation.isPending}
               variant="outline"

@@ -6,6 +6,7 @@ import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2, Phone, Mail, MessageCircle, Trophy, X, Trash2, ArrowUpDown, ListChecks } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -147,22 +148,35 @@ export default function MyTasks() {
     enabled: appointmentIds.length > 0
   });
 
+  // `status` is DERIVED from `state` by trg_task_legacy_status on every write, so
+  // updating status directly was a silent no-op: the task looked ticked until the
+  // list refetched, then came back pending. Both of these now go through the RPCs,
+  // which set state, write the append-only log, and clear the inbox nudge.
   const completeMutation = useMutation({
     mutationFn: async (taskId) => {
-      await base44.entities.Task.update(taskId, { status: 'completed' });
+      const { data, error } = await base44.functions.invoke('completeTask', { id: taskId });
+      if (error) throw error;
+      if (data?.ok === false) throw new Error(data.reason || 'Could not complete that task');
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myTasks'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ['inboxUnread'] });
+    },
+    onError: (e) => toast.error(e?.message || 'Could not complete that task')
   });
 
   const uncompleteMutation = useMutation({
     mutationFn: async (taskId) => {
-      await base44.entities.Task.update(taskId, { status: 'pending' });
+      const { data, error } = await base44.functions.invoke('reopenTask', { id: taskId });
+      if (error) throw error;
+      if (data?.ok === false) throw new Error(data.reason || 'Could not reopen that task');
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myTasks'] });
-    }
+    },
+    onError: (e) => toast.error(e?.message || 'Could not reopen that task')
   });
 
   const deleteMutation = useMutation({
@@ -202,8 +216,13 @@ export default function MyTasks() {
 
       await base44.entities.Appointment.update(appointmentId, updateData);
 
-      // Mark current task as completed
-      await base44.entities.Task.update(taskId, { status: 'completed' });
+      // Mark current task as completed. Must go through the RPC — writing
+      // status directly does nothing (see completeMutation above), which is why
+      // the old follow-up would reappear the moment the list refetched.
+      const { data: doneData, error: doneErr } =
+        await base44.functions.invoke('completeTask', { id: taskId });
+      if (doneErr) throw doneErr;
+      if (doneData?.ok === false) throw new Error(doneData.reason || 'Could not close the current task');
 
       // Always create new task unless marked as lost
       if (!markLost && dueDate && currentUser?.email) {
