@@ -146,9 +146,44 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
 
       const asbestos = checklist_data?.safety?.asbestos_suspected === true;
       if (asbestos) {
-        for (const m of await alertMembers(s, 'asbestos_hard_stop'))
+        const members = await alertMembers(s, 'asbestos_hard_stop');
+        for (const m of members)
           await qEmail(s, cfg, m.email, '[Alert Team] 🚨 HARD STOP — Asbestos Suspected',
             `Asbestos suspected at project ${project_id}. Installation HALTED. Customer must engage a licensed abatement company and provide a clearance certificate before work resumes.`);
+
+        // The in-app inbox is the ONLY channel here that cannot silently fail:
+        // email needs a Resend key, SMS needs a Twilio from-number, and the
+        // asbestos alert group has zero members. This is a safety stop — it must
+        // land somewhere a human will see it and must be ACKNOWLEDGED, not just
+        // delivered. notify_* falls back to org admins and reports anyone
+        // unreachable rather than pretending the alert arrived.
+        const ids = members.map((m: any) => m.id).filter(Boolean);
+        if (ids.length) {
+          await s.rpc('notify_team_members', {
+            p_team_member_ids: ids,
+            p_title: '🚨 HARD STOP — asbestos suspected',
+            p_body: `Installation is HALTED at ${customerName}. The customer must engage a licensed abatement company and provide a clearance certificate before work resumes.`,
+            p_kind: 'alert', p_severity: 'crit',
+            p_subject_type: 'project', p_subject_id: project_id,
+            p_route: `/JourneyProjectDetail?id=${project_id}`,
+            p_rule_key: 'asbestos_hard_stop',
+            p_dedupe_key: `asbestos:${project_id}`,
+            p_requires_ack: true,
+          });
+        } else {
+          await s.rpc('notify_role', {
+            p_role_name: 'Operations',
+            p_title: '🚨 HARD STOP — asbestos suspected',
+            p_body: `Installation is HALTED at ${customerName}. No asbestos alert group is configured, so this was routed by role.`,
+            p_kind: 'alert', p_severity: 'crit',
+            p_subject_type: 'project', p_subject_id: project_id,
+            p_route: `/JourneyProjectDetail?id=${project_id}`,
+            p_rule_key: 'asbestos_hard_stop',
+            p_dedupe_key: `asbestos:${project_id}`,
+            p_requires_ack: true,
+          });
+        }
+
         await s.from('project').update({ installation_date_status: 'on hold' }).eq('id', project_id);
       }
       // ── GATE 2: install-start collection backstop ────────────────────────
@@ -223,6 +258,38 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
           // If even that is empty the exception row is still written above, so
           // the record survives — but say so in the logs rather than silently.
           if (!icRecs.length) console.error(`[gate2] COD hold on ${project_id} reached NO recipients — configure an install coordinator, an alert group, or an org admin.`);
+
+          // Same reasoning as the asbestos stop: the inbox is the channel that
+          // works today. Deliberately NO dollar figure — an inbox row is visible
+          // to its recipient whatever module permissions they hold, and the
+          // balance belongs behind the Finance screens.
+          const codIds = icRecs.map((m: any) => m.id).filter(Boolean);
+          if (codIds.length) {
+            await s.rpc('notify_team_members', {
+              p_team_member_ids: codIds,
+              p_title: 'Balance outstanding at install start',
+              p_body: `${customerName} started installation with a balance still outstanding. The crew was NOT stopped. Collect it, or record what was already taken.`,
+              p_kind: 'alert', p_severity: 'crit',
+              p_subject_type: 'project', p_subject_id: project_id,
+              p_route: `/JourneyProjectDetail?id=${project_id}`,
+              p_rule_key: 'cod_uncollected',
+              p_dedupe_key: `cod:${project_id}`,
+              p_requires_ack: true,
+            });
+          } else {
+            await s.rpc('notify_role', {
+              p_role_name: 'Operations',
+              p_title: 'Balance outstanding at install start',
+              p_body: `${customerName} started installation with a balance still outstanding. The crew was NOT stopped.`,
+              p_kind: 'alert', p_severity: 'crit',
+              p_subject_type: 'project', p_subject_id: project_id,
+              p_route: `/JourneyProjectDetail?id=${project_id}`,
+              p_rule_key: 'cod_uncollected',
+              p_dedupe_key: `cod:${project_id}`,
+              p_requires_ack: true,
+            });
+          }
+
           for (const m of icRecs) {
             await qEmail(s, cfg, m.email, `[Ops Team] Balance outstanding at install start — ${customerName}`,
               `Hi ${m.first_name || 'there'},\n\nThe Job Start Checklist was submitted for ${customerName} with ${fmtUsd(amountDue)} still outstanding.\n\nThe crew was NOT stopped — this is a record, not a block.\n\nThe balance is due before install starts. Collect it, or record what was already taken, here: ${url}`);

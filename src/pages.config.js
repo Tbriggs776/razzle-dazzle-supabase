@@ -14,6 +14,7 @@
  *   import Settings from './pages/Settings';
  *   
  *   export const PAGES = {
+    "Inbox": Inbox,
  *       "HomePage": HomePage,
  *       "Dashboard": Dashboard,
  *       "Settings": Settings,
@@ -47,6 +48,7 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
+import Inbox from './pages/Inbox';
 import AppointmentDetail from './pages/AppointmentDetail';
 import AppointmentReports from './pages/AppointmentReports';
 import AppointmentSettingChecklists from './pages/AppointmentSettingChecklists';

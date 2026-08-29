@@ -82,6 +82,21 @@ export default function Layout({ children, currentPageName }) {
     refetchOnMount: 'always'
   });
 
+  // Unread inbox count. Deliberately counts UNACKNOWLEDGED items, not merely
+  // unread ones: an alert someone scrolled past is still outstanding. This is
+  // the one channel that works without any vendor credential.
+  const { data: inboxUnread = 0 } = useQuery({
+    queryKey: ['inboxUnread'],
+    queryFn: async () => {
+      const rows = await base44.entities.Notification.filter(
+        { acknowledged_at: null }, '-created_at', 200
+      );
+      return rows.length;
+    },
+    enabled: !!currentUser,
+    refetchInterval: 60000,
+  });
+
   const { data: pendingTasksCount = 0 } = useQuery({
     queryKey: ['pendingTasksCount', teamMember?.id],
     queryFn: async () => {
@@ -281,6 +296,7 @@ export default function Layout({ children, currentPageName }) {
     {
       name: 'My Work', icon: Briefcase,
       subItems: [
+        { name: 'Inbox', href: 'Inbox', pages: ['Inbox'] },
         { name: 'My Appointments', href: 'MyAppointments', pages: ['MyAppointments', 'AppointmentDetail', 'ChecklistDetail'] },
         { name: 'My Results', href: 'MyAppointmentResults', pages: ['MyAppointmentResults'] },
         { name: 'My Tasks', href: 'MyTasks', pages: ['MyTasks'] },
@@ -530,7 +546,11 @@ export default function Layout({ children, currentPageName }) {
               const Icon = item.icon;
               const active = moduleHasActive(item);
               const isExpanded = expandedMenuItems[item.name] ?? active;
-              const moduleUnread = item.subItems.some(s => s.href === 'MyTasks') && pendingTasksCount > 0;
+              // Badge counts per sub-item, so the collapsed module shows the sum
+              // rather than only the task count it used to hardcode.
+              const badgeFor = (href) =>
+                href === 'MyTasks' ? pendingTasksCount : href === 'Inbox' ? inboxUnread : 0;
+              const moduleUnread = item.subItems.reduce((n, s) => n + badgeFor(s.href), 0);
 
               return (
                 <div key={item.name}>
@@ -545,9 +565,9 @@ export default function Layout({ children, currentPageName }) {
                   >
                     <Icon className="w-[18px] h-[18px] shrink-0" />
                     <span className="flex-1 text-left text-[13.5px] font-medium">{item.name}</span>
-                    {!isExpanded && moduleUnread && (
+                    {!isExpanded && moduleUnread > 0 && (
                       <span className="min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-white text-[10px] font-bold">
-                        {pendingTasksCount}
+                        {moduleUnread}
                       </span>
                     )}
                     {isExpanded ? (
@@ -561,7 +581,8 @@ export default function Layout({ children, currentPageName }) {
                     <div className="mb-1 ml-[26px] mt-0.5 space-y-0.5 border-l border-sidebar-border pl-3">
                       {item.subItems.map((subItem) => {
                         const subActive = pageInItem(subItem);
-                        const showBadge = subItem.href === 'MyTasks' && pendingTasksCount > 0;
+                        const subBadge = badgeFor(subItem.href);
+                        const showBadge = subBadge > 0;
                         return (
                           <Link
                             key={subItem.name}
@@ -577,7 +598,7 @@ export default function Layout({ children, currentPageName }) {
                             <span className="flex-1 truncate">{subItem.name}</span>
                             {showBadge && (
                               <span className="ml-auto min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-white text-[10px] font-bold">
-                                {pendingTasksCount}
+                                {subBadge}
                               </span>
                             )}
                           </Link>

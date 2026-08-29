@@ -70,6 +70,9 @@ const ENTITY_TABLE = {
   TicketLog: 'ticket_log',
   TicketMessage: 'ticket_message',
   TimeBlockSettings: 'time_block_settings',
+  // In-app inbox. NOTE: no created_date column — pass an explicit sort
+  // ('-created_at') or the client's default orderBy will 400.
+  Notification: 'notification',
   // Workflow defects the engine raises for a human (E1-E11). NOTE: no
   // created_date column — pass an explicit sort ('-last_seen_at') or the
   // client's '-created_date' default will 400.
@@ -504,6 +507,12 @@ const RPC_FUNCTIONS = {
   // A waiver is what makes enforcement survivable: a stop with no remedy is a
   // stop people route around.
   waiveCodHold:            (p) => ['waive_cod_hold', { p_project_id: p.projectId, p_reason: p.reason }],
+  // Inbox. Producing is service_role-only (users cannot notify each other yet);
+  // only these two consumer actions are reachable from the browser, and
+  // acknowledge is restricted server-side to the RECIPIENT so the
+  // accountability record cannot be forged on someone else's behalf.
+  markNotificationsRead:   (p) => ['mark_notifications_read', { p_ids: p.ids }],
+  acknowledgeNotification: (p) => ['acknowledge_notification', { p_id: p.id }],
   resolveWorkflowException:(p) => ['resolve_workflow_exception', { p_id: p.id, p_note: p.note ?? null }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
