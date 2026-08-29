@@ -40,6 +40,9 @@ const ENTITY_TABLE = {
   Lead: 'lead',
   Log: 'log',
   ManualSalesContract: 'manual_sales_contract',
+  // The money ledger. Shipped in 0051/0053 but unreachable from the app until
+  // now — which is why there has never been a way to record a second payment.
+  Payment: 'payment',
   Project: 'project',
   ProjectCheckpoint: 'project_checkpoint',
   ProjectCheckpointTemplate: 'project_checkpoint_template',
@@ -55,6 +58,10 @@ const ENTITY_TABLE = {
   RolePermissions: 'role_permissions',
   SMSSettings: 'sms_settings',
   Sale: 'sale',
+  // READ-ONLY view. Carries balance_due plus the two collection gates
+  // (deposit_satisfied, fully_collected), which are never null by construction.
+  // Compute neither in JavaScript — the view is the single definition.
+  SaleBalance: 'sale_balance',
   StandalonePreInstallChecklist: 'standalone_pre_install_checklist',
   Tag: 'tag',
   Task: 'task',
@@ -472,6 +479,19 @@ const RPC_FUNCTIONS = {
   }],
   // AT4: atomic manual project create (customer + project + log) in one txn.
   createManualProject: (p) => ['create_manual_project', { p_customer: p.customer ?? {}, p_project: p.project ?? {}, p_log: p.log ?? null }],
+  // Money. Sales/Journey may RECORD a payment (deposits are taken at the kitchen
+  // table, balances in the driveway); only Accounting may CONFIRM one cleared.
+  // Both gates are enforced server-side — never trust a client-side amount check.
+  recordPayment: (p) => ['record_payment', {
+    p_sale: p.saleId, p_amount: p.amount, p_method: p.method ?? null,
+    p_reference: p.reference ?? null, p_kind: p.kind ?? 'final',
+    p_note: p.note ?? null, p_idempotency_key: p.idempotencyKey ?? null,
+  }],
+  // Confirms every unconfirmed payment on the sale, then releases the ordering
+  // hold ONLY if the cleared total meets the agreed deposit. Returns
+  // { ok:false, reason:'short', shortfall } when it does not.
+  confirmSaleDeposit: (p) => ['confirm_sale_deposit', { p_sale_id: p.saleId, p_note: p.note ?? null }],
+  confirmPayment:     (p) => ['confirm_payment', { p_payment_id: p.paymentId, p_note: p.note ?? null }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
   adminSetEsignType: (p) => ['admin_set_esign_type', {

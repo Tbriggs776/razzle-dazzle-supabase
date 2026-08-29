@@ -98,6 +98,14 @@ export default function SaleDetail() {
   const newContractInputRef = React.useRef(null);
   const [showCostBreakdown, setShowCostBreakdown] = useState(false);
   const [costBreakdownData, setCostBreakdownData] = useState(null);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [payAmount, setPayAmount] = useState('');
+  const [payMethod, setPayMethod] = useState('');
+  const [payReference, setPayReference] = useState('');
+  const [payKind, setPayKind] = useState('final');
+  const [payNote, setPayNote] = useState('');
+  // Minted once per open dialog so a double submit is the same payment, not two.
+  const [payIdemKey, setPayIdemKey] = useState('');
 
   const { data: sale, isLoading } = useQuery({
     queryKey: ['sale', saleId],
@@ -133,6 +141,55 @@ export default function SaleDetail() {
       return projects[0];
     },
     enabled: !!sale?.id
+  });
+
+  // The money. `sale_balance` owns balance_due and both collection gates; never
+  // recompute either here — sale.deposit_amount is legacy and drifts.
+  const { data: balance } = useQuery({
+    queryKey: ['saleBalance', saleId],
+    queryFn: async () => {
+      // Explicit sort: the shim defaults to '-created_date', which this VIEW
+      // does not have — the default would 400.
+      const rows = await base44.entities.SaleBalance.filter({ sale_id: saleId }, '-sale_date');
+      return rows[0] || null;
+    },
+    enabled: !!saleId,
+  });
+
+  const { data: payments = [] } = useQuery({
+    queryKey: ['payments', saleId],
+    queryFn: () => base44.entities.Payment.filter({ sale: saleId }, '-payment_date'),
+    enabled: !!saleId,
+  });
+
+  const refreshMoney = () => {
+    queryClient.invalidateQueries({ queryKey: ['saleBalance', saleId] });
+    queryClient.invalidateQueries({ queryKey: ['payments', saleId] });
+    queryClient.invalidateQueries({ queryKey: ['sale', saleId] });
+  };
+
+  const recordPaymentMutation = useMutation({
+    mutationFn: async (p) => {
+      const { data, error } = await base44.functions.invoke('recordPayment', {
+        saleId, amount: p.amount, method: p.method, reference: p.reference,
+        kind: p.kind, note: p.note,
+        // Guards the double-tap: a retry returns the original row, not a second charge.
+        idempotencyKey: p.idempotencyKey,
+      });
+      if (error) throw error;
+      if (data && data.ok === false) throw new Error(data.reason || 'Payment was not recorded');
+      return data;
+    },
+    onSuccess: (data) => {
+      refreshMoney();
+      setPaymentOpen(false);
+      toast.success(
+        data?.duplicate
+          ? 'That payment was already recorded — nothing was charged twice.'
+          : `Payment recorded. Balance ${money(data?.balance_due ?? 0)}.`,
+      );
+    },
+    onError: (e) => toast.error(e?.message || 'Could not record the payment.'),
   });
 
   const updateSaleMutation = useMutation({
@@ -550,7 +607,23 @@ export default function SaleDetail() {
   // Presentational rollups for the header + KPI row.
   const isCancelled = !!sale.is_cancelled;
   const rfmsSourced = !!sale.rfms_order_data;
-  const balanceDue = (sale.sale_amount || 0) - (sale.deposit_amount || 0);
+  // From the ledger, not from sale.deposit_amount — that column is legacy, holds
+  // only the FIRST deposit, and cannot see a second payment or a refund.
+  const balanceDue = balance ? Number(balance.balance_due) : null;
+  const amountPaid = balance ? Number(balance.amount_paid) : null;
+  const depositSatisfied = balance?.deposit_satisfied === true;
+  const fullyCollected = balance?.fully_collected === true;
+  const pendingClearance = balance ? Number(balance.amount_pending_clearance) : 0;
+
+  const openPaymentDialog = () => {
+    setPayAmount(balanceDue != null && balanceDue > 0 ? String(balanceDue) : '');
+    setPayMethod(''); setPayReference(''); setPayNote('');
+    setPayKind(depositSatisfied ? 'final' : 'deposit');
+    setPayIdemKey(
+      (globalThis.crypto?.randomUUID?.() ?? `pay-${saleId}-${Date.now()}-${Math.random()}`),
+    );
+    setPaymentOpen(true);
+  };
   const heroGP = rfmsLines.length > 0 ? computeCatalogGP(rfmsLines, catalogCostMap) : null;
 
   return (
@@ -671,14 +744,22 @@ export default function SaleDetail() {
             foot={sale.invoice_number ? `Invoice #${sale.invoice_number}` : 'Closed sale'}
           />
           <KpiTile
-            label="Deposit"
-            value={money(sale.deposit_amount)}
-            foot={sale.deposit_payment_method || 'Deposit collected'}
+            label="Collected"
+            value={amountPaid == null ? '—' : money(amountPaid)}
+            foot={
+              amountPaid == null ? 'Loading'
+                : pendingClearance > 0 ? `${money(pendingClearance)} not yet cleared`
+                : depositSatisfied ? 'Deposit cleared' : 'Deposit not yet met'
+            }
           />
           <KpiTile
             label="Balance Due"
-            value={money(balanceDue)}
-            foot="Sale amount − deposit"
+            value={balanceDue == null ? '—' : money(balanceDue)}
+            foot={
+              balanceDue == null ? 'Loading'
+                : fullyCollected ? 'Paid in full — clear to install'
+                : 'Due before install starts'
+            }
           />
           {heroGP && (
             <KpiTile
@@ -760,31 +841,74 @@ export default function SaleDetail() {
             </div>
           </ModuleCard>
 
-          {/* Payment Details */}
-          <ModuleCard title="Payment Details" icon={DollarSign}>
-            <div className="p-3 space-y-1">
-              {sale.deposit_payment_method && (
-                <DetailField icon={DollarSign} label="Payment Method">
-                  {sale.deposit_payment_method}
-                </DetailField>
+          {/* Payments — the ledger, not a single deposit field */}
+          <ModuleCard
+            title="Payments"
+            icon={DollarSign}
+            action={
+              !isCancelled && (
+                <Button size="sm" variant="outline" onClick={openPaymentDialog}>
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />
+                  Record Payment
+                </Button>
+              )
+            }
+          >
+            <div className="p-3">
+              {/* What the two gates say, in plain language. */}
+              {balance && (
+                <div className="mb-3 grid grid-cols-2 gap-2">
+                  <div className="rounded-lg border border-border px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Deposit</p>
+                    <p className={cn('text-sm font-semibold',
+                      depositSatisfied ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
+                      {depositSatisfied ? 'Cleared' : 'Not cleared'}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {money(balance.amount_cleared)} of {money(balance.deposit_required)} required
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-border px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Before install</p>
+                    <p className={cn('text-sm font-semibold',
+                      fullyCollected ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
+                      {fullyCollected ? 'Paid in full' : `${money(balance.balance_due)} due`}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {balance.collection_terms === 'financed' ? 'Financed — lender funds after completion'
+                        : balance.collect_exempt ? 'Exempt from collection'
+                        : 'Collected on day one of install'}
+                    </p>
+                  </div>
+                </div>
               )}
-              {sale.deposit_amount && (
-                <DetailField icon={DollarSign} label="Deposit Amount">
-                  {money(sale.deposit_amount)}
-                </DetailField>
-              )}
-              {sale.check_number && (
-                <DetailField icon={FileText} label="Check Number">
-                  {sale.check_number}
-                </DetailField>
-              )}
-              {sale.check_date && (
-                <DetailField icon={CalendarIcon} label="Check Date">
-                  {format(new Date(sale.check_date + 'T00:00:00'), 'MMMM d, yyyy')}
-                </DetailField>
-              )}
-              {!sale.deposit_payment_method && !sale.deposit_amount && !sale.check_number && !sale.check_date && (
-                <p className="px-3 py-6 text-center text-sm text-muted-foreground">No payment details recorded</p>
+
+              {payments.length === 0 ? (
+                <p className="px-3 py-6 text-center text-sm text-muted-foreground">
+                  No payments recorded against this sale
+                </p>
+              ) : (
+                <div className="space-y-1">
+                  {payments.map((p) => (
+                    <div key={p.id} className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/60">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-foreground">{money(p.amount)}</span>
+                          <StatusPill tone={p.confirmed_at ? 'good' : 'warn'}>
+                            {p.confirmed_at ? 'Cleared' : 'Not cleared'}
+                          </StatusPill>
+                          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">{p.kind}</span>
+                        </div>
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                          {p.payment_date ? format(new Date(p.payment_date + 'T00:00:00'), 'MMM d, yyyy') : '—'}
+                          {p.method ? ` · ${p.method}` : ''}
+                          {p.reference ? ` · ${p.reference}` : ''}
+                          {p.recorded_by ? ` · ${p.recorded_by}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </ModuleCard>
@@ -1186,6 +1310,86 @@ export default function SaleDetail() {
         onClose={setShowCostBreakdown}
         data={costBreakdownData}
       />
+
+      {/* Record Payment — the only write path into the ledger. The server
+          re-derives every gate; nothing here is trusted as an amount check. */}
+      <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Record a payment</DialogTitle>
+            <DialogDescription>
+              {balanceDue != null && balanceDue > 0
+                ? `${money(balanceDue)} outstanding on this sale.`
+                : 'This sale is paid in full.'}
+              {' '}Accounting confirms it cleared separately.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label htmlFor="pay-amount">Amount</Label>
+              <Input
+                id="pay-amount" type="number" step="0.01" inputMode="decimal"
+                value={payAmount} onChange={(e) => setPayAmount(e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+            <div>
+              <Label htmlFor="pay-kind">Type</Label>
+              <select
+                id="pay-kind" value={payKind} onChange={(e) => setPayKind(e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+              >
+                <option value="deposit">Deposit</option>
+                <option value="progress">Progress payment</option>
+                <option value="final">Final / balance</option>
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="pay-method">Method</Label>
+              <Input
+                id="pay-method" value={payMethod} onChange={(e) => setPayMethod(e.target.value)}
+                placeholder="Card, Check, Money order, ACH…"
+              />
+            </div>
+            <div>
+              <Label htmlFor="pay-ref">Reference</Label>
+              <Input
+                id="pay-ref" value={payReference} onChange={(e) => setPayReference(e.target.value)}
+                placeholder="Check number, auth code…"
+              />
+            </div>
+            <div>
+              <Label htmlFor="pay-note">Note</Label>
+              <Textarea
+                id="pay-note" rows={2} value={payNote} onChange={(e) => setPayNote(e.target.value)}
+                placeholder="Optional"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPaymentOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => recordPaymentMutation.mutate({
+                amount: parseFloat(payAmount),
+                method: payMethod || null,
+                reference: payReference || null,
+                kind: payKind,
+                note: payNote || null,
+                idempotencyKey: payIdemKey,
+              })}
+              disabled={
+                recordPaymentMutation.isPending
+                || !payAmount
+                || !Number.isFinite(parseFloat(payAmount))
+                || parseFloat(payAmount) <= 0
+              }
+            >
+              {recordPaymentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Record payment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
