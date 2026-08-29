@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
+import { emailToText, looksLikeHtml } from '@/lib/emailToText';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Send, MessageSquare, Loader2, Phone, RefreshCw, Calendar, DollarSign, ClipboardCheck, ExternalLink, ArrowLeft, Info, X, Eye, EyeOff } from 'lucide-react';
@@ -571,11 +572,14 @@ export default function CommunicationHub() {
                               ? 'rounded-br-sm bg-primary text-primary-foreground'
                               : 'rounded-bl-sm border border-border bg-card text-foreground'
                           )}>
-                            {msg.body && msg.body.trim().startsWith('<') ? (
-                              <div className="prose prose-sm max-w-none text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: msg.body }} />
-                            ) : (
-                              <p className="text-sm leading-relaxed">{msg.body}</p>
-                            )}
+                            {/* Emails are converted to text, not injected. A full
+                                email body inside a chat bubble rendered its CTA at
+                                email width on top of the sentence above it, and a
+                                signing URL with a 64-char token ran off the edge.
+                                break-words keeps any long link inside the bubble. */}
+                            <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                              {looksLikeHtml(msg.body) ? emailToText(msg.body) : msg.body}
+                            </p>
                             <div className={cn('flex items-center justify-between gap-4 text-[10px]', msg.direction === 'outbound' ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
                               <span>
                                 {msg.created_date && format(
