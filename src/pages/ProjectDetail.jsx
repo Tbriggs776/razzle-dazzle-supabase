@@ -40,6 +40,7 @@ import StatusPill from '@/components/common/StatusPill';
 import SyncBadge from '@/components/common/SyncBadge';
 import KpiTile from '@/components/dashboard/KpiTile';
 import ModuleCard from '@/components/dashboard/ModuleCard';
+import SubjectThread from '@/components/threads/SubjectThread';
 import WorkRow from '@/components/dashboard/WorkRow';
 import TeamNotesSection from '@/components/projects/TeamNotesSection';
 import { generatePreInstallPDF } from '@/utils/generatePreInstallPDF';
@@ -1383,6 +1384,10 @@ export default function ProjectDetail() {
             </div>
           </ModuleCard>
         )}
+
+        {/* Conversation about this job — internal, homeowner and crew in one
+            place, separated by audience rather than by tool. */}
+        <SubjectThread subjectType="project" subjectId={project.id} defaultTopic="This job" />
 
         {/* Customer Experience */}
         <ModuleCard title="Customer Experience" icon={Phone}>

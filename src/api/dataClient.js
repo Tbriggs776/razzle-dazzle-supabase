@@ -73,6 +73,11 @@ const ENTITY_TABLE = {
   // Approvals — the gate between process steps. A decision always requires a
   // SECOND person; decide_approval refuses self-approval server-side.
   Approval: 'approval',
+  // Subject-scoped conversation. thread_message.audience decides who may see
+  // each message (internal / customer / installer / all) — that is what lets a
+  // homeowner and a subcontractor share a thread with staff safely.
+  Thread: 'thread',
+  ThreadMessage: 'thread_message',
   Department: 'department',
   DepartmentMember: 'department_member',
   TaskLog: 'task_log',
@@ -535,6 +540,15 @@ const RPC_FUNCTIONS = {
     p_required_role: p.requiredRole ?? null, p_route: p.route ?? null,
   }],
   decideApproval:  (p) => ['decide_approval', { p_id: p.id, p_state: p.state, p_note: p.note ?? null }],
+  // Threads. Writes go through RPCs so authorship and audience cannot be
+  // forged, and thread_message is UPDATE/DELETE-revoked: a conversation that
+  // can be rewritten later is worthless in the dispute it exists for.
+  openThread:  (p) => ['open_thread', { p_subject_type: p.subjectType, p_subject_id: p.subjectId, p_topic: p.topic }],
+  postMessage: (p) => ['post_message', {
+    p_thread_id: p.threadId, p_body: p.body, p_audience: p.audience ?? 'internal',
+    p_file_urls: p.fileUrls ?? [], p_approval_id: p.approvalId ?? null,
+  }],
+  closeThread: (p) => ['close_thread', { p_thread_id: p.threadId }],
   resolveWorkflowException:(p) => ['resolve_workflow_exception', { p_id: p.id, p_note: p.note ?? null }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
