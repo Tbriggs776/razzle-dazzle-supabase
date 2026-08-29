@@ -376,11 +376,12 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
           )}
       </div>
 
-      {/* Main split: map left, cards right */}
-      <div className="flex flex-1 min-h-0">
+      {/* Main split: map left, cards right — stacked on a phone, where a 288px card rail
+          beside the map would leave the map a sliver. */}
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0">
 
         {/* Map */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative min-h-[15rem] lg:min-h-0">
           <MapContainer
             center={AZ_CENTER}
             zoom={9}
@@ -470,7 +471,7 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
         </div>
 
         {/* Right panel: job cards */}
-        <div className="w-72 shrink-0 border-l border-border bg-muted/40 flex flex-col overflow-hidden">
+        <div className="w-full lg:w-72 flex-1 lg:flex-none shrink-0 min-h-0 border-t lg:border-t-0 lg:border-l border-border bg-muted/40 flex flex-col overflow-hidden">
           {/* Region tags */}
           {myRegions.length > 0 && (
             <div className="px-3 py-2 border-b border-border flex flex-wrap gap-1.5 bg-card">

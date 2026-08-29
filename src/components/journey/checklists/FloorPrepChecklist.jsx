@@ -381,7 +381,7 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
 
       {/* Action: Submit Prep */}
       {isPrepPhase && (
-        <div className="flex items-center justify-end gap-2 pt-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
           {!allValid && (
             <p className="text-xs text-warn mr-auto">
               {totalMissing} required field{totalMissing === 1 ? '' : 's'} remaining

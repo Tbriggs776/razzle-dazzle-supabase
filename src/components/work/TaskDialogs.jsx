@@ -99,7 +99,7 @@ export function NewTaskDialog({ open, onOpenChange, subjectType, subjectId }) {
 
   return (
     <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) reset(); }}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>New task</DialogTitle>
           <DialogDescription>
@@ -114,7 +114,7 @@ export function NewTaskDialog({ open, onOpenChange, subjectType, subjectId }) {
               placeholder="Confirm the subfloor moisture reading" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label htmlFor="t-dept">Department</Label>
               <select id="t-dept" className={selectCls} value={dept}
@@ -135,7 +135,7 @@ export function NewTaskDialog({ open, onOpenChange, subjectType, subjectId }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <Label htmlFor="t-due">Due</Label>
               <Input id="t-due" type="datetime-local" value={due}
@@ -396,7 +396,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, currentUserId }) {
                 placeholder="Title" />
               <Textarea rows={2} value={editNotes} onChange={(e) => setEditNotes(e.target.value)}
                 placeholder="Detail" />
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div>
                   <Label className="text-[11px] text-muted-foreground">Due</Label>
                   <Input type="datetime-local" value={editDue}
@@ -439,7 +439,7 @@ export function TaskDetailSheet({ task, open, onOpenChange, currentUserId }) {
             <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-foreground">
               <UserRound className="h-4 w-4 text-muted-foreground" />Assign
             </h3>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <select className={selectCls} value={reassignTo}
                 onChange={(e) => { setReassignTo(e.target.value); if (e.target.value) setReassignDept(''); }}>
                 <option value="">To a person…</option>

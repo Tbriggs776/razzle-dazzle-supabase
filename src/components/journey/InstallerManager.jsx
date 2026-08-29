@@ -120,8 +120,8 @@ export default function InstallerManager() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold text-foreground">Installer Contact Info</h2>
           <p className="text-sm text-muted-foreground">Manage email & phone for each RFMS crew. Installers receive notifications when their checkpoint is approved or rejected.</p>
         </div>
@@ -212,7 +212,7 @@ export default function InstallerManager() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                 <div className="relative">
                   <Mail className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                   <Input

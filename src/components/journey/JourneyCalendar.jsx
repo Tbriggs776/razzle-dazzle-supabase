@@ -149,7 +149,9 @@ function DayColumn({ date, scheduledOrders, regionByOrderId, onDrop, onUnschedul
   return (
     <div
       className={cn(
-        "flex-1 flex flex-col min-w-0 border-r border-border last:border-r-0 transition-colors",
+        // Below ~7×9rem the week stops fitting; the columns hold that floor and the week
+        // scrolls sideways in its own container rather than squeezing to unreadable slivers.
+        "flex-1 flex flex-col min-w-[9rem] border-r border-border last:border-r-0 transition-colors",
         dragOver && "bg-primary/5 ring-2 ring-inset ring-primary/40"
       )}
       onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -386,7 +388,7 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
     <div className="flex h-full overflow-hidden">
 
       {/* ── Left: Job Pool ── */}
-      <div className="w-56 shrink-0 border-r border-border bg-card flex flex-col overflow-hidden">
+      <div className="w-40 sm:w-56 shrink-0 border-r border-border bg-card flex flex-col overflow-hidden">
         <div className="px-3 py-2.5 border-b border-border shrink-0">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t('jcJobPool')}</p>
@@ -450,7 +452,7 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
 
       {/* ── Right: Calendar ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-card shrink-0">
+        <div className="flex flex-wrap items-center gap-2 px-3 sm:px-4 py-2.5 border-b border-border bg-card shrink-0">
           <button onClick={() => setWeekStart(w => subWeeks(w, 1))} className="p-1 rounded hover:bg-muted/60">
             <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
@@ -490,7 +492,7 @@ export default function JourneyCalendar({ journeyOrders, regions }) {
           </div>
         </div>
 
-        <div className="flex flex-1 overflow-hidden min-h-0">
+        <div className="flex flex-1 overflow-x-auto overflow-y-hidden min-h-0">
           {days.map(day => (
             <DayColumn
               key={day.toISOString()}

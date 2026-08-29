@@ -167,7 +167,7 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
             crewsLoading={false}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Customer Name</Label>
               <Input value={form.customer_name} onChange={e => set('customer_name', e.target.value)} />
@@ -183,7 +183,7 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
             <Input value={form.address} onChange={e => set('address', e.target.value)} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Submitted By</Label>
               <Input value={form.submitted_by} onChange={e => set('submitted_by', e.target.value)} />

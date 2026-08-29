@@ -188,9 +188,9 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
       </div>
 
       {/* Calendar grid */}
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-x-auto">
         {/* Day headers */}
-        <div className="grid grid-cols-7 border-b border-border">
+        <div className="grid grid-cols-7 border-b border-border min-w-[640px]">
           {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
             <div key={d} className="py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               {d}
@@ -199,7 +199,7 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
         </div>
 
         {/* Day cells */}
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-7 min-w-[640px]">
           {days.map((d, i) => {
             const key = format(d, 'yyyy-MM-dd');
             const dayProjects = byDate[key] || [];

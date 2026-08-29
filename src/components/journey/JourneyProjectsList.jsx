@@ -88,7 +88,7 @@ export default function JourneyProjectsList() {
       <PageHeader title={t('jplTitle')} subtitle={t('jplSubtitle')} className="mb-4" />
 
       {/* Legend */}
-      <div className="flex items-center gap-4 mb-3 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-3 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-muted-foreground/30" /> {t('jplLegendPending')}</div>
         <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-warn" /> {t('jplLegendAwaiting')}</div>
         <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-info" /> {t('jplLegendInProgress')}</div>
@@ -96,7 +96,11 @@ export default function JourneyProjectsList() {
         <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-crit" /> {t('jplLegendRejected')}</div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl">
+      {/* The 12-column row layout needs real width to stay readable, so it keeps a
+          min-width and scrolls sideways inside this wrapper — never the page body. */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden xl:overflow-visible">
+        <div className="overflow-x-auto xl:overflow-x-visible">
+        <div className="min-w-[820px] xl:min-w-0">
         {/* Header */}
         <div className="sticky top-0 z-10 grid grid-cols-12 gap-3 px-4 py-2.5 bg-muted border-b border-border rounded-t-xl text-xs font-medium text-muted-foreground uppercase tracking-wide">
           <div className="col-span-4">{t('jplColCustomer')}</div>
@@ -178,6 +182,8 @@ export default function JourneyProjectsList() {
             </button>
           );
         })}
+        </div>
+        </div>
 
         {projects.length === 0 && (
           <div className="py-12 text-center text-muted-foreground">

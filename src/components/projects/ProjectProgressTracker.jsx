@@ -38,7 +38,8 @@ export default function ProjectProgressTracker({ project, projectLogs = [] }) {
       <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider text-center mb-8">
         Project Progress
       </h2>
-      <div className="relative">
+      <div className="overflow-x-auto">
+      <div className="relative min-w-[520px]">
         {/* Progress Line */}
         <div className="absolute top-5 left-0 right-0 h-1 bg-slate-200">
           <div
@@ -94,6 +95,7 @@ export default function ProjectProgressTracker({ project, projectLogs = [] }) {
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );

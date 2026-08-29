@@ -116,7 +116,7 @@ export default function FollowUpDialog({ open, onClose, appointment, lead, curre
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Log Follow-Up</DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">{leadName}</p>

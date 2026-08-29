@@ -35,12 +35,12 @@ export default function LeadInfoCard({ lead, leadName }) {
             href={`mailto:${lead.email}`}
             className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
           >
-            <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
               <Mail className="w-5 h-5 text-green-600" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-slate-400 mb-0.5">Email</p>
-              <p className="text-slate-800 group-hover:text-green-600 transition-colors">
+              <p className="text-slate-800 break-words group-hover:text-green-600 transition-colors">
                 {lead.email}
               </p>
             </div>

@@ -1507,7 +1507,7 @@ export default function SalesReports() {
 
             return (
               <>
-                <div className="grid grid-cols-5 gap-4 pb-4 border-b">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 pb-4 border-b">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-primary">{totalDeals}</p>
                     <p className="text-xs text-muted-foreground">Total Appointments</p>

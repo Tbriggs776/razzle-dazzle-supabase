@@ -159,7 +159,14 @@ export default function MyQueue() {
           <p className="text-muted-foreground">{t('mqNoProjects')}</p>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-xl">
+        <div className="bg-card border border-border rounded-xl overflow-hidden xl:overflow-visible">
+          {/* The 12-column row layout needs real width to stay readable, so it keeps a
+              min-width and scrolls sideways inside this wrapper — never the page body.
+              Above xl the row fits without scrolling, so the scroll container is dropped
+              again: it would otherwise become the scrollport for the sticky header below
+              and stop it sticking to the page. */}
+          <div className="overflow-x-auto xl:overflow-x-visible">
+          <div className="min-w-[880px] xl:min-w-0">
           <div className="sticky top-0 z-10 grid grid-cols-12 gap-3 px-4 py-2.5 bg-muted border-b border-border rounded-t-xl text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <div className="col-span-3">{t('mqColCustomer')}</div>
             <div className="col-span-1">{t('mqColCG')}</div>
@@ -261,6 +268,8 @@ export default function MyQueue() {
               </button>
             );
           })}
+          </div>
+          </div>
         </div>
       )}
     </div>

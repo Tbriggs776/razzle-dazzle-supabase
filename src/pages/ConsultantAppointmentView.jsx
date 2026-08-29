@@ -1212,12 +1212,12 @@ export default function ConsultantAppointmentView() {
                   href={`mailto:${lead.email}`}
                   className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-brand-gold/15 flex items-center justify-center flex-shrink-0">
                     <Mail className="w-5 h-5 text-brand-gold" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs text-muted-foreground mb-0.5">Email</p>
-                    <p className="text-foreground group-hover:text-brand-gold transition-colors">
+                    <p className="text-foreground break-words group-hover:text-brand-gold transition-colors">
                       {lead.email}
                     </p>
                   </div>
@@ -1227,10 +1227,10 @@ export default function ConsultantAppointmentView() {
                     href={`tel:${lead.phone}`}
                     className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors group"
                   >
-                    <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-brand-blue/15 flex items-center justify-center flex-shrink-0">
                       <Mail className="w-5 h-5 text-brand-blue" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs text-muted-foreground mb-0.5">Phone</p>
                       <p className="text-foreground group-hover:text-brand-blue transition-colors">
                         {lead.phone}

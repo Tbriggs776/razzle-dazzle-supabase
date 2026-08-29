@@ -152,15 +152,15 @@ export default function FleetDrivers() {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>{editId ? 'Edit Driver' : 'Add Driver'}</DialogTitle></DialogHeader>
           <div className="space-y-3 py-2">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>First Name</Label><Input value={form.first_name} onChange={e => setForm(f => ({...f, first_name: e.target.value}))} placeholder="First" /></div>
               <div><Label>Last Name</Label><Input value={form.last_name} onChange={e => setForm(f => ({...f, last_name: e.target.value}))} placeholder="Last" /></div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(f => ({...f, phone: e.target.value}))} placeholder="(555) 000-0000" /></div>
               <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({...f, email: e.target.value}))} placeholder="driver@email.com" /></div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>License #</Label><Input value={form.license_number} onChange={e => setForm(f => ({...f, license_number: e.target.value}))} placeholder="License number" /></div>
               <div><Label>Status</Label>
                 <Select value={form.status} onValueChange={v => setForm(f => ({...f, status: v}))}>
@@ -201,7 +201,7 @@ export default function FleetDrivers() {
               </Select>
               <p className="text-xs text-muted-foreground mt-1">Name, phone, and email will be pulled from their team profile.</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>License # (optional)</Label><Input value={importForm.license_number} onChange={e => setImportForm(f => ({...f, license_number: e.target.value}))} placeholder="License number" /></div>
               <div><Label>Status</Label>
                 <Select value={importForm.status} onValueChange={v => setImportForm(f => ({...f, status: v}))}>

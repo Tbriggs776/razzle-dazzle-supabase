@@ -480,7 +480,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
 
       {/* FM Gate — Review buttons */}
       {isReviewPhase && !installerMode && (
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+        <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-border">
           <Button variant="outline" onClick={handleReject} disabled={saving} className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive">
             <XCircle className="w-4 h-4" /> Reject
           </Button>
@@ -494,7 +494,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
 
       {/* Action: Submit for FM Approval */}
       {isInstallerPhase && (
-        <div className="flex items-center justify-end gap-2 pt-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
           {!isValid && (
             <p className="text-xs text-warn mr-auto">
               {missingCount} required field{missingCount === 1 ? '' : 's'} remaining

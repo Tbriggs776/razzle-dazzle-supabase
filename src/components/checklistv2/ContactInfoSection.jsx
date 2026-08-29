@@ -76,7 +76,7 @@ export default function ContactInfoSection({ formData, onChange }) {
 
       <div className="p-5 space-y-4 bg-white">
         {/* Name */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>First Name <span className="text-red-500">*</span></Label>
             <LocalInput
@@ -96,7 +96,7 @@ export default function ContactInfoSection({ formData, onChange }) {
         </div>
 
         {/* Phones */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Phone <span className="text-red-500">*</span></Label>
             <LocalPhoneInput
@@ -134,7 +134,7 @@ export default function ContactInfoSection({ formData, onChange }) {
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1.5">
             <Label>City <span className="text-red-500">*</span></Label>
             <Input

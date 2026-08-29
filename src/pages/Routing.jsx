@@ -227,9 +227,9 @@ export default function Routing() {
           <ModuleCard title="On the roster, but unreachable" icon={UserX}
             subtitle="A notification addresses an account — these people have none">
             {noLogin.map((p) => (
-              <div key={p.team_member_id} className="flex items-center justify-between gap-3 px-4 py-2">
-                <span className="text-sm text-foreground">{p.name || p.email || p.team_member_id}</span>
-                <span className="text-xs text-muted-foreground">{p.email}</span>
+              <div key={p.team_member_id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 px-4 py-2">
+                <span className="break-words text-sm text-foreground">{p.name || p.email || p.team_member_id}</span>
+                <span className="break-words text-xs text-muted-foreground">{p.email}</span>
               </div>
             ))}
             <div className="px-4 py-3">

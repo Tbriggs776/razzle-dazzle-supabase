@@ -56,7 +56,7 @@ export default function AppointmentCard({ appointment, index, preloadedData }) {
         className="group block bg-white rounded-2xl border border-slate-100 p-6 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300"
       >
         <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
               {leadName}
             </h3>
@@ -87,9 +87,9 @@ export default function AppointmentCard({ appointment, index, preloadedData }) {
               {currentUser?.role === 'admin' && (
                 <Badge 
                   variant="secondary" 
-                  className={cn('border font-mono text-xs', 
-                    appointment.google_calendar_event_id 
-                      ? 'bg-blue-50 text-blue-700 border-blue-200' 
+                  className={cn('border font-mono text-xs max-w-full break-all',
+                    appointment.google_calendar_event_id
+                      ? 'bg-blue-50 text-blue-700 border-blue-200'
                       : 'bg-slate-100 text-slate-500 border-slate-200'
                   )}
                 >

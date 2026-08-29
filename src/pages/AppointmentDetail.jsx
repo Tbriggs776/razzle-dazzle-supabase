@@ -841,7 +841,7 @@ export default function AppointmentDetail() {
                   {currentUser?.role === 'admin' && (
                     <Badge 
                       variant="secondary" 
-                      className={cn('border font-mono text-xs', 
+                      className={cn('border font-mono text-xs max-w-full break-all',
                         appointment.google_calendar_event_id
                           ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25'
                           : 'bg-secondary text-muted-foreground border-border'
@@ -1440,8 +1440,8 @@ export default function AppointmentDetail() {
                 </div>
               </div>
               <div className="flex items-center gap-4 p-3 rounded-xl bg-secondary">
-                <Mail className="w-5 h-5 text-muted-foreground" />
-                <div>
+                <Mail className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
+                <div className="min-w-0">
                   <p className="text-xs text-muted-foreground mb-0.5">Created By</p>
                   <p className="text-sm text-foreground truncate">{appointment.created_by}</p>
                 </div>
@@ -1901,7 +1901,7 @@ export default function AppointmentDetail() {
           
           <div className="space-y-4 py-4">
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button
                 variant="outline"
                 onClick={() => runAdminAction('Google Calendar Sync', async () => {

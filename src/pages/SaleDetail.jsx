@@ -1314,7 +1314,7 @@ export default function SaleDetail() {
       {/* Record Payment — the only write path into the ledger. The server
           re-derives every gate; nothing here is trusted as an amount check. */}
       <Dialog open={paymentOpen} onOpenChange={setPaymentOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Record a payment</DialogTitle>
             <DialogDescription>
@@ -1393,7 +1393,7 @@ export default function SaleDetail() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Sale</DialogTitle>
             <DialogDescription>
@@ -1498,7 +1498,7 @@ export default function SaleDetail() {
 
       {/* Replace Contract Dialog */}
       <Dialog open={showReplaceContractDialog} onOpenChange={setShowReplaceContractDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Replace Contract</DialogTitle>
             <DialogDescription>

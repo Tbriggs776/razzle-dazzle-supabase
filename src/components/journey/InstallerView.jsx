@@ -117,12 +117,12 @@ export default function InstallerView() {
       />
 
       {/* Crew Selector */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
         <label className="text-xs font-medium text-muted-foreground">{t('ivViewingAs')}</label>
         <select
           value={selectedCrewId || ''}
           onChange={e => setSelectedCrewId(e.target.value)}
-          className="text-sm border border-input rounded-lg px-3 py-1.5 bg-card text-foreground"
+          className="text-sm border border-input rounded-lg px-3 py-1.5 bg-card text-foreground min-w-0 max-w-full"
         >
           <option value="">{t('ivSelectInstaller')}</option>
           {installers.map(i => (
@@ -148,7 +148,7 @@ export default function InstallerView() {
       ) : (
         <>
           {/* Legend — swatches use the same fills as the checkpoint dots below */}
-          <div className="flex items-center gap-4 mb-3 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-muted" /> {t('ivLegendPending')}</div>
             <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-warn/20" /> {t('ivLegendAwaiting')}</div>
             <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-info/20" /> {t('ivLegendInProgress')}</div>
@@ -156,7 +156,11 @@ export default function InstallerView() {
             <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-crit/20" /> {t('ivLegendRejected')}</div>
           </div>
 
-          <div className="bg-card border border-border rounded-xl">
+          {/* The 12-column row layout needs real width to stay readable, so it keeps a
+              min-width and scrolls sideways inside this wrapper — never the page body. */}
+          <div className="bg-card border border-border rounded-xl overflow-hidden xl:overflow-visible">
+            <div className="overflow-x-auto xl:overflow-x-visible">
+            <div className="min-w-[820px] xl:min-w-0">
             <div className="sticky top-0 z-10 grid grid-cols-12 gap-3 px-4 py-2.5 bg-muted border-b border-border rounded-t-xl text-xs font-medium text-muted-foreground uppercase tracking-wide">
               <div className="col-span-4">{t('ivColCustomer')}</div>
               <div className="col-span-2">{t('ivColCG')}</div>
@@ -239,6 +243,8 @@ export default function InstallerView() {
                 </button>
               );
             })}
+            </div>
+            </div>
           </div>
         </>
       )}

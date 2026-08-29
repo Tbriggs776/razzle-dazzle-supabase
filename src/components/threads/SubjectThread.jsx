@@ -143,7 +143,7 @@ export default function SubjectThread({ subjectType, subjectId, defaultTopic = '
                       {m.created_at ? formatDistanceToNow(new Date(m.created_at), { addSuffix: true }) : ''}
                     </span>
                   </div>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{m.body}</p>
+                  <p className="mt-1 whitespace-pre-wrap break-words text-sm text-foreground">{m.body}</p>
                 </div>
               );
             })}

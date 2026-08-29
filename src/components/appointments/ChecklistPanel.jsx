@@ -386,7 +386,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>First Name *</Label>
                   <Input
@@ -404,7 +404,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Phone *</Label>
                   <PhoneInput
@@ -438,7 +438,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
                   placeholder="Start typing an address..."
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>City *</Label>
                   <Input

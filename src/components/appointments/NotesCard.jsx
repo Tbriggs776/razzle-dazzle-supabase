@@ -35,8 +35,8 @@ export default function NotesCard({ appointment, updateMutation }) {
         <div className="space-y-3 mb-4">
           {appointment.notes.map((note, index) => (
             <div key={index} className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-              <div className="flex items-start justify-between gap-4 mb-2">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 mb-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <span className="text-xs font-medium text-purple-600">{note.context || 'Note'}</span>
                   <span className="text-xs text-slate-400">•</span>
                   <span className="text-xs text-slate-500">{note.user_name}</span>

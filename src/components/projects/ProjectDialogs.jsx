@@ -87,11 +87,11 @@ export default function ProjectDialogs({
               <Label>Installation Date</Label>
               <Input type="date" value={editData.installation_date} onChange={(e) => setEditData({ ...editData, installation_date: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Scheduled Start</Label><Input type="date" value={editData.scheduled_start_date} onChange={(e) => setEditData({ ...editData, scheduled_start_date: e.target.value })} /></div>
               <div className="space-y-2"><Label>Scheduled End</Label><Input type="date" value={editData.scheduled_end_date} onChange={(e) => setEditData({ ...editData, scheduled_end_date: e.target.value })} /></div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Actual Start</Label><Input type="date" value={editData.actual_start_date} onChange={(e) => setEditData({ ...editData, actual_start_date: e.target.value })} /></div>
               <div className="space-y-2"><Label>Actual Completion</Label><Input type="date" value={editData.actual_completion_date} onChange={(e) => setEditData({ ...editData, actual_completion_date: e.target.value })} /></div>
             </div>

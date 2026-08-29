@@ -154,7 +154,7 @@ export default function AlertGroupManager() {
         <div className="bg-card border border-primary/40 rounded-xl p-5 space-y-4">
           <h3 className="font-semibold text-foreground">{editingGroup.id ? 'Edit Group' : 'New Alert Group'}</h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>Label (display name)</Label>
               <Input value={editingGroup.label} onChange={e => setEditingGroup({ ...editingGroup, label: e.target.value })} placeholder="e.g., Asbestos Hard Stop" />

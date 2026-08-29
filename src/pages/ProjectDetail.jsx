@@ -959,9 +959,9 @@ export default function ProjectDetail() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-good/15">
                     <Mail className="h-5 w-5 text-good" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="mb-0.5 text-xs text-muted-foreground">Email</p>
-                    <p className="text-foreground transition-colors group-hover:text-good">
+                    <p className="break-words text-foreground transition-colors group-hover:text-good">
                       {customer.email}
                     </p>
                   </div>
@@ -1392,7 +1392,7 @@ export default function ProjectDetail() {
         {/* Customer Experience */}
         <ModuleCard title="Customer Experience" icon={Phone}>
           <div className="p-4">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {[
                 { id: 'welcome_call_attempted', label: 'Welcome Call Attempted', dateField: 'welcome_call_attempted_date', color: 'blue' },
                 { id: 'welcome_call_completed', label: 'Welcome Call Completed', dateField: 'welcome_call_completed_date', color: 'green' },

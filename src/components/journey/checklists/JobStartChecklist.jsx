@@ -377,13 +377,13 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
         <div className="ml-6 mt-1 p-3 bg-crit/10 rounded-lg space-y-2">
           <ChecklistRow label="⛔ Is any material missing or wrong? → Stop. Tell your Field Manager before you start." checked={data.verification.material_shortage} onChange={v => update('verification', 'material_shortage', v)} disabled={isReadOnly} />
           {data.verification.material_shortage && (
-            <div className="grid grid-cols-2 gap-3 pl-7">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-7">
               <div className="space-y-1">
                 <Label className="text-xs">Shortage count <span className="text-crit">*</span></Label>
                 <Input type="number" value={data.verification.shortage_count} onChange={e => update('verification', 'shortage_count', parseInt(e.target.value) || 0)} disabled={isReadOnly} className={submitAttempted && missing.shortage_count ? 'border-crit' : ''} />
                 {submitAttempted && missing.shortage_count && <p className="text-xs text-crit">Required</p>}
               </div>
-              <div className="space-y-1 col-span-2">
+              <div className="space-y-1 sm:col-span-2">
                 <Label className="text-xs">Shortage details (alerts Install Coordinator + Order Entry) <span className="text-crit">*</span></Label>
                 <Textarea value={data.verification.shortage_notes} onChange={e => update('verification', 'shortage_notes', e.target.value)} disabled={isReadOnly} rows={2} className={submitAttempted && missing.shortage_notes ? 'border-crit' : ''} />
                 {submitAttempted && missing.shortage_notes && <p className="text-xs text-crit">Required</p>}
@@ -421,7 +421,7 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
       </Section>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-2 pt-2">
+      <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
         {!isReadOnly && (
           <>
             {!isValid && (

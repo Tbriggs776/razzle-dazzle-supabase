@@ -199,7 +199,7 @@ export default function FleetMaintenance() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label>Service Type</Label>
                 <Select value={form.service_type} onValueChange={v => setForm(f => ({...f, service_type: v}))}>
@@ -211,7 +211,7 @@ export default function FleetMaintenance() {
               </div>
               <div><Label>Scheduled Date</Label><Input type="date" value={form.scheduled_date} onChange={e => setForm(f => ({...f, scheduled_date: e.target.value}))} /></div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>Status</Label>
                 <Select value={form.status} onValueChange={v => setForm(f => ({...f, status: v}))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>

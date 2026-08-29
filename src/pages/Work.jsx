@@ -181,7 +181,7 @@ export default function Work() {
                       {isMine && <StatusPill tone="neutral">Your request</StatusPill>}
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">{a.reason}</p>
-                    <p className="mt-1 text-[11px] text-muted-foreground">
+                    <p className="mt-1 break-words text-[11px] text-muted-foreground">
                       {a.requested_by} · {a.requested_at
                         ? formatDistanceToNow(new Date(a.requested_at), { addSuffix: true }) : ''}
                       {a.required_dept ? ` · ${DEPT_LABEL[a.required_dept] || a.required_dept}` : ''}

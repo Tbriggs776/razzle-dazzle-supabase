@@ -61,7 +61,7 @@ export default function ResultStatusDialog({ open, onOpenChange, appointment, cu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-slate-800">Mark Appointment Result</DialogTitle>
           <DialogDescription className="text-slate-500 mt-2">

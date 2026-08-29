@@ -84,18 +84,18 @@ export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
             </button>
           ))}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Input
             type="date"
             value={dateFrom}
             onChange={e => setDateFrom(e.target.value)}
-            className="h-8 text-xs"
+            className="h-8 text-xs flex-1 min-w-[8rem]"
           />
           <Input
             type="date"
             value={dateTo}
             onChange={e => setDateTo(e.target.value)}
-            className="h-8 text-xs"
+            className="h-8 text-xs flex-1 min-w-[8rem]"
           />
           <Button size="sm" className="h-8 text-xs shrink-0" onClick={() => refetch()}>
             {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Fetch'}

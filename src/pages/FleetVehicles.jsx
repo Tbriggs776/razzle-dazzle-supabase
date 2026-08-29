@@ -109,12 +109,12 @@ export default function FleetVehicles() {
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>{editId ? 'Edit Vehicle' : 'Add Vehicle'}</DialogTitle></DialogHeader>
           <div className="space-y-3 py-2">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div><Label>Year</Label><Input value={form.year} onChange={e => setForm(f => ({...f, year: e.target.value}))} placeholder="2024" /></div>
               <div><Label>Make</Label><Input value={form.make} onChange={e => setForm(f => ({...f, make: e.target.value}))} placeholder="Ford" /></div>
               <div><Label>Model</Label><Input value={form.model} onChange={e => setForm(f => ({...f, model: e.target.value}))} placeholder="Transit" /></div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>License Plate</Label><Input value={form.license_plate} onChange={e => setForm(f => ({...f, license_plate: e.target.value}))} placeholder="ABC1234" /></div>
               <div><Label>Status</Label>
                 <Select value={form.status} onValueChange={v => setForm(f => ({...f, status: v}))}>

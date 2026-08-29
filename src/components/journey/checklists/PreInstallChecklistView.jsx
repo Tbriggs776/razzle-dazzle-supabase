@@ -69,8 +69,8 @@ export default function PreInstallChecklistView({ project, sale, customer, insta
                   </a>
                 )}
                 {fieldManager.email && (
-                  <a href={`mailto:${fieldManager.email}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
-                    <Mail className="w-3 h-3" />{fieldManager.email}
+                  <a href={`mailto:${fieldManager.email}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary min-w-0 break-all">
+                    <Mail className="w-3 h-3 shrink-0" />{fieldManager.email}
                   </a>
                 )}
               </div>
@@ -95,8 +95,8 @@ export default function PreInstallChecklistView({ project, sale, customer, insta
                   </a>
                 )}
                 {installCoordinator.email && (
-                  <a href={`mailto:${installCoordinator.email}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary">
-                    <Mail className="w-3 h-3" />{installCoordinator.email}
+                  <a href={`mailto:${installCoordinator.email}`} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary min-w-0 break-all">
+                    <Mail className="w-3 h-3 shrink-0" />{installCoordinator.email}
                   </a>
                 )}
               </div>
@@ -109,7 +109,7 @@ export default function PreInstallChecklistView({ project, sale, customer, insta
       </div>
 
       {/* Pre-Install welcome */}
-      <div className="bg-card rounded-xl border border-border p-6 space-y-5">
+      <div className="bg-card rounded-xl border border-border p-4 sm:p-6 space-y-5">
         <div>
           <h3 className="text-xl font-bold text-foreground">You've Got a New Job. Let's Razzle Dazzle It.</h3>
         </div>

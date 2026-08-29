@@ -832,7 +832,7 @@ export default function Projects() {
             <DialogTitle>New Temporary Project</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label>First Name *</Label>
                 <Input value={newProjectForm.first_name} onChange={e => setNewProjectForm(f => ({ ...f, first_name: e.target.value }))} placeholder="First name" />
@@ -842,7 +842,7 @@ export default function Projects() {
                 <Input value={newProjectForm.last_name} onChange={e => setNewProjectForm(f => ({ ...f, last_name: e.target.value }))} placeholder="Last name" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label>Email</Label>
                 <Input type="email" value={newProjectForm.email} onChange={e => setNewProjectForm(f => ({ ...f, email: e.target.value }))} placeholder="customer@email.com" />
@@ -856,7 +856,7 @@ export default function Projects() {
               <Label>Address</Label>
               <Input value={newProjectForm.address} onChange={e => setNewProjectForm(f => ({ ...f, address: e.target.value }))} placeholder="Optional" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label>Status</Label>
                 <Select value={newProjectForm.status} onValueChange={v => setNewProjectForm(f => ({ ...f, status: v }))}>

@@ -252,7 +252,7 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
 
       {/* Action: Complete Installation */}
       {isEditable && (
-        <div className="flex items-center justify-end gap-2 pt-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
           {!valid && (
             <p className="text-xs text-warn mr-auto">
               {missingCount} required field{missingCount === 1 ? '' : 's'} remaining

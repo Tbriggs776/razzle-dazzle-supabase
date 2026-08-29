@@ -540,7 +540,7 @@ export default function AppointmentSettingChecklists() {
               </TabsContent>
               
               <TabsContent value="new" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="first_name" className="text-foreground mb-2 block">First Name *</Label>
                     <Input

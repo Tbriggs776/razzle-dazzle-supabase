@@ -597,7 +597,7 @@ export default function Layout({ children, currentPageName }) {
                                 : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                             )}
                           >
-                            <span className="flex-1 truncate">{subItem.name}</span>
+                            <span className="min-w-0 flex-1 truncate">{subItem.name}</span>
                             {showBadge && (
                               <span className="ml-auto min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-background text-[10px] font-bold">
                                 {subBadge}

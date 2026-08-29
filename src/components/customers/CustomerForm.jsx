@@ -43,7 +43,7 @@ export default function CustomerForm({ customer, onSubmit, onCancel, isLoading }
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Basic Information
         </h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="first_name">First Name *</Label>
             <Input
@@ -65,7 +65,7 @@ export default function CustomerForm({ customer, onSubmit, onCancel, isLoading }
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
             <Input
@@ -110,7 +110,7 @@ export default function CustomerForm({ customer, onSubmit, onCancel, isLoading }
             className="h-12"
           />
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>
             <Input

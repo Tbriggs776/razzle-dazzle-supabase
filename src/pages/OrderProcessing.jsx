@@ -943,7 +943,7 @@ export default function OrderProcessing() {
                                       )}>
                                         <p className="font-medium text-foreground">{msg.sender_name}</p>
                                         {msg.message && msg.message !== '(attached files)' && (
-                                          <p className="mt-1 text-muted-foreground">{msg.message}</p>
+                                          <p className="mt-1 break-words text-muted-foreground">{msg.message}</p>
                                         )}
                                         {msg.file_urls && msg.file_urls.length > 0 && (
                                           <div className="mt-2 flex flex-wrap gap-2">
@@ -971,8 +971,8 @@ export default function OrderProcessing() {
                                                   src={url}
                                                   className="flex items-center gap-1 rounded border border-border bg-card px-2 py-1 hover:bg-secondary"
                                                 >
-                                                  <Paperclip className="h-3 w-3" />
-                                                  <span className="text-xs">{getFileName(url)}</span>
+                                                  <Paperclip className="h-3 w-3 shrink-0" />
+                                                  <span className="max-w-[160px] truncate text-xs">{getFileName(url)}</span>
                                                 </SignedFileLink>
                                               )
                                             ))}
@@ -1130,7 +1130,7 @@ export default function OrderProcessing() {
                           )}
                           </div>
 
-                          <div className="flex flex-shrink-0 gap-2">
+                          <div className="flex flex-wrap justify-end gap-2 sm:flex-shrink-0">
                           {currentUser?.role?.toLowerCase() === 'admin' && (
                             <>
                               {ticket.requester_short_url && (
@@ -1194,7 +1194,7 @@ export default function OrderProcessing() {
 
       {/* Create Ticket Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Ticket</DialogTitle>
           </DialogHeader>
@@ -1340,7 +1340,7 @@ export default function OrderProcessing() {
 
       {/* Edit Ticket Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Ticket</DialogTitle>
           </DialogHeader>

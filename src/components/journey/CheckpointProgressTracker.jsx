@@ -32,7 +32,9 @@ export default function CheckpointProgressTracker({ checkpoints, activeStep, onS
   };
 
   return (
-    <div className="flex items-center gap-1">
+    // Five non-shrinking steps plus arrows are wider than a phone: the row scrolls
+    // inside itself rather than pushing the page sideways.
+    <div className="flex items-center gap-1 overflow-x-auto">
       {STEPS.map((step, index) => {
         const state = getStepState(index);
         const unlocked = isUnlocked(index);

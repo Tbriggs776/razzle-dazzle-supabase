@@ -190,7 +190,7 @@ export default function DesignModsSection({ project, customer, sale }) {
             <DialogTitle>New Design Modification</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Customer First Name</Label>
                 <Input value={form.customer_first_name} onChange={e => setForm(f => ({ ...f, customer_first_name: e.target.value }))} />
@@ -217,7 +217,7 @@ export default function DesignModsSection({ project, customer, sale }) {
                 className="min-h-28"
               />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Value Added Costs ($)</Label>
                 <Input type="number" value={form.value_added_costs} onChange={e => setForm(f => ({ ...f, value_added_costs: e.target.value }))} placeholder="0" />

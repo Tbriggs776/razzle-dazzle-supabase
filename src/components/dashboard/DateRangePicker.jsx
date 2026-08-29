@@ -86,7 +86,7 @@ function CalendarMonth({ year, month, rangeStart, rangeEnd, hoverDate, onDayClic
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
   return (
-    <div className="w-64">
+    <div className="w-full lg:w-64">
       <div className="text-center font-semibold text-slate-700 mb-3 text-sm">
         {MONTHS[month]} {year}
       </div>
@@ -213,9 +213,9 @@ export default function DateRangePicker({ value, onChange }) {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-2 z-50 bg-white border border-slate-200 rounded-xl shadow-xl flex">
+        <div className="fixed left-1/2 top-1/2 z-50 flex w-[calc(100vw-2rem)] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl lg:absolute lg:left-auto lg:right-0 lg:top-full lg:mt-2 lg:w-auto lg:max-h-none lg:translate-x-0 lg:translate-y-0 lg:flex-row lg:overflow-visible">
           {/* Presets */}
-          <div className="w-40 border-r border-slate-100 p-3 space-y-0.5">
+          <div className="grid grid-cols-2 gap-1 border-b border-slate-100 p-3 lg:w-40 lg:grid-cols-1 lg:gap-0.5 lg:border-b-0 lg:border-r">
             {PRESETS.map(p => (
               <button
                 key={p.label}
@@ -228,10 +228,10 @@ export default function DateRangePicker({ value, onChange }) {
           </div>
 
           {/* Calendars */}
-          <div className="p-4">
-            <div className="flex items-center gap-4 mb-3">
-              <button onClick={prevMonth} className="p-1 rounded hover:bg-slate-100 text-slate-500">‹</button>
-              <div className="flex gap-8 flex-1 justify-center">
+          <div className="min-w-0 p-4">
+            <div className="flex items-center gap-2 mb-3 lg:gap-4">
+              <button onClick={prevMonth} className="shrink-0 p-1 rounded hover:bg-slate-100 text-slate-500">‹</button>
+              <div className="flex min-w-0 flex-col gap-6 flex-1 justify-center lg:flex-row lg:gap-8">
                 <CalendarMonth
                   year={leftYear} month={leftMonth}
                   rangeStart={rangeStart} rangeEnd={rangeEnd} hoverDate={hoverDate}
@@ -243,12 +243,12 @@ export default function DateRangePicker({ value, onChange }) {
                   onDayClick={handleDayClick} onDayHover={setHoverDate}
                 />
               </div>
-              <button onClick={nextMonth} className="p-1 rounded hover:bg-slate-100 text-slate-500">›</button>
+              <button onClick={nextMonth} className="shrink-0 p-1 rounded hover:bg-slate-100 text-slate-500">›</button>
             </div>
 
             {/* Custom date inputs */}
-            <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100">
+              <div className="flex min-w-0 items-center gap-2">
                 <label className="text-xs text-slate-400 font-medium">Start:</label>
                 <input
                   type="date"
@@ -265,7 +265,7 @@ export default function DateRangePicker({ value, onChange }) {
                   className="text-sm border border-slate-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-slate-400"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <label className="text-xs text-slate-400 font-medium">End:</label>
                 <input
                   type="date"
@@ -285,9 +285,9 @@ export default function DateRangePicker({ value, onChange }) {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
               <span className="text-xs text-slate-400">Dates shown in Mountain Standard Time (Arizona)</span>
-              <div className="flex gap-2">
+              <div className="ml-auto flex shrink-0 gap-2">
                 <button onClick={handleCancel} className="px-4 py-1.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-600 hover:bg-slate-50">Cancel</button>
                 <button
                   onClick={handleUpdate}

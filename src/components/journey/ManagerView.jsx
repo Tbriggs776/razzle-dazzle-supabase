@@ -157,8 +157,11 @@ export default function ManagerView() {
         <span className="text-xs text-muted-foreground">{t('mvOfProjects', { shown: filteredProjects.length, total: projects.length })}</span>
       </div>
 
-      {/* Table */}
+      {/* Table — twelve columns of assignment selects need real width to stay usable, so the
+          grid keeps a min-width and scrolls sideways inside its wrapper, never the page body. */}
       <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+        <div className="min-w-[900px]">
         {/* Header */}
         <div className="sticky top-0 z-10 grid grid-cols-12 gap-2 px-4 py-2.5 bg-muted/60 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
           <div className="col-span-2">{t('mvColCustomer')}</div>
@@ -287,6 +290,8 @@ export default function ManagerView() {
             </div>
           );
         })}
+        </div>
+        </div>
 
         {filteredProjects.length === 0 && (
           <div className="py-12 text-center text-muted-foreground">

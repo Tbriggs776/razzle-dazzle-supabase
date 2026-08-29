@@ -265,7 +265,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
 
         <div className="space-y-4 py-2">
           {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Customer Name</Label>
               <Input value={form.customer_name} onChange={e => set('customer_name', e.target.value)} />
@@ -279,7 +279,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
             <Label>Address</Label>
             <Input value={form.address} onChange={e => set('address', e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Phone Primary</Label>
               <Input value={form.phone_primary} onChange={e => set('phone_primary', e.target.value)} />
@@ -289,7 +289,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
               <Input value={form.phone_secondary} onChange={e => set('phone_secondary', e.target.value)} />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Inspected By</Label>
               <Input value={form.inspected_by} onChange={e => set('inspected_by', e.target.value)} />
@@ -299,7 +299,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
               <Input type="date" value={form.inspected_on} onChange={e => set('inspected_on', e.target.value)} />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <InstallersList
               installers={installers}
               onChange={setInstallers}
@@ -325,7 +325,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
           </div>
 
           {/* Send original installer back */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <Label>Send Original Installer Back?</Label>
               <Select value={form.send_original_installer_back} onValueChange={v => set('send_original_installer_back', v)}>

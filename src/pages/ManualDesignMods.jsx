@@ -630,7 +630,7 @@ export default function ManualDesignMods() {
             <div className="bg-card rounded-2xl border border-border p-6">
               <h2 className="text-lg font-semibold text-foreground mb-6">New Sales Contract</h2>
               <form onSubmit={handleScSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label className="text-foreground">First Name *</Label>
                     <Input value={scFormData.customer_first_name} onChange={e => setScFormData({...scFormData, customer_first_name: e.target.value})} required className="h-10 border-border" />
@@ -668,7 +668,7 @@ export default function ManualDesignMods() {
                    <Label className="text-foreground">Products / Services *</Label>
                   <Textarea value={scFormData.products_description} onChange={e => setScFormData({...scFormData, products_description: e.target.value})} required rows={4} className="border-border" placeholder="Describe products and services..." />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label className="text-foreground">Sale Amount ($) *</Label>
                     <Input type="number" step="0.01" value={scFormData.sale_amount} onChange={e => setScFormData({...scFormData, sale_amount: e.target.value})} required className="h-10 border-border" />

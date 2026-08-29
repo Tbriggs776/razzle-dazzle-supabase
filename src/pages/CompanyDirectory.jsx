@@ -168,7 +168,7 @@ export default function CompanyDirectory() {
             <DialogTitle>Add New Employee</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <Label>First Name *</Label>
                 <Input value={form.first_name} onChange={e => set('first_name', e.target.value)} placeholder="Jane" />
