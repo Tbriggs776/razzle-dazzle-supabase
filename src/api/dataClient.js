@@ -510,6 +510,18 @@ const RPC_FUNCTIONS = {
   // { ok:false, reason:'short', shortfall } when it does not.
   confirmSaleDeposit: (p) => ['confirm_sale_deposit', { p_sale_id: p.saleId, p_note: p.note ?? null }],
   confirmPayment:     (p) => ['confirm_payment', { p_payment_id: p.paymentId, p_note: p.note ?? null }],
+  // The ONLY way to change a sale's collection terms or grant a collection
+  // exemption. Those columns are no longer client-writable (0080) because setting
+  // collect_exempt_reason clears BOTH money gates and releases the ordering hold.
+  // Requires can_edit('finance'); an exemption needs a written reason; every change
+  // lands in sale_financial_log.
+  // NOTE: no UI calls this yet — the plumbing is here, the Finance control is not.
+  setCollectionTerms: (p) => ['set_collection_terms', {
+    p_sale_id: p.saleId, p_collection_terms: p.terms ?? null,
+    p_collect_exempt_reason: p.exemptReason ?? null,
+    p_deposit_pct_required: p.depositPct ?? null,
+    p_clear_exemption: p.clearExemption ?? false,
+  }],
   // Driveway-safe: returns the amount due for ONE project and nothing else.
   // The Job Start Checklist is often opened by a subcontract installer whose
   // role cannot read the payment ledger, so this must never become a table read.
