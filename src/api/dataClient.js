@@ -567,6 +567,14 @@ const RPC_FUNCTIONS = {
   // `communication` is revoked outright (0083), because three months later that
   // thread is the ROC defence. Archiving records who and why, and is reversible.
   archiveConversation: (p) => ['archive_conversation', { p_ids: p.ids, p_reason: p.reason ?? null }],
+  // Language follows the PERSON, not the device — a crew member who set Spanish on
+  // the yard phone was getting English again on his own. An org admin can set it
+  // for someone who cannot easily do it themselves, which is the real case: a crew
+  // member on a phone, mid-job, in a language they cannot read the settings in.
+  myPreferredLanguage: () => ['my_preferred_language', {}],
+  setPreferredLanguage: (p) => ['set_preferred_language', {
+    p_language: p.language, p_user_id: p.userId ?? null,
+  }],
   restoreConversation: (p) => ['restore_conversation', { p_ids: p.ids }],
   requestApproval: (p) => ['request_approval', {
     p_subject_type: p.subjectType, p_subject_id: p.subjectId, p_kind: p.kind,
