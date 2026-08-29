@@ -1,0 +1,38 @@
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 0069b — TOMBSTONE. Recorded 2026-08-29. Intentionally contains no DDL.
+--
+-- This migration was applied to production via MCP in an earlier session and its
+-- file was never saved. It is recorded here so the migration ledger and the repo
+-- agree; it deliberately re-applies nothing, because 0077 replaces the entire
+-- function it patched.
+--
+-- WHAT IT DID: 0069's first reconciler run opened 13 tasks AND escalated all 13
+-- immediately, because those jobs had entered their stages weeks earlier, so every
+-- task was born already past its escalation window. An alert storm on day one is
+-- the classic adoption killer — people conclude the feature is broken and there is
+-- no second chance.
+--
+-- The fix added a second condition to the escalation pass:
+--
+--     and now() > tk.created_date + make_interval(hours => tk.escalate_after_hours)
+--
+-- i.e. the TASK must also have existed for its own window, not just be past its
+-- due date. The clock starts when someone could first have acted on it.
+--
+-- WHY THIS FILE IS EMPTY: 0076 and then 0077 rewrote reconcile_tasks() in full.
+-- That guard is still present, verbatim, in 0077 — it is load-bearing and was
+-- carried forward deliberately. Re-applying the 0069-era body here would briefly
+-- reintroduce the `least(due_in_hours, 24)` SLA flattening and the project-only
+-- subject filter during a rebuild, which is strictly worse than doing nothing.
+-- On a fresh rebuild the ordering 0069 → 0069b → … → 0077 lands on the correct
+-- final definition either way.
+--
+-- If you ever need the escalation guard in isolation, take it from 0077 rather
+-- than reconstructing it from this comment.
+--
+-- ── PROCESS NOTE ─────────────────────────────────────────────────────────────
+-- Root cause of the four missing files recovered on 2026-08-29 (0063b, 0067b,
+-- 0067c, this one): apply_migration was called without saving the file in the
+-- same turn. Every apply MUST be followed by writing the file before moving on,
+-- or production drifts ahead of the repo silently.
+-- ─────────────────────────────────────────────────────────────────────────────
