@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { Bell, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -15,7 +16,12 @@ export default function InstallerNotificationBadge({ checkpoint }) {
         action: 'resend_installer_notification',
         checkpoint_id: checkpoint?.id,
       });
-      setResult(res.data);
+      // On a transport failure res.data is null, which left `result` null — and the
+      // badge's own fallback then read "Installer notification sent". Pressing
+      // Resend and being told it sent is the exact failure this badge exists to
+      // prevent.
+      const failed = invokeFailure(res);
+      setResult(failed ? { error: failed } : res.data);
     } catch (e) {
       console.error('Resend installer notification failed', e);
       setResult({ error: e.message || 'Failed to resend' });
@@ -35,7 +41,12 @@ export default function InstallerNotificationBadge({ checkpoint }) {
           {result?.error
             ? result.error
             : result?.success
-              ? `Notification sent to ${result.installer}${result.emailSent ? ' (email)' : ''}${result.smsSent ? ' + (SMS)' : ''}`
+              // Neither channel firing is the live state whenever the email/SMS
+              // credentials are absent, and it used to render as a bare
+              // "Notification sent to <crew>" with no channel after it.
+              ? (!result.emailSent && !result.smsSent
+                  ? `Nothing was sent to ${result.installer} — no email or SMS channel is set up`
+                  : `Notification sent to ${result.installer}${result.emailSent ? ' (email)' : ''}${result.smsSent ? ' + (SMS)' : ''}`)
               : notifiedDate
                 ? `Installer notified: ${installerName || ''} on ${new Date(notifiedDate).toLocaleString()}`
                 : 'Installer notification sent'}

@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { compressImage } from '@/lib/compressImage';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Send, CheckCircle2, XCircle, Lock, DollarSign, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -205,10 +206,11 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
         step_key: 'floor_prep_checklist',
         checklist_data: { prep: data.prep, change_order: data.change_order },
       });
-      // invoke() returns { data, error } (no throw for deployed fns) — surface the billable
-      // change-order gate + any backend error instead of silently re-fetching.
-      if (res.error || res.data?.error) {
-        toast.error(res.data?.error || 'Failed to submit. Please try again.');
+      // Surfaces the billable change-order gate ("chargeable prep must be called
+      // in for approval") as well as any transport failure.
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(failed);
         setSaving(false);
         return;
       }
@@ -225,15 +227,20 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
     if (!fmAcknowledged) return;
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'approve_prep',
         checkpoint_id: checkpoint.id,
         project_id: projectId,
         step_key: 'floor_prep_checklist',
       });
+      // Approving prep is what releases the crew to lay floor. Reporting it as
+      // done when it was refused sends them ahead on an unapproved subfloor.
+      const failed = invokeFailure(res);
+      if (failed) { toast.error(failed); return; }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
     } catch (e) {
       console.error('Approve prep failed', e);
+      toast.error('That approval did not go through. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -244,16 +251,19 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
     if (!notes) return;
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'reject',
         checkpoint_id: checkpoint.id,
         project_id: projectId,
         step_key: 'floor_prep_checklist',
         rejection_notes: notes,
       });
+      const failed = invokeFailure(res);
+      if (failed) { toast.error(failed); return; }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
     } catch (e) {
       console.error('Reject failed', e);
+      toast.error('That rejection did not go through. Please try again.');
     } finally {
       setSaving(false);
     }

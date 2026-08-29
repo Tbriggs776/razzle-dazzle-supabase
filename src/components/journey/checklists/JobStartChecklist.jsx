@@ -265,8 +265,9 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
       });
       // invoke() returns { data, error } and does NOT throw for a deployed function, so the
       // catch below never sees a backend error — check the result before advancing.
-      if (res.error || res.data?.error) {
-        toast.error(res.data?.error || 'Failed to submit checklist. Please try again.');
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(failed);
         setSaving(false);
         return;
       }

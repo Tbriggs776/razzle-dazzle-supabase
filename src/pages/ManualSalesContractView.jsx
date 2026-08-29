@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2, Eraser } from 'lucide-react';
 import { SignedImage } from '@/lib/fileUrl';
+import { invokeFailure } from '@/lib/invokeResult';
+import { toast } from 'sonner';
 
 function formatCurrency(val) {
   if (val == null) return '$0.00';
@@ -76,13 +78,22 @@ export default function ManualSalesContractView() {
   const submitMutation = useMutation({
     mutationFn: async () => {
       const signature = canvasRef.current ? canvasRef.current.toDataURL('image/png') : '';
-      await base44.functions.invoke('submitManualSalesContract', {
+      const res = await base44.functions.invoke('submitManualSalesContract', {
         contractId,
         customerPrintedName,
         customerSignature: signature
       });
+      // A customer signing a sales contract. The result was discarded and the
+      // thank-you screen rendered either way, so a failed signing looked
+      // identical to a completed one — to the customer AND to us.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      return res.data;
     },
-    onSuccess: () => setSubmitted(true)
+    onSuccess: () => setSubmitted(true),
+    onError: (e) => toast.error(
+      `That did not go through — ${e?.message || 'the request failed'}. Your signature is still here, please try again.`
+    ),
   });
 
   if (isLoading) {

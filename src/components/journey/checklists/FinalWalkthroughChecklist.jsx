@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { compressImage } from '@/lib/compressImage';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Send, CheckCircle2, XCircle, Lock, ShieldCheck, DollarSign, Star, FileSignature, ClipboardCheck, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -229,9 +230,9 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
         step_key: 'final_walkthrough_checklist',
         checklist_data: data,
       });
-      // invoke() returns { data, error } (no throw for deployed fns) — surface backend errors.
-      if (res.error || res.data?.error) {
-        toast.error(res.data?.error || 'Failed to submit. Please try again.');
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(failed);
         setSaving(false);
         return;
       }
@@ -248,16 +249,22 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
   const handleApproveFinal = async () => {
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      // This is the sign-off that closes the job. It reported success no matter
+      // what came back — a refused approval left the checkpoint open while the
+      // screen said it was done, and the next person to look believed it.
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'approve_final',
         checkpoint_id: checkpoint.id,
         project_id: projectId,
         step_key: 'final_walkthrough_checklist',
       });
+      const failed = invokeFailure(res);
+      if (failed) { toast.error(failed); return; }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
       onSubmitted?.();
     } catch (e) {
       console.error('Approve final failed', e);
+      toast.error('That approval did not go through. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -268,17 +275,22 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
     if (!notes) return;
     setSaving(true);
     try {
-      await base44.functions.invoke('submitCheckpoint', {
+      const res = await base44.functions.invoke('submitCheckpoint', {
         action: 'reject',
         checkpoint_id: checkpoint.id,
         project_id: projectId,
         step_key: 'final_walkthrough_checklist',
         rejection_notes: notes,
       });
+      // A rejection that silently fails is worse than one that errors: the crew
+      // is never told to come back, and the reviewer thinks they were.
+      const failed = invokeFailure(res);
+      if (failed) { toast.error(failed); return; }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
       onSubmitted?.();
     } catch (e) {
       console.error('Reject failed', e);
+      toast.error('That rejection did not go through. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -294,9 +306,9 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
         step_key: 'final_walkthrough_checklist',
         checklist_data: data,
       });
-      // invoke() returns { data, error } (no throw for deployed fns) — surface backend errors.
-      if (res.error || res.data?.error) {
-        toast.error(res.data?.error || 'Failed to submit for payment. Please try again.');
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(failed);
         setSaving(false);
         return;
       }

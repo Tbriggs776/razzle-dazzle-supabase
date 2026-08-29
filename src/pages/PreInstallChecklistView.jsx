@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2, Eraser } from 'lucide-react';
 import { format } from 'date-fns';
 import { SignedImage } from '@/lib/fileUrl';
+import { invokeFailure } from '@/lib/invokeResult';
+import { toast } from 'sonner';
 
 const CHECKLIST_ITEMS = [
   { id: 'est_dates', title: 'Estimated Installation & Completion Dates', text: "Customer acknowledges that flooring installation is a construction project and that all installation dates, start dates, and completion dates, whether stated in this Agreement or communicated verbally or in writing by Floor Daddy, LLC, are estimates only and are not guaranteed. Customer further acknowledges and agrees that unforeseen circumstances, including but not limited to product availability, manufacturer delays, weather, site conditions, change orders, labor availability, or other events beyond Floor Daddy, LLC's reasonable control, may affect the project schedule. Accordingly, Floor Daddy, LLC's inability to meet any estimated installation or completion date shall not constitute a breach of this Agreement and shall not entitle Customer to cancel this Agreement, withhold payment, demand a price reduction, assess penalties, or seek monetary damages. Customer agrees that all payments required under this Agreement remain due in accordance with the payment terms, regardless of any scheduling delays. Floor Daddy, LLC does not guarantee completion of the Work within any estimated timeframe." },
@@ -107,13 +109,21 @@ export default function PreInstallChecklistView() {
   const submitMutation = useMutation({
     mutationFn: async () => {
       const signature = canvasRef.current ? canvasRef.current.toDataURL('image/png') : '';
-      await base44.functions.invoke('submitPreInstallChecklist', {
+      const res = await base44.functions.invoke('submitPreInstallChecklist', {
         checklistId,
         customerPrintedName,
         customerSignature: signature
       });
+      // Discarded result + unconditional onSuccess: a failed signing showed the
+      // customer a thank-you screen and left no signed checklist behind it.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      return res.data;
     },
-    onSuccess: () => setSubmitted(true)
+    onSuccess: () => setSubmitted(true),
+    onError: (e) => toast.error(
+      `That did not go through — ${e?.message || 'the request failed'}. Your signature is still here, please try again.`
+    ),
   });
 
   const handleSubmit = () => {

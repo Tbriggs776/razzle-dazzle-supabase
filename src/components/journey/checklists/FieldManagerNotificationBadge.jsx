@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { Bell, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -15,7 +16,10 @@ export default function FieldManagerNotificationBadge({ checkpoint }) {
         action: 'resend_notification',
         checkpoint_id: checkpoint?.id,
       });
-      setResult(res.data);
+      // res.data is null on a transport failure, which left `result` null and
+      // dropped the badge into its "Notification sent to field manager" fallback.
+      const failed = invokeFailure(res);
+      setResult(failed ? { error: failed } : res.data);
     } catch (e) {
       console.error('Resend notification failed', e);
       setResult({ error: e.message || 'Failed to resend' });
@@ -32,7 +36,11 @@ export default function FieldManagerNotificationBadge({ checkpoint }) {
           {result?.error
             ? result.error
             : result?.success
-              ? `Notification sent to ${result.fieldManager}${result.emailSent ? ' (email)' : ''}${result.smsSent ? ' + (SMS)' : ''}`
+              // With no email or SMS credentials configured, both flags come back
+              // false and this used to read as a plain "Notification sent".
+              ? (!result.emailSent && !result.smsSent
+                  ? `Nothing was sent to ${result.fieldManager} — no email or SMS channel is set up`
+                  : `Notification sent to ${result.fieldManager}${result.emailSent ? ' (email)' : ''}${result.smsSent ? ' + (SMS)' : ''}`)
               : 'Notification sent to field manager'}
         </span>
       </div>

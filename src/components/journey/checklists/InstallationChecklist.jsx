@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { compressImage } from '@/lib/compressImage';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, CheckCircle2, XCircle, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -177,9 +178,9 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
         step_key: 'installation_checklist',
         checklist_data: data,
       });
-      // invoke() returns { data, error } (no throw for deployed fns) — surface backend errors.
-      if (res.error || res.data?.error) {
-        toast.error(res.data?.error || 'Failed to submit. Please try again.');
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(failed);
         setSaving(false);
         return;
       }

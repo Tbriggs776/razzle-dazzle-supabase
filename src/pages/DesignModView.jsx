@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle2, Eraser } from 'lucide-react';
 import { SignedImage } from '@/lib/fileUrl';
+import { invokeFailure } from '@/lib/invokeResult';
+import { toast } from 'sonner';
 
 export default function DesignModView() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -80,13 +82,23 @@ export default function DesignModView() {
   const submitMutation = useMutation({
     mutationFn: async () => {
       const signature = canvasRef.current ? canvasRef.current.toDataURL('image/png') : '';
-      await base44.functions.invoke('submitDesignMod', {
+      const res = await base44.functions.invoke('submitDesignMod', {
         designModId: modId,
         customerPrintedName,
         customerSignature: signature
       });
+      // This is a CUSTOMER signing a change to their job, on a page they reached
+      // from a link. The result was discarded and onSuccess fired regardless, so
+      // a failed submission showed them a thank-you screen — signature gone, no
+      // record on our side, and nobody with any reason to look.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      return res.data;
     },
-    onSuccess: () => setSubmitted(true)
+    onSuccess: () => setSubmitted(true),
+    onError: (e) => toast.error(
+      `That did not go through — ${e?.message || 'the request failed'}. Your signature is still here, please try again.`
+    ),
   });
 
   if (isLoading) {
