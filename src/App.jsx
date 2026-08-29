@@ -1,4 +1,5 @@
 import './App.css'
+import RequirePage from '@/components/common/RequirePage';
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as SonnerToaster } from "sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -132,8 +133,12 @@ const AuthenticatedApp = () => {
       <Route path="/CancelledProjects" element={<LayoutWrapper currentPageName="CancelledProjects"><CancelledProjectsPage /></LayoutWrapper>} />
       <Route path="/ChecklistV2Detail" element={<LayoutWrapper currentPageName="ChecklistV2Detail"><ChecklistV2DetailPage /></LayoutWrapper>} />
       <Route path="/Dashboard" element={<LayoutWrapper currentPageName="Dashboard"><DashboardPage /></LayoutWrapper>} />
-      <Route path="/Journey" element={<JourneyPage />} />
-      <Route path="/JourneyProjectDetail" element={<JourneyProjectDetailPage />} />
+      {/* Journey replaces the app chrome, so it renders outside LayoutWrapper —
+          which is where the module guard used to live. Without RequirePage a user
+          holding only the appointments module could type the URL and get the whole
+          Journey surface: map, calendar and Manager View. */}
+      <Route path="/Journey" element={<RequirePage pageKey="Journey"><JourneyPage /></RequirePage>} />
+      <Route path="/JourneyProjectDetail" element={<RequirePage pageKey="JourneyProjectDetail"><JourneyProjectDetailPage /></RequirePage>} />
       <Route path="/MarketingPerformance" element={<LayoutWrapper currentPageName="MarketingPerformance"><MarketingPerformancePage /></LayoutWrapper>} />
       <Route path="/DCPerformanceMatrix" element={<LayoutWrapper currentPageName="DCPerformanceMatrix"><DCPerformanceMatrixPage /></LayoutWrapper>} />
       <Route path="/Integrations" element={<LayoutWrapper currentPageName="Integrations"><IntegrationsPage /></LayoutWrapper>} />

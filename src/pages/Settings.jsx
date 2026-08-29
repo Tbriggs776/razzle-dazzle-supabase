@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Settings as SettingsIcon, Save, Loader2, MessageSquare, Shield, Palette, Users, Phone, Send, FileText, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -551,19 +551,6 @@ export default function Settings() {
     }
   });
 
-  const updateRolePermissionsMutation = useMutation({
-    mutationFn: async ({ role, pages }) => {
-      const existing = rolePermissions.find(rp => rp.role === role);
-      if (existing) {
-        return await base44.entities.RolePermissions.update(existing.id, { accessible_pages: pages });
-      } else {
-        return await base44.entities.RolePermissions.create({ role, accessible_pages: pages });
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rolePermissions'] });
-    }
-  });
 
   const saveTimeBlockMutation = useMutation({
     mutationFn: async (data) => {
@@ -737,19 +724,6 @@ export default function Settings() {
   const getRolePages = (role) => {
     const permission = rolePermissions.find(rp => rp.role === role);
     return permission?.accessible_pages || [];
-  };
-
-  const togglePageForRole = (role, pageKey) => {
-    const currentPages = getRolePages(role);
-    const newPages = currentPages.includes(pageKey)
-      ? currentPages.filter(p => p !== pageKey)
-      : [...currentPages, pageKey];
-    updateRolePermissionsMutation.mutate({ role, pages: newPages });
-  };
-
-  const toggleAllPagesForRole = (role, enable) => {
-    const newPages = enable ? ALL_PAGES.map(p => p.key) : [];
-    updateRolePermissionsMutation.mutate({ role, pages: newPages });
   };
 
   if (isLoading) {
@@ -1490,51 +1464,29 @@ export default function Settings() {
                   Role-Based Access Control
                 </CardTitle>
                 <CardDescription>
-                  Configure which pages each role can access
+                  Page access is managed in User Access
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  {ALL_ROLES.map(role => {
-                    const currentPages = getRolePages(role);
-                    const allSelected = currentPages.length === ALL_PAGES.length;
-                    
-                    return (
-                      <div key={role} className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-foreground">{role}</h3>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleAllPagesForRole(role, !allSelected)}
-                            disabled={updateRolePermissionsMutation.isPending}
-                          >
-                            {allSelected ? 'Deselect All' : 'Select All'}
-                          </Button>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {ALL_PAGES.map(page => (
-                            <div key={page.key} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`${role}-${page.key}`}
-                                checked={currentPages.includes(page.key)}
-                                onCheckedChange={() => togglePageForRole(role, page.key)}
-                                disabled={updateRolePermissionsMutation.isPending}
-                              />
-                              <Label
-                                htmlFor={`${role}-${page.key}`}
-                                className="text-sm font-normal cursor-pointer"
-                              >
-                                {page.name}
-                              </Label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                {/* The editor that used to live here wrote to `role_permissions`,
+                    which NOTHING READS. Its only consumer is
+                    _legacyGetFilteredNavigation in Layout.jsx, explicitly marked
+                    dead and superseded by the module-based filter. So an admin
+                    could uncheck Finance for Design Consultants, watch it save,
+                    reload and see it persisted — and nothing whatsoever changed.
+                    A control that persists but does nothing is worse than no
+                    control: it produces confident wrong beliefs about who can see
+                    what. Removed rather than rewired, because roles -> modules ->
+                    pages already has one home and a second editor would be a
+                    second source of truth. */}
+                <p className="text-sm text-muted-foreground">
+                  Access is granted by module, per role, and enforced by the
+                  database. Manage it in{' '}
+                  <Link to={createPageUrl('UserAccess')} className="font-medium text-primary underline">
+                    User Access
+                  </Link>
+                  .
+                </p>
               </CardContent>
             </Card>
           </motion.div>
