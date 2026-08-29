@@ -36,6 +36,28 @@ async function currentUser(req: Request) {
   return data?.user ?? null;
 }
 
+// AUTHORIZATION, not just authentication. This function forwards a
+// caller-supplied `to` and `body` using the server's internal secret, so being
+// merely logged in was enough to send an SMS or email to ANY number or address AS
+// FLOOR DADDY. Harmless only because no from-number is provisioned yet; the day
+// one is, it becomes a way for any account — including a future subcontractor
+// crew login — to message anyone in the customer's name.
+async function canMessageCustomers(req: Request): Promise<boolean> {
+  const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!jwt) return false;
+  const asUser = createClient(SUPABASE_URL, ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${jwt}` } },
+    auth: { persistSession: false },
+  });
+  const [{ data: isAdmin }, { data: comms }, { data: leads }, { data: appts }] = await Promise.all([
+    asUser.rpc('is_org_admin'),
+    asUser.rpc('can_edit', { m: 'communication' }),
+    asUser.rpc('can_edit', { m: 'leads' }),
+    asUser.rpc('can_edit', { m: 'appointments' }),
+  ]);
+  return !!(isAdmin || comms || leads || appts);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
@@ -46,6 +68,12 @@ Deno.serve(async (req) => {
   if (!isInternal) {
     user = await currentUser(req);
     if (!user) return Response.json({ success: false, error: 'Unauthorized' }, { status: 401, headers: cors });
+    if (!(await canMessageCustomers(req))) {
+      return Response.json(
+        { success: false, error: 'Not authorized to message customers' },
+        { status: 403, headers: cors },
+      );
+    }
   }
 
   try {

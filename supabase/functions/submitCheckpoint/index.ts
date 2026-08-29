@@ -512,6 +512,24 @@ async function canApprove(req: Request): Promise<boolean> {
   return !!(isAdmin || journey || projects);
 }
 
+// Weaker than canApprove on purpose: a crew member fills a checklist in but must
+// not be able to approve it. Journey VIEW is the closest thing to "this person is
+// part of the install workflow" until an installer role exists.
+async function canParticipate(req: Request): Promise<boolean> {
+  const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!jwt) return false;
+  const asUser = createClient(SUPABASE_URL, ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${jwt}` } },
+    auth: { persistSession: false },
+  });
+  const [{ data: isAdmin }, { data: journey }, { data: projects }] = await Promise.all([
+    asUser.rpc('is_org_admin'),
+    asUser.rpc('can_view', { m: 'journey' }),
+    asUser.rpc('can_edit', { m: 'projects' }),
+  ]);
+  return !!(isAdmin || journey || projects);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
@@ -528,6 +546,25 @@ Deno.serve(async (req) => {
     if (!isInternal && APPROVAL_ACTIONS.has(body.action) && !(await canApprove(req))) {
       return Response.json(
         { error: 'Not authorized to approve, reject or release this checkpoint' },
+        { status: 403, headers: cors },
+      );
+    }
+
+    // EVERY OTHER ACTION was authenticated but not authorized: it ran as SERVICE
+    // ROLE against a body-supplied project_id, so any logged-in account — with no
+    // roles whatsoever — could submit a checkpoint for ANY project. Including
+    // claiming asbestos, which halts the job and alerts management, on someone
+    // else's install.
+    //
+    // The check is module-level, not per-project. There is no installer role and
+    // no crew-to-project linkage in the schema yet, so "is this YOUR job?" is not
+    // answerable here. Requiring the journey module blocks the zero-role account,
+    // which is the actual hole, and breaks nobody who legitimately uses the
+    // screen. Per-project scoping belongs with the subcontractor portal, when
+    // crew membership actually exists to check against.
+    if (!isInternal && !APPROVAL_ACTIONS.has(body.action) && !(await canParticipate(req))) {
+      return Response.json(
+        { error: 'Not authorized to submit checkpoints for this project' },
         { status: 403, headers: cors },
       );
     }
