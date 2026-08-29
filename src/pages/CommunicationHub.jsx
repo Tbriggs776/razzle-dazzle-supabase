@@ -198,12 +198,30 @@ export default function CommunicationHub() {
   }, 0);
 
   const handleDeleteThread = async (conv) => {
-    if (!window.confirm(`Delete all ${conv.messages.length} messages in this thread?`)) return;
+    // Named, so a misclick on the adjacent conversation is survivable — this used
+    // to be a generic "Delete all N messages?" on a row you might not have meant.
+    const who = conv.contact_name || conv.contact_phone || conv.contact_email || 'this contact';
+    if (!window.confirm(
+      `Archive the ${conv.messages.length} message(s) with ${who}?\n\n`
+      + 'They are hidden from the Hub but kept on record, and an administrator can '
+      + 'restore them. Nothing is permanently deleted.'
+    )) return;
+
     setDeletingKey(conv.key);
     try {
-      await Promise.all(conv.messages.map(m => base44.entities.Communication.delete(m.id)));
+      // One call for the whole thread, so the audit entry reads like the action a
+      // person actually took rather than N separate deletions.
+      const res = await base44.functions.invoke('archiveConversation', {
+        ids: conv.messages.map(m => m.id),
+      });
+      const failed = invokeFailure(res);
+      if (failed) {
+        toast.error(`Could not archive that conversation — ${failed}`);
+        return;
+      }
       if (selectedKey === conv.key) { setSelectedKey(null); setShowMobileThread(false); }
       queryClient.invalidateQueries({ queryKey: ['communications'] });
+      toast.success(`Archived ${res.data?.archived ?? conv.messages.length} message(s) with ${who}.`);
     } finally {
       setDeletingKey(null);
     }

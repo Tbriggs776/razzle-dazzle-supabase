@@ -563,6 +563,11 @@ const RPC_FUNCTIONS = {
   // status FROM state on every write. Writing status directly is a silent no-op,
   // which is what MyTasks did until 0076. Always go through these two.
   reopenTask:      (p) => ['reopen_task', { p_task_id: p.id, p_reason: p.reason ?? null }],
+  // Customer conversations are archived, never destroyed — DELETE on
+  // `communication` is revoked outright (0083), because three months later that
+  // thread is the ROC defence. Archiving records who and why, and is reversible.
+  archiveConversation: (p) => ['archive_conversation', { p_ids: p.ids, p_reason: p.reason ?? null }],
+  restoreConversation: (p) => ['restore_conversation', { p_ids: p.ids }],
   requestApproval: (p) => ['request_approval', {
     p_subject_type: p.subjectType, p_subject_id: p.subjectId, p_kind: p.kind,
     p_reason: p.reason, p_required_dept: p.requiredDept ?? null,
