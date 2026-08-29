@@ -198,11 +198,13 @@ function DispositionDialog({ lead, onClose, onDone }) {
         leadId: lead.lead_id, disposition: key,
         recallDate: recall || null, note: note.trim() || null,
       });
+      // ok:false here is a RULE refusal, not a failure — the database is telling
+      // the CSR why this lead cannot be closed that way yet. It has to be checked
+      // BEFORE invokeFailure, which treats ok===false as a failure and would
+      // show "that needs 7 attempts logged and there are 3" as a red error.
+      if (res.data?.ok === false) { toast.warning(res.data.reason); return; }
       const failed = invokeFailure(res);
       if (failed) { toast.error(failed); return; }
-      // ok:false here is a RULE refusal, not a failure — the database is telling
-      // the CSR why this lead cannot be closed that way yet.
-      if (res.data?.ok === false) { toast.warning(res.data.reason); return; }
       toast.success('Closed out');
       onDone();
       onClose();
@@ -235,7 +237,7 @@ function DispositionDialog({ lead, onClose, onDone }) {
                 min={new Date().toISOString().slice(0, 10)}
                 onChange={(e) => setRecall(e.target.value)} />
               <p className="text-xs text-muted-foreground">
-                They come back to the top of your queue that morning.
+                They come back to the queue that morning, marked as a call-back.
               </p>
             </div>
           )}
@@ -273,6 +275,14 @@ function LeadRow({ lead, onLog, onDisposition, onBook, booking }) {
           <div className="flex flex-wrap items-center gap-2">
             <p className="truncate font-semibold text-foreground">{name}</p>
             <ClockChip dueAt={lead.next_due_at} firstDial={lead.is_first_dial} />
+            {/* A lead that parked itself with "call me back on the 12th" and has
+                now come back around. Without saying so, the CSR has no idea why
+                someone they closed out last month is on the board again. */}
+            {lead.is_recall && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary ring-1 ring-primary/25">
+                <CalendarClock className="h-3.5 w-3.5" /> asked us to call back
+              </span>
+            )}
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
             {lead.phone_e164 && (
@@ -348,9 +358,13 @@ export default function LeadQueue() {
     setClaiming(true);
     try {
       const res = await base44.functions.invoke('claimNextLead');
+      // Order matters: invokeFailure() treats ok===false as a failure and returns
+      // its reason, so checking it first made this branch unreachable and turned
+      // "nothing waiting in the queue" — a completely normal state — into a red
+      // error toast.
+      if (res.data?.ok === false) { toast.info(res.data.reason); return; }
       const failed = invokeFailure(res);
       if (failed) { toast.error(failed); return; }
-      if (res.data?.ok === false) { toast.info(res.data.reason); return; }
       toast.success('Next lead is yours — ring them now');
       setScope('mine');
       refresh();
