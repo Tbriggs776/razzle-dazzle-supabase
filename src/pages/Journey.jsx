@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -81,6 +82,11 @@ function JourneyInner() {
     queryKey: ['rfmsCrewsJourney'],
     queryFn: async () => {
       const res = await base44.functions.invoke('getRFMSCrews', {});
+      // An empty crew list and "RFMS did not answer" look identical in a
+      // dropdown, and one of them means the assignment you are about to make is
+      // wrong. Throw so the caller can tell them apart.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
       return res.data?.crews?.detail || [];
     },
     enabled: !!user,

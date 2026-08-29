@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw, Mail, Phone, Loader2, Save, HardHat, UserPlus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,11 @@ export default function InstallerManager() {
     queryKey: ['rfmsCrewsInstallerMgr'],
     queryFn: async () => {
       const res = await base44.functions.invoke('getRFMSCrews', {});
+      // An empty crew list and "RFMS did not answer" look identical in a
+      // dropdown, and one of them means the assignment you are about to make is
+      // wrong. Throw so the caller can tell them apart.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
       return res.data?.crews?.detail || [];
     },
     staleTime: 5 * 60 * 1000,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQuery } from '@tanstack/react-query';
 import {
   Loader2,
@@ -50,13 +51,18 @@ export default function CustomerProjectView() {
   // so fetch a curated, read-only projection through the token-scoped RPC keyed by the
   // project id — see migration 0023 / get_public_project. One round-trip returns the
   // project + customer + sale + both managers + settings.
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['publicProject', projectId],
     queryFn: async () => {
       // getPublicProjectSigned wraps the get_public_project projection and returns SIGNED URLs
       // for the contract PDF + manager photos (the 'uploads' bucket is private; anon can't sign).
-      const { data } = await base44.functions.invoke('getPublicProjectSigned', { id: projectId });
-      return data || null;
+      const res = await base44.functions.invoke('getPublicProjectSigned', { id: projectId });
+      // A failed fetch must NOT render as "not found". Telling a customer
+      // their project does not exist because the network hiccuped sends them
+      // hunting for a bad link and generates a support call.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      return res.data || null;
     },
     enabled: !!projectId,
     retry: false
@@ -73,6 +79,26 @@ export default function CustomerProjectView() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  // A connection failure is not a missing record. Separate screens, because
+  // only one of them means the customer should do something about their link.
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-6">
+        <div className="max-w-sm text-center">
+          <h2 className="mb-2 text-xl font-semibold text-foreground">We could not load your project</h2>
+          <p className="mb-4 text-muted-foreground">This is a connection problem, not a missing project — it is still here. Please try again in a moment.</p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="inline-flex min-h-11 items-center rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-muted"
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }

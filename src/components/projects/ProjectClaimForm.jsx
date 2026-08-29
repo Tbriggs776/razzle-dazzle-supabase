@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, X, Plus, Upload } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { toast } from 'sonner';
 import { compressImage } from '@/lib/compressImage';
 import { useQuery } from '@tanstack/react-query';
@@ -54,7 +55,12 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
     queryKey: ['rfmsCrews'],
     queryFn: async () => {
       const res = await base44.functions.invoke('getRFMSCrews', {});
-      return res?.data?.crews?.detail || [];
+      // An empty crew list and "RFMS did not answer" look identical in a
+      // dropdown, and one of them means the assignment you are about to make is
+      // wrong. Throw so the caller can tell them apart.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      return res.data?.crews?.detail || [];
     },
     staleTime: 10 * 60 * 1000,
   });
