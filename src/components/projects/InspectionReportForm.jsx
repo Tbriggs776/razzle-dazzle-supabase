@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Eraser, X, Plus, Upload, Paperclip, Download } from 'lucide-react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
+import { compressImage } from '@/lib/compressImage';
 import { useQuery } from '@tanstack/react-query';
 import InstallersList from './InstallersList';
 import { SignedImage, openSignedFile } from '@/lib/fileUrl';
@@ -70,15 +72,25 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
+    e.target.value = '';
     if (!files.length) return;
     setUploadingImage(true);
-    const newImages = await Promise.all(files.map(async (file) => {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      return { url: file_url, description: '' };
-    }));
-    setImages(prev => [...prev, ...newImages]);
-    setUploadingImage(false);
-    e.target.value = '';
+    // Was un-guarded: a single failure inside Promise.all rejected the whole
+    // batch, lost every photo in it, and left the input disabled for good.
+    try {
+      const newImages = await Promise.all(files.map(async (file) => {
+        const shrunk = await compressImage(file);
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: shrunk });
+        if (!file_url) throw new Error('the upload returned no file');
+        return { url: file_url, description: '' };
+      }));
+      setImages(prev => [...prev, ...newImages]);
+    } catch (err) {
+      console.error('Inspection photo upload failed', err);
+      toast.error('Those photos did not upload. Check your signal and try again.');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const removeImage = (index) => {
@@ -93,10 +105,21 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
     const selected = Array.from(e.target.files || []);
     if (!selected.length) return;
     setUploadingFile(true);
-    const uploaded = await Promise.all(selected.map(async (file) => {
-      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
-      return { url: fileUrl, name: file.name };
-    }));
+    // Same missing guard as the photo handler above. Documents are not
+    // compressed — these are PDFs and reports where fidelity matters.
+    let uploaded;
+    try {
+      uploaded = await Promise.all(selected.map(async (file) => {
+        const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
+        if (!fileUrl) throw new Error('the upload returned no file');
+        return { url: fileUrl, name: file.name };
+      }));
+    } catch (err) {
+      console.error('Inspection file upload failed', err);
+      toast.error('Those files did not upload. Check your signal and try again.');
+      setUploadingFile(false);
+      return;
+    }
     setFiles(prev => [...prev, ...uploaded]);
     setUploadingFile(false);
     e.target.value = '';

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
+import { compressImage } from '@/lib/compressImage';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Send, CheckCircle2, XCircle, Lock, DollarSign, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -31,13 +32,23 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
+    // Reset the input straight away so re-picking the SAME photo after a failure
+    // still fires a change event.
+    e.target.value = '';
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      // Camera originals are 3-12MB each and this asks for several. On a job site
+      // that is minutes per photo, and the usual failure is the crew giving up.
+      const shrunk = await compressImage(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: shrunk });
+      if (!file_url) throw new Error('the upload returned no file');
       onChange([...photos, file_url]);
     } catch (err) {
+      // Was console.error only: the photo silently never appeared, and a crew that
+      // believes it uploaded moves on without the evidence.
       console.error('Upload failed', err);
+      toast.error('That photo did not upload. Check your signal and try again.');
     } finally {
       setUploading(false);
     }
@@ -53,11 +64,23 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
         {photos.map((url, i) => (
           <div key={i} className="relative group">
             <SignedImage src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-border cursor-pointer" />
+            {/* Was opacity-0 group-hover:opacity-100 at 20px: invisible on a touch
+                screen yet still tappable, so evidence photos were deleted by accident
+                and could not be deleted on purpose. Always visible, 44px target,
+                and it asks first. */}
             {!disabled && (
               <button
-                onClick={() => onChange(photos.filter((_, idx) => idx !== i))}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-              >×</button>
+                type="button"
+                aria-label="Remove this photo"
+                onClick={() => {
+                  if (window.confirm('Remove this photo?')) {
+                    onChange(photos.filter((_, idx) => idx !== i));
+                  }
+                }}
+                className="absolute -top-2 -right-2 flex h-11 w-11 items-center justify-center"
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-sm leading-none text-destructive-foreground shadow ring-2 ring-background">×</span>
+              </button>
             )}
           </div>
         ))}

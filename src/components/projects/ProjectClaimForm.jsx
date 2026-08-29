@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, X, Plus, Upload } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { toast } from 'sonner';
+import { compressImage } from '@/lib/compressImage';
 import { useQuery } from '@tanstack/react-query';
 import InstallersList from './InstallersList';
 import { SignedImage, openSignedFile } from '@/lib/fileUrl';
@@ -102,12 +104,23 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
     setUploadingImage(true);
-    const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
-    setImages(prev => [...prev, fileUrl]);
-    setUploadingImage(false);
-    e.target.value = '';
+    // No try/finally at all before this: one thrown upload left uploadingImage
+    // true forever, so the file input stayed disabled with no message — mid-claim,
+    // in the customer's house, with no way back except reloading the page.
+    try {
+      const shrunk = await compressImage(file);
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file: shrunk });
+      if (!fileUrl) throw new Error('the upload returned no file');
+      setImages(prev => [...prev, fileUrl]);
+    } catch (err) {
+      console.error('Claim photo upload failed', err);
+      toast.error('That photo did not upload. Check your signal and try again.');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const removeImage = (index) => setImages(prev => prev.filter((_, i) => i !== index));

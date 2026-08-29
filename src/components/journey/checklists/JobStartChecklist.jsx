@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { compressImage } from '@/lib/compressImage';
 import { invokeFailure } from '@/lib/invokeResult';
+import { draftKeyFor, loadDraft, clearDraft, useChecklistDraft } from '@/lib/checklistDraft';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Send, CheckCircle2, XCircle, Clock, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,7 +21,8 @@ const money = (n) =>
 
 function ChecklistRow({ label, checked, onChange, disabled, required, missing }) {
   return (
-    <label className={cn("flex items-start gap-3 py-2 rounded-md px-1 -mx-1 transition-colors", !disabled && "cursor-pointer", missing && "bg-crit/10 ring-1 ring-crit/30")}>
+    <label data-missing={missing ? 'true' : undefined}
+      className={cn("flex items-start gap-3 py-2 rounded-md px-1 -mx-1 transition-colors", !disabled && "cursor-pointer", missing && "bg-crit/10 ring-1 ring-crit/30")}>
       <Checkbox checked={checked} onCheckedChange={onChange} disabled={disabled} className="mt-0.5" />
       <span className={cn("text-sm", disabled ? "text-muted-foreground" : "text-foreground")}>
         {label}
@@ -35,20 +38,31 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
+    // Reset the input straight away so re-picking the SAME photo after a failure
+    // still fires a change event.
+    e.target.value = '';
     if (!file) return;
     setUploading(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      // Camera originals are 3-12MB each and this asks for several. On a job site
+      // that is minutes per photo, and the usual failure is the crew giving up.
+      const shrunk = await compressImage(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: shrunk });
+      if (!file_url) throw new Error('the upload returned no file');
       onChange([...photos, file_url]);
     } catch (err) {
+      // Was console.error only: the photo silently never appeared, and a crew that
+      // believes it uploaded moves on without the evidence.
       console.error('Upload failed', err);
+      toast.error('That photo did not upload. Check your signal and try again.');
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div className={cn("space-y-2 rounded-md px-1 -mx-1 py-1 transition-colors", missing && "bg-crit/10 ring-1 ring-crit/30")}>
+    <div data-missing={missing ? 'true' : undefined}
+      className={cn("space-y-2 rounded-md px-1 -mx-1 py-1 transition-colors", missing && "bg-crit/10 ring-1 ring-crit/30")}>
       <Label className="text-sm font-medium text-foreground">
         {label}
         {required && <span className="text-crit ml-0.5">*</span>}
@@ -57,11 +71,23 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
         {photos.map((url, i) => (
           <div key={i} className="relative group">
             <SignedImage src={url} alt="" onClick={() => setLightboxIndex(i)} className="w-16 h-16 object-cover rounded-lg border border-border cursor-pointer" />
+            {/* Was opacity-0 group-hover:opacity-100 at 20px: invisible on a touch
+                screen yet still tappable, so evidence photos were deleted by accident
+                and could not be deleted on purpose. Always visible, 44px target,
+                and it asks first. */}
             {!disabled && (
               <button
-                onClick={() => onChange(photos.filter((_, idx) => idx !== i))}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-              >×</button>
+                type="button"
+                aria-label="Remove this photo"
+                onClick={() => {
+                  if (window.confirm('Remove this photo?')) {
+                    onChange(photos.filter((_, idx) => idx !== i));
+                  }
+                }}
+                className="absolute -top-2 -right-2 flex h-11 w-11 items-center justify-center"
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-sm leading-none text-destructive-foreground shadow ring-2 ring-background">×</span>
+              </button>
             )}
           </div>
         ))}
@@ -112,7 +138,19 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [mode, setMode] = useState(checkpoint?.status === 'SubmittedForApproval' ? 'review' : 'form');
 
-  const existingData = checkpoint?.checklist_data || {};
+  // A draft only ever wins for a checklist still being filled in. Once it is
+  // submitted or completed the server copy is the truth, so a stale draft on one
+  // device can never overwrite what was actually filed.
+  const draftKey = draftKeyFor(projectId, 'job_start_checklist');
+  const draftEligible = !(checkpoint?.status === 'SubmittedForApproval' || checkpoint?.status === 'Completed');
+  // useMemo, not a bare call: this reads localStorage and would otherwise run on
+  // every render. useState ignores anything after the first value anyway.
+  const restoredDraft = useMemo(
+    () => (draftEligible ? loadDraft(draftKey) : null),
+    [draftKey, draftEligible],
+  );
+
+  const existingData = restoredDraft || checkpoint?.checklist_data || {};
   const [data, setData] = useState({
     arrival: {
       arrived_on_time: existingData.arrival?.arrived_on_time || false,
@@ -153,6 +191,10 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
   });
 
   const isReadOnly = checkpoint?.status === 'SubmittedForApproval' || checkpoint?.status === 'Completed';
+
+  // Survives a tab switch, a backgrounded phone and a back-swipe. Cleared the
+  // moment the checklist is actually filed.
+  useChecklistDraft(draftKey, data, !isReadOnly);
   const asbestosHalt = data.safety.asbestos_suspected;
 
   const update = (section, field, value) => {
@@ -192,7 +234,24 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
 
   const handleSubmit = async () => {
     setSubmitAttempted(true);
-    if (!isValid) return;
+
+    // ASBESTOS BYPASSES VALIDATION. The 23 required fields include
+    // careful_demolition and its photos — evidence of the very work this row tells
+    // the crew to stop. Requiring them meant the hard stop could only be reported
+    // by someone who had ignored it, so in practice it was never reported at all:
+    // handleSubmit returned here, the footer said "3 required fields remaining",
+    // and submitCheckpoint was never called. No project hold, no alert, no email,
+    // and there is no other asbestos path in the app.
+    if (!asbestosHalt && !isValid) {
+      // B8: this is now reachable, because the button is no longer disabled while
+      // invalid. Take them to the first thing that is missing rather than making
+      // them re-scan 23 rows on a phone in daylight.
+      requestAnimationFrame(() => {
+        document.querySelector('[data-missing="true"]')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+      return;
+    }
     setSaving(true);
     try {
       const res = await base44.functions.invoke('submitCheckpoint', {
@@ -209,6 +268,8 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
         setSaving(false);
         return;
       }
+      // Filed successfully, so the local copy is no longer the source of truth.
+      clearDraft(draftKey);
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
       queryClient.invalidateQueries({ queryKey: ['installCollection', projectId] });
       if (res.data?.asbestos_halt) {
@@ -438,14 +499,29 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
       <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
         {!isReadOnly && (
           <>
-            {!isValid && (
+            {!isValid && !asbestosHalt && (
               <p className="text-xs text-warn mr-auto">
                 {missingCount} required field{missingCount === 1 ? '' : 's'} remaining
               </p>
             )}
-            <Button onClick={handleSubmit} disabled={saving || !isValid} className="gap-2">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              Submit for Approval
+            {asbestosHalt && (
+              <p className="text-xs font-semibold text-crit mr-auto">
+                Report this now — the rest of the checklist can wait.
+              </p>
+            )}
+            {/* NOT disabled when invalid. Disabling it was what made the missing-field
+                highlighting unreachable: only handleSubmit sets submitAttempted, and
+                it could never run. Pressing it now marks the attempt, highlights what
+                is missing and scrolls to the first one. */}
+            <Button
+              onClick={handleSubmit}
+              disabled={saving}
+              className={cn('gap-2', asbestosHalt && 'bg-crit text-background hover:bg-crit/90')}
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" />
+                : asbestosHalt ? <ShieldAlert className="w-4 h-4" />
+                : <Send className="w-4 h-4" />}
+              {asbestosHalt ? 'Report asbestos and stop work' : 'Submit for Approval'}
             </Button>
           </>
         )}
