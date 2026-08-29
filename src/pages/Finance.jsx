@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, DollarSign, Loader2, CheckCircle2, Send, AlertTriangle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
@@ -76,7 +77,7 @@ export default function Finance() {
 
   // Derived from the ledger, not from a flag somebody remembered to set. A sale
   // whose deposit never cleared can no longer be invisible here.
-  const { data: balances = [], isLoading } = useQuery({
+  const { data: balances = [], isLoading, isError, error } = useQuery({
     queryKey: ['depositQueue'],
     queryFn: () => base44.entities.SaleBalance.list('-sale_date'),
   });
@@ -136,25 +137,37 @@ export default function Finance() {
           }
         />
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Every tile below is computed from `balances`. When that query fails
+            the array defaults to [], and the page then states — in money — that
+            $0 is outstanding and nothing is awaiting a deposit. On a finance
+            screen that is not a blank state, it is a false all-clear, and the
+            person reading it releases jobs to ordering on the strength of it. */}
+        {isError && (
+          <div className="rounded-xl border border-crit/30 bg-crit/5 px-4 py-3 text-sm text-foreground">
+            <span className="font-semibold">These figures could not be loaded</span>
+            {' — '}{error?.message || 'the request failed'}. Nothing below is a real balance; reload before acting on it.
+          </div>
+        )}
+
+        <div className={cn('grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4', isError && 'opacity-40')}>
           <KpiTile
             hero
             label="Awaiting deposit"
-            value={String(awaiting.length)}
-            foot="Ordering is held on these"
+            value={isError ? '—' : String(awaiting.length)}
+            foot={isError ? 'unknown' : 'Ordering is held on these'}
           />
-          <KpiTile label="Recorded, not cleared" value={money(uncleared)} foot="Banked but unconfirmed" />
+          <KpiTile label="Recorded, not cleared" value={isError ? '—' : money(uncleared)} foot={isError ? 'unknown' : 'Banked but unconfirmed'} />
           <KpiTile
             label="Outstanding"
-            value={money(outstanding)}
-            foot={overCollected.length
+            value={isError ? '—' : money(outstanding)}
+            foot={isError ? 'unknown' : overCollected.length
               ? `Due before install · ${overCollected.length} over-collected, listed below`
               : 'Due before install starts'}
           />
           <KpiTile
             label="Gap to 50% policy"
-            value={money(totalGap)}
-            foot={gapRows.length ? `${gapRows.length} sale(s) below policy` : 'Whole book at policy'}
+            value={isError ? '—' : money(totalGap)}
+            foot={isError ? 'unknown' : gapRows.length ? `${gapRows.length} sale(s) below policy` : 'Whole book at policy'}
           />
         </div>
 
@@ -162,6 +175,15 @@ export default function Finance() {
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : isError ? (
+            // "Every live sale has a cleared deposit" is the single most
+            // dangerous sentence this page can show when it does not actually
+            // know. A failed load is not an all-clear.
+            <div className="py-16 text-center">
+              <AlertTriangle className="mx-auto mb-3 h-10 w-10 text-crit" />
+              <p className="font-medium text-foreground">The deposit queue could not be loaded</p>
+              <p className="mt-1 text-sm text-muted-foreground">{error?.message || 'The request failed'}</p>
             </div>
           ) : awaiting.length === 0 ? (
             <div className="py-16 text-center">

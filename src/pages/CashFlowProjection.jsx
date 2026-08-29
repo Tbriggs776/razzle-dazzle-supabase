@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -91,7 +92,25 @@ export default function CashFlowProjection() {
         orderDateTo: rfmsTo
       });
 
-      setOrders(res.data.orders || []);
+      // This was `res.data.orders` with no guard — the only RFMS consumer in the
+      // app without one. Two separate wrong outcomes:
+      //  * RFMS not configured -> rfmsQuery returns 200 { stub: true }, so
+      //    `orders` became [] and the page showed "0 Orders" and a Total Balance
+      //    Due of $0.00 — a cash-flow projection of zero, indistinguishable from
+      //    a real one, for an ERP that was never queried.
+      //  * RFMS errors -> data is null and `res.data.orders` threw, putting a raw
+      //    "Cannot read properties of null" into the page's error banner.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      const notSent = invokeNotSent(res);
+      if (notSent) {
+        setError(`RFMS was not queried — ${notSent}. These figures would not be real, so nothing is shown.`);
+        setOrders([]);
+        setFetched(false);
+        return;
+      }
+
+      setOrders(res.data?.orders || []);
       setFetched(true);
     } catch (e) {
       const msg = e.message || '';

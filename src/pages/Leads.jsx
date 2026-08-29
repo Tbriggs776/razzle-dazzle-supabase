@@ -45,7 +45,18 @@ export default function Leads() {
     onSuccess: (d) => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       setShowCreateDialog(false);
-      toast.success(d?.created ? 'Lead created' : 'We already had that person — opened their existing lead');
+      if (d?.created) {
+        toast.success('Lead created');
+        return;
+      }
+      // The toast used to say "opened their existing lead" while nothing opened
+      // and the dialog just closed — so the CSR believed the details they had
+      // typed were saved onto that record. upsert_lead fills BLANKS only; it
+      // never overwrites a name or address someone already corrected. Say that,
+      // and actually open the record.
+      toast.info(`We already had that ${d?.matched_on === 'email' ? 'email address' : 'number'} — opening their record. `
+        + 'Anything you typed that they already had was left as it was.', { duration: 9000 });
+      if (d?.lead_id) navigate(`${createPageUrl('LeadDetail')}?id=${d.lead_id}`);
     },
     onError: (e) => toast.error(e?.message || 'Could not save that lead'),
   });

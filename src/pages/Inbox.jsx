@@ -31,7 +31,7 @@ export default function Inbox() {
   const navigate = useNavigate();
   const [showDone, setShowDone] = useState(false);
 
-  const { data: rows = [], isLoading } = useQuery({
+  const { data: rows = [], isLoading, isError, error } = useQuery({
     queryKey: ['inbox'],
     // Explicit sort: this table has no created_date, the client default would 400.
     queryFn: () => base44.entities.Notification.list('-created_at', 200),
@@ -139,9 +139,11 @@ export default function Inbox() {
         <PageHeader
           title="Inbox"
           subtitle={
-            open.length === 0
-              ? 'Nothing outstanding'
-              : `${open.length} outstanding${unread.length ? ` · ${unread.length} unread` : ''}`
+            isError
+              ? 'Could not be loaded'
+              : open.length === 0
+                ? 'Nothing outstanding'
+                : `${open.length} outstanding${unread.length ? ` · ${unread.length} unread` : ''}`
           }
           actions={
             unread.length > 0 && (
@@ -156,6 +158,15 @@ export default function Inbox() {
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : isError ? (
+            // "You're clear" is a statement about the world, and the query
+            // failing is not evidence for it. An alert nobody sees because the
+            // list would not load is worse than one nobody has read yet.
+            <div className="py-16 text-center">
+              <TriangleAlert className="mx-auto mb-3 h-10 w-10 text-crit" />
+              <p className="font-medium text-foreground">Your inbox could not be loaded</p>
+              <p className="mt-1 text-sm text-muted-foreground">{error?.message || 'The request failed'}</p>
             </div>
           ) : open.length === 0 ? (
             <div className="py-16 text-center">

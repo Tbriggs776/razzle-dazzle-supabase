@@ -102,8 +102,12 @@ export default function MarketingPerformance() {
       setAllApptDates(appts.filter(a => a.status !== 'Cancelled').map(a => a.appointment_created_date).filter(Boolean));
       setAllCancelledApptDates(appts.filter(a => a.status === 'Cancelled').map(a => a.appointment_created_date).filter(Boolean));
     } catch (e) {
-      setAllApptDates([]);
-      setAllCancelledApptDates([]);
+      // null, not [] — the report's memos treat null as "not loaded" and stay
+      // blank, whereas [] is a real answer meaning "zero appointments", which
+      // this page would then print as a booking rate and a cost per booking.
+      setAllApptDates(null);
+      setAllCancelledApptDates(null);
+      toast.error(`Appointment history could not be loaded — ${e?.message || 'the request failed'}`);
     } finally {
       setApptLoading(false);
     }
@@ -116,7 +120,11 @@ export default function MarketingPerformance() {
       const sales = await base44.entities.Sale.list('-sale_date', 5000);
       setAllSales(sales.filter(s => s.sale_date && !s.is_cancelled).map(s => ({ date: s.sale_date, amount: s.sale_amount || 0 })));
     } catch (e) {
-      setAllSales([]);
+      // Same reasoning as loadAppointments: [] here becomes "0 sales, $0
+      // revenue" beside real ad spend, which makes every cost-per-sale figure
+      // on the page infinite-looking nonsense presented as fact.
+      setAllSales(null);
+      toast.error(`Sales history could not be loaded — ${e?.message || 'the request failed'}`);
     } finally {
       setSalesLoading(false);
     }

@@ -28,7 +28,7 @@ export default function Routing() {
   const qc = useQueryClient();
   const [adding, setAdding] = useState(null);   // dept key with its picker open
 
-  const { data: health, isLoading: healthLoading } = useQuery({
+  const { data: health, isLoading: healthLoading, isError: healthError, error: healthErr } = useQuery({
     queryKey: ['routingHealth'],
     queryFn: async () => {
       const { data, error } = await base44.functions.invoke('routingHealth', {});
@@ -93,19 +93,31 @@ export default function Routing() {
           subtitle="Who receives the work each rule creates — and where that currently falls through"
         />
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Every tile reads off `health?.x || []`. When the query fails those
+            defaults are empty, and empty here reads as HEALTHY — "Every rule has
+            an owner", "Everyone reachable". This page exists to show where work
+            falls through; saying nothing falls through, because we could not
+            check, is the exact opposite of its job. */}
+        {healthError && (
+          <div className="rounded-xl border border-crit/30 bg-crit/5 px-4 py-3 text-sm text-foreground">
+            <span className="font-semibold">Routing health could not be checked</span>
+            {' — '}{healthErr?.message || 'the request failed'}. The tiles below are not an all-clear.
+          </div>
+        )}
+
+        <div className={cn('grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4', healthError && 'opacity-40')}>
           <KpiTile
             hero
             label="Rules with nobody"
-            value={healthLoading ? '—' : String(unstaffed.length)}
-            foot={unstaffed.length ? 'Falling back to org admins' : 'Every rule has an owner'}
+            value={healthLoading || healthError ? '—' : String(unstaffed.length)}
+            foot={healthError ? 'unknown' : unstaffed.length ? 'Falling back to org admins' : 'Every rule has an owner'}
           />
-          <KpiTile label="People without a login" value={String(noLogin.length)}
-            foot={noLogin.length ? 'Cannot receive anything' : 'Everyone reachable'} />
-          <KpiTile label="Alert groups" value={String(health?.alert_groups ?? 0)}
-            foot={health?.alert_groups ? 'Configured' : 'None — alerts route by role'} />
-          <KpiTile label="SMS" value={health?.sms_ready ? 'Ready' : 'Off'}
-            foot={health?.sms_ready ? 'Outbound enabled' : 'No from-number / disabled'} />
+          <KpiTile label="People without a login" value={healthError ? '—' : String(noLogin.length)}
+            foot={healthError ? 'unknown' : noLogin.length ? 'Cannot receive anything' : 'Everyone reachable'} />
+          <KpiTile label="Alert groups" value={healthError ? '—' : String(health?.alert_groups ?? 0)}
+            foot={healthError ? 'unknown' : health?.alert_groups ? 'Configured' : 'None — alerts route by role'} />
+          <KpiTile label="SMS" value={healthError ? '—' : health?.sms_ready ? 'Ready' : 'Off'}
+            foot={healthError ? 'unknown' : health?.sms_ready ? 'Outbound enabled' : 'No from-number / disabled'} />
         </div>
 
         {/* The honest banner: while this is true, one person gets everything. */}

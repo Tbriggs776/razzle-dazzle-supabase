@@ -95,15 +95,32 @@ export default function Dashboard() {
   const [allDateAdded, setAllDateAdded] = useState(null);
 
   const [lastFetched, setLastFetched] = useState(null);
+  const [ghlError, setGhlError] = useState(null);
 
   const loadFromCache = async () => {
     setGhlLoading(true);
     try {
       const r = await base44.functions.invoke('getGHLLeadCount', {});
+      // Two lies lived here. `?? []` turned "GHL is not connected" into a lead
+      // count of 0 on the Marketing pillar, and the `: new Date()` fallback
+      // stamped "Updated 1:06 PM" using the browser clock when synced_at was
+      // absent — so a cache that had NEVER been synced was presented as fresh
+      // as of this second.
+      const failed = invokeFailure(r);
+      const notSent = invokeNotSent(r);
+      if (failed || notSent) {
+        setGhlError(failed || notSent);
+        setAllDateAdded(null);   // null, not [] — the memo renders "—" for unknown
+        setLastFetched(null);
+        return;
+      }
+      setGhlError(null);
       setAllDateAdded(r.data?.dateAddedList ?? []);
-      setLastFetched(r.data?.synced_at ? new Date(r.data.synced_at) : new Date());
+      setLastFetched(r.data?.synced_at ? new Date(r.data.synced_at) : null);
     } catch (e) {
-      setAllDateAdded([]);
+      setGhlError(e?.message || 'Lead counts could not be loaded');
+      setAllDateAdded(null);
+      setLastFetched(null);
     } finally {
       setGhlLoading(false);
     }
@@ -325,6 +342,11 @@ export default function Dashboard() {
             {!ghlLoading && lastFetched && (
               <span className="text-xs text-muted-foreground">
                 Updated {lastFetched.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+              </span>
+            )}
+            {!ghlLoading && !lastFetched && (
+              <span className="text-xs text-warn" title={ghlError || undefined}>
+                {ghlError ? 'Lead counts unavailable' : 'Never synced'}
               </span>
             )}
             <button
