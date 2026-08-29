@@ -48,6 +48,7 @@ import {
   today,
 } from '@/lib/ops/metrics';
 import { buildJobFlow, departmentView } from '@/lib/ops/flow';
+import { useBalances } from '@/lib/ops/useBalances';
 
 // ── Local presentation helpers ───────────────────────────────────────────────
 const GRAINS = [
@@ -179,14 +180,17 @@ export default function OrderingTeam() {
     };
   }, [material, sales]);
 
+  // Collection state for Gate 1 — ordering is held until the deposit clears.
+  const { balances } = useBalances();
+
   // ── Handoffs ───────────────────────────────────────────────────────────────
   // The same rows this page already loads, run through the stage engine so the
   // desk can see both directions of the handoff: what has landed on Ordering,
   // and what Ordering is holding up for somebody downstream. No appointments are
   // needed here — nothing Ordering owns turns on one.
   const flow = useMemo(
-    () => buildJobFlow({ sales, projects, appointments: [], customers, material, asOf }),
-    [sales, projects, customers, material, asOf]
+    () => buildJobFlow({ sales, projects, appointments: [], customers, material, balances, asOf }),
+    [sales, projects, customers, material, balances, asOf]
   );
 
   const view = useMemo(() => departmentView(flow, 'ordering'), [flow]);

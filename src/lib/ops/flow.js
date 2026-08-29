@@ -17,7 +17,7 @@
  * exactly what they are holding up for someone else. That is the handoff.
  */
 
-import { isoDay, today, dayDiff, distribution } from './metrics';
+import { isoDay, today, dayDiff, distribution, money } from './metrics';
 
 // ── Departments ──────────────────────────────────────────────────────────────
 export const DEPARTMENTS = {
@@ -75,7 +75,7 @@ function blocker(code, severity, label, detail, owner) {
  * we must not silently advance a job past a material gate we cannot see, so the
  * material gate only ever *holds* a job when we have real data saying it should.
  */
-export function classifyJob({ sale, project, appointment, customer, material, asOf = today() }) {
+export function classifyJob({ sale, project, appointment, customer, material, balance, asOf = today() }) {
   const blockers = [];
 
   const soldOn = isoDay(sale?.sale_date);
@@ -117,9 +117,11 @@ export function classifyJob({ sale, project, appointment, customer, material, as
     const [detail, owner] = statusHold || ['Pending cancellation — not cleared', 'sales'];
     blockers.push(blocker('hold', 'crit', 'On hold', detail, owner));
   }
-  const depositMissing = !sale?.deposit_amount || Number(sale.deposit_amount) <= 0;
-  if (depositMissing && sale?.sale_amount) {
-    blockers.push(blocker('deposit', 'warn', 'No deposit recorded', 'Nothing collected against this sale yet', 'finance'));
+  // An unpriced sale is a blank field on a Design Consultant's form, not a
+  // Finance problem — route it to the people who can actually fill it in.
+  if (!sale?.sale_amount || Number(sale.sale_amount) <= 0) {
+    blockers.push(blocker('sale_unpriced', 'crit', 'Sale has no amount',
+      'No sale amount recorded — nothing can be gated or ordered against this', 'sales'));
   }
 
   // ── Stage resolution, latest-first: the furthest thing that has demonstrably
@@ -168,7 +170,29 @@ export function classifyJob({ sale, project, appointment, customer, material, as
   } else if (!invoice) {
     stage = 'to_order';
     since = soldOn;
-    blockers.push(blocker('not_ordered', 'warn', 'Not in RFMS', 'Sold, but no order has been placed', 'ordering'));
+
+    // GATE 1 — ordering. Material may not be ordered until Accounting has
+    // confirmed the deposit CLEARED, which is the owner's rule that ordering
+    // begins once the deposit is actually deposited.
+    //
+    // Read strictly from the view: `=== false` and never a JS amount comparison,
+    // so a missing balance row (not yet loaded) reads as unknown rather than as
+    // unpaid, and there is exactly one definition of "satisfied" in the system.
+    //
+    // Deliberately 'warn', not 'crit': a crit reassigns ownership of the job, and
+    // Finance has no board of its own in the flow UI yet. Promote once it does.
+    if (balance?.deposit_satisfied === false) {
+      const short = Math.max(0, Number(balance.deposit_required || 0) - Number(balance.amount_cleared || 0));
+      blockers.push(blocker(
+        'deposit_unconfirmed', 'warn', 'Deposit not cleared',
+        Number(balance.amount_paid || 0) === 0
+          ? 'Nothing collected against this sale yet — ordering is held'
+          : `${money(short)} of the deposit has not cleared the bank yet — ordering is held`,
+        'finance',
+      ));
+    } else {
+      blockers.push(blocker('not_ordered', 'warn', 'Not in RFMS', 'Sold, but no order has been placed', 'ordering'));
+    }
   } else if (material && material.total > 0 && material.preReceipt > 0) {
     stage = 'awaiting_material';
     since = isoDay(sale?.rfms_sync_date) || soldOn;
@@ -192,9 +216,17 @@ export function classifyJob({ sale, project, appointment, customer, material, as
   const critical = blockers.find((b) => b.severity === 'crit');
   const owner = critical?.owner || def.owner;
 
+  // Sort by severity, not insertion order. Cross-cutting blockers are pushed
+  // first, so taking blockers[0] hid "Install date passed" behind a deposit
+  // warning on exactly the jobs most in trouble.
+  const SEV_RANK = { crit: 0, warn: 1, info: 2 };
+  const ranked = [...blockers].sort(
+    (a, b) => (SEV_RANK[a.severity] ?? 3) - (SEV_RANK[b.severity] ?? 3),
+  );
+
   const nextAction =
-    blockers.length > 0
-      ? blockers[0].label
+    ranked.length > 0
+      ? ranked[0].label
       : def.owner
         ? def.blurb
         : 'Nothing outstanding';
@@ -220,7 +252,7 @@ export function classifyJob({ sale, project, appointment, customer, material, as
     ageDays,
     sla: def.sla,
     overSla,
-    blockers,
+    blockers: ranked, // severity-ordered, so any UI taking the first is right
     nextAction,
     onHold,
     materialKnown: !!(material && material.total > 0),
@@ -237,6 +269,10 @@ export function buildJobFlow({
   appointments = [],
   customers = [],
   material = {},
+  // sale_balance rows keyed by sale id. The view owns deposit_satisfied and
+  // fully_collected; both are non-null there by construction, so a missing entry
+  // means UNKNOWN (not yet loaded) and must never be read as "unpaid".
+  balances = {},
   asOf = today(),
 }) {
   const custById = Object.fromEntries(customers.map((c) => [c.id, c]));
@@ -257,6 +293,7 @@ export function buildJobFlow({
         appointment: sale.appointment ? apptById[sale.appointment] : null,
         customer: sale.customer ? custById[sale.customer] : null,
         material: invoice ? material[invoice] || null : null,
+        balance: balances[sale.id] || null,
         asOf,
       });
     });

@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { createPageUrl } from '@/utils';
 import { buildJobFlow, DEPARTMENTS, STAGE_BY_KEY, STAGE_TONE } from '@/lib/ops/flow';
+import { useBalances } from '@/lib/ops/useBalances';
 import { materialIndex, money, fmtDate, today } from '@/lib/ops/metrics';
 
 // ── Small helpers ────────────────────────────────────────────────────────────
@@ -121,6 +122,9 @@ export default function JobFlow() {
     staleTime: 60000,
   });
 
+  // Collection state for Gate 1. A sale missing here is UNKNOWN, not unpaid.
+  const { balances } = useBalances();
+
   const flow = useMemo(
     () =>
       buildJobFlow({
@@ -129,9 +133,10 @@ export default function JobFlow() {
         appointments,
         customers,
         material: materialIndex(statusRows),
+        balances,
         asOf: today(),
       }),
-    [sales, projects, appointments, customers, statusRows]
+    [sales, projects, appointments, customers, statusRows, balances]
   );
 
   // The lifecycle minus the terminal stage — "Complete" is not somewhere a job

@@ -43,6 +43,7 @@ import {
   STATUS_TONE,
 } from '@/lib/ops/metrics';
 import { buildJobFlow, departmentView } from '@/lib/ops/flow';
+import { useBalances } from '@/lib/ops/useBalances';
 
 // ── Presentation maps ────────────────────────────────────────────────────────
 // Domain project stage → StatusPill tone (same vocabulary as ProjectDetail).
@@ -145,6 +146,9 @@ export default function InstallTeam() {
     [projects, sales, customers, statusRows]
   );
 
+  // Collection state for Gate 1. A sale missing here is UNKNOWN, not unpaid.
+  const { balances } = useBalances();
+
   // The same source data run through the stage engine. The board answers "what is
   // on the calendar"; the flow answers "who owns this job right now" — which is
   // what makes the handoff visible in both directions.
@@ -156,9 +160,10 @@ export default function InstallTeam() {
         appointments: [],
         customers,
         material: materialIndex(statusRows),
+        balances,
         asOf: today(),
       }),
-    [projects, sales, customers, statusRows]
+    [projects, sales, customers, statusRows, balances]
   );
 
   const view = useMemo(() => departmentView(flow, 'install'), [flow]);
