@@ -72,10 +72,14 @@ function JourneyProjectDetailInner() {
     enabled: !!project?.customer,
   });
 
+  // `sale` is staff-only by design (0093 — the money on a job is not a crew's
+  // business), so for an installer login this query is GUARANTEED to fail. Asking
+  // anyway produced three retried 406s and a console full of red on every job a
+  // crew opened. The page already treats sale as optional.
   const { data: sale } = useQuery({
     queryKey: ['journeyProjectSale', project?.sale],
     queryFn: () => base44.entities.Sale.get(project.sale),
-    enabled: !!project?.sale,
+    enabled: !!project?.sale && !installerMode,
   });
 
   const { data: checkpoints = [], isLoading: checkpointsLoading } = useQuery({
@@ -154,7 +158,11 @@ function JourneyProjectDetailInner() {
       <div className="bg-card border-b border-border px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <Link to={installerMode ? "/Journey?view=installer" : "/Journey"} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+            {/* Installer mode goes back to the PORTAL, not to Journey. A crew
+                login holds no staff modules, so /Journey?view=installer sent them
+                to a "no access to this page" screen — a dead end at the bottom of
+                the one link they were given. */}
+            <Link to={installerMode ? "/Portal" : "/Journey"} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
               <ArrowLeft className="w-4 h-4" />
               {installerMode ? t('jpdBackInstaller') : t('jpdBackJourney')}
             </Link>

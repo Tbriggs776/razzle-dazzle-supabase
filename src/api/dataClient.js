@@ -36,6 +36,7 @@ const ENTITY_TABLE = {
   GHLContactCache: 'ghl_contact_cache',
   InspectionReport: 'inspection_report',
   Installer: 'installer',
+  InstallerMember: 'installer_member',
   JourneyOrder: 'journey_order',
   Lead: 'lead',
   Log: 'log',
@@ -577,6 +578,19 @@ const RPC_FUNCTIONS = {
   // in-progress application and read the W-9 and bank details on it.
   // The response is identical whether or not an application exists.
   requestInstallerApplicationLink: (p) => ['request_installer_application_link', { p_email: p.email }],
+  // ── Subcontractor portal ──────────────────────────────────────────────────
+  // Every one of these derives the caller's installer server-side. None of them
+  // takes an installer_id, which is deliberate: there is no argument through
+  // which a caller could name a company that is not theirs.
+  myPortalContext: () => ['my_portal_context', {}],
+  myInstallerJobs: () => ['my_installer_jobs', {}],
+  inviteInstallerMember: (p) => ['invite_installer_member', {
+    p_full_name: p.fullName, p_email: p.email ?? null,
+    p_phone: p.phone ?? null, p_role: p.role ?? 'crew',
+  }],
+  setInstallerMemberActive: (p) => ['set_installer_member_active', {
+    p_member_id: p.memberId, p_active: p.active,
+  }],
   myPreferredLanguage: () => ['my_preferred_language', {}],
   setPreferredLanguage: (p) => ['set_preferred_language', {
     p_language: p.language, p_user_id: p.userId ?? null,

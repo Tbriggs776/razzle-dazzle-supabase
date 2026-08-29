@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { useAuth } from '@/lib/AuthContext';
+import { usePortalContext } from '@/lib/usePortal';
 
 /**
  * The module route guard, on its own.
@@ -20,8 +21,13 @@ import { useAuth } from '@/lib/AuthContext';
  * RLS remains the real enforcement — this is the clean "no access" screen rather
  * than an empty page. Anything this guard misses is still refused by the database.
  */
-export default function RequirePage({ pageKey, children }) {
+export default function RequirePage({ pageKey, allowInstaller = false, children }) {
   const { access } = useAuth();
+  // Subcontractors hold no staff modules by design, so the page-key test can only
+  // ever deny them. `allowInstaller` marks the pages that are theirs to open —
+  // today just the job detail their portal links into. RLS still decides which
+  // rows they see there; this only stops the guard slamming the door first.
+  const { data: portal, isLoading: portalLoading } = usePortalContext();
 
   const allowedPageKeys = React.useMemo(() => {
     const s = new Set();
@@ -34,8 +40,13 @@ export default function RequirePage({ pageKey, children }) {
   if (!access || !pageKey || allowedPageKeys.has(pageKey)) {
     return children;
   }
+  if (allowInstaller && (portalLoading || portal?.is_installer)) {
+    return children;
+  }
 
-  const home = access?.modules?.[0]?.pages?.[0]?.key || 'Dashboard';
+  const home = portal?.is_installer
+    ? 'Portal'
+    : access?.modules?.[0]?.pages?.[0]?.key || 'Dashboard';
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-xl">

@@ -43,8 +43,36 @@ import JourneyPage from './pages/Journey';
 import JourneyProjectDetailPage from './pages/JourneyProjectDetail';
 import MarketingPerformancePage from './pages/MarketingPerformance';
 import DCPerformanceMatrixPage from './pages/DCPerformanceMatrix';
+import PortalPage from './pages/Portal';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { usePortalContext } from '@/lib/usePortal';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+
+/**
+ * Where "/" goes, which is not the same answer for everyone.
+ *
+ * A subcontractor login holds zero staff modules — indistinguishable, from the
+ * client's side, from an employee nobody has granted anything to yet. Sending
+ * both to /Dashboard gave crews an empty page behind an empty sidebar. Only the
+ * database can tell them apart, so ask it (my_portal_context) before choosing.
+ *
+ * Staff who are ALSO on a crew roster keep going to the app: if they hold any
+ * staff page at all, that is the surface they signed in for.
+ */
+const HomeRedirect = () => {
+  const { access } = useAuth();
+  const { data: portal, isLoading } = usePortalContext();
+  const hasStaffPages = (access?.modules || []).some((m) => (m.pages || []).length > 0);
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+  return <Navigate to={portal?.is_installer && !hasStaffPages ? '/Portal' : '/Dashboard'} replace />;
+};
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -97,7 +125,9 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/Dashboard" replace />} />
+      <Route path="/" element={<HomeRedirect />} />
+      {/* The subcontractor portal renders without the staff chrome — see Portal.jsx. */}
+      <Route path="/Portal" element={<PortalPage />} />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
@@ -138,7 +168,10 @@ const AuthenticatedApp = () => {
           holding only the appointments module could type the URL and get the whole
           Journey surface: map, calendar and Manager View. */}
       <Route path="/Journey" element={<RequirePage pageKey="Journey"><JourneyPage /></RequirePage>} />
-      <Route path="/JourneyProjectDetail" element={<RequirePage pageKey="JourneyProjectDetail"><JourneyProjectDetailPage /></RequirePage>} />
+      {/* allowInstaller: this is the page the portal's job list links into, and
+          the crew's assignment SMS deep-links straight to it. RLS still limits
+          them to their own jobs. */}
+      <Route path="/JourneyProjectDetail" element={<RequirePage pageKey="JourneyProjectDetail" allowInstaller><JourneyProjectDetailPage /></RequirePage>} />
       <Route path="/MarketingPerformance" element={<LayoutWrapper currentPageName="MarketingPerformance"><MarketingPerformancePage /></LayoutWrapper>} />
       <Route path="/DCPerformanceMatrix" element={<LayoutWrapper currentPageName="DCPerformanceMatrix"><DCPerformanceMatrixPage /></LayoutWrapper>} />
       <Route path="/Integrations" element={<LayoutWrapper currentPageName="Integrations"><IntegrationsPage /></LayoutWrapper>} />
