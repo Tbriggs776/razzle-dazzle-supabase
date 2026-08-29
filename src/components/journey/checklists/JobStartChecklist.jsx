@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQueryClient } from '@tanstack/react-query';
-import { Camera, AlertTriangle, Loader2, Send, CheckCircle2, XCircle, Clock, ShieldAlert } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Camera, Loader2, Send, CheckCircle2, XCircle, Clock, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +12,9 @@ import FieldManagerNotificationBadge from './FieldManagerNotificationBadge';
 import PhotoLightboxModal from './PhotoLightboxModal';
 import { SignedImage } from '@/lib/fileUrl';
 import { toast } from 'sonner';
+
+const money = (n) =>
+  '$' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function ChecklistRow({ label, checked, onChange, disabled, required, missing }) {
   return (
@@ -90,6 +93,21 @@ function Section({ title, icon: Icon, children, warning }) {
 export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, installerMode }) {
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
+
+  // Collection state via a narrow RPC, NOT a direct ledger read: whoever opens
+  // this screen is often a subcontract installer whose role cannot read the
+  // payment table at all. The RPC returns the amount and nothing else — no
+  // customer PII, no job costs, no other jobs.
+  const { data: collection } = useQuery({
+    queryKey: ['installCollection', projectId],
+    queryFn: async () => {
+      const { data, error } = await base44.functions.invoke('installCollectionStatus', { projectId });
+      if (error) return null; // never let a money lookup break the checklist
+      return data;
+    },
+    enabled: !!projectId,
+    staleTime: 30000,
+  });
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [mode, setMode] = useState(checkpoint?.status === 'SubmittedForApproval' ? 'review' : 'form');
 
@@ -191,8 +209,17 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
         return;
       }
       queryClient.invalidateQueries({ queryKey: ['projectCheckpoints', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['installCollection', projectId] });
       if (res.data?.asbestos_halt) {
         toast('⚠️ HARD STOP: Asbestos suspected. Installation halted. Field Manager, Zone Manager, and Ops have been alerted.');
+      }
+      // Observe-only: the submit succeeded and the crew is NOT blocked. Say so
+      // plainly, so nobody stands in a driveway wondering whether to start.
+      if (res.data?.cod_hold) {
+        toast.warning(`Balance outstanding: ${money(res.data.amount_due)}`, {
+          description: 'Your coordinator has been notified. This does not stop you — carry on with the install.',
+          duration: 10000,
+        });
       }
       setMode('review');
       onSubmitted?.();
@@ -246,6 +273,31 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
 
   return (
     <div className="space-y-4">
+      {/* Balance due — first thing on the page, above the 23 fields, so the crew
+          reads it at the curb while they still have signal. There is no offline
+          mode anywhere in this app; the money fact has to arrive on the way IN,
+          not at submit. */}
+      {collection?.gate_applies && collection?.satisfied === false && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-amber-900">
+                Collect {money(collection.amount_due)} before starting
+              </p>
+              <p className="mt-0.5 text-xs text-amber-700">
+                {collection.collection_terms === 'financed'
+                  ? 'Financed job — confirm the lender approval is on file rather than collecting cash.'
+                  : 'The full balance is due before install begins. If it has already been taken, ask your coordinator to record it.'}
+              </p>
+              <p className="mt-1 text-xs text-amber-600">
+                This does not block you — submit the checklist either way.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Status banner */}
       {checkpoint?.status === 'SubmittedForApproval' && (
         <div>

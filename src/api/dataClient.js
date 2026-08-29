@@ -492,6 +492,10 @@ const RPC_FUNCTIONS = {
   // { ok:false, reason:'short', shortfall } when it does not.
   confirmSaleDeposit: (p) => ['confirm_sale_deposit', { p_sale_id: p.saleId, p_note: p.note ?? null }],
   confirmPayment:     (p) => ['confirm_payment', { p_payment_id: p.paymentId, p_note: p.note ?? null }],
+  // Driveway-safe: returns the amount due for ONE project and nothing else.
+  // The Job Start Checklist is often opened by a subcontract installer whose
+  // role cannot read the payment ledger, so this must never become a table read.
+  installCollectionStatus: (p) => ['install_collection_status', { p_project_id: p.projectId }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
   adminSetEsignType: (p) => ['admin_set_esign_type', {

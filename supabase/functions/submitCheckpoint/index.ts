@@ -42,6 +42,9 @@ async function currentUser(req: Request) {
   return data?.user ?? null;
 }
 
+const fmtUsd = (n: number) =>
+  '$' + (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 async function one(s: any, table: string, id: string | null | undefined) {
   if (!id) return null;
   const { data } = await s.from(table).select('*').eq('id', id).maybeSingle();
@@ -148,6 +151,65 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
             `Asbestos suspected at project ${project_id}. Installation HALTED. Customer must engage a licensed abatement company and provide a clearance certificate before work resumes.`);
         await s.from('project').update({ installation_date_status: 'on hold' }).eq('id', project_id);
       }
+      // ── GATE 2: install-start collection backstop ────────────────────────
+      // Collection belongs to Install Coordination BEFORE install day (task rule
+      // collect_balance). This is the net under that, not the process itself.
+      //
+      // OBSERVE-ONLY by owner decision: it records and alerts, it never blocks.
+      // The submit must always succeed — the "Take Photos First" evidence
+      // captured here is what the claims process later depends on.
+      //
+      // The hold is written to workflow_exception, NEVER to
+      // project.installation_date_status: that column carries the asbestos halt
+      // (which this must not clobber) and get_public_project exports it to the
+      // customer's own public tracker, where it would publish their delinquency.
+      let codHold = false;
+      let amountDue = 0;
+      if (step_key === 'job_start_checklist') {
+        const { data: bal } = await s
+          .from('sale_balance')
+          .select('sale_id, balance_due, amount_paid, fully_collected, is_cancelled, collection_terms, collect_exempt')
+          .eq('sale_id', project?.sale ?? '__none__')
+          .maybeSingle();
+
+        // No sale (manual project), no balance row, or a cancelled sale: never
+        // invent a debt. E11 already flags live-project-on-cancelled-sale.
+        if (bal && !bal.is_cancelled && bal.fully_collected === false) {
+          codHold = true;
+          amountDue = Number(bal.balance_due) || 0;
+
+          // Idempotent: one open exception per project (partial unique index).
+          const { data: open } = await s.from('workflow_exception')
+            .select('id').eq('code', 'E9_COD_UNCOLLECTED')
+            .eq('subject_type', 'project').eq('subject_id', project_id)
+            .is('resolved_at', null).maybeSingle();
+          const detail = `Install started with ${fmtUsd(amountDue)} outstanding of ${fmtUsd(Number(bal.amount_paid) + amountDue)}. Terms: ${bal.collection_terms || 'cod'}. Observe-only — the crew was NOT stopped.`;
+          if (open) {
+            await s.from('workflow_exception')
+              .update({ last_seen_at: nowIso, detail }).eq('id', open.id);
+          } else {
+            await s.from('workflow_exception').insert({
+              code: 'E9_COD_UNCOLLECTED', subject_type: 'project', subject_id: project_id,
+              detail, severity: 'crit', first_seen_at: nowIso, last_seen_at: nowIso,
+            });
+          }
+
+          // Tell the people who own collection, not the crew in the driveway.
+          // Wording is deliberately "balance"/"COD", never "payment" — in this
+          // same function submit_for_payment means INSTALLER pay, and a crew
+          // reading "payment hold" hears "we are not getting paid".
+          const icIds = [region?.install_coordinator_id, project?.field_manager_id].filter(Boolean);
+          let icRecs: any[] = [];
+          if (icIds.length) { const { data } = await s.from('team_member').select('*').in('id', icIds); icRecs = data || []; }
+          if (!icRecs.length) icRecs = await alertMembers(s, 'cod_uncollected');
+          for (const m of icRecs) {
+            await qEmail(s, cfg, m.email, `[Ops Team] Balance outstanding at install start — ${customerName}`,
+              `Hi ${m.first_name || 'there'},\n\nThe Job Start Checklist was submitted for ${customerName} with ${fmtUsd(amountDue)} still outstanding.\n\nThe crew was NOT stopped — this is a record, not a block.\n\nThe balance is due before install starts. Collect it, or record what was already taken, here: ${url}`);
+            await qSms(s, cfg, m.phone, `Floor Daddy: ${customerName} started install with ${fmtUsd(amountDue)} outstanding. Not blocked — please collect. ${url}`);
+          }
+        }
+      }
+
       if (checklist_data?.verification?.material_shortage === true) {
         const cnt = checklist_data?.verification?.shortage_count || 0;
         const notes = checklist_data?.verification?.shortage_notes || 'No details provided';
@@ -172,7 +234,9 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
           await qEmail(s, cfg, m.email, `[Ops Team] Change Order — Billable Floor Prep — ${customerName}`,
             `Hi ${m.first_name},\n\nA billable floor prep change order has been submitted for ${customerName}.\n\nCalled in for approval before work: ${calledIn}\nAmount: $${amt}\nWhat prep: ${desc}\nRegion: ${regionName}\n\nProject: ${url}`);
       }
-      return { status: 200, body: { success: true, checkpoint, asbestos_halt: asbestos } };
+      // cod_hold rides back on a 200: the submit succeeded and the crew is not
+      // blocked. The client shows it as a notice, not an error.
+      return { status: 200, body: { success: true, checkpoint, asbestos_halt: asbestos, cod_hold: codHold, amount_due: amountDue } };
     }
 
     case 'approve_prep': {
