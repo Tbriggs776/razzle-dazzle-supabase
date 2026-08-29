@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, StickyNote, RefreshCw, Plus } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -28,8 +29,13 @@ export default function RFMSOrderNotes({ invoiceNumber, currentUser }) {
   const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['rfmsOrderNotes', invoiceNumber],
     queryFn: async () => {
-      const { data } = await base44.functions.invoke('getRFMSOrderNotes', { documentNumber: invoiceNumber });
+      const res = await base44.functions.invoke('getRFMSOrderNotes', { documentNumber: invoiceNumber });
       if (data?.error) throw new Error(data.error);
+      // Was `const { data } = ...` with no check: on failure data is
+      // null and this threw a TypeError, or silently returned [].
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      const data = res.data;
       return data;
     },
     retry: 0,

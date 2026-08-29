@@ -1,5 +1,6 @@
 import React from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { Users, Calendar as CalendarIcon } from 'lucide-react';
@@ -13,7 +14,12 @@ export default function RFMSJobBadge({ invoiceNumber }) {
   const { data: jobs = [] } = useQuery({
     queryKey: ['rfmsJobs', invoiceNumber],
     queryFn: async () => {
-      const { data } = await base44.functions.invoke('getRFMSJobs', { invoiceNumber });
+      const res = await base44.functions.invoke('getRFMSJobs', { invoiceNumber });
+      // Was `const { data } = ...` with no check: on failure data is
+      // null and this threw a TypeError, or silently returned [].
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      const data = res.data;
       return data.jobs || [];
     },
     enabled: !!invoiceNumber,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -73,7 +74,12 @@ export default function ProjectsCalendarView({ projects, customers, sales, enabl
      queries: invoiceNumbers.map(inv => ({
        queryKey: ['rfmsJobs', inv],
        queryFn: async () => {
-         const { data } = await base44.functions.invoke('getRFMSJobs', { invoiceNumber: inv });
+         const res = await base44.functions.invoke('getRFMSJobs', { invoiceNumber: inv });
+         // Was `const { data } = ...` with no check: on failure data is
+         // null and this threw a TypeError, or silently returned [].
+         const failed = invokeFailure(res);
+         if (failed) throw new Error(failed);
+         const data = res.data;
          return data.jobs || [];
        },
        staleTime: 5 * 60 * 1000,

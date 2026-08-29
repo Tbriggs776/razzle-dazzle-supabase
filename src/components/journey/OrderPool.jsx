@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Plus, Loader2, MapPin, Calendar, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,10 @@ export default function OrderPool({ regions, onTagOrder, taggingOrderId }) {
         orderDateTo: dateTo,
         dateField,
       });
+      // A swallowed failure here renders as an empty result the user
+      // cannot tell from real data. Throw so isError is set.
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
       return res.data?.orders || [];
     },
     enabled: false,
