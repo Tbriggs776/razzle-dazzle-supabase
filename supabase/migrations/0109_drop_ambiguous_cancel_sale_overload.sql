@@ -1,0 +1,43 @@
+-- ---------------------------------------------------------------------------
+-- 0109 -- "Cancel Sale" has been failing for every user, on every sale.
+--
+-- Two overloads existed: cancel_sale(p_sale_id text) from 0031 and
+-- cancel_sale(p_sale_id text, p_reason text DEFAULT NULL) from 0048. 0048
+-- added the second without dropping the first.
+--
+-- dataClient sends { p_sale_id } -- one key -- which matches BOTH (p_reason has
+-- a default). PostgREST cannot choose and returns HTTP 300 / PGRST203 before
+-- the function is ever entered. Reproduced over HTTP:
+--
+--   POST /rest/v1/rpc/cancel_sale {"p_sale_id":"..."}
+--   -> 300 PGRST203 "Could not choose the best candidate function between:
+--      public.cancel_sale(p_sale_id => text),
+--      public.cancel_sale(p_sale_id => text, p_reason => text)"
+--
+-- Because resolution happens before authorization, this failed identically for
+-- every role -- an anon key reproduces it -- and SaleDetail showed the user that
+-- raw PostgREST sentence as the explanation.
+--
+-- ---- WHICH ONE TO KEEP, AND WHY IT MATTERS MORE THAN THE OUTAGE ------------
+-- The two are not equivalent:
+--   0031 (1-arg): DELETE FROM project WHERE sale = ...; DELETE FROM sale ...
+--                 A hard delete. The sale and its projects are gone.
+--   0048 (2-arg): sets is_cancelled, stamps cancelled_date/by/reason, sets
+--                 project status='Cancelled' while preserving the prior status
+--                 in pre_cancelled_status, and completes the appointment.
+--
+-- So the ambiguity was, accidentally, the only thing standing between a user
+-- and a destructive delete of sale and project rows. Dropping the 1-arg version
+-- both restores the feature and removes that path.
+--
+-- Verified after: the same HTTP call now resolves (401 permission denied for
+-- anon, which is correct); an authenticated admin gets
+-- {"success":true,"soft_cancelled":true,"projects_cancelled":1}; the sale row
+-- survives with is_cancelled=true and the reason recorded; the project survives
+-- with status='Cancelled' and pre_cancelled_status='In Progress'.
+--
+-- cancel_sale was the ONLY overloaded function in the schema -- checked with a
+-- group-by over pg_proc -- so there is no sibling of this bug hiding elsewhere.
+-- ---------------------------------------------------------------------------
+
+drop function if exists public.cancel_sale(text);
