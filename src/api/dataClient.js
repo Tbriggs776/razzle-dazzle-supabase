@@ -548,6 +548,14 @@ const RPC_FUNCTIONS = {
     p_task_id: p.id, p_user_id: p.userId ?? null, p_dept: p.dept ?? null, p_note: p.note ?? null,
   }],
   addTaskNote:     (p) => ['add_task_note', { p_task_id: p.id, p_note: p.note }],
+  // A task the reconciler created is a STARTING POINT, not a verdict — its
+  // owner and due date are guesses made without knowing what is happening on
+  // the job. Every change is logged with its old and new value.
+  updateTask:      (p) => ['update_task', {
+    p_task_id: p.id, p_title: p.title ?? null, p_notes: p.notes ?? null,
+    p_due_at: p.dueAt ?? null, p_priority: p.priority ?? null,
+    p_clear_due: p.clearDue ?? false,
+  }],
   // Threads. Writes go through RPCs so authorship and audience cannot be
   // forged, and thread_message is UPDATE/DELETE-revoked: a conversation that
   // can be rewritten later is worthless in the dispute it exists for.

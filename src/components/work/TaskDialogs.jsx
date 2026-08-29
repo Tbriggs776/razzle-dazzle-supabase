@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
-  Loader2, CheckCircle2, UserRound, ShieldCheck, MessageSquarePlus, History, ExternalLink,
+  Loader2, CheckCircle2, UserRound, ShieldCheck, MessageSquarePlus, History, ExternalLink, Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -186,6 +186,28 @@ export function TaskDetailSheet({ task, open, onOpenChange, currentUserId }) {
   const people = useAssignableUsers();
 
   const [note, setNote] = useState('');
+
+  // Seeded from the task, and re-seeded when a different task is opened — the
+  // sheet is reused, so without this you would edit task B with task A's values.
+  const toLocalInput = (iso) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+  const [editTitle, setEditTitle] = useState('');
+  const [editNotes, setEditNotes] = useState('');
+  const [editDue, setEditDue] = useState('');
+  const [editPriority, setEditPriority] = useState('3');
+  const [seededFor, setSeededFor] = useState(null);
+  if (task && seededFor !== task.id) {
+    setSeededFor(task.id);
+    setEditTitle(task.created_reason?.title || task.notes || '');
+    setEditNotes(task.notes || '');
+    setEditDue(toLocalInput(task.due_at));
+    setEditPriority(String(task.priority ?? 3));
+  }
+
   const [reassignTo, setReassignTo] = useState('');
   const [reassignDept, setReassignDept] = useState('');
   const [approvalReason, setApprovalReason] = useState('');
@@ -218,6 +240,36 @@ export function TaskDetailSheet({ task, open, onOpenChange, currentUserId }) {
       toast.success(who ? `Now with ${who}` : 'Reassigned');
     },
     onError: (e) => toast.error(e?.message || 'Could not reassign'),
+  });
+
+  const dirty = !!task && (
+    editTitle !== (task.created_reason?.title || task.notes || '')
+    || editNotes !== (task.notes || '')
+    || editDue !== toLocalInput(task.due_at)
+    || editPriority !== String(task.priority ?? 3)
+  );
+
+  const update = useMutation({
+    mutationFn: async ({ clearDue }) => {
+      const { data, error } = await base44.functions.invoke('updateTask', {
+        id: task.id,
+        title: clearDue ? null : editTitle.trim() || null,
+        notes: clearDue ? null : editNotes,
+        dueAt: clearDue || !editDue ? null : new Date(editDue).toISOString(),
+        priority: clearDue ? null : Number(editPriority),
+        clearDue: !!clearDue,
+      });
+      if (error) throw error;
+      if (data?.ok === false) throw new Error(data.reason);
+      return data;
+    },
+    onSuccess: (d) => {
+      refresh();
+      setSeededFor(null);   // re-seed from the saved row
+      toast.success(d?.changed ? 'Updated' : 'Nothing to change',
+        d?.changes ? { description: d.changes } : undefined);
+    },
+    onError: (e) => toast.error(e?.message || 'Could not update the task'),
   });
 
   const addNote = useMutation({
@@ -322,6 +374,65 @@ export function TaskDetailSheet({ task, open, onOpenChange, currentUserId }) {
               </Button>
             )}
           </div>
+
+          {/* Adjust what the system chose.
+              The reconciler picks an owner from the on-call rota and a due date
+              from (stage entered + the rule's SLA) — both guesses made without
+              knowing what is actually happening on the job. If the only options
+              were accept or close, people would close things that are not done. */}
+          <section>
+            <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+              <Pencil className="h-4 w-4 text-muted-foreground" />Adjust
+            </h3>
+            {task.source === 'rule' && (
+              <p className="mb-2 text-xs text-muted-foreground">
+                This was raised automatically for the{' '}
+                <span className="text-foreground">{task.created_reason?.stage || 'current'}</span>{' '}
+                stage. The owner and due date are the system's starting point — change them.
+              </p>
+            )}
+            <div className="space-y-2">
+              <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Title" />
+              <Textarea rows={2} value={editNotes} onChange={(e) => setEditNotes(e.target.value)}
+                placeholder="Detail" />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-[11px] text-muted-foreground">Due</Label>
+                  <Input type="datetime-local" value={editDue}
+                    onChange={(e) => setEditDue(e.target.value)}
+                    className="bg-background text-foreground" />
+                </div>
+                <div>
+                  <Label className="text-[11px] text-muted-foreground">Priority</Label>
+                  <select className={selectCls} value={editPriority}
+                    onChange={(e) => setEditPriority(e.target.value)}>
+                    <option value="1">1 — urgent</option>
+                    <option value="2">2 — high</option>
+                    <option value="3">3 — normal</option>
+                    <option value="4">4 — low</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" disabled={!dirty || update.isPending}
+                  onClick={() => update.mutate({})}>
+                  {update.isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+                  Save changes
+                </Button>
+                {task.due_at && (
+                  <Button size="sm" variant="ghost" disabled={update.isPending}
+                    onClick={() => update.mutate({ clearDue: true })}>
+                    Remove due date
+                  </Button>
+                )}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Changes are recorded in the history below with their old and new values, and the
+                reconciler will not overwrite them.
+              </p>
+            </div>
+          </section>
 
           {/* Hand it over */}
           <section>
