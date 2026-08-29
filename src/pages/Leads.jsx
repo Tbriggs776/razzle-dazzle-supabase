@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
+import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -30,11 +32,22 @@ export default function Leads() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Lead.create(data),
-    onSuccess: () => {
+    // upsert_lead, not Lead.create: since 0098 a phone number we already hold
+    // raises a unique violation on insert. Resolving instead means typing an
+    // existing customer's number lands on their record rather than erroring —
+    // and says which it did.
+    mutationFn: async (data) => {
+      const res = await base44.functions.invoke('upsertLead', { lead: data });
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      return res.data;
+    },
+    onSuccess: (d) => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       setShowCreateDialog(false);
-    }
+      toast.success(d?.created ? 'Lead created' : 'We already had that person — opened their existing lead');
+    },
+    onError: (e) => toast.error(e?.message || 'Could not save that lead'),
   });
 
   // Filter leads based on search query

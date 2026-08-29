@@ -578,6 +578,12 @@ const RPC_FUNCTIONS = {
   // in-progress application and read the W-9 and bank details on it.
   // The response is identical whether or not an application exists.
   requestInstallerApplicationLink: (p) => ['request_installer_application_link', { p_email: p.email }],
+  // Lead identity resolution. Every path that would have called Lead.create()
+  // goes through this instead: 0098 made "one lead per phone number" a database
+  // rule, so a direct insert of a number we already hold now raises a unique
+  // violation. This matches on phone → email → GHL id → CallRail id and returns
+  // { lead_id, created, matched_on }.
+  upsertLead: (p) => ['upsert_lead', { p_lead: p.lead ?? p }],
   // ── Subcontractor portal ──────────────────────────────────────────────────
   // Every one of these derives the caller's installer server-side. None of them
   // takes an installer_id, which is deliberate: there is no argument through

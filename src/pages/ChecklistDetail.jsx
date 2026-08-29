@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { runPostConversion } from '@/lib/postConversion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
@@ -160,31 +161,26 @@ export default function ChecklistDetail() {
       console.timeEnd('⏱️ Check existing appointment');
 
       if (shouldCreateNew) {
-       // Check if a lead already exists with this email
        console.time('⏱️ Check/Create Lead');
        let leadId;
-       // Only check for existing leads if email is provided
-       const existingLeads = checklist.customer_email 
-         ? await base44.entities.Lead.filter({ email: checklist.customer_email })
-         : [];
-
-       if (existingLeads.length > 0) {
-         // Use existing lead
-         leadId = existingLeads[0].id;
-       } else {
-         // Create a new lead from checklist data
-         const newLead = await base44.entities.Lead.create({
-           first_name: checklist.customer_first_name || 'Unknown',
-           last_name: checklist.customer_last_name || 'Customer',
-           email: checklist.customer_email || '',
-           phone: checklist.customer_phone || '',
-           address_line1: checklist.customer_street || '',
-           city: checklist.city || '',
-           state: checklist.state || '',
-           zip: checklist.postal_code || ''
-         });
-         leadId = newLead.id;
-       }
+       // Resolve the person rather than searching on email alone. Matching only
+       // by email created a second lead for every caller who gave a phone number
+       // and no address — and since 0098 made one-lead-per-number a database
+       // rule, that insert now fails outright. upsert_lead matches on phone
+       // first, which is the identifier a CSR always has.
+       const leadRes = await base44.functions.invoke('upsertLead', { lead: {
+         first_name: checklist.customer_first_name || 'Unknown',
+         last_name:  checklist.customer_last_name || 'Customer',
+         email:      checklist.customer_email || '',
+         phone:      checklist.customer_phone || '',
+         address_line1: checklist.customer_street || '',
+         city:  checklist.city || '',
+         state: checklist.state || '',
+         zip:   checklist.postal_code || '',
+       } });
+       const leadFailed = invokeFailure(leadRes);
+       if (leadFailed) throw new Error(`Could not save the customer — ${leadFailed}`);
+       leadId = leadRes.data.lead_id;
        console.timeEnd('⏱️ Check/Create Lead');
 
        // Create new appointment with the lead

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { invokeFailure } from '@/lib/invokeResult';
 import { runPostConversion } from '@/lib/postConversion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -130,24 +131,25 @@ export default function ChecklistV2Detail() {
 
       // Find or create Lead
       let leadId;
-      const existingLeads = formData.customer_email
-        ? await base44.entities.Lead.filter({ email: formData.customer_email })
-        : [];
-      if (existingLeads.length > 0) {
-        leadId = existingLeads[0].id;
-      } else {
-        const newLead = await base44.entities.Lead.create({
-          first_name: formData.customer_first_name || 'Unknown',
-          last_name: formData.customer_last_name || 'Customer',
-          email: formData.customer_email || '',
-          phone: formData.customer_phone || '',
-          address_line1: formData.customer_street || '',
-          city: formData.city || '',
-          state: formData.state || '',
-          zip: formData.postal_code || ''
-        });
-        leadId = newLead.id;
-      }
+      // Resolve the person rather than searching on email alone. Matching only
+      // by email created a second lead for every caller who gave a phone number
+      // and no address — and since 0098 made one-lead-per-number a database
+      // rule, that insert now fails outright. upsert_lead matches on phone
+      // first, which is the identifier a CSR always has.
+      const leadRes = await base44.functions.invoke('upsertLead', { lead: {
+        first_name: formData.customer_first_name || 'Unknown',
+        last_name:  formData.customer_last_name || 'Customer',
+        email:      formData.customer_email || '',
+        phone:      formData.customer_phone || '',
+        address_line1: formData.customer_street || '',
+        city:  formData.city || '',
+        state: formData.state || '',
+        zip:   formData.postal_code || '',
+      } });
+      const leadFailed = invokeFailure(leadRes);
+      if (leadFailed) throw new Error(`Could not save the customer — ${leadFailed}`);
+      leadId = leadRes.data.lead_id;
+
 
       // Build notes from AI summary or project notes
       const notes = [];
