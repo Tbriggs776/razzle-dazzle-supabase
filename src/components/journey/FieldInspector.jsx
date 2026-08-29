@@ -135,7 +135,18 @@ function JobCard({ order, region, isSelected, onClick, stopNumber }) {
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex items-start gap-2 flex-1 min-w-0">
             {stopNumber != null && (
-              <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center mt-0.5">
+              // A stop with no coordinates is numbered on the board but is NOT in
+              // the Google Maps route, so the driver would arrive at the end a job
+              // short with nothing having said so. Mark it on the card.
+              <span
+                title={!order.lat || !order.lng ? 'Not in the route — this address could not be located' : undefined}
+                className={cn(
+                  "shrink-0 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center mt-0.5",
+                  (!order.lat || !order.lng)
+                    ? "bg-warn/20 text-warn ring-1 ring-warn/40"
+                    : "bg-primary text-primary-foreground"
+                )}
+              >
                 {stopNumber}
               </span>
             )}
@@ -277,7 +288,10 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
     const missing = ordersForDay.filter(o => !o.lat && !o.lng && o.address && !geocodedRef.current.has(o.id));
     if (missing.length === 0) return;
 
-    missing.forEach(o => geocodedRef.current.add(o.id));
+    // NOT marked attempted here. Doing that before the call meant one failed
+    // geocode was never retried for the rest of the session — and invoke() never
+    // throws, so the catch below could not see the failure either. The stop then
+    // silently vanished from the route while the header still counted it.
     setGeocodingIds(prev => { const next = new Set(prev); missing.forEach(o => next.add(o.id)); return next; });
 
     Promise.all(missing.map(async (order) => {
@@ -286,8 +300,10 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
         const res = await base44.functions.invoke('journeyGeocode', { address: fullAddr });
         if (res.data?.success && res.data.lat && res.data.lng) {
           await base44.entities.JourneyOrder.update(order.id, { lat: res.data.lat, lng: res.data.lng });
+          // Only now is this address settled and not worth trying again.
+          geocodedRef.current.add(order.id);
         }
-      } catch (e) { /* ignore */ }
+      } catch (e) { /* a transient failure stays retryable */ }
     })).finally(() => {
       setGeocodingIds(prev => {
         const next = new Set(prev);
@@ -370,7 +386,9 @@ export default function FieldInspector({ journeyOrders, regions, teamMembers, on
           className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold rounded-lg transition-colors shrink-0"
           >
           <Navigation className="w-3.5 h-3.5" />
-          {t('fiFullRoute')}
+          {mappableOrders.length < routedOrders.length
+            ? `${t('fiFullRoute')} (${mappableOrders.length} of ${routedOrders.length})`
+            : t('fiFullRoute')}
           <ExternalLink className="w-3 h-3 opacity-70" />
           </a>
           )}

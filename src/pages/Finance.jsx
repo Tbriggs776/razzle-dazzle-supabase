@@ -95,7 +95,19 @@ export default function Finance() {
   const live = balances.filter((b) => !b.is_cancelled);
   const awaiting = live.filter((b) => !b.deposit_satisfied);
   const uncleared = live.reduce((sum, b) => sum + Number(b.amount_pending_clearance || 0), 0);
-  const outstanding = live.reduce((sum, b) => sum + Number(b.balance_due || 0), 0);
+  // Floored per sale, NOT in aggregate. balance_due has no floor in the view —
+  // deliberately, because a negative IS the truth for an over-collected or
+  // not-yet-priced job. But summing it raw meant one sale carrying a $5,000
+  // deposit against a $0 price contributed MINUS $5,000 and quietly cancelled out
+  // real receivables on other jobs, so the headline number an owner reads was
+  // wrong in the flattering direction. The view keeps telling the truth; the
+  // rollup stops treating "we hold their money" as "they owe us less".
+  const outstanding = live.reduce((sum, b) => sum + Math.max(0, Number(b.balance_due || 0)), 0);
+  // The negatives are not noise to be hidden — they are jobs where we are holding
+  // money against no price, which is its own thing to chase.
+  const overCollected = live.filter((b) => Number(b.balance_due || 0) < 0);
+  const overCollectedTotal = overCollected.reduce(
+    (sum, b) => sum + Math.abs(Number(b.balance_due || 0)), 0);
   // Owner decision: the legacy book is deemed satisfied at its actual deposit,
   // and the gap to the current policy is REPORTED here rather than enforced.
   const gapRows = live.filter((b) => Number(b.deposit_policy_gap || 0) > 0);
@@ -132,7 +144,13 @@ export default function Finance() {
             foot="Ordering is held on these"
           />
           <KpiTile label="Recorded, not cleared" value={money(uncleared)} foot="Banked but unconfirmed" />
-          <KpiTile label="Outstanding" value={money(outstanding)} foot="Due before install starts" />
+          <KpiTile
+            label="Outstanding"
+            value={money(outstanding)}
+            foot={overCollected.length
+              ? `Due before install · ${overCollected.length} over-collected, listed below`
+              : 'Due before install starts'}
+          />
           <KpiTile
             label="Gap to 50% policy"
             value={money(totalGap)}
@@ -199,6 +217,39 @@ export default function Finance() {
             })
           )}
         </ModuleCard>
+
+        {/* These used to be invisible AND actively harmful: each one subtracted
+            from the Outstanding headline, netting off real receivables on other
+            jobs. Now they are excluded from that total and listed as what they
+            actually are — money held against a job with no price on it yet. */}
+        {overCollected.length > 0 && (
+          <ModuleCard
+            title="Money held against no price"
+            icon={AlertTriangle}
+            subtitle="Deposit taken but the sale total is zero or lower — price these, or refund"
+          >
+            {overCollected.map((b) => (
+              <Link
+                key={b.sale_id}
+                to={createPageUrl('SaleDetail') + `?id=${b.sale_id}`}
+                className="flex items-center justify-between gap-4 px-4 py-2.5 transition-colors hover:bg-muted/60"
+              >
+                <div className="min-w-0">
+                  <span className="text-sm font-medium text-foreground">{nameOf(b)}</span>
+                  <p className="text-xs text-muted-foreground">
+                    {money(b.amount_paid)} taken against a {money(b.sale_amount)} sale
+                  </p>
+                </div>
+                <span className="whitespace-nowrap text-sm font-medium text-warn">
+                  {money(Math.abs(Number(b.balance_due || 0)))} held
+                </span>
+              </Link>
+            ))}
+            <div className="border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
+              {money(overCollectedTotal)} in total, excluded from Outstanding above.
+            </div>
+          </ModuleCard>
+        )}
 
         {gapRows.length > 0 && (
           <ModuleCard
