@@ -111,6 +111,22 @@ export default function Layout({ children, currentPageName }) {
     refetchInterval: 60000,
   });
 
+  // Leads already past their due moment — the first-dial clock, or a missed step
+  // in the 0/1/3/7/14 cadence. Scoped to the signed-in CSR's own queue by
+  // lead_queue('mine'), so it is a personal number, not a company one.
+  const { data: leadsPastDue = 0 } = useQuery({
+    queryKey: ['leadQueuePastDue'],
+    queryFn: async () => {
+      const { data, error } = await base44.functions.invoke('leadQueue', { scope: 'mine' });
+      if (error) return 0;
+      const now = Date.now();
+      return (data || []).filter((l) => l.next_due_at && new Date(l.next_due_at).getTime() < now).length;
+    },
+    enabled: !!currentUser,
+    refetchInterval: 60000,
+    retry: false,
+  });
+
   const { data: pendingTasksCount = 0 } = useQuery({
     queryKey: ['pendingTasksCount', teamMember?.id],
     queryFn: async () => {
@@ -584,7 +600,13 @@ export default function Layout({ children, currentPageName }) {
               // Badge counts per sub-item, so the collapsed module shows the sum
               // rather than only the task count it used to hardcode.
               const badgeFor = (href) =>
-                href === 'MyTasks' ? pendingTasksCount : href === 'Inbox' ? inboxUnread : 0;
+                href === 'MyTasks' ? pendingTasksCount
+                : href === 'Inbox' ? inboxUnread
+                // A five-minute SLA that is only visible once you have already
+                // opened the page is not an SLA. This is the count of leads
+                // already past due, which is the number a CSR must not miss.
+                : href === 'LeadQueue' ? leadsPastDue
+                : 0;
               const moduleUnread = item.subItems.reduce((n, s) => n + badgeFor(s.href), 0);
 
               return (

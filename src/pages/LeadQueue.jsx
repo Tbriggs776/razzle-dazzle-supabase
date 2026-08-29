@@ -359,6 +359,11 @@ export default function LeadQueue() {
 
   // "Book" is the existing path, not a new one: a Checklist 2.0 pre-filled from
   // the lead, which is what create_appointment_from_checklist converts.
+  //
+  // The lead never leaves the queue by being stamped here — lead_queue() derives
+  // "booked" from an appointment pointing at this lead, so it disappears when the
+  // checklist actually converts, and not a moment earlier. Starting a checklist
+  // and abandoning it correctly leaves the lead on the board.
   const book = async (lead) => {
     setBooking(lead.lead_id);
     try {
@@ -367,7 +372,10 @@ export default function LeadQueue() {
         customer_last_name: lead.last_name || '',
         customer_email: lead.email || '',
         customer_phone: lead.phone || '',
+        customer_street: lead.address_line1 || '',
         city: lead.city || '',
+        state: lead.state || '',
+        postal_code: lead.zip || '',
       });
       window.location.href = `${createPageUrl('ChecklistV2Detail')}?id=${checklist.id}`;
     } catch (e) {
