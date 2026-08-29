@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import ReactQuill from 'react-quill';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';

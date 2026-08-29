@@ -35,6 +35,18 @@ export default [
       "unused-imports": pluginUnusedImports,
     },
     rules: {
+      // `...pluginJs.configs.recommended` above brings a `rules` key, and this
+      // object replaces it wholesale — so every recommended rule, no-undef
+      // included, was silently switched off. That is not academic: it let two
+      // real bugs ship. Settings.jsx used createPageUrl without importing it,
+      // which threw during render and left the whole app a white screen (React
+      // unmounts the tree on an unhandled render error, so the crash looks like
+      // a blank page rather than a broken panel). PreInstallChecklistModal used
+      // `base44` without importing it, so saving a customer's signature threw.
+      //
+      // Neither `vite build` nor the rest of this config can catch that class:
+      // an undefined identifier is perfectly valid JavaScript until it runs.
+      "no-undef": "error",
       "no-unused-vars": "off",
       "react/jsx-uses-vars": "error",
       "react/jsx-uses-react": "error",
