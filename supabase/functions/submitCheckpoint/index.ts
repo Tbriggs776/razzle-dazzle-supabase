@@ -530,6 +530,27 @@ async function canParticipate(req: Request): Promise<boolean> {
   return !!(isAdmin || journey || projects);
 }
 
+// PER-PROJECT, at last. When this was written there was no crew-to-project
+// relationship in the schema, so "is this YOUR job?" was not a question that could
+// be asked and the check had to stay module-level. 0092/0093 added the identity
+// layer, so a subcontractor crew is now authorised for THE JOBS THEY ARE ON and
+// nothing else — which is the whole point, since a crew member holds no staff
+// module and would otherwise be refused outright.
+//
+// Returns false when the project has no installer assigned, which is every project
+// today, so this can only ever GRANT access a staff member already had.
+async function installerOnProject(req: Request, projectId: string): Promise<boolean> {
+  if (!projectId) return false;
+  const jwt = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!jwt) return false;
+  const asUser = createClient(SUPABASE_URL, ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${jwt}` } },
+    auth: { persistSession: false },
+  });
+  const { data } = await asUser.rpc('installer_on_project', { p_project_id: projectId });
+  return data === true;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
 
@@ -562,7 +583,9 @@ Deno.serve(async (req) => {
     // which is the actual hole, and breaks nobody who legitimately uses the
     // screen. Per-project scoping belongs with the subcontractor portal, when
     // crew membership actually exists to check against.
-    if (!isInternal && !APPROVAL_ACTIONS.has(body.action) && !(await canParticipate(req))) {
+    if (!isInternal && !APPROVAL_ACTIONS.has(body.action)
+        && !(await canParticipate(req))
+        && !(await installerOnProject(req, body.project_id))) {
       return Response.json(
         { error: 'Not authorized to submit checkpoints for this project' },
         { status: 403, headers: cors },
