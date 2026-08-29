@@ -80,7 +80,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
     try {
       const newImages = await Promise.all(files.map(async (file) => {
         const shrunk = await compressImage(file);
-        const { file_url } = await base44.integrations.Core.UploadFile({ file: shrunk });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file: shrunk, prefix: 'projects' });
         if (!file_url) throw new Error('the upload returned no file');
         return { url: file_url, description: '' };
       }));
@@ -110,7 +110,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
     let uploaded;
     try {
       uploaded = await Promise.all(selected.map(async (file) => {
-        const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file });
+        const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file, prefix: 'projects' });
         if (!fileUrl) throw new Error('the upload returned no file');
         return { url: fileUrl, name: file.name };
       }));

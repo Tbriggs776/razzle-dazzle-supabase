@@ -112,7 +112,7 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
     // in the customer's house, with no way back except reloading the page.
     try {
       const shrunk = await compressImage(file);
-      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file: shrunk });
+      const { file_url: fileUrl } = await base44.integrations.Core.UploadFile({ file: shrunk, prefix: 'projects' });
       if (!fileUrl) throw new Error('the upload returned no file');
       setImages(prev => [...prev, fileUrl]);
     } catch (err) {

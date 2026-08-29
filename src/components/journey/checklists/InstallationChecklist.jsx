@@ -39,7 +39,7 @@ function PhotoUpload({ label, photos, onChange, disabled, required, missing }) {
       // Camera originals are 3-12MB each and this asks for several. On a job site
       // that is minutes per photo, and the usual failure is the crew giving up.
       const shrunk = await compressImage(file);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: shrunk });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: shrunk, prefix: 'journey' });
       if (!file_url) throw new Error('the upload returned no file');
       onChange([...photos, file_url]);
     } catch (err) {

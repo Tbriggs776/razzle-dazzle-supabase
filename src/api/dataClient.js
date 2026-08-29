@@ -704,10 +704,26 @@ const functions = {
 // ---------------------------------------------------------------------------
 const integrations = {
   Core: {
-    async UploadFile({ file } = {}) {
+    /**
+     * @param {File}   file
+     * @param {string} [prefix]  module folder, e.g. 'journey' | 'projects' | 'sales'
+     *
+     * The prefix exists so the storage policy has something to key on. Every
+     * upload used to land in `uploads/<date>/<uuid>.<ext>` — a date and nothing
+     * else — which meant a crew photo, a recorded sales appointment and a signed
+     * inspection report were indistinguishable at the path level. That is why the
+     * bucket could only ever be all-readable or all-closed: there was no
+     * information in the key to write a rule against.
+     *
+     * Callers that pass no prefix keep landing in the legacy date folder, which
+     * the policy treats as staff-only. New module-prefixed paths are readable by
+     * whoever can view that module.
+     */
+    async UploadFile({ file, prefix } = {}) {
       if (!file) return { file_url: null };
       const ext = (file.name?.split('.').pop() || 'bin').toLowerCase();
-      const path = `${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${ext}`;
+      const folder = /^[a-z_]+$/.test(prefix || '') ? `${prefix}/` : '';
+      const path = `${folder}${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from('uploads').upload(path, file, {
         cacheControl: '3600',
         upsert: false,
