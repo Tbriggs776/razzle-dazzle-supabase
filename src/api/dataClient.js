@@ -500,6 +500,11 @@ const RPC_FUNCTIONS = {
   // The Job Start Checklist is often opened by a subcontract installer whose
   // role cannot read the payment ledger, so this must never become a table read.
   installCollectionStatus: (p) => ['install_collection_status', { p_project_id: p.projectId }],
+  // Both gated on the assignable 'cod_exception' permission (or org admin).
+  // A waiver is what makes enforcement survivable: a stop with no remedy is a
+  // stop people route around.
+  waiveCodHold:            (p) => ['waive_cod_hold', { p_project_id: p.projectId, p_reason: p.reason }],
+  resolveWorkflowException:(p) => ['resolve_workflow_exception', { p_id: p.id, p_note: p.note ?? null }],
   // Admin e-sign config (is_org_admin gated server-side).
   adminGetEsignTypes: () => ['admin_get_esign_types', {}],
   adminSetEsignType: (p) => ['admin_set_esign_type', {

@@ -188,26 +188,15 @@ async function handle(s: any, body: any, user: any): Promise<{ status: number; b
           // two different numbers for one hold.
           amountDue = Math.max(0, Number(bal.balance_due) || 0);
 
-          // Idempotent: one open exception per project (partial unique index).
-          const { data: open } = await s.from('workflow_exception')
-            .select('id').eq('code', 'E9_COD_UNCOLLECTED')
-            .eq('subject_type', 'project').eq('subject_id', project_id)
-            .is('resolved_at', null).maybeSingle();
-          // No dollar figures in the detail. workflow_exception is readable by
-          // every ops role, which is wider than the payment ledger's own RLS —
-          // writing the balance and contract total here published them to
-          // people RLS deliberately denies the ledger to. Whoever is entitled to
-          // the number reads it from sale_balance.
-          const detail = `Install started with a balance outstanding. Terms: ${bal.collection_terms || 'cod'}. Observe-only — the crew was NOT stopped.`;
-          if (open) {
-            await s.from('workflow_exception')
-              .update({ last_seen_at: nowIso, detail }).eq('id', open.id);
-          } else {
-            await s.from('workflow_exception').insert({
-              code: 'E9_COD_UNCOLLECTED', subject_type: 'project', subject_id: project_id,
-              detail, severity: 'crit', first_seen_at: nowIso, last_seen_at: nowIso,
-            });
-          }
+          // The exception row is NOT written here. The trg_checkpoint_cod_gate
+          // trigger on project_checkpoint already wrote it during upsertCheckpoint
+          // above, and it is the single writer on purpose: this Edge Function is
+          // only one of two doors into project_checkpoint — the projects UI
+          // PATCHes the row directly through PostgREST. Duplicating the write
+          // here would mean two definitions of the same decision.
+          //
+          // What stays here is the UX the trigger cannot do: the response flag
+          // and the notifications.
 
           // Tell the people who own collection, not the crew in the driveway.
           // Wording is deliberately "balance"/"COD", never "payment" — in this
