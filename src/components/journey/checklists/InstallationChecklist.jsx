@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { compressImage } from '@/lib/compressImage';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, CheckCircle2, XCircle, Layers } from 'lucide-react';
@@ -113,6 +114,7 @@ function Section({ title, icon: Icon, children, warning, accent }) {
 }
 
 export default function InstallationChecklist({ checkpoint, projectId, installerMode }) {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -213,27 +215,27 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
       )}
 
       {/* Installation — All Floor Types */}
-      <Section title="Installation — All Floor Types" icon={CheckCircle2}>
-        <ChecklistRow label="Did you confirm the product and layout with the homeowner? (If they are home)" required checked={data.install_core.product_layout_confirmed} missing={submitAttempted && missing.product_layout_confirmed} onChange={v => update('install_core', 'product_layout_confirmed', v)} disabled={readOnly} />
-        <PhotoUpload label="Take photos during installation" required missing={submitAttempted && missing.install_photos} photos={data.install_core.install_photos} onChange={urls => update('install_core', 'install_photos', urls)} disabled={readOnly} />
-        <ChecklistRow label="Is the work area cleaned at the end of every day?" required checked={data.install_core.work_area_cleaned_daily} missing={submitAttempted && missing.work_area_cleaned_daily} onChange={v => update('install_core', 'work_area_cleaned_daily', v)} disabled={readOnly} />
+      <Section title={t('ickSecAll')} icon={CheckCircle2}>
+        <ChecklistRow label={t('ickConfirmLayout')} required checked={data.install_core.product_layout_confirmed} missing={submitAttempted && missing.product_layout_confirmed} onChange={v => update('install_core', 'product_layout_confirmed', v)} disabled={readOnly} />
+        <PhotoUpload label={t('ickProgressPhotos')} required missing={submitAttempted && missing.install_photos} photos={data.install_core.install_photos} onChange={urls => update('install_core', 'install_photos', urls)} disabled={readOnly} />
+        <ChecklistRow label={t('ickDailyClean')} required checked={data.install_core.work_area_cleaned_daily} missing={submitAttempted && missing.work_area_cleaned_daily} onChange={v => update('install_core', 'work_area_cleaned_daily', v)} disabled={readOnly} />
       </Section>
 
       {/* Installation — Hard Surface (LVP / Laminate / Wood) */}
       <Section
-        title="Installation — Hard Surface (LVP / Laminate / Wood)"
+        title={t('ickSecHard')}
         icon={CheckCircle2}
         warning={isEditable && data.install_hard_surface.applies && !expansionGateMet}
       >
         <div className="ml-6 p-3 bg-muted rounded-lg">
-          <ChecklistRow label="Does this apply to this job?" checked={data.install_hard_surface.applies} onChange={v => update('install_hard_surface', 'applies', v)} disabled={readOnly} />
+          <ChecklistRow label={t('ickApplies')} checked={data.install_hard_surface.applies} onChange={v => update('install_hard_surface', 'applies', v)} disabled={readOnly} />
         </div>
         {data.install_hard_surface.applies && (
           <>
-            <ChecklistRow label="Are expansion gaps correct around the whole edge and around all fixed objects? (Follow the spec)" required checked={data.install_hard_surface.expansion_gaps_correct} missing={submitAttempted && missing.expansion_gaps_correct} onChange={v => update('install_hard_surface', 'expansion_gaps_correct', v)} disabled={readOnly} />
+            <ChecklistRow label={t('ickExpansionGaps')} required checked={data.install_hard_surface.expansion_gaps_correct} missing={submitAttempted && missing.expansion_gaps_correct} onChange={v => update('install_hard_surface', 'expansion_gaps_correct', v)} disabled={readOnly} />
             <div className={cn("rounded-lg p-3", !expansionGateMet ? "bg-crit/10 border border-crit/30" : "bg-muted")}>
               <PhotoUpload
-                label="⛔ Upload photos of your expansion gaps / spacers — HARD UPLOAD GATE"
+                label={t('ickGapPhotos')}
                 photos={data.install_hard_surface.expansion_gap_photos}
                 onChange={urls => update('install_hard_surface', 'expansion_gap_photos', urls)}
                 disabled={readOnly}
@@ -247,16 +249,16 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
                 <p className="text-xs text-good mt-1">✓ Photos uploaded — gate cleared.</p>
               )}
             </div>
-            <ChecklistRow label="For laminate runs over 1,000 sq ft: Are T-molding transitions placed where required?" required checked={data.install_hard_surface.t_molding_transitions} missing={submitAttempted && missing.t_molding_transitions} onChange={v => update('install_hard_surface', 't_molding_transitions', v)} disabled={readOnly} />
-            <PhotoUpload label="Add photos of underlayment (if you did not already do this in prep)" photos={data.install_hard_surface.underlayment_photos} onChange={urls => update('install_hard_surface', 'underlayment_photos', urls)} disabled={readOnly} />
+            <ChecklistRow label={t('ickTMolding')} required checked={data.install_hard_surface.t_molding_transitions} missing={submitAttempted && missing.t_molding_transitions} onChange={v => update('install_hard_surface', 't_molding_transitions', v)} disabled={readOnly} />
+            <PhotoUpload label={t('ickUnderlayment')} photos={data.install_hard_surface.underlayment_photos} onChange={urls => update('install_hard_surface', 'underlayment_photos', urls)} disabled={readOnly} />
           </>
         )}
       </Section>
 
       {/* Installation — Carpet (Unlocks if the job includes carpet) */}
-      <Section title="Installation — Carpet (Unlocks if the job includes carpet)" icon={Layers}>
+      <Section title={t('ickSecCarpet')} icon={Layers}>
         <div className="ml-6 p-3 bg-muted rounded-lg">
-          <ChecklistRow label="Does this apply to this job?" checked={data.install_carpet.applies} onChange={v => update('install_carpet', 'applies', v)} disabled={readOnly} />
+          <ChecklistRow label={t('ickApplies')} checked={data.install_carpet.applies} onChange={v => update('install_carpet', 'applies', v)} disabled={readOnly} />
         </div>
         {data.install_carpet.applies && (
           <p className="text-xs text-muted-foreground pl-7">Carpet-specific checkpoints to be defined.</p>
@@ -264,9 +266,9 @@ export default function InstallationChecklist({ checkpoint, projectId, installer
       </Section>
 
       {/* Installation — Tile (Unlocks if the job includes tile) */}
-      <Section title="Installation — Tile (Unlocks if the job includes tile)" icon={Layers}>
+      <Section title={t('ickSecTile')} icon={Layers}>
         <div className="ml-6 p-3 bg-muted rounded-lg">
-          <ChecklistRow label="Does this apply to this job?" checked={data.install_tile.applies} onChange={v => update('install_tile', 'applies', v)} disabled={readOnly} />
+          <ChecklistRow label={t('ickApplies')} checked={data.install_tile.applies} onChange={v => update('install_tile', 'applies', v)} disabled={readOnly} />
         </div>
         {data.install_tile.applies && (
           <p className="text-xs text-muted-foreground pl-7">Tile-specific checkpoints to be defined.</p>

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { compressImage } from '@/lib/compressImage';
 import { invokeFailure } from '@/lib/invokeResult';
 import { draftKeyFor, loadDraft, clearDraft, useChecklistDraft } from '@/lib/checklistDraft';
@@ -118,6 +119,7 @@ function Section({ title, icon: Icon, children, warning }) {
 }
 
 export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, installerMode }) {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
 
@@ -415,12 +417,12 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
       )}
 
       {/* Section: Arrival & Presentation */}
-      <Section title="Arrival & Presentation" icon={CheckCircle2}>
-        <ChecklistRow label="Did you arrive to the job on time?" required checked={data.arrival.arrived_on_time} missing={submitAttempted && missing.arrived_on_time} onChange={v => update('arrival', 'arrived_on_time', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Are all installers wearing clean Floor Daddy shirts?" required checked={data.arrival.wearing_shirts} missing={submitAttempted && missing.wearing_shirts} onChange={v => update('arrival', 'wearing_shirts', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Did you put a Floor Daddy yard sign in the yard?" required checked={data.arrival.yard_sign_placed} missing={submitAttempted && missing.yard_sign_placed} onChange={v => update('arrival', 'yard_sign_placed', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Is your truck parked on the street, NOT in the customer's driveway? (Oil leak risk!)" required checked={data.arrival.truck_parked_properly} missing={submitAttempted && missing.truck_parked_properly} onChange={v => update('arrival', 'truck_parked_properly', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Who is the Crew Lead for this job?" required checked={data.arrival.crew_lead_confirmed} missing={submitAttempted && missing.crew_lead_confirmed} onChange={v => update('arrival', 'crew_lead_confirmed', v)} disabled={isReadOnly} />
+      <Section title={t('jscSecArrival')} icon={CheckCircle2}>
+        <ChecklistRow label={t('jscOnTime')} required checked={data.arrival.arrived_on_time} missing={submitAttempted && missing.arrived_on_time} onChange={v => update('arrival', 'arrived_on_time', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscShirts')} required checked={data.arrival.wearing_shirts} missing={submitAttempted && missing.wearing_shirts} onChange={v => update('arrival', 'wearing_shirts', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscYardSign')} required checked={data.arrival.yard_sign_placed} missing={submitAttempted && missing.yard_sign_placed} onChange={v => update('arrival', 'yard_sign_placed', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscTruck')} required checked={data.arrival.truck_parked_properly} missing={submitAttempted && missing.truck_parked_properly} onChange={v => update('arrival', 'truck_parked_properly', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscCrewLead')} required checked={data.arrival.crew_lead_confirmed} missing={submitAttempted && missing.crew_lead_confirmed} onChange={v => update('arrival', 'crew_lead_confirmed', v)} disabled={isReadOnly} />
         <div className="ml-6 grid grid-cols-1 sm:grid-cols-2 gap-3 pl-7">
           {/* htmlFor/id pairing: the labels were visually present but not
               programmatically associated, so a screen reader announced two bare
@@ -464,21 +466,21 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
       </Section>
 
       {/* Section: Protect Yourself — Take Photos First */}
-      <Section title="Protect Yourself — Take Photos First" icon={Camera}>
+      <Section title={t('jscSecPhotos')} icon={Camera}>
         <p className="text-xs text-muted-foreground italic -mt-1">Do this BEFORE you move or touch anything. These photos protect you if there is ever a problem or a claim.</p>
         <PhotoUpload label='Take a "before" video and photos of the whole work area' required missing={submitAttempted && missing.before_video_photos} photos={data.documentation.before_video_photos} onChange={urls => update('documentation', 'before_video_photos', urls)} disabled={isReadOnly} />
-        <PhotoUpload label="Take photos of all customer furniture and belongings before you move them" required missing={submitAttempted && missing.furniture_photos} photos={data.documentation.furniture_photos} onChange={urls => update('documentation', 'furniture_photos', urls)} disabled={isReadOnly} />
-        <PhotoUpload label="Take detailed photos of the refrigerator and any other appliances you will move or touch (look for dents and scratches first)" required missing={submitAttempted && missing.appliance_photos} photos={data.documentation.appliance_photos} onChange={urls => update('documentation', 'appliance_photos', urls)} disabled={isReadOnly} />
+        <PhotoUpload label={t('jscFurniturePhotos')} required missing={submitAttempted && missing.furniture_photos} photos={data.documentation.furniture_photos} onChange={urls => update('documentation', 'furniture_photos', urls)} disabled={isReadOnly} />
+        <PhotoUpload label={t('jscAppliancePhotos')} required missing={submitAttempted && missing.appliance_photos} photos={data.documentation.appliance_photos} onChange={urls => update('documentation', 'appliance_photos', urls)} disabled={isReadOnly} />
       </Section>
 
       {/* Section: Check the Job Before You Start */}
-      <Section title="Check the Job Before You Start" icon={CheckCircle2}>
-        <ChecklistRow label="Did you measure the job?" required checked={data.verification.measured_job} missing={submitAttempted && missing.measured_job} onChange={v => update('verification', 'measured_job', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Did you check all materials against the work order? (Right product, style, color, and amount)" required checked={data.verification.materials_verified} missing={submitAttempted && missing.materials_verified} onChange={v => update('verification', 'materials_verified', v)} disabled={isReadOnly} />
+      <Section title={t('jscSecVerify')} icon={CheckCircle2}>
+        <ChecklistRow label={t('jscMeasured')} required checked={data.verification.measured_job} missing={submitAttempted && missing.measured_job} onChange={v => update('verification', 'measured_job', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscMaterials')} required checked={data.verification.materials_verified} missing={submitAttempted && missing.materials_verified} onChange={v => update('verification', 'materials_verified', v)} disabled={isReadOnly} />
 
         {/* Material shortage conditional */}
         <div className="ml-6 mt-1 p-3 bg-crit/10 rounded-lg space-y-2">
-          <ChecklistRow label="⛔ Is any material missing or wrong? → Stop. Tell your Field Manager before you start." checked={data.verification.material_shortage} onChange={v => update('verification', 'material_shortage', v)} disabled={isReadOnly} />
+          <ChecklistRow label={t('jscShortage')} checked={data.verification.material_shortage} onChange={v => update('verification', 'material_shortage', v)} disabled={isReadOnly} />
           {data.verification.material_shortage && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-7">
               <div className="space-y-1">
@@ -495,17 +497,17 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
           )}
         </div>
 
-        <ChecklistRow label="Do all work areas match the work order?" required checked={data.verification.work_areas_verified} missing={submitAttempted && missing.work_areas_verified} onChange={v => update('verification', 'work_areas_verified', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Did you read the work order for special instructions or patterns?" required checked={data.verification.special_instructions_reviewed} missing={submitAttempted && missing.special_instructions_reviewed} onChange={v => update('verification', 'special_instructions_reviewed', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Are the transitions, stair materials, and quarter round / shoe molding on site?" required checked={data.verification.transitions_confirmed} missing={submitAttempted && missing.transitions_confirmed} onChange={v => update('verification', 'transitions_confirmed', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Did you confirm the furniture plan with the customer?" required checked={data.verification.furniture_plan_confirmed} missing={submitAttempted && missing.furniture_plan_confirmed} onChange={v => update('verification', 'furniture_plan_confirmed', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscWorkAreas')} required checked={data.verification.work_areas_verified} missing={submitAttempted && missing.work_areas_verified} onChange={v => update('verification', 'work_areas_verified', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscSpecialInstructions')} required checked={data.verification.special_instructions_reviewed} missing={submitAttempted && missing.special_instructions_reviewed} onChange={v => update('verification', 'special_instructions_reviewed', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscTransitions')} required checked={data.verification.transitions_confirmed} missing={submitAttempted && missing.transitions_confirmed} onChange={v => update('verification', 'transitions_confirmed', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscFurniturePlan')} required checked={data.verification.furniture_plan_confirmed} missing={submitAttempted && missing.furniture_plan_confirmed} onChange={v => update('verification', 'furniture_plan_confirmed', v)} disabled={isReadOnly} />
       </Section>
 
       {/* Section: Safety — Asbestos (STOP) */}
-      <Section title="Safety — Asbestos (STOP)" icon={ShieldAlert} warning>
-        <ChecklistRow label="Did you check the home for asbestos?" checked={data.safety.asbestos_checked} onChange={v => update('safety', 'asbestos_checked', v)} disabled={isReadOnly} />
+      <Section title={t('jscSecAsbestos')} icon={ShieldAlert} warning>
+        <ChecklistRow label={t('jscAsbestosChecked')} checked={data.safety.asbestos_checked} onChange={v => update('safety', 'asbestos_checked', v)} disabled={isReadOnly} />
         <div className="ml-6 mt-1 p-3 bg-crit/10 rounded-lg">
-          <ChecklistRow label="⛔ Do you think there is asbestos? → STOP the job right away. Do not cut, sand, or move it. Call your Field Manager now." checked={data.safety.asbestos_suspected} onChange={v => update('safety', 'asbestos_suspected', v)} disabled={isReadOnly} />
+          <ChecklistRow label={t('jscAsbestosSuspected')} checked={data.safety.asbestos_suspected} onChange={v => update('safety', 'asbestos_suspected', v)} disabled={isReadOnly} />
           {data.safety.asbestos_suspected && (
             <p className="text-xs text-crit pl-7 mt-1">
               Installation stops until customer engages a licensed abatement company and provides a clearance certificate. Per signed acknowledgment, Floor Daddy does not proceed.
@@ -515,12 +517,12 @@ export default function JobStartChecklist({ checkpoint, projectId, onSubmitted, 
       </Section>
 
       {/* Section: Site Care */}
-      <Section title="Site Care" icon={CheckCircle2}>
-        <PhotoUpload label="Did you take photos of everything covered before demo?" required missing={submitAttempted && missing.coverings_photos} photos={data.site_care.coverings_photos} onChange={urls => update('site_care', 'coverings_photos', urls)} disabled={isReadOnly} />
-        <ChecklistRow label="Did you demo carefully and leave one working toilet for the customer?" required checked={data.site_care.careful_demolition} missing={submitAttempted && missing.careful_demolition} onChange={v => update('site_care', 'careful_demolition', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Trash plan: Never use the customer's trash can. Take all trash to the warehouse dumpster or the dump." required checked={data.site_care.trash_plan_acknowledged} missing={submitAttempted && missing.trash_plan_acknowledged} onChange={v => update('site_care', 'trash_plan_acknowledged', v)} disabled={isReadOnly} />
-        <ChecklistRow label="Respect the home: Take breaks the right way. Never sit on customer furniture. Never take gifts. Never move personal items unless the furniture plan says so." required checked={data.site_care.conduct_standards_acknowledged} missing={submitAttempted && missing.conduct_standards_acknowledged} onChange={v => update('site_care', 'conduct_standards_acknowledged', v)} disabled={isReadOnly} />
-        <PhotoUpload label="Did you take photos during demo?" required missing={submitAttempted && missing.demo_photos} photos={data.site_care.demo_photos} onChange={urls => update('site_care', 'demo_photos', urls)} disabled={isReadOnly} />
+      <Section title={t('jscSecSiteCare')} icon={CheckCircle2}>
+        <PhotoUpload label={t('jscCoverPhotos')} required missing={submitAttempted && missing.coverings_photos} photos={data.site_care.coverings_photos} onChange={urls => update('site_care', 'coverings_photos', urls)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscCarefulDemo')} required checked={data.site_care.careful_demolition} missing={submitAttempted && missing.careful_demolition} onChange={v => update('site_care', 'careful_demolition', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscTrashPlan')} required checked={data.site_care.trash_plan_acknowledged} missing={submitAttempted && missing.trash_plan_acknowledged} onChange={v => update('site_care', 'trash_plan_acknowledged', v)} disabled={isReadOnly} />
+        <ChecklistRow label={t('jscConduct')} required checked={data.site_care.conduct_standards_acknowledged} missing={submitAttempted && missing.conduct_standards_acknowledged} onChange={v => update('site_care', 'conduct_standards_acknowledged', v)} disabled={isReadOnly} />
+        <PhotoUpload label={t('jscDemoPhotos')} required missing={submitAttempted && missing.demo_photos} photos={data.site_care.demo_photos} onChange={urls => update('site_care', 'demo_photos', urls)} disabled={isReadOnly} />
       </Section>
 
       {/* Actions */}

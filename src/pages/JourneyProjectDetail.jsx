@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, User, Calendar, Loader2, Building2, HardHat } from 'lucide-react';
+import { ArrowLeft, MapPin, User, Calendar, Loader2, Building2, HardHat, Globe } from 'lucide-react';
 import CheckpointProgressTracker from '@/components/journey/CheckpointProgressTracker';
 import JobStartChecklist from '@/components/journey/checklists/JobStartChecklist';
 import PreInstallChecklistView from '@/components/journey/checklists/PreInstallChecklistView';
@@ -12,7 +13,7 @@ import InstallationChecklist from '@/components/journey/checklists/InstallationC
 import { LanguageProvider, useLanguage } from '@/lib/i18n/LanguageContext';
 
 function JourneyProjectDetailInner() {
-  const { t } = useLanguage();
+  const { t, language, changeLanguage } = useLanguage();
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   // Accept BOTH names. The page only ever read `project_id`, but seven link sites
@@ -152,10 +153,35 @@ function JourneyProjectDetailInner() {
       {/* Header */}
       <div className="bg-card border-b border-border px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-4xl mx-auto">
-          <Link to={installerMode ? "/Journey?view=installer" : "/Journey"} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3">
-            <ArrowLeft className="w-4 h-4" />
-            {installerMode ? t('jpdBackInstaller') : t('jpdBackJourney')}
-          </Link>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <Link to={installerMode ? "/Journey?view=installer" : "/Journey"} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="w-4 h-4" />
+              {installerMode ? t('jpdBackInstaller') : t('jpdBackJourney')}
+            </Link>
+
+            {/* The EN/ES toggle lived ONLY in the Journey sidebar — but the crew's
+                assignment SMS deep-links straight to THIS page, so a Spanish-speaking
+                installer arrived on the one screen that had no way to switch, and the
+                checklist below is the whole job. 44px targets, because this is used
+                on a phone. */}
+            <div className="flex shrink-0 items-center gap-1">
+              <Globe className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              {['en', 'es'].map((lng) => (
+                <button
+                  key={lng}
+                  type="button"
+                  onClick={() => changeLanguage(lng)}
+                  aria-pressed={language === lng}
+                  className={cn(
+                    'min-h-11 min-w-11 rounded px-2 text-[11px] font-medium transition-all',
+                    language === lng ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary',
+                  )}
+                >
+                  {lng.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>

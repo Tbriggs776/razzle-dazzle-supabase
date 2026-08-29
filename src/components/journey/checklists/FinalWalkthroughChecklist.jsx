@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { compressImage } from '@/lib/compressImage';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Send, CheckCircle2, XCircle, Lock, ShieldCheck, DollarSign, Star, FileSignature, ClipboardCheck, Layers } from 'lucide-react';
@@ -121,6 +122,7 @@ function Section({ title, icon: Icon, children, warning, accent }) {
 }
 
 export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSubmitted, installerMode }) {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -366,9 +368,9 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       )}
 
       {/* Pre-Final */}
-      <Section title="Pre-Final" icon={ClipboardCheck}>
+      <Section title={t('fwcSecPreFinal')} icon={ClipboardCheck}>
         <ChecklistRow
-          label="Notified Field Manager the day before finishing to schedule the final walk"
+          label={t('fwcNotifyFM')}
           required
           checked={data.pre_final.fm_notified_day_before}
           missing={submitAttempted && missing.fm_notified_day_before}
@@ -376,7 +378,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
           disabled={readOnly}
         />
         <ChecklistRow
-          label="Customer notified: Your project is nearing completion. A final walkthrough is being scheduled."
+          label={t('fwcNotifyCustomer')}
           required
           checked={data.pre_final.customer_notified_nearing_completion}
           missing={submitAttempted && missing.customer_notified_nearing_completion}
@@ -386,22 +388,22 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       </Section>
 
       {/* Quality Closeout — Shared Core */}
-      <Section title="Quality Closeout — Shared Core (All Product Types)" icon={CheckCircle2}>
-        <ChecklistRow label="All work areas cleaned before leaving" required checked={data.closeout_core.work_areas_cleaned} missing={submitAttempted && missing.work_areas_cleaned} onChange={v => update('closeout_core', 'work_areas_cleaned', v)} disabled={readOnly} />
-        <PhotoUpload label="Final photos of completed project (per area)" required missing={submitAttempted && missing.final_photos} photos={data.closeout_core.final_photos} onChange={urls => update('closeout_core', 'final_photos', urls)} disabled={readOnly} />
+      <Section title={t('fwcSecShared')} icon={CheckCircle2}>
+        <ChecklistRow label={t('fwcAreasClean')} required checked={data.closeout_core.work_areas_cleaned} missing={submitAttempted && missing.work_areas_cleaned} onChange={v => update('closeout_core', 'work_areas_cleaned', v)} disabled={readOnly} />
+        <PhotoUpload label={t('fwcFinalPhotos')} required missing={submitAttempted && missing.final_photos} photos={data.closeout_core.final_photos} onChange={urls => update('closeout_core', 'final_photos', urls)} disabled={readOnly} />
       </Section>
 
       {/* Quality Closeout — Hard Surface */}
-      <Section title="Quality Closeout — Hard Surface (LVP / Laminate / Wood)" icon={CheckCircle2}>
+      <Section title={t('fwcSecHard')} icon={CheckCircle2}>
         <div className="ml-6 p-3 bg-muted rounded-lg">
-          <ChecklistRow label="Applies to this job?" checked={data.closeout_hard_surface.applies} onChange={v => update('closeout_hard_surface', 'applies', v)} disabled={readOnly} />
+          <ChecklistRow label={t('fwcApplies')} checked={data.closeout_hard_surface.applies} onChange={v => update('closeout_hard_surface', 'applies', v)} disabled={readOnly} />
         </div>
         {data.closeout_hard_surface.applies && (
           <>
-            <ChecklistRow label="Baseboards completed correctly" required checked={data.closeout_hard_surface.baseboards_completed} missing={submitAttempted && missing.baseboards_completed} onChange={v => update('closeout_hard_surface', 'baseboards_completed', v)} disabled={readOnly} />
-            <ChecklistRow label="Transitions / T-moldings seated correctly" required checked={data.closeout_hard_surface.transitions_seated} missing={submitAttempted && missing.transitions_seated} onChange={v => update('closeout_hard_surface', 'transitions_seated', v)} disabled={readOnly} />
+            <ChecklistRow label={t('fwcBaseboards')} required checked={data.closeout_hard_surface.baseboards_completed} missing={submitAttempted && missing.baseboards_completed} onChange={v => update('closeout_hard_surface', 'baseboards_completed', v)} disabled={readOnly} />
+            <ChecklistRow label={t('fwcTransitions')} required checked={data.closeout_hard_surface.transitions_seated} missing={submitAttempted && missing.transitions_seated} onChange={v => update('closeout_hard_surface', 'transitions_seated', v)} disabled={readOnly} />
             <ChecklistRow
-              label="Door re-hung where possible"
+              label={t('fwcDoors')}
               required
               checked={data.closeout_hard_surface.door_rehung}
               missing={submitAttempted && missing.door_rehung}
@@ -418,9 +420,9 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       </Section>
 
       {/* Quality Closeout — Carpet (placeholder) */}
-      <Section title="Quality Closeout — Carpet Module" icon={Layers}>
+      <Section title={t('fwcSecCarpet')} icon={Layers}>
         <div className="ml-6 p-3 bg-muted rounded-lg">
-          <ChecklistRow label="Applies to this job?" checked={data.closeout_carpet.applies} onChange={v => update('closeout_carpet', 'applies', v)} disabled={readOnly} />
+          <ChecklistRow label={t('fwcApplies')} checked={data.closeout_carpet.applies} onChange={v => update('closeout_carpet', 'applies', v)} disabled={readOnly} />
         </div>
         {data.closeout_carpet.applies && (
           <p className="text-xs text-muted-foreground pl-7">To be defined: tack strip / smooth-edge install, pad/cushion verification, seam placement + seam-iron quality, stretch/power-stretch verification, transition placement.</p>
@@ -428,9 +430,9 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       </Section>
 
       {/* Quality Closeout — Tile (placeholder) */}
-      <Section title="Quality Closeout — Tile Module" icon={Layers}>
+      <Section title={t('fwcSecTile')} icon={Layers}>
         <div className="ml-6 p-3 bg-muted rounded-lg">
-          <ChecklistRow label="Applies to this job?" checked={data.closeout_tile.applies} onChange={v => update('closeout_tile', 'applies', v)} disabled={readOnly} />
+          <ChecklistRow label={t('fwcApplies')} checked={data.closeout_tile.applies} onChange={v => update('closeout_tile', 'applies', v)} disabled={readOnly} />
         </div>
         {data.closeout_tile.applies && (
           <p className="text-xs text-muted-foreground pl-7">To be defined: grout joint size + tile spacing per manufacturer spec, layout/pattern verification, 12-hour no-foot-traffic window after setting, 12-hour window after grouting, mortar coverage check.</p>
@@ -438,39 +440,39 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       </Section>
 
       {/* Walkthrough (all parties present) */}
-      <Section title="Walkthrough (All Parties Present)" icon={ClipboardCheck}>
-        <ChecklistRow label="Installer / crew lead present" required checked={data.walkthrough.installer_present} missing={submitAttempted && missing.installer_present} onChange={v => update('walkthrough', 'installer_present', v)} disabled={readOnly} />
-        <ChecklistRow label="Floor Daddy Field Manager present (onsite)" required checked={data.walkthrough.fm_present} missing={submitAttempted && missing.fm_present} onChange={v => update('walkthrough', 'fm_present', v)} disabled={readOnly} />
-        <ChecklistRow label="Customer present" required checked={data.walkthrough.customer_present} missing={submitAttempted && missing.customer_present} onChange={v => update('walkthrough', 'customer_present', v)} disabled={readOnly} />
+      <Section title={t('fwcSecWalk')} icon={ClipboardCheck}>
+        <ChecklistRow label={t('fwcInstallerPresent')} required checked={data.walkthrough.installer_present} missing={submitAttempted && missing.installer_present} onChange={v => update('walkthrough', 'installer_present', v)} disabled={readOnly} />
+        <ChecklistRow label={t('fwcFMPresent')} required checked={data.walkthrough.fm_present} missing={submitAttempted && missing.fm_present} onChange={v => update('walkthrough', 'fm_present', v)} disabled={readOnly} />
+        <ChecklistRow label={t('fwcCustomerPresent')} required checked={data.walkthrough.customer_present} missing={submitAttempted && missing.customer_present} onChange={v => update('walkthrough', 'customer_present', v)} disabled={readOnly} />
         <div className="ml-6 p-3 bg-muted rounded-lg space-y-2">
-          <ChecklistRow label="Blue-tape walkthrough completed" required checked={data.walkthrough.blue_tape_walkthrough_completed} missing={submitAttempted && missing.blue_tape_walkthrough_completed} onChange={v => update('walkthrough', 'blue_tape_walkthrough_completed', v)} disabled={readOnly} />
+          <ChecklistRow label={t('fwcBlueTape')} required checked={data.walkthrough.blue_tape_walkthrough_completed} missing={submitAttempted && missing.blue_tape_walkthrough_completed} onChange={v => update('walkthrough', 'blue_tape_walkthrough_completed', v)} disabled={readOnly} />
           {data.walkthrough.blue_tape_walkthrough_completed && (
-            <PhotoUpload label="Blue-tape items photographed" required missing={submitAttempted && missing.blue_tape_photos} photos={data.walkthrough.blue_tape_photos} onChange={urls => update('walkthrough', 'blue_tape_photos', urls)} disabled={readOnly} />
+            <PhotoUpload label={t('fwcBlueTapePhotos')} required missing={submitAttempted && missing.blue_tape_photos} photos={data.walkthrough.blue_tape_photos} onChange={urls => update('walkthrough', 'blue_tape_photos', urls)} disabled={readOnly} />
           )}
         </div>
-        <ChecklistRow label="Punch list created" required checked={data.walkthrough.punch_list_created} missing={submitAttempted && missing.punch_list_created} onChange={v => update('walkthrough', 'punch_list_created', v)} disabled={readOnly} />
+        <ChecklistRow label={t('fwcPunchCreated')} required checked={data.walkthrough.punch_list_created} missing={submitAttempted && missing.punch_list_created} onChange={v => update('walkthrough', 'punch_list_created', v)} disabled={readOnly} />
         <div className="ml-6 p-3 bg-muted rounded-lg space-y-2">
-          <ChecklistRow label="Punch list completed" required checked={data.walkthrough.punch_list_completed} missing={submitAttempted && missing.punch_list_completed} onChange={v => update('walkthrough', 'punch_list_completed', v)} disabled={readOnly} />
+          <ChecklistRow label={t('fwcPunchCompleted')} required checked={data.walkthrough.punch_list_completed} missing={submitAttempted && missing.punch_list_completed} onChange={v => update('walkthrough', 'punch_list_completed', v)} disabled={readOnly} />
           {data.walkthrough.punch_list_completed && (
-            <PhotoUpload label="Completed punch-list items photographed" required missing={submitAttempted && missing.punch_list_photos} photos={data.walkthrough.punch_list_photos} onChange={urls => update('walkthrough', 'punch_list_photos', urls)} disabled={readOnly} />
+            <PhotoUpload label={t('fwcPunchPhotos')} required missing={submitAttempted && missing.punch_list_photos} photos={data.walkthrough.punch_list_photos} onChange={urls => update('walkthrough', 'punch_list_photos', urls)} disabled={readOnly} />
           )}
         </div>
       </Section>
 
       {/* Materials & Site */}
-      <Section title="Materials & Site" icon={ClipboardCheck}>
-        <ChecklistRow label="Leftover materials returned to Floor Daddy warehouse" required checked={data.materials_site.leftover_materials_returned} missing={submitAttempted && missing.leftover_materials_returned} onChange={v => update('materials_site', 'leftover_materials_returned', v)} disabled={readOnly} />
-        <ChecklistRow label="All trash disposed of properly (warehouse dumpster or dump — never customer's bins)" required checked={data.materials_site.trash_disposed} missing={submitAttempted && missing.trash_disposed} onChange={v => update('materials_site', 'trash_disposed', v)} disabled={readOnly} />
-        <ChecklistRow label="Opened-carton remainder left for customer per policy" required checked={data.materials_site.opened_carton_left} missing={submitAttempted && missing.opened_carton_left} onChange={v => update('materials_site', 'opened_carton_left', v)} disabled={readOnly} />
+      <Section title={t('fwcSecMaterials')} icon={ClipboardCheck}>
+        <ChecklistRow label={t('fwcLeftovers')} required checked={data.materials_site.leftover_materials_returned} missing={submitAttempted && missing.leftover_materials_returned} onChange={v => update('materials_site', 'leftover_materials_returned', v)} disabled={readOnly} />
+        <ChecklistRow label={t('fwcTrash')} required checked={data.materials_site.trash_disposed} missing={submitAttempted && missing.trash_disposed} onChange={v => update('materials_site', 'trash_disposed', v)} disabled={readOnly} />
+        <ChecklistRow label={t('fwcOpenCarton')} required checked={data.materials_site.opened_carton_left} missing={submitAttempted && missing.opened_carton_left} onChange={v => update('materials_site', 'opened_carton_left', v)} disabled={readOnly} />
       </Section>
 
       {/* Customer Sign-Off */}
-      <Section title="Customer Sign-Off" icon={FileSignature} warning={!customerSignoffGateMet && isInstallerPhase} accent={customerSignoffGateMet}>
+      <Section title={t('fwcSecSignoff')} icon={FileSignature} warning={!customerSignoffGateMet && isInstallerPhase} accent={customerSignoffGateMet}>
         {!customerSignoffGateMet && isInstallerPhase && (
           <p className="text-xs text-crit font-medium">⚠️ GATE: Certificate of Completion must be signed by customer before submitting.</p>
         )}
         <ChecklistRow
-          label="Certificate of Completion signed by customer"
+          label={t('fwcCertificate')}
           required
           checked={data.customer_signoff.certificate_signed}
           missing={submitAttempted && missing.certificate_signed}
@@ -479,7 +481,7 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
         />
         <div className="ml-6 p-3 bg-muted rounded-lg">
           <ChecklistRow
-            label="On financed jobs — signer validated to match contract signer"
+            label={t('fwcSignerMatch')}
             checked={data.customer_signoff.signer_matches_contract}
             onChange={v => update('customer_signoff', 'signer_matches_contract', v)}
             disabled={readOnly}
@@ -489,9 +491,9 @@ export default function FinalWalkthroughChecklist({ checkpoint, projectId, onSub
       </Section>
 
       {/* Five-Star Review */}
-      <Section title="Five-Star Review" icon={Star}>
+      <Section title={t('fwcSecReview')} icon={Star}>
         <ChecklistRow
-          label="Review request made — set the expectation onsite that if we earned 5 stars, we'd be grateful for one"
+          label={t('fwcReviewAsk')}
           required
           checked={data.five_star_review.review_request_made}
           missing={submitAttempted && missing.review_request_made}

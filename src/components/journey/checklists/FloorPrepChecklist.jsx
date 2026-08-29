@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { compressImage } from '@/lib/compressImage';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, Send, CheckCircle2, XCircle, Lock, DollarSign, ShieldCheck } from 'lucide-react';
@@ -116,6 +117,7 @@ function Section({ title, icon: Icon, children, warning, accent }) {
 }
 
 export default function FloorPrepChecklist({ checkpoint, projectId, installerMode }) {
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -299,9 +301,9 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
       )}
 
       {/* Floor Prep — Verification (Crew Lead QC) */}
-      <Section title="Floor Prep — Verification (Crew Lead QC)" icon={CheckCircle2}>
+      <Section title={t('fpcSecVerify')} icon={CheckCircle2}>
         <PhotoUpload
-          label="Take a moisture reading — photo of the meter"
+          label={t('fpcMoisture1')}
           photos={data.prep.moisture_reading_photos}
           onChange={urls => update('prep', 'moisture_reading_photos', urls)}
           disabled={prepReadOnly}
@@ -318,25 +320,25 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
             className={submitAttempted && prepMissing.moisture_reading_value ? 'border-crit' : ''}
           />
         </div>
-        <ChecklistRow label="Is the subfloor flat and level? (Check before you start)" required checked={data.prep.subfloor_flat_level} missing={submitAttempted && prepMissing.subfloor_flat_level} onChange={v => update('prep', 'subfloor_flat_level', v)} disabled={prepReadOnly} />
-        <ChecklistRow label="Is floor patching complete?" required checked={data.prep.floor_patch_complete} missing={submitAttempted && prepMissing.floor_patch_complete} onChange={v => update('prep', 'floor_patch_complete', v)} disabled={prepReadOnly} />
-        <ChecklistRow label="Is grinding complete?" required checked={data.prep.grinding_complete} missing={submitAttempted && prepMissing.grinding_complete} onChange={v => update('prep', 'grinding_complete', v)} disabled={prepReadOnly} />
+        <ChecklistRow label={t('fpcLevel')} required checked={data.prep.subfloor_flat_level} missing={submitAttempted && prepMissing.subfloor_flat_level} onChange={v => update('prep', 'subfloor_flat_level', v)} disabled={prepReadOnly} />
+        <ChecklistRow label={t('fpcPatching')} required checked={data.prep.floor_patch_complete} missing={submitAttempted && prepMissing.floor_patch_complete} onChange={v => update('prep', 'floor_patch_complete', v)} disabled={prepReadOnly} />
+        <ChecklistRow label={t('fpcGrinding')} required checked={data.prep.grinding_complete} missing={submitAttempted && prepMissing.grinding_complete} onChange={v => update('prep', 'grinding_complete', v)} disabled={prepReadOnly} />
         <div className="ml-6 p-3 bg-muted rounded-lg space-y-2">
-          <ChecklistRow label="Did you use self-leveler?" checked={data.prep.self_leveler_used} onChange={v => update('prep', 'self_leveler_used', v)} disabled={prepReadOnly} />
+          <ChecklistRow label={t('fpcSelfLeveler')} checked={data.prep.self_leveler_used} onChange={v => update('prep', 'self_leveler_used', v)} disabled={prepReadOnly} />
           {data.prep.self_leveler_used && (
-            <ChecklistRow label="Did you give it enough time to fully dry?" required checked={data.prep.self_leveler_dry_time} missing={submitAttempted && prepMissing.self_leveler_dry_time} onChange={v => update('prep', 'self_leveler_dry_time', v)} disabled={prepReadOnly} />
+            <ChecklistRow label={t('fpcDryTime')} required checked={data.prep.self_leveler_dry_time} missing={submitAttempted && prepMissing.self_leveler_dry_time} onChange={v => update('prep', 'self_leveler_dry_time', v)} disabled={prepReadOnly} />
           )}
         </div>
-        <PhotoUpload label="Second moisture reading (after prep is done) — add a photo" required missing={submitAttempted && prepMissing.second_moisture_reading_photos} photos={data.prep.second_moisture_reading_photos} onChange={urls => update('prep', 'second_moisture_reading_photos', urls)} disabled={prepReadOnly} />
-        <ChecklistRow label="Is all debris removed and the work area clean?" required checked={data.prep.debris_removed} missing={submitAttempted && prepMissing.debris_removed} onChange={v => update('prep', 'debris_removed', v)} disabled={prepReadOnly} />
-        <PhotoUpload label="Add photos of all floor prep" required missing={submitAttempted && prepMissing.floor_prep_photos} photos={data.prep.floor_prep_photos} onChange={urls => update('prep', 'floor_prep_photos', urls)} disabled={prepReadOnly} />
-        <PhotoUpload label="Add photos of any underlayment" required missing={submitAttempted && prepMissing.underlayment_photos} photos={data.prep.underlayment_photos} onChange={urls => update('prep', 'underlayment_photos', urls)} disabled={prepReadOnly} />
+        <PhotoUpload label={t('fpcMoisture2')} required missing={submitAttempted && prepMissing.second_moisture_reading_photos} photos={data.prep.second_moisture_reading_photos} onChange={urls => update('prep', 'second_moisture_reading_photos', urls)} disabled={prepReadOnly} />
+        <ChecklistRow label={t('fpcDebris')} required checked={data.prep.debris_removed} missing={submitAttempted && prepMissing.debris_removed} onChange={v => update('prep', 'debris_removed', v)} disabled={prepReadOnly} />
+        <PhotoUpload label={t('fpcPrepPhotos')} required missing={submitAttempted && prepMissing.floor_prep_photos} photos={data.prep.floor_prep_photos} onChange={urls => update('prep', 'floor_prep_photos', urls)} disabled={prepReadOnly} />
+        <PhotoUpload label={t('fpcUnderlaymentPhotos')} required missing={submitAttempted && prepMissing.underlayment_photos} photos={data.prep.underlayment_photos} onChange={urls => update('prep', 'underlayment_photos', urls)} disabled={prepReadOnly} />
       </Section>
 
       {/* Billable Prep / Change Order */}
-      <Section title="Billable Prep / Change Order" icon={DollarSign} warning={data.change_order.is_chargeable && !changeOrderValid}>
+      <Section title={t('fpcSecBillable')} icon={DollarSign} warning={data.change_order.is_chargeable && !changeOrderValid}>
         <ChecklistRow
-          label="Is there extra prep that needs to be charged? (Chargeable change order)"
+          label={t('fpcChargeable')}
           checked={data.change_order.is_chargeable}
           onChange={v => update('change_order', 'is_chargeable', v)}
           disabled={prepReadOnly}
@@ -344,7 +346,7 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
         {data.change_order.is_chargeable && (
           <div className="ml-6 space-y-3 border-l-2 border-border pl-4">
             <ChecklistRow
-              label="Did you call it in for approval BEFORE doing the work?"
+              label={t('fpcCalledIn')}
               required
               checked={data.change_order.called_in_before_work}
               missing={submitAttempted && changeOrderMissing.called_in_before_work}
@@ -380,7 +382,7 @@ export default function FloorPrepChecklist({ checkpoint, projectId, installerMod
 
       {/* FM Gate — Review & approve */}
       {isReviewPhase && !installerMode && (
-        <Section title="Field Manager Approval Gate" icon={ShieldCheck} accent>
+        <Section title={t('fpcSecApproval')} icon={ShieldCheck} accent>
           <p className="text-xs text-muted-foreground">
             When every item above is done, your Field Manager will review your prep photos and moisture readings and approve the job before you install.
           </p>
