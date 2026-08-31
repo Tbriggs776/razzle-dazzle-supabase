@@ -3,6 +3,7 @@
 // sendMessage fetches + attaches it). Auth: internal secret OR authed user.
 // Types: receipt, inspection, claim. Add one = one buildXPdf() + one case + one alias.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { requireModules } from '../_shared/authz.ts';
 import { encodeBase64 } from 'jsr:@std/encoding/base64';
 import { jsPDF } from 'npm:jspdf@4.0.0';
 
@@ -331,6 +332,10 @@ Deno.serve(async (req) => {
   if (!isInternal) {
     const user = await currentUser(req);
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors });
+    // 0114 punch list: a JWT alone is not authorization. This also excludes
+    // crew logins (active, role-less) and inactive signups (see _shared/authz.ts).
+    const denied = await requireModules(req, cors, ['projects','sales','quotes','finance'], 'edit');
+    if (denied) return denied;
   }
 
   try {

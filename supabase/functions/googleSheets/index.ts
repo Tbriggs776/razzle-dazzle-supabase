@@ -4,6 +4,7 @@
 //
 // Graceful degrade: { stub: true } when google is disabled / no service-account JSON.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { requireModules } from '../_shared/authz.ts';
 import { googleContext, googleToken, svcClient, getSecret, SHEETS_SCOPE } from '../_shared/google.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -45,7 +46,13 @@ Deno.serve(async (req) => {
   const s = svcClient();
   const internal = await getSecret(s, 'CRON_SECRET');
   const isInternal = !!internal && req.headers.get('x-internal-secret') === internal;
-  if (!isInternal) { const user = await currentUser(req); if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors }); }
+  if (!isInternal) {
+    const user = await currentUser(req);
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors });
+    // 0114 punch list: the ad-spend workbook is a reports surface.
+    const denied = await requireModules(req, cors, ['reports'], 'view');
+    if (denied) return denied;
+  }
 
   try {
     const p = await req.json().catch(() => ({}));

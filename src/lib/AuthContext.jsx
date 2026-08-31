@@ -27,7 +27,17 @@ export const AuthProvider = ({ children }) => {
       setUser(me);
       setAccess(acc);
       setIsAuthenticated(true);
-      setAuthError(null);
+      // my_access() returns user: null for a login the access model does not
+      // recognise as ACTIVE — a roster-less signup left inactive, or someone an
+      // admin disabled. (Crew logins are active, so their user is non-null and
+      // they pass through to the portal.) App.jsx has consumed this error type
+      // since day one; this is the first thing that produces it. Without it, an
+      // inactive login just saw an empty app while its session kept working.
+      if (acc && !acc.user) {
+        setAuthError({ type: 'user_not_registered' });
+      } else {
+        setAuthError(null);
+      }
     } catch (e) {
       setUser(null);
       setAccess(null);

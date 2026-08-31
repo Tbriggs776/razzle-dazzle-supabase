@@ -5,6 +5,7 @@
 // When Short.io isn't configured yet, returns the original (long) URL so callers
 // keep working during the migration instead of erroring.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { requireActiveStaff } from '../_shared/authz.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -39,6 +40,10 @@ Deno.serve(async (req) => {
 
   const user = await currentUser(req);
   if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors });
+  // 0114 punch list: link shortening is used across ticket/appointment/sale
+  // flows — any active staff member, but never a crew or inactive login.
+  const denied = await requireActiveStaff(req, cors);
+  if (denied) return denied;
 
   try {
     const { originalURL } = await req.json();

@@ -1,6 +1,11 @@
 import React from 'react';
+import { useAuth } from '@/lib/AuthContext';
 
 const UserNotRegisteredError = () => {
+  // Without a real sign-out this screen is a trap: the text suggests "logging
+  // out and back in" but offered no way to do it, so a person on the wrong
+  // account (or a disabled one) could only clear cookies.
+  const { logout } = useAuth();
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-slate-50">
       <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg border border-slate-100">
@@ -22,6 +27,13 @@ const UserNotRegisteredError = () => {
               <li>Try logging out and back in again</li>
             </ul>
           </div>
+          <button
+            type="button"
+            onClick={logout}
+            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white hover:bg-slate-700"
+          >
+            Sign out
+          </button>
         </div>
       </div>
     </div>

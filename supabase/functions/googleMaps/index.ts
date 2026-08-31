@@ -5,6 +5,7 @@
 // Graceful degrade: { stub: true } when the google integration is disabled or no key is set.
 // Auth: internal secret OR an authenticated user.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { requireModules } from '../_shared/authz.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -138,6 +139,10 @@ Deno.serve(async (req) => {
   if (!isInternal) {
     const user = await currentUser(req);
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors });
+    // 0114 punch list: a JWT alone is not authorization. This also excludes
+    // crew logins (active, role-less) and inactive signups (see _shared/authz.ts).
+    const denied = await requireModules(req, cors, ['appointments','journey','projects','leads'], 'view');
+    if (denied) return denied;
   }
 
   try {

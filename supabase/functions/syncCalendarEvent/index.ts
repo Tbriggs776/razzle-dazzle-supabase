@@ -8,6 +8,7 @@
 // Graceful degrade: { stub: true } when google is disabled / no service-account JSON.
 // Auth: internal secret OR an authenticated user.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { requireModules } from '../_shared/authz.ts';
 import { googleContext, googleToken, svcClient, getSecret, CALENDAR_SCOPE } from '../_shared/google.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -57,7 +58,13 @@ Deno.serve(async (req) => {
   const internal = await getSecret(s, 'CRON_SECRET');
   const isInternal = !!internal && req.headers.get('x-internal-secret') === internal;
   let user: any = null;
-  if (!isInternal) { user = await currentUser(req); if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors }); }
+  if (!isInternal) {
+    user = await currentUser(req);
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors });
+    // 0114 punch list: only someone who can edit appointments may touch the calendar.
+    const denied = await requireModules(req, cors, ['appointments'], 'edit');
+    if (denied) return denied;
+  }
 
   try {
     const { appointmentId, action, appUrl } = await req.json();

@@ -10,6 +10,7 @@
 // { stub: true } so the existing frontend "not available yet" fallbacks keep working.
 // Auth: internal secret (server) OR an authenticated user (browser invoke).
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { requireModules } from '../_shared/authz.ts';
 import { encodeBase64 } from 'jsr:@std/encoding/base64';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -320,6 +321,10 @@ Deno.serve(async (req) => {
   if (!isInternal) {
     const user = await currentUser(req);
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401, headers: cors });
+    // 0114 punch list: a JWT alone is not authorization. This also excludes
+    // crew logins (active, role-less) and inactive signups (see _shared/authz.ts).
+    const denied = await requireModules(req, cors, ['sales','appointments','order_processing','finance'], 'view');
+    if (denied) return denied;
   }
 
   try {
