@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Users, UserCog, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, Truck, BarChart3, HardHat, Briefcase, Package } from 'lucide-react';
+import { Users, UserCog, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, Truck, BarChart3, HardHat, Briefcase, Package, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AudioRecorder from '@/components/AudioRecorder';
 import BrandLogo from '@/components/BrandLogo';
+import HelpDrawer from '@/components/playbooks/HelpDrawer';
 
 const RecordingContext = createContext();
 
@@ -335,6 +336,7 @@ export default function Layout({ children, currentPageName }) {
         { name: 'My Quotes', href: 'MyQuotes', pages: ['MyQuotes', 'QuoteDetail'],
           hiddenWhen: () => !(appSettings?.quotes_enabled && (!appSettings?.quotes_admin_only || currentUser?.role === 'admin')) },
         { name: 'My Tickets', href: 'MyTickets', pages: ['MyTickets'] },
+        { name: 'My Training', href: 'MyTraining', pages: ['MyTraining'] },
       ],
     },
     {
@@ -418,6 +420,13 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Sales Manager Dashboard', href: 'AppointmentRehashReport', pages: ['AppointmentRehashReport'] },
         { name: 'Marketing Performance', href: 'MarketingPerformance', pages: ['MarketingPerformance'] },
         { name: 'DC Performance Matrix', href: 'DCPerformanceMatrix', pages: ['DCPerformanceMatrix'] },
+      ],
+    },
+    {
+      name: 'Playbooks', icon: BookOpen,
+      subItems: [
+        { name: 'Playbooks', href: 'Playbooks', pages: ['Playbooks', 'PlaybookDetail'] },
+        { name: 'Training Admin', href: 'TrainingAdmin', pages: ['TrainingAdmin'] },
       ],
     },
     {
@@ -732,6 +741,9 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Page content */}
         <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto">{children}</main>
+        {/* The published SOP for THIS page, one tap away. Renders nothing on
+            pages without one — see HelpDrawer. */}
+        <HelpDrawer currentPageName={currentPageName} />
 
         {/* Role Toggle - Bottom Right */}
         {currentUser?.role === 'admin' && (

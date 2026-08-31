@@ -38,6 +38,14 @@ const ENTITY_TABLE = {
   Installer: 'installer',
   InstallerMember: 'installer_member',
   LeadDisposition: 'lead_disposition',
+  Sop: 'sop',
+  SopVersion: 'sop_version',
+  SopCapture: 'sop_capture',
+  Course: 'course',
+  CourseLesson: 'course_lesson',
+  TrainingAssignment: 'training_assignment',
+  TrainingAck: 'training_ack',
+  CourseEnrollment: 'course_enrollment',
   LeadSourceChannel: 'lead_source_channel',
   JourneyOrder: 'journey_order',
   Lead: 'lead',
@@ -599,6 +607,32 @@ const RPC_FUNCTIONS = {
     p_recall_date: p.recallDate ?? null, p_note: p.note ?? null,
   }],
   reopenLead:       (p) => ['reopen_lead', { p_lead_id: p.leadId }],
+  // ── Playbooks ─────────────────────────────────────────────────────────────
+  // The ack is the training record; it and every other write goes through a
+  // SECURITY DEFINER RPC — the tables have no client write path at all.
+  myTraining:       () => ['my_training', {}],
+  ackSop:           (p) => ['ack_sop', { p_sop_id: p.sopId }],
+  createSop:        (p) => ['create_sop', {
+    p_key: p.key, p_title: p.title, p_body_md: p.bodyMd ?? '',
+    p_job_stage: p.jobStage ?? null, p_app_page_key: p.appPageKey ?? null,
+    p_target_role_keys: p.targetRoleKeys ?? [],
+  }],
+  publishSop:       (p) => ['publish_sop', {
+    p_sop_id: p.sopId, p_body_md: p.bodyMd, p_loom_url: p.loomUrl ?? null,
+    p_target_role_keys: p.targetRoleKeys ?? null, p_job_stage: p.jobStage ?? null,
+    p_app_page_key: p.appPageKey ?? null,
+  }],
+  submitSopCapture: (p) => ['submit_sop_capture', {
+    p_loom_url: p.loomUrl ?? null, p_notes_md: p.notesMd ?? null,
+    p_source_page_key: p.sourcePageKey ?? null, p_source_job_id: p.sourceJobId ?? null,
+    p_sop_id: p.sopId ?? null,
+  }],
+  reviewSopCapture: (p) => ['review_sop_capture', {
+    p_capture_id: p.captureId, p_status: p.status, p_sop_id: p.sopId ?? null,
+    p_new_sop_key: p.newSopKey ?? null, p_new_sop_title: p.newSopTitle ?? null,
+  }],
+  signoffCourse:    (p) => ['signoff_course', { p_enrollment_id: p.enrollmentId }],
+  waiveAssignment:  (p) => ['waive_assignment', { p_assignment_id: p.assignmentId, p_reason: p.reason }],
   // ── Subcontractor portal ──────────────────────────────────────────────────
   // Every one of these derives the caller's installer server-side. None of them
   // takes an installer_id, which is deliberate: there is no argument through
