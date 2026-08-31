@@ -7,10 +7,21 @@
 // SIGNATURE VERIFICATION IS THE WHOLE SECURITY MODEL. This endpoint deploys
 // with verify_jwt = false (GHL cannot present a Supabase JWT), so without a
 // signature check anyone who guessed the URL could POST fabricated contacts
-// straight into the lead table. GHL signs with Ed25519 over the raw body; we
-// verify against GHL_WEBHOOK_PUBLIC_KEY before looking at the payload at all.
-// If that key is absent the endpoint REFUSES every request rather than
-// falling open — an unverified lead is worse than a missed one.
+// straight into the lead table.
+//
+// GHL SENDS TWO SIGNATURES USING TWO DIFFERENT ALGORITHMS, and pairing the
+// wrong one with the wrong key rejects every event:
+//     x-ghl-signature  ->  Ed25519      (current; prefer whenever present)
+//     x-wh-signature   ->  RSA-SHA256   (legacy, deprecated 2026-09-01)
+// Both are base64 over the RAW body, which is why the body is read as text and
+// never round-tripped through JSON.parse -- re-serialising changes bytes and
+// breaks the signature.
+//
+// Both public keys are PUBLISHED BY GHL AND ARE NOT SECRETS, so they are baked
+// in below: a missing environment variable must not be able to take lead
+// ingest offline. Either can still be overridden by a stored secret if GHL
+// rotates one. An unverified lead is worse than a missed one, so a body that
+// carries no recognised signature is refused rather than trusted.
 //
 // DELIVERY IS AT-LEAST-ONCE AND OUT OF ORDER. A ContactUpdate can arrive before
 // its ContactCreate, and anything can arrive twice. Both are fine here because
@@ -35,18 +46,54 @@ async function getSecret(s: any, name: string): Promise<string | null> {
   return Deno.env.get(name) ?? null;
 }
 
-/** Ed25519 verify over the RAW body — re-serialised JSON would not match. */
-async function verifySignature(raw: string, sigB64: string, pubKeyPem: string): Promise<boolean> {
+// GHL's published verification keys. Public by definition -- these appear in
+// the vendor's own docs and identify GHL to us, they do not authenticate us to
+// anyone. Checked in deliberately so ingest cannot break on a missing env var.
+const GHL_ED25519_PUB = `-----BEGIN PUBLIC KEY-----
+MCowBQYDK2VwAyEAi2HR1srL4o18O8BRa7gVJY7G7bupbN3H9AwJrHCDiOg=
+-----END PUBLIC KEY-----`;
+
+const GHL_RSA_PUB = `-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAokvo/r9tVgcfZ5DysOSC
+Frm602qYV0MaAiNnX9O8KxMbiyRKWeL9JpCpVpt4XHIcBOK4u3cLSqJGOLaPuXw6
+dO0t6Q/ZVdAV5Phz+ZtzPL16iCGeK9po6D6JHBpbi989mmzMryUnQJezlYJ3DVfB
+csedpinheNnyYeFXolrJvcsjDtfAeRx5ByHQmTnSdFUzuAnC9/GepgLT9SM4nCpv
+uxmZMxrJt5Rw+VUaQ9B8JSvbMPpez4peKaJPZHBbU3OdeCVx5klVXXZQGNHOs8gF
+3kvoV5rTnXV0IknLBXlcKKAQLZcY/Q9rG6Ifi9c+5vqlvHPCUJFT5XUGG5RKgOKU
+J062fRtN+rLYZUV+BjafxQauvC8wSWeYja63VSUruvmNj8xkx2zE/Juc+yjLjTXp
+IocmaiFeAO6fUtNjDeFVkhf5LNb59vECyrHD2SQIrhgXpO4Q3dVNA5rw576PwTzN
+h/AMfHKIjE4xQA1SZuYJmNnmVZLIZBlQAF9Ntd03rfadZ+yDiOXCCs9FkHibELhC
+HULgCsnuDJHcrGNd5/Ddm5hxGQ0ASitgHeMZ0kcIOwKDOzOU53lDza6/Y09T7sYJ
+PQe7z0cvj7aE4B+Ax1ZoZGPzpJlZtGXCsu9aTEGEnKzmsFqwcSsnw3JB31IGKAyk
+T1hhTiaCeIY/OwwwNUY2yvcCAwEAAQ==
+-----END PUBLIC KEY-----`;
+
+const pemToDer = (pem: string) =>
+  decodeBase64(pem.replace(/-----(BEGIN|END) PUBLIC KEY-----/g, '').replace(/\s+/g, ''));
+
+/**
+ * Verify a base64 signature over the RAW body.
+ *
+ * `alg` must match the header the signature came from -- Ed25519 for
+ * x-ghl-signature, RSA-SHA256 for x-wh-signature. Verifying one with the
+ * other's key fails 100% of the time, which reads exactly like a hostile
+ * caller, so the two are never allowed to drift apart in the caller below.
+ */
+async function verifySignature(
+  raw: string, sigB64: string, pubKeyPem: string, alg: 'ed25519' | 'rsa',
+): Promise<boolean> {
   try {
-    const der = decodeBase64(
-      pubKeyPem.replace(/-----(BEGIN|END) PUBLIC KEY-----/g, '').replace(/\s+/g, ''),
+    const params = alg === 'ed25519'
+      ? { name: 'Ed25519' }
+      : { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' };
+    const key = await crypto.subtle.importKey(
+      'spki', pemToDer(pubKeyPem), params, false, ['verify'],
     );
-    const key = await crypto.subtle.importKey('spki', der, { name: 'Ed25519' }, false, ['verify']);
     return await crypto.subtle.verify(
-      { name: 'Ed25519' }, key, decodeBase64(sigB64), new TextEncoder().encode(raw),
+      params.name, key, decodeBase64(sigB64), new TextEncoder().encode(raw),
     );
   } catch (e) {
-    console.error('signature verify threw', (e as Error).message);
+    console.error(`signature verify threw (${alg})`, (e as Error).message);
     return false;
   }
 }
@@ -112,13 +159,22 @@ Deno.serve(async (req) => {
   const raw = await req.text();
 
   // ── Gate 1: signature. Nothing below runs on an unverified body. ──────────
-  const pubKey = await getSecret(s, 'GHL_WEBHOOK_PUBLIC_KEY');
-  if (!pubKey) {
-    console.error('GHL_WEBHOOK_PUBLIC_KEY is not set — refusing webhook');
-    return Response.json({ error: 'Webhook verification is not configured' }, { status: 503, headers: cors });
+  // Header choice picks the algorithm; the algorithm picks the key. Ed25519
+  // first because GHL prefers it and the RSA header retires 2026-09-01.
+  const edSig = req.headers.get('x-ghl-signature');
+  const rsaSig = req.headers.get('x-wh-signature');
+  const attempt = edSig
+    ? { sig: edSig, alg: 'ed25519' as const, key: await getSecret(s, 'GHL_WEBHOOK_PUBLIC_KEY') ?? GHL_ED25519_PUB }
+    : rsaSig
+    ? { sig: rsaSig, alg: 'rsa' as const, key: await getSecret(s, 'GHL_WEBHOOK_RSA_PUBLIC_KEY') ?? GHL_RSA_PUB }
+    : null;
+
+  if (!attempt) {
+    console.error('webhook carried neither x-ghl-signature nor x-wh-signature');
+    return Response.json({ error: 'Unsigned request' }, { status: 401, headers: cors });
   }
-  const sig = req.headers.get('x-wh-signature') ?? req.headers.get('x-ghl-signature') ?? '';
-  if (!sig || !(await verifySignature(raw, sig, pubKey))) {
+  if (!(await verifySignature(raw, attempt.sig, attempt.key, attempt.alg))) {
+    console.error(`webhook failed ${attempt.alg} verification`);
     return Response.json({ error: 'Bad signature' }, { status: 401, headers: cors });
   }
 
