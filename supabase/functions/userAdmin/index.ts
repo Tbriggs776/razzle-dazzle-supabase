@@ -140,9 +140,14 @@ async function setRoles(s: any, userId: string, roleIds: string[]) {
   if (rows.length) await s.from('user_role').insert(rows);
 }
 
-async function actSetRoles(s: any, p: any) {
+async function actSetRoles(s: any, p: any, callerId: string) {
   if (!p.userId) return json({ error: 'userId required' }, 400);
-  await setRoles(s, p.userId, Array.isArray(p.roleIds) ? p.roleIds : [p.roleId].filter(Boolean));
+  const roleIds = Array.isArray(p.roleIds) ? p.roleIds : [p.roleId].filter(Boolean);
+  const { data: before } = await s.from('user_role').select('role_id').eq('user_id', p.userId);
+  await setRoles(s, p.userId, roleIds);
+  await audit(s, callerId, 'set_roles', {
+    userId: p.userId, before: (before || []).map((r: any) => r.role_id), after: roleIds,
+  });
   return json({ ok: true });
 }
 
@@ -170,6 +175,7 @@ async function actSetActive(s: any, p: any, callerId: string) {
 
   await s.from('app_user').update({ is_active: active }).eq('id', p.userId);
   await s.auth.admin.updateUserById(p.userId, { ban_duration: active ? 'none' : '876000h' });
+  await audit(s, callerId, 'set_active', { userId: p.userId, active });
   return json({ ok: true, active });
 }
 
@@ -187,7 +193,162 @@ async function actSetOrgAdmin(s: any, p: any, callerId: string) {
   }
 
   await s.from('app_user').update({ is_org_admin: makeAdmin }).eq('id', p.userId);
+  await audit(s, callerId, 'set_org_admin', { userId: p.userId, isOrgAdmin: makeAdmin });
   return json({ ok: true, isOrgAdmin: makeAdmin });
+}
+
+
+// ── The role matrix (razzle-role-matrix spec) ────────────────────────────────
+// Rights are a role × module cell. These five actions are the ONLY write path
+// the UI uses — never PostgREST — so the guards below (system-role lock,
+// core-module floor, org fencing) cannot be skipped, and every change lands in
+// access_change_log. The audit is best-effort by design: blocking an access
+// change on an audit insert would trade a record for a lockout.
+
+const PERMS = ['none', 'view', 'edit', 'admin'];
+const ROLE_KEY_RE = /^[a-z][a-z0-9_]+$/;
+
+async function callerOrg(s: any, userId: string): Promise<string | null> {
+  const { data } = await s.from('app_user').select('org_id').eq('id', userId).maybeSingle();
+  return data?.org_id ?? null;
+}
+
+async function audit(s: any, actorId: string, action: string, target: Record<string, unknown>) {
+  try {
+    const org_id = await callerOrg(s, actorId);
+    if (!org_id) return;
+    await s.from('access_change_log').insert({ org_id, actor_user_id: actorId, action, target });
+  } catch (e) {
+    console.error('access audit insert failed', e);
+  }
+}
+
+async function actListMatrix(s: any, callerId: string) {
+  const org = await callerOrg(s, callerId);
+  const [{ data: modules }, { data: ents }, { data: roles }, { data: cells }, { data: urs }] = await Promise.all([
+    s.from('module').select('key, name, sort_order, is_core').eq('is_active', true).order('sort_order'),
+    s.from('org_module_entitlement').select('module_key, is_enabled').eq('org_id', org),
+    s.from('role').select('id, key, name, sort_order, is_system').eq('org_id', org).order('sort_order'),
+    s.from('role_module_permission').select('role_id, module_key, permission'),
+    s.from('user_role').select('role_id'),
+  ]);
+  // A MISSING entitlement row means NOT entitled — that is how the 0002
+  // resolver reads it, so the matrix must say the same.
+  const entitled: Record<string, boolean> = {};
+  for (const e of ents || []) entitled[e.module_key] = e.is_enabled === true;
+  const counts: Record<string, number> = {};
+  for (const ur of urs || []) counts[ur.role_id] = (counts[ur.role_id] || 0) + 1;
+  const roleIds = new Set((roles || []).map((r: any) => r.id));
+  return {
+    modules: (modules || []).map((m: any) => ({ ...m, entitled: entitled[m.key] === true })),
+    roles: (roles || []).map((r: any) => ({ ...r, assignedCount: counts[r.id] || 0 })),
+    cells: (cells || []).filter((c: any) => roleIds.has(c.role_id)),
+  };
+}
+
+async function actSetCell(s: any, p: any, callerId: string) {
+  const { roleId, moduleKey, permission } = p || {};
+  if (!roleId || !moduleKey) return json({ error: 'roleId and moduleKey required' }, 400);
+  if (!PERMS.includes(permission)) return json({ error: `permission must be one of ${PERMS.join(', ')}` }, 400);
+
+  const org = await callerOrg(s, callerId);
+  const { data: role } = await s.from('role').select('id, key, name, is_system, org_id')
+    .eq('id', roleId).maybeSingle();
+  if (!role || role.org_id !== org) return json({ error: 'No such role in this organization' }, 400);
+  if (role.is_system) return json({ error: 'The Administrator role is locked — clone it to make a weaker owner role' }, 400);
+
+  const { data: mod } = await s.from('module').select('key, is_core, is_active').eq('key', moduleKey).maybeSingle();
+  if (!mod || !mod.is_active) return json({ error: 'Unknown module' }, 400);
+  if (mod.is_core && permission === 'none') {
+    return json({ error: `${moduleKey} is a core module — every staff role keeps at least view, so nobody can be locked out of their own landing pages` }, 400);
+  }
+
+  const { data: before } = await s.from('role_module_permission').select('permission')
+    .eq('role_id', roleId).eq('module_key', moduleKey).maybeSingle();
+  const { error } = await s.from('role_module_permission')
+    .upsert({ role_id: roleId, module_key: moduleKey, permission }, { onConflict: 'role_id,module_key' });
+  if (error) return json({ error: error.message }, 400);
+
+  await audit(s, callerId, 'set_cell', {
+    roleId, roleKey: role.key, moduleKey, before: before?.permission ?? 'none', after: permission,
+  });
+  return json({ ok: true });
+}
+
+async function actSetEntitlement(s: any, p: any, callerId: string) {
+  const { moduleKey } = p || {};
+  const enabled = p?.enabled === true;
+  if (!moduleKey) return json({ error: 'moduleKey required' }, 400);
+  const { data: mod } = await s.from('module').select('key, is_core').eq('key', moduleKey).maybeSingle();
+  if (!mod) return json({ error: 'Unknown module' }, 400);
+  if (mod.is_core && !enabled) {
+    return json({ error: `${moduleKey} is a core module and cannot be switched off for the company` }, 400);
+  }
+  const org = await callerOrg(s, callerId);
+  const { data: before } = await s.from('org_module_entitlement').select('is_enabled')
+    .eq('org_id', org).eq('module_key', moduleKey).maybeSingle();
+  const { error } = await s.from('org_module_entitlement')
+    .upsert({ org_id: org, module_key: moduleKey, is_enabled: enabled }, { onConflict: 'org_id,module_key' });
+  if (error) return json({ error: error.message }, 400);
+
+  await audit(s, callerId, 'set_entitlement', { moduleKey, before: before?.is_enabled ?? false, after: enabled });
+  return json({ ok: true });
+}
+
+async function actCloneRole(s: any, p: any, callerId: string) {
+  const { sourceRoleId } = p || {};
+  const name = String(p?.name || '').trim();
+  const key = String(p?.key || '').trim();
+  if (!sourceRoleId || !name || !key) return json({ error: 'sourceRoleId, name and key required' }, 400);
+  if (!ROLE_KEY_RE.test(key)) {
+    return json({ error: 'key must be lowercase letters, digits and underscores, starting with a letter (e.g. csr_west)' }, 400);
+  }
+  const org = await callerOrg(s, callerId);
+  const { data: src } = await s.from('role').select('id, key, name, sort_order, org_id')
+    .eq('id', sourceRoleId).maybeSingle();
+  if (!src || src.org_id !== org) return json({ error: 'No such role in this organization' }, 400);
+  const { data: dupe } = await s.from('role').select('id').eq('org_id', org).eq('key', key).maybeSingle();
+  if (dupe) return json({ error: `A role with key "${key}" already exists` }, 400);
+
+  const { data: maxRow } = await s.from('role').select('sort_order').eq('org_id', org)
+    .order('sort_order', { ascending: false }).limit(1).maybeSingle();
+  const { data: created, error } = await s.from('role')
+    .insert({ org_id: org, key, name, is_system: false, sort_order: (maxRow?.sort_order ?? 0) + 10 })
+    .select('id, key, name, sort_order, is_system').single();
+  if (error) return json({ error: error.message }, 400);
+
+  // Copy every cell, so the clone starts as an exact twin the admin then edits.
+  const { data: cells } = await s.from('role_module_permission')
+    .select('module_key, permission').eq('role_id', sourceRoleId);
+  if (cells?.length) {
+    const { error: copyErr } = await s.from('role_module_permission')
+      .insert(cells.map((c: any) => ({ role_id: created.id, module_key: c.module_key, permission: c.permission })));
+    if (copyErr) return json({ error: `Role created but cells failed to copy: ${copyErr.message}` }, 500);
+  }
+
+  await audit(s, callerId, 'clone_role', {
+    sourceRoleId, sourceKey: src.key, newRoleId: created.id, newKey: key, name, cellsCopied: cells?.length ?? 0,
+  });
+  return json({ ok: true, role: { ...created, assignedCount: 0 } });
+}
+
+async function actRenameRole(s: any, p: any, callerId: string) {
+  const { roleId } = p || {};
+  const name = String(p?.name || '').trim();
+  if (!roleId || !name) return json({ error: 'roleId and name required' }, 400);
+  const org = await callerOrg(s, callerId);
+  const { data: role } = await s.from('role').select('id, key, name, is_system, org_id')
+    .eq('id', roleId).maybeSingle();
+  if (!role || role.org_id !== org) return json({ error: 'No such role in this organization' }, 400);
+  if (role.is_system) return json({ error: 'The Administrator role cannot be renamed' }, 400);
+
+  // Display name only. `key` is the stable identity that user_role rows,
+  // playbook targeting and SOP assignments hang off — it never changes.
+  const { error } = await s.from('role').update({ name }).eq('id', roleId);
+  if (error) return json({ error: error.message }, 400);
+
+  await audit(s, callerId, 'rename_role', { roleId, key: role.key, before: role.name, after: name });
+  return json({ ok: true });
 }
 
 Deno.serve(async (req) => {
@@ -204,9 +365,14 @@ Deno.serve(async (req) => {
       case 'list':          return json({ ok: true, ...(await actList(s)) });
       case 'invite':        return await actInvite(s, p);
       case 'reset_link':    return await actResetLink(s, p);
-      case 'set_roles':     return await actSetRoles(s, p);
+      case 'set_roles':     return await actSetRoles(s, p, user.id);
       case 'set_active':    return await actSetActive(s, p, user.id);
       case 'set_org_admin': return await actSetOrgAdmin(s, p, user.id);
+      case 'list_matrix':   return json({ ok: true, ...(await actListMatrix(s, user.id)) });
+      case 'set_cell':      return await actSetCell(s, p, user.id);
+      case 'set_entitlement': return await actSetEntitlement(s, p, user.id);
+      case 'clone_role':    return await actCloneRole(s, p, user.id);
+      case 'rename_role':   return await actRenameRole(s, p, user.id);
       default:              return json({ error: 'unknown action' }, 400);
     }
   } catch (e) {
