@@ -513,6 +513,18 @@ const RPC_FUNCTIONS = {
   getAppointmentsByDC: (p) => ['get_appointments_by_dc', { p_start_date: p.startDate, p_end_date: p.endDate }],
   getSalesByDC:        (p) => ['get_sales_by_dc', { p_start_date: p.startDate, p_end_date: p.endDate }],
   getOnHoldCache:      () => ['get_on_hold_cache', {}],
+  // Lead search and totals, server-side. The Leads page and the appointment
+  // pickers used to fetch the whole lead table and filter it in the browser --
+  // fine at 2,101 rows, 4.8 MB over 18 round trips at 17,459. search_leads
+  // returns one page plus the total match count; lead_stats returns the KPI
+  // rollups separately, so paging the list does not make the tiles wrong.
+  searchLeads: (p) => ['search_leads', {
+    p_query: p.query ?? null,
+    p_limit: p.limit ?? 50,
+    p_offset: p.offset ?? 0,
+    p_sort: p.sort ?? 'desc',
+  }],
+  leadStats: () => ['lead_stats', {}],
   // Public (anon) pages read a curated single-record projection by id — the only
   // anon-reachable surface for these tables (RLS denies direct anon reads).
   getPublicAppointment: (p) => ['get_public_appointment', { p_id: p.id }],

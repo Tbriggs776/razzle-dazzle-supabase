@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import LeadPicker from '@/components/leads/LeadPicker';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Plus, ClipboardCheck, Loader2, Calendar, Clock, MoreVertical, XCircle, AlertTriangle, RotateCcw } from 'lucide-react';
@@ -51,11 +51,6 @@ export default function AppointmentSettingChecklists() {
     queryFn: () => base44.entities.Appointment.list()
   });
 
-  const { data: leads = [] } = useQuery({
-    queryKey: ['leads'],
-    queryFn: () => base44.entities.Lead.list('first_name')
-  });
-
   const { data: appointmentLogs = [] } = useQuery({
     queryKey: ['appointmentLogs'],
     queryFn: () => base44.entities.AppointmentLog.list()
@@ -84,7 +79,12 @@ export default function AppointmentSettingChecklists() {
       if (createNewLead) {
         leadData = newLeadData;
       } else {
-        leadData = leads.find(l => l.id === selectedLead);
+        // Fetch the one lead rather than searching a copy of the whole table:
+        // the picker no longer downloads 17,459 rows to populate a dropdown.
+        const rows = await base44.entities.Lead
+          .filter({ id: selectedLead }, '-created_date', 1)
+          .catch(() => []);
+        leadData = rows[0];
         if (!leadData) throw new Error('Lead not found');
       }
       
@@ -524,18 +524,7 @@ export default function AppointmentSettingChecklists() {
               <TabsContent value="existing" className="space-y-4">
                 <div>
                   <Label htmlFor="lead" className="text-foreground mb-2 block">Select Lead *</Label>
-                  <Select value={selectedLead} onValueChange={setSelectedLead}>
-                    <SelectTrigger className="h-12 border-border">
-                      <SelectValue placeholder="Choose a lead" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {leads.map((lead) => (
-                        <SelectItem key={lead.id} value={lead.id}>
-                          {lead.first_name} {lead.last_name} - {lead.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <LeadPicker value={selectedLead} onChange={setSelectedLead} />
                 </div>
               </TabsContent>
               

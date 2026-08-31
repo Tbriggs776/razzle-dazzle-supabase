@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { invokeFailure } from '@/lib/invokeResult';
 import { toast } from 'sonner';
@@ -26,9 +26,52 @@ export default function Leads() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { data: leads = [], isLoading } = useQuery({
-    queryKey: ['leads', sortOrder],
-    queryFn: () => base44.entities.Lead.list(sortOrder === 'desc' ? '-created_date' : 'created_date')
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 50;
+
+  // Debounced, so typing "greenwood" issues one search rather than nine.
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  useEffect(() => {
+    const t = setTimeout(() => { setDebouncedQuery(searchQuery.trim()); setPage(0); }, 250);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  // One page of matches, searched and counted in Postgres.
+  //
+  // This page used to fetch every lead and filter in the browser. That was fine
+  // at 2,101 rows and became 4.8 MB over 18 sequential round trips at 17,459 --
+  // and then rendered all of them into the DOM. Now it asks for 50.
+  const { data: pageRows = [], isLoading, isFetching } = useQuery({
+    queryKey: ['searchLeads', debouncedQuery, sortOrder, page],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('searchLeads', {
+        query: debouncedQuery || null,
+        limit: PAGE_SIZE,
+        offset: page * PAGE_SIZE,
+        sort: sortOrder,
+      });
+      const failed = invokeFailure(res);
+      if (failed) throw new Error(failed);
+      return res.data ?? [];
+    },
+    placeholderData: (prev) => prev,   // keep the old page visible while the next loads
+  });
+
+  const leads = pageRows;
+  // Every row carries the same total, so one query answers both "which page"
+  // and "how many altogether".
+  const totalMatches = pageRows[0]?.total_count ?? 0;
+
+  // Totals over the WHOLE book, separately -- otherwise paging the list would
+  // silently make the KPI tiles report the page instead of the business.
+  const { data: stats } = useQuery({
+    queryKey: ['leadStats'],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('leadStats', {});
+      if (invokeFailure(res)) return null;
+      return Array.isArray(res.data) ? res.data[0] : res.data;
+    },
+    staleTime: 60000,
   });
 
   const createMutation = useMutation({
@@ -61,38 +104,20 @@ export default function Leads() {
     onError: (e) => toast.error(e?.message || 'Could not save that lead'),
   });
 
-  // Filter leads based on search query
-  const filteredLeads = leads.filter(lead => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    const fullName = `${lead.first_name} ${lead.last_name}`.toLowerCase();
-    return (
-      fullName.includes(query) ||
-      lead.email?.toLowerCase().includes(query) ||
-      lead.phone?.includes(query)
-    );
-  });
+  // The server already applied the search; this page renders what it returned.
+  const filteredLeads = leads;
 
-  // Presentational KPI rollups over the full lead book (not the filtered view).
   const now = Date.now();
-  const newThisWeek = leads.filter(l => l.created_date && now - new Date(l.created_date).getTime() <= 7 * DAY).length;
-  const newThisMonth = leads.filter(l => l.created_date && now - new Date(l.created_date).getTime() <= 30 * DAY).length;
+  const totalLeads   = stats?.total ?? totalMatches;
+  const newThisWeek  = stats?.new_this_week ?? 0;
+  const newThisMonth = stats?.new_this_month ?? 0;
 
-  // Chronological sparkline of lead-count buckets for the hero tile.
-  const spark = useMemo(() => {
-    const asc = leads
-      .filter(l => l.created_date)
-      .slice()
-      .sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
-    if (asc.length < 2) return [];
-    const n = Math.min(8, asc.length);
-    const size = Math.ceil(asc.length / n);
-    const out = [];
-    for (let i = 0; i < asc.length; i += size) {
-      out.push(asc.slice(i, i + size).length);
-    }
-    return out;
-  }, [leads]);
+  // Leads per week for the last eight weeks, computed in Postgres.
+  //
+  // The old version sliced the sorted list into eight equal-sized chunks and
+  // plotted each chunk's LENGTH -- which is the chunk size by construction, so
+  // it drew a flat line from 17,000 rows and called it a trend.
+  const spark = stats?.spark ?? [];
 
   if (isLoading) {
     return (
@@ -130,7 +155,7 @@ export default function Leads() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <KpiTile
             label="Total Leads"
-            value={leads.length}
+            value={totalLeads}
             hero
             foot="In your database"
             spark={spark}
@@ -149,7 +174,7 @@ export default function Leads() {
 
         <ModuleCard
           title="Lead Directory"
-          subtitle={`${filteredLeads.length} ${filteredLeads.length === 1 ? 'lead' : 'leads'}${searchQuery ? ` · filtered from ${leads.length}` : ''}`}
+          subtitle={`${totalMatches.toLocaleString()} ${totalMatches === 1 ? 'lead' : 'leads'}${debouncedQuery ? ' matching' : ''}`}
           icon={Users}
           action={
             <div className="relative w-52">
@@ -165,7 +190,7 @@ export default function Leads() {
           footer={
             filteredLeads.length > 0 ? (
               <span className="text-muted-foreground">
-                Showing {filteredLeads.length} of {leads.length} leads
+                Showing {(page * PAGE_SIZE + 1).toLocaleString()}–{(page * PAGE_SIZE + filteredLeads.length).toLocaleString()} of {totalMatches.toLocaleString()}
               </span>
             ) : undefined
           }
@@ -213,6 +238,35 @@ export default function Leads() {
                 />
               );
             })
+          )}
+
+          {/* Pager. Hidden on a single page of results so it does not add
+              furniture to a search that returned nine leads. */}
+          {totalMatches > PAGE_SIZE && (
+            <div className="flex items-center justify-between border-t border-border px-1 pt-4 mt-2">
+              <span className="text-sm text-muted-foreground tabular-nums">
+                Page {page + 1} of {Math.ceil(totalMatches / PAGE_SIZE).toLocaleString()}
+                {isFetching && <span className="ml-2 opacity-60">loading…</span>}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page === 0 || isFetching}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={(page + 1) * PAGE_SIZE >= totalMatches || isFetching}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           )}
         </ModuleCard>
       </div>
