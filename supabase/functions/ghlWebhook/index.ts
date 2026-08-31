@@ -23,6 +23,11 @@
 // rotates one. An unverified lead is worse than a missed one, so a body that
 // carries no recognised signature is refused rather than trusted.
 //
+// MESSAGES ARRIVE HERE LIVE. InboundMessage/OutboundMessage are written straight
+// into ghl_message, which is the same table ghlSync backfills history into --
+// history and the leading edge meet in one corpus. ghl_replay_message_webhooks()
+// exists as a reconciler over ghl_webhook_event in case this path ever misses one.
+//
 // AN OPT-OUT HAS TO ACTUALLY STOP OUTBOUND. GHL's DND state is pushed into
 // public.suppression, which sendMessage already checks before every send, so a
 // customer who switches DND on in GHL stops receiving texts and email from here
@@ -359,6 +364,73 @@ Deno.serve(async (req) => {
       case 'ContactDndUpdate': {
         if (!contact) return await finish({ action: 'ignored', reason: 'no contact on payload' });
         return await finish({ action: 'dnd_applied', contactId, ...(await applyDnd(s, contact, contactId)) });
+      }
+
+      case 'InboundMessage':
+      case 'OutboundMessage': {
+        // Live messages. The backfill in ghlSync walks history; this is the
+        // leading edge, so a text sent thirty seconds ago is already in the
+        // corpus rather than waiting for the next sweep.
+        const convId = evt.conversationId ?? null;
+        const msgId = evt.messageId ?? evt.id ?? null;
+        if (!convId || !msgId) {
+          return await finish({ action: 'skipped', reason: 'no conversationId or messageId' });
+        }
+
+        // The message needs its conversation to exist (FK). Insert a stub ONLY
+        // if the corpus has never seen this thread — ignoreDuplicates keeps an
+        // existing row's richer `raw` from the sweep instead of flattening it
+        // to a single message event.
+        await s.from('ghl_conversation').upsert(
+          { id: convId, location_id: locationId ?? 'unknown', contact_id: contactId, raw: evt },
+          { onConflict: 'id', ignoreDuplicates: true },
+        );
+
+        // Resolve the customer now rather than leaving it to the next sweep, so
+        // a live message is attached the moment it lands. The conversation's own
+        // lead is authoritative; falling back to the contact id covers a thread
+        // this webhook just created.
+        const { data: conv } = await s.from('ghl_conversation')
+          .select('lead_id').eq('id', convId).maybeSingle();
+        let leadId: string | null = conv?.lead_id ?? null;
+        if (!leadId && contactId) {
+          const { data: l } = await s.from('lead')
+            .select('id').eq('ghl_contact_id', contactId).limit(1).maybeSingle();
+          leadId = l?.id ?? null;
+        }
+
+        const rawSent = evt.dateAdded ?? evt.timestamp ?? null;
+        const sentAt = rawSent ? new Date(rawSent).toISOString() : new Date().toISOString();
+
+        const { error: mErr } = await s.from('ghl_message').upsert({
+          id: msgId,
+          conversation_id: convId,
+          location_id: locationId,
+          contact_id: contactId,
+          lead_id: leadId,
+          direction: evt.direction ?? null,
+          // messageType is absent on some events; messageTypeString carries it.
+          message_type: evt.messageType ?? evt.messageTypeString ?? null,
+          status: evt.status ?? null,
+          body: evt.body ?? null,
+          sent_at: sentAt,
+          raw: evt,
+        }, { onConflict: 'id' });
+        if (mErr) return await finish({ action: 'failed' }, mErr.message);
+
+        // Keep the thread summary current so ordering is right immediately,
+        // without waiting for the sweep to come back round.
+        await s.from('ghl_conversation').update({
+          last_message_at: sentAt,
+          last_message_type: evt.messageType ?? evt.messageTypeString ?? null,
+          last_message_body: evt.body ?? null,
+          updated_date: new Date().toISOString(),
+        }).eq('id', convId);
+
+        return await finish({
+          action: 'message_stored', conversationId: convId, messageId: msgId,
+          linked_to_lead: !!leadId,
+        });
       }
 
       case 'ContactDelete':

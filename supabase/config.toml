@@ -28,6 +28,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.ghlOAuth]
 verify_jwt = false
+[functions.ghlSync]
+verify_jwt = false
 [functions.ghlWebhook]
 verify_jwt = false
 [functions.googleMaps]
