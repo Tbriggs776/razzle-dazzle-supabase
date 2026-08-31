@@ -51,17 +51,19 @@ export default function FlowEditor({ onClose }) {
   const qc = useQueryClient();
 
   // Published state (the draft's starting point).
-  const { data: stages = [], isLoading: l1 } = useQuery({
+  const { data: stages = [], isLoading: l1, error: e1 } = useQuery({
     queryKey: ['ops', 'editorStages'],
-    queryFn: () => base44.entities.OpsStage.list(),
+    // Explicit sorts throughout: these tables have no created_date, and the
+    // client's default orderBy would 400 — an empty editor lying as truth.
+    queryFn: () => base44.entities.OpsStage.list('sort_order'),
   });
-  const { data: edges = [], isLoading: l2 } = useQuery({
+  const { data: edges = [], isLoading: l2, error: e2 } = useQuery({
     queryKey: ['ops', 'editorEdges'],
-    queryFn: () => base44.entities.OpsEdge.list(),
+    queryFn: () => base44.entities.OpsEdge.list('sort_order'),
   });
-  const { data: departments = [], isLoading: l3 } = useQuery({
+  const { data: departments = [], isLoading: l3, error: e3 } = useQuery({
     queryKey: ['ops', 'editorDepts'],
-    queryFn: () => base44.entities.OpsDepartment.list(),
+    queryFn: () => base44.entities.OpsDepartment.list('sort_order'),
   });
   const { data: versions = [] } = useQuery({
     queryKey: ['ops', 'editorVersions'],
@@ -203,6 +205,20 @@ export default function FlowEditor({ onClose }) {
 
   if (l1 || l2 || l3) {
     return <div className="flex items-center justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  }
+
+  // An editor drawn from a failed query would show an EMPTY graph as if that
+  // were the published truth — refuse to render instead.
+  const loadError = e1 || e2 || e3;
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+        <ShieldAlert className="h-8 w-8 text-crit" />
+        <p className="text-sm font-semibold text-foreground">The published graph could not be loaded</p>
+        <p className="max-w-md text-xs text-muted-foreground">{loadError.message}</p>
+        {onClose && <Button size="sm" variant="outline" onClick={onClose}>Back to board</Button>}
+      </div>
+    );
   }
 
   return (

@@ -15,17 +15,20 @@ import { graphFromRows } from '@/lib/ops/flow';
 export function usePublishedFlow() {
   const stagesQ = useQuery({
     queryKey: ['ops', 'publishedStages'],
-    queryFn: () => base44.entities.OpsStage.list(),
+    // Explicit sort: ops_stage has no created_date — the client's default
+    // '-created_date' orderBy would 400 (42703) and kill every board.
+    queryFn: () => base44.entities.OpsStage.list('sort_order'),
     staleTime: 5 * 60 * 1000,
   });
   const deptsQ = useQuery({
     queryKey: ['ops', 'publishedDepartments'],
-    queryFn: () => base44.entities.OpsDepartment.list(),
+    queryFn: () => base44.entities.OpsDepartment.list('sort_order'),
     staleTime: 5 * 60 * 1000,
   });
   const viewQ = useQuery({
     queryKey: ['ops', 'jobStageRows'],
-    queryFn: () => base44.entities.JobStage.list(),
+    // The classifier view also has no created_date; sale_id is a real column.
+    queryFn: () => base44.entities.JobStage.list('sale_id'),
     staleTime: 30000,
   });
 
