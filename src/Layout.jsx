@@ -432,14 +432,15 @@ export default function Layout({ children, currentPageName }) {
     {
       name: 'Team', icon: UserCog,
       subItems: [
-        { name: 'Team Members', href: 'TeamMembers', pages: ['TeamMembers', 'TeamMemberDetail', 'DesignConsultants', 'CustomerServiceReps'] },
-        { name: 'Company Directory', href: 'CompanyDirectory', pages: ['CompanyDirectory'] },
+        // Managing people moved to System -> Users. What stays here is the
+        // read-only directory everyone uses to look each other up.
+        { name: 'Company Directory', href: 'CompanyDirectory', pages: ['CompanyDirectory', 'DesignConsultants', 'CustomerServiceReps'] },
       ],
     },
     {
       name: 'System', icon: SettingsIcon,
       subItems: [
-        { name: 'User Access', href: 'UserAccess', pages: ['UserAccess'] },
+        { name: 'Users', href: 'Users', pages: ['Users', 'UserDetail', 'UserAccess', 'TeamMembers', 'TeamMemberDetail'] },
         { name: 'Routing', href: 'Routing', pages: ['Routing'] },
         { name: 'Settings', href: 'Settings', pages: ['Settings'] },
         { name: 'Integrations', href: 'Integrations', pages: ['Integrations'] },

@@ -97,6 +97,8 @@ import SubmitTicket from './pages/SubmitTicket';
 import TeamMemberDetail from './pages/TeamMemberDetail';
 import TeamMembers from './pages/TeamMembers';
 import UserAccess from './pages/UserAccess';
+import Users from './pages/Users';
+import UserDetail from './pages/UserDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -151,6 +153,8 @@ export const PAGES = {
     "TeamMemberDetail": TeamMemberDetail,
     "TeamMembers": TeamMembers,
     "UserAccess": UserAccess,
+    "Users": Users,
+    "UserDetail": UserDetail,
 }
 
 export const pagesConfig = {
