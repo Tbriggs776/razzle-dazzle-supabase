@@ -34,7 +34,12 @@ const GHL_VERSION = '2021-07-28';
 // when this expires is simply the next invocation's work.
 const TIME_BUDGET_MS = 50_000;
 // GHL rate-limits; a short gap between calls costs little and avoids 429 storms.
-const PAUSE_MS = 120;
+const PAUSE_MS = 60;
+// How many conversations to pull at once. Almost all the wall-clock here is
+// waiting on GHL, so a small pool multiplies throughput without multiplying
+// load much. Kept modest on purpose: a backfill that trips a 429 storm finishes
+// later than one that never does.
+const CONCURRENCY = 4;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -180,70 +185,85 @@ async function syncMessages(c: Ctx, limitConversations: number) {
 
   let convDone = 0, msgWritten = 0, failed = 0;
 
-  for (const conv of pending ?? []) {
-    if (outOfTime(c)) break;
-    try {
-      let lastMessageId: string | null = null;
-      let guard = 0;
-      let countForConv = 0;
+  // One conversation, start to finish. Lifted out of the loop so several can be
+  // in flight at once -- walking them one at a time is what made the first pass
+  // crawl, since each thread is mostly a wait on GHL.
+  const pullOne = async (conv: any) => {
+    let lastMessageId: string | null = null;
+    let guard = 0;
+    let countForConv = 0;
 
-      while (guard++ < 40) {
-        const qs = new URLSearchParams({ limit: '100' });
-        if (lastMessageId) qs.set('lastMessageId', lastMessageId);
-        const d = await ghl(c, `/conversations/${conv.id}/messages?${qs}`);
+    while (guard++ < 40) {
+      const qs = new URLSearchParams({ limit: '100' });
+      if (lastMessageId) qs.set('lastMessageId', lastMessageId);
+      const d = await ghl(c, `/conversations/${conv.id}/messages?${qs}`);
 
-        // GHL nests this one: { messages: { messages: [...], lastMessageId, nextPage } }
-        const inner = d?.messages ?? {};
-        const rows: any[] = Array.isArray(inner) ? inner : (inner.messages ?? []);
-        if (!rows.length) break;
+      // GHL nests this one: { messages: { messages: [...], lastMessageId, nextPage } }
+      const inner = d?.messages ?? {};
+      const rows: any[] = Array.isArray(inner) ? inner : (inner.messages ?? []);
+      if (!rows.length) break;
 
-        const upserts = rows.map((m) => ({
-          id: m.id,
-          conversation_id: conv.id,
-          location_id: m.locationId ?? conv.location_id ?? c.locationId,
-          contact_id: m.contactId ?? conv.contact_id ?? null,
-          lead_id: conv.lead_id ?? null,
-          direction: m.direction ?? null,
-          message_type: m.messageType ?? m.type ?? null,
-          status: m.status ?? null,
-          body: m.body ?? null,
-          sent_at: toIso(m.dateAdded ?? m.dateUpdated),
-          raw: m,
-        }));
+      const upserts = rows.map((m) => ({
+        id: m.id,
+        conversation_id: conv.id,
+        location_id: m.locationId ?? conv.location_id ?? c.locationId,
+        contact_id: m.contactId ?? conv.contact_id ?? null,
+        lead_id: conv.lead_id ?? null,
+        direction: m.direction ?? null,
+        message_type: m.messageType ?? m.type ?? null,
+        status: m.status ?? null,
+        body: m.body ?? null,
+        sent_at: toIso(m.dateAdded ?? m.dateUpdated),
+        raw: m,
+      }));
 
-        const { error: mErr } = await c.s.from('ghl_message')
-          .upsert(upserts, { onConflict: 'id', ignoreDuplicates: false });
-        if (mErr) throw new Error(mErr.message);
+      const { error: mErr } = await c.s.from('ghl_message')
+        .upsert(upserts, { onConflict: 'id', ignoreDuplicates: false });
+      if (mErr) throw new Error(mErr.message);
 
-        msgWritten += upserts.length;
-        countForConv += upserts.length;
+      msgWritten += upserts.length;
+      countForConv += upserts.length;
 
-        const nextPage = inner.nextPage === true;
-        const nextId = inner.lastMessageId ?? rows[rows.length - 1]?.id ?? null;
-        if (!nextPage || !nextId || nextId === lastMessageId) break;
-        lastMessageId = nextId;
-        await sleep(PAUSE_MS);
-      }
-
-      await c.s.from('ghl_conversation').update({
-        messages_synced_at: new Date().toISOString(),
-        message_count: countForConv,
-        last_error: null,
-        updated_date: new Date().toISOString(),
-      }).eq('id', conv.id);
-      convDone += 1;
-    } catch (e) {
-      // One bad conversation must not stall the backfill. Record why and move
-      // on; messages_synced_at stays null so it is retried on a later pass.
-      failed += 1;
-      await c.s.from('ghl_conversation')
-        .update({ last_error: (e as Error).message, updated_date: new Date().toISOString() })
-        .eq('id', conv.id);
+      const nextPage = inner.nextPage === true;
+      const nextId = inner.lastMessageId ?? rows[rows.length - 1]?.id ?? null;
+      if (!nextPage || !nextId || nextId === lastMessageId) break;
+      lastMessageId = nextId;
+      await sleep(PAUSE_MS);
     }
-    await sleep(PAUSE_MS);
-  }
 
-  return { conversations_completed: convDone, messages_written: msgWritten, failed };
+    await c.s.from('ghl_conversation').update({
+      messages_synced_at: new Date().toISOString(),
+      message_count: countForConv,
+      last_error: null,
+      updated_date: new Date().toISOString(),
+    }).eq('id', conv.id);
+  };
+
+  // A shared queue rather than fixed slices, so one enormous thread cannot leave
+  // three workers idle while it finishes.
+  const queue = [...(pending ?? [])];
+  const worker = async () => {
+    while (queue.length && !outOfTime(c)) {
+      const conv = queue.shift();
+      if (!conv) return;
+      try {
+        await pullOne(conv);
+        convDone += 1;
+      } catch (e) {
+        // One bad conversation must not stall the backfill. Record why and move
+        // on; messages_synced_at stays null so it is retried on a later pass.
+        failed += 1;
+        await c.s.from('ghl_conversation')
+          .update({ last_error: (e as Error).message, updated_date: new Date().toISOString() })
+          .eq('id', conv.id);
+      }
+      await sleep(PAUSE_MS);
+    }
+  };
+  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
+
+  return { conversations_completed: convDone, messages_written: msgWritten, failed,
+           left_in_batch: queue.length };
 }
 
 Deno.serve(async (req) => {
