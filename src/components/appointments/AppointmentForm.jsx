@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import LeadPicker from '@/components/leads/LeadPicker';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,10 +54,6 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
   });
   const [reasonError, setReasonError] = React.useState('');
 
-  const { data: leads = [] } = useQuery({
-    queryKey: ['leads'],
-    queryFn: () => base44.entities.Lead.list('first_name')
-  });
 
   const { data: teamMembers = [] } = useQuery({
     queryKey: ['teamMembers'],
@@ -66,24 +63,37 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
   const csrMembers = teamMembers.filter(m => m.role === 'Customer Service Rep' || m.role === 'Admin');
   const dcMembers = teamMembers.filter(m => m.role === 'Design Consultant' || m.role === 'Sales Manager');
 
-  // Auto-populate address when customer is selected
+  // Auto-populate address when customer is selected.
+  //
+  // Was a leads.find() over every lead in the business, which is no longer
+  // downloaded — so this fetches the one record instead. `cancelled` guards the
+  // case where the user picks a second lead before the first lookup returns:
+  // without it the slower response could overwrite the newer address.
   useEffect(() => {
-    if (formData.customer && !appointment) {
-      const selectedLead = leads.find(l => l.id === formData.customer);
-      if (selectedLead) {
-        const address = [
-          selectedLead.address_line1,
-          selectedLead.address_line2,
-          selectedLead.city,
-          selectedLead.state,
-          selectedLead.zip
-        ].filter(Boolean).join(', ');
-        if (address) {
-          setFormData(prev => ({ ...prev, location_address: address }));
-        }
+    if (!formData.customer || appointment) return;
+    let cancelled = false;
+
+    (async () => {
+      const rows = await base44.entities.Lead
+        .filter({ id: formData.customer }, '-created_date', 1)
+        .catch(() => []);
+      const selectedLead = rows[0];
+      if (cancelled || !selectedLead) return;
+
+      const address = [
+        selectedLead.address_line1,
+        selectedLead.address_line2,
+        selectedLead.city,
+        selectedLead.state,
+        selectedLead.zip
+      ].filter(Boolean).join(', ');
+      if (address) {
+        setFormData(prev => ({ ...prev, location_address: address }));
       }
-    }
-  }, [formData.customer, leads, appointment]);
+    })();
+
+    return () => { cancelled = true; };
+  }, [formData.customer, appointment]);
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -146,18 +156,10 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
         <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Lead Information</h3>
         <div className="space-y-2">
           <Label htmlFor="customer" className="text-slate-700">Lead *</Label>
-          <Select value={formData.customer} onValueChange={(value) => handleChange('customer', value)} required>
-            <SelectTrigger className="h-12 border-slate-200">
-              <SelectValue placeholder="Select a lead" />
-            </SelectTrigger>
-            <SelectContent>
-              {leads.map((lead) => (
-                <SelectItem key={lead.id} value={lead.id}>
-                  {lead.first_name} {lead.last_name} - {lead.email}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <LeadPicker
+            value={formData.customer}
+            onChange={(id) => handleChange('customer', id)}
+          />
         </div>
       </div>
 
