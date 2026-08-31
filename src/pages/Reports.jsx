@@ -21,10 +21,6 @@ export default function Reports() {
     queryFn: () => base44.entities.Appointment.list()
   });
 
-  const { data: leads = [] } = useQuery({
-    queryKey: ['leads'],
-    queryFn: () => base44.entities.Lead.list()
-  });
 
   const { data: teamMembers = [] } = useQuery({
     queryKey: ['teamMembers'],

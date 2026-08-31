@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { fetchByIds } from '@/lib/fetchByIds';
 import { invokeFailure } from '@/lib/invokeResult';
 import { toast } from 'sonner';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -67,9 +68,16 @@ export default function SalesReports() {
     queryFn: () => base44.entities.TeamMember.list()
   });
 
+  // Only the leads the reported appointments reference.
+  const leadIds = useMemo(
+    () => [...new Set(appointments.map(a => a.customer).filter(Boolean))].sort(),
+    [appointments],
+  );
+
   const { data: leads = [] } = useQuery({
-    queryKey: ['leads'],
-    queryFn: () => base44.entities.Lead.list()
+    queryKey: ['leadsByIds', leadIds],
+    queryFn: () => fetchByIds('Lead', leadIds),
+    enabled: leadIds.length > 0,
   });
 
   const { data: checklists = [] } = useQuery({
