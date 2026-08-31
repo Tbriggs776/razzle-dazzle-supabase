@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import './App.css'
 import RequirePage from '@/components/common/RequirePage';
 import { Toaster } from "@/components/ui/toaster"
@@ -9,46 +10,46 @@ import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import SignDocumentPage from './pages/SignDocument';
-import LeadAppointmentViewPage from './pages/LeadAppointmentView';
-import CustomerProjectViewPage from './pages/CustomerProjectView';
-import InstallerApplyPage from './pages/InstallerApply';
+const SignDocumentPage = lazy(() => import('./pages/SignDocument'));
+const LeadAppointmentViewPage = lazy(() => import('./pages/LeadAppointmentView'));
+const CustomerProjectViewPage = lazy(() => import('./pages/CustomerProjectView'));
+const InstallerApplyPage = lazy(() => import('./pages/InstallerApply'));
 import Login from '@/components/Login';
-import IntegrationsPage from './pages/Integrations';
-import ClaimsDashboardPage from './pages/ClaimsDashboard';
-import CommunicationHubPage from './pages/CommunicationHub';
-import DesignModViewPage from './pages/DesignModView';
-import ManualDesignModsPage from './pages/ManualDesignMods';
-import PreInstallChecklistViewPage from './pages/PreInstallChecklistView';
-import FinancePage from './pages/Finance';
-import CompanyDirectoryPage from './pages/CompanyDirectory';
-import FleetPage from './pages/Fleet';
-import FleetVehiclesPage from './pages/FleetVehicles';
-import FleetDriversPage from './pages/FleetDrivers';
-import FleetMaintenancePage from './pages/FleetMaintenance';
-import OrderProcessingReportsPage from './pages/OrderProcessingReports';
-import CashFlowProjectionPage from './pages/CashFlowProjection';
-import MySalesPage from './pages/MySales';
-import MyQuotesPage from './pages/MyQuotes';
-import QuoteDetailPage from './pages/QuoteDetail';
-import ManualSalesContractViewPage from './pages/ManualSalesContractView';
-import CancelledProjectsPage from './pages/CancelledProjects';
-import ChecklistV2DetailPage from './pages/ChecklistV2Detail';
-import RFMSCustomersPage from './pages/RFMSCustomers';
-import ContractDiscrepancyPage from './pages/ContractDiscrepancy';
-import GrossProfitReportPage from './pages/GrossProfitReport';
-import AppointmentRehashReportPage from './pages/AppointmentRehashReport';
-import DashboardPage from './pages/Dashboard';
-import JourneyPage from './pages/Journey';
-import JourneyProjectDetailPage from './pages/JourneyProjectDetail';
-import MarketingPerformancePage from './pages/MarketingPerformance';
-import DCPerformanceMatrixPage from './pages/DCPerformanceMatrix';
-import PortalPage from './pages/Portal';
-import LeadQueuePage from './pages/LeadQueue';
-import PlaybooksPage from './pages/Playbooks';
-import PlaybookDetailPage from './pages/PlaybookDetail';
-import MyTrainingPage from './pages/MyTraining';
-import TrainingAdminPage from './pages/TrainingAdmin';
+const IntegrationsPage = lazy(() => import('./pages/Integrations'));
+const ClaimsDashboardPage = lazy(() => import('./pages/ClaimsDashboard'));
+const CommunicationHubPage = lazy(() => import('./pages/CommunicationHub'));
+const DesignModViewPage = lazy(() => import('./pages/DesignModView'));
+const ManualDesignModsPage = lazy(() => import('./pages/ManualDesignMods'));
+const PreInstallChecklistViewPage = lazy(() => import('./pages/PreInstallChecklistView'));
+const FinancePage = lazy(() => import('./pages/Finance'));
+const CompanyDirectoryPage = lazy(() => import('./pages/CompanyDirectory'));
+const FleetPage = lazy(() => import('./pages/Fleet'));
+const FleetVehiclesPage = lazy(() => import('./pages/FleetVehicles'));
+const FleetDriversPage = lazy(() => import('./pages/FleetDrivers'));
+const FleetMaintenancePage = lazy(() => import('./pages/FleetMaintenance'));
+const OrderProcessingReportsPage = lazy(() => import('./pages/OrderProcessingReports'));
+const CashFlowProjectionPage = lazy(() => import('./pages/CashFlowProjection'));
+const MySalesPage = lazy(() => import('./pages/MySales'));
+const MyQuotesPage = lazy(() => import('./pages/MyQuotes'));
+const QuoteDetailPage = lazy(() => import('./pages/QuoteDetail'));
+const ManualSalesContractViewPage = lazy(() => import('./pages/ManualSalesContractView'));
+const CancelledProjectsPage = lazy(() => import('./pages/CancelledProjects'));
+const ChecklistV2DetailPage = lazy(() => import('./pages/ChecklistV2Detail'));
+const RFMSCustomersPage = lazy(() => import('./pages/RFMSCustomers'));
+const ContractDiscrepancyPage = lazy(() => import('./pages/ContractDiscrepancy'));
+const GrossProfitReportPage = lazy(() => import('./pages/GrossProfitReport'));
+const AppointmentRehashReportPage = lazy(() => import('./pages/AppointmentRehashReport'));
+const DashboardPage = lazy(() => import('./pages/Dashboard'));
+const JourneyPage = lazy(() => import('./pages/Journey'));
+const JourneyProjectDetailPage = lazy(() => import('./pages/JourneyProjectDetail'));
+const MarketingPerformancePage = lazy(() => import('./pages/MarketingPerformance'));
+const DCPerformanceMatrixPage = lazy(() => import('./pages/DCPerformanceMatrix'));
+const PortalPage = lazy(() => import('./pages/Portal'));
+const LeadQueuePage = lazy(() => import('./pages/LeadQueue'));
+const PlaybooksPage = lazy(() => import('./pages/Playbooks'));
+const PlaybookDetailPage = lazy(() => import('./pages/PlaybookDetail'));
+const MyTrainingPage = lazy(() => import('./pages/MyTraining'));
+const TrainingAdminPage = lazy(() => import('./pages/TrainingAdmin'));
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { usePortalContext } from '@/lib/usePortal';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -83,9 +84,26 @@ const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
+/**
+ * Shown while a page's chunk is in flight. Pages are lazy now (see
+ * pages.config.js), so there is a real, if usually brief, gap on first
+ * navigation to each one.
+ */
+const PageLoading = () => (
+  <div className="flex items-center justify-center py-24">
+    <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+  </div>
+);
+
+/**
+ * Suspense sits INSIDE the layout on purpose. Wrapping the whole <Routes> would
+ * blank the sidebar and header on every navigation -- the app would appear to
+ * reload itself each time. Here the chrome stays put and only the content area
+ * spins, which is what a page transition should look like.
+ */
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+  <Layout currentPageName={currentPageName}><Suspense fallback={<PageLoading />}>{children}</Suspense></Layout>
+  : <Suspense fallback={<PageLoading />}>{children}</Suspense>;
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated, authError } = useAuth();
@@ -99,12 +117,14 @@ const AuthenticatedApp = () => {
   const PUBLIC_PREFIXES = ['/SignDocument', '/LeadAppointmentView', '/CustomerProjectView', '/InstallerApply'];
   if (PUBLIC_PREFIXES.some((p) => location.pathname.startsWith(p))) {
     return (
+      <Suspense fallback={<PageLoading />}>
       <Routes>
         <Route path="/SignDocument" element={<SignDocumentPage />} />
         <Route path="/LeadAppointmentView" element={<LeadAppointmentViewPage />} />
         <Route path="/CustomerProjectView" element={<CustomerProjectViewPage />} />
         <Route path="/InstallerApply" element={<InstallerApplyPage />} />
       </Routes>
+      </Suspense>
     );
   }
 
@@ -129,6 +149,7 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
+    <Suspense fallback={<PageLoading />}>
     <Routes>
       <Route path="/" element={<HomeRedirect />} />
       {/* The subcontractor portal renders without the staff chrome — see Portal.jsx. */}
@@ -187,6 +208,7 @@ const AuthenticatedApp = () => {
       <Route path="/TrainingAdmin" element={<LayoutWrapper currentPageName="TrainingAdmin"><TrainingAdminPage /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </Suspense>
   );
 };
 

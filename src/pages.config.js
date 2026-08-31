@@ -1,161 +1,47 @@
 /**
  * pages.config.js - Page routing configuration
- * 
- * This file is AUTO-GENERATED. Do not add imports or modify PAGES manually.
- * Pages are auto-registered when you create files in the ./pages/ folder.
- * 
+ *
+ * WAS auto-generated, and is not any more. The generated version listed all 88
+ * pages as static imports, which is why the whole application compiled into one
+ * 4.5 MB JavaScript file: every page had to download, parse and execute before
+ * anything at all could render, on every first visit.
+ *
+ * This does the same job -- register every page under ./pages -- but lazily.
+ * import.meta.glob hands Vite a dynamic importer per file, so each page becomes
+ * its own chunk fetched the first time somebody navigates to it.
+ *
+ * IT STILL AUTO-REGISTERS. That was the point of the generated file and it is
+ * preserved: drop a new file in ./pages and it appears here with no edit. The
+ * glob pattern is static on purpose -- Vite resolves it at build time, so it
+ * cannot be built from a variable.
+ *
+ * Layout stays a normal import. It wraps every authenticated page, so making it
+ * lazy would buy nothing and add a flash of empty chrome on first paint.
+ *
+ * Anything rendering these pages must sit inside a <Suspense> boundary; App.jsx
+ * provides it.
+ *
  * THE ONLY EDITABLE VALUE: mainPage
- * This controls which page is the landing page (shown when users visit the app).
- * 
- * Example file structure:
- * 
- *   import HomePage from './pages/HomePage';
- *   import Dashboard from './pages/Dashboard';
- *   import Settings from './pages/Settings';
- *   
- *   export const PAGES = {
- *       "HomePage": HomePage,
- *       "Dashboard": Dashboard,
- *       "Settings": Settings,
- *   }
- *   
- *   export const pagesConfig = {
- *       mainPage: "HomePage",
- *       Pages: PAGES,
- *   };
- * 
- * Example with Layout (wraps all pages):
- *
- *   import Home from './pages/Home';
- *   import Settings from './pages/Settings';
- *   import __Layout from './Layout.jsx';
- *
- *   export const PAGES = {
- *       "Home": Home,
- *       "Settings": Settings,
- *   }
- *
- *   export const pagesConfig = {
- *       mainPage: "Home",
- *       Pages: PAGES,
- *       Layout: __Layout,
- *   };
- *
- * To change the main page from HomePage to Dashboard, use find_replace:
- *   Old: mainPage: "HomePage",
- *   New: mainPage: "Dashboard",
- *
- * The mainPage value must match a key in the PAGES object exactly.
+ * This controls which page is the landing page.
  */
-import Inbox from './pages/Inbox';
-import Work from './pages/Work';
-import Routing from './pages/Routing';
-import AppointmentDetail from './pages/AppointmentDetail';
-import AppointmentReports from './pages/AppointmentReports';
-import AppointmentSettingChecklists from './pages/AppointmentSettingChecklists';
-import Appointments from './pages/Appointments';
-import Calculators from './pages/Calculators';
-import CancelledAppointments from './pages/CancelledAppointments';
-import ChecklistDetail from './pages/ChecklistDetail';
-import ClaimsDashboard from './pages/ClaimsDashboard';
-import ConsultantAppointmentView from './pages/ConsultantAppointmentView';
-import CustomerDetail from './pages/CustomerDetail';
-import CustomerProjectView from './pages/CustomerProjectView';
-import CustomerServiceReps from './pages/CustomerServiceReps';
-import Customers from './pages/Customers';
-import DesignConsultantTicketView from './pages/DesignConsultantTicketView';
-import DesignConsultants from './pages/DesignConsultants';
-import InvoiceCalculator from './pages/InvoiceCalculator';
-import LeadAppointmentView from './pages/LeadAppointmentView';
-import LeadDetail from './pages/LeadDetail';
-import Leads from './pages/Leads';
-import InstallerApplications from './pages/InstallerApplications';
-import InstallTeam from './pages/InstallTeam';
-import JobFlow from './pages/JobFlow';
-import Logs from './pages/Logs';
-import MyAppointments from './pages/MyAppointments';
-import MyAppointmentResults from './pages/MyAppointmentResults';
-import MyTasks from './pages/MyTasks';
-import MyTickets from './pages/MyTickets';
-import OrderingTeam from './pages/OrderingTeam';
-import OrderProcessing from './pages/OrderProcessing';
-import ProjectDetail from './pages/ProjectDetail';
-import Projects from './pages/Projects';
-import RecordingDetail from './pages/RecordingDetail';
-import Recordings from './pages/Recordings';
-import Reports from './pages/Reports';
-import RequesterTicketView from './pages/RequesterTicketView';
-import RescheduledAppointments from './pages/RescheduledAppointments';
-import SaleDetail from './pages/SaleDetail';
-import Sales from './pages/Sales';
-import SalesReports from './pages/SalesReports';
-import ScheduleAssistant from './pages/ScheduleAssistant';
-import ScheduledThisWeek from './pages/ScheduledThisWeek';
-import Settings from './pages/Settings';
-import SpeedToInstall from './pages/SpeedToInstall';
-import SubmitTicket from './pages/SubmitTicket';
-import TeamMemberDetail from './pages/TeamMemberDetail';
-import TeamMembers from './pages/TeamMembers';
-import UserAccess from './pages/UserAccess';
-import Users from './pages/Users';
-import UserDetail from './pages/UserDetail';
+import { lazy } from 'react';
 import __Layout from './Layout.jsx';
 
+const modules = import.meta.glob('./pages/*.jsx');
 
-export const PAGES = {
-    "Inbox": Inbox,
-    "Work": Work,
-    "Routing": Routing,
-    "AppointmentDetail": AppointmentDetail,
-    "AppointmentReports": AppointmentReports,
-    "AppointmentSettingChecklists": AppointmentSettingChecklists,
-    "Appointments": Appointments,
-    "Calculators": Calculators,
-    "CancelledAppointments": CancelledAppointments,
-    "ChecklistDetail": ChecklistDetail,
-    "ClaimsDashboard": ClaimsDashboard,
-    "ConsultantAppointmentView": ConsultantAppointmentView,
-    "CustomerDetail": CustomerDetail,
-    "CustomerProjectView": CustomerProjectView,
-    "CustomerServiceReps": CustomerServiceReps,
-    "Customers": Customers,
-    "DesignConsultantTicketView": DesignConsultantTicketView,
-    "DesignConsultants": DesignConsultants,
-    "InvoiceCalculator": InvoiceCalculator,
-    "LeadAppointmentView": LeadAppointmentView,
-    "LeadDetail": LeadDetail,
-    "InstallerApplications": InstallerApplications,
-    "InstallTeam": InstallTeam,
-    "JobFlow": JobFlow,
-    "Leads": Leads,
-    "Logs": Logs,
-    "MyAppointments": MyAppointments,
-    "MyAppointmentResults": MyAppointmentResults,
-    "MyTasks": MyTasks,
-    "MyTickets": MyTickets,
-    "OrderingTeam": OrderingTeam,
-    "OrderProcessing": OrderProcessing,
-    "ProjectDetail": ProjectDetail,
-    "Projects": Projects,
-    "RecordingDetail": RecordingDetail,
-    "Recordings": Recordings,
-    "Reports": Reports,
-    "RequesterTicketView": RequesterTicketView,
-    "RescheduledAppointments": RescheduledAppointments,
-    "SaleDetail": SaleDetail,
-    "Sales": Sales,
-    "SalesReports": SalesReports,
-    "ScheduleAssistant": ScheduleAssistant,
-    "ScheduledThisWeek": ScheduledThisWeek,
-    "Settings": Settings,
-    "SpeedToInstall": SpeedToInstall,
-    "SubmitTicket": SubmitTicket,
-    "TeamMemberDetail": TeamMemberDetail,
-    "TeamMembers": TeamMembers,
-    "UserAccess": UserAccess,
-    "Users": Users,
-    "UserDetail": UserDetail,
-}
+const PREFIX = './pages/';
+const SUFFIX = '.jsx';
+
+/**
+ * "./pages/LeadQueue.jsx" -> "LeadQueue", which is the key the router uses as
+ * the URL segment and the name Layout receives as currentPageName. Both depend
+ * on this matching the filename exactly, as the generated file's keys did.
+ */
+export const PAGES = Object.fromEntries(
+  Object.entries(modules)
+    .map(([path, loader]) => [path.slice(PREFIX.length, -SUFFIX.length), lazy(loader)])
+    .sort(([a], [b]) => a.localeCompare(b)),
+);
 
 export const pagesConfig = {
     mainPage: "Dashboard",
