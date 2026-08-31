@@ -1,7 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Users, UserCog, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, Truck, BarChart3, HardHat, Briefcase, Package, BookOpen } from 'lucide-react';
+import { Users, UserCog, Menu, X, Settings as SettingsIcon, DollarSign, LogOut, User, ShieldCheck, Activity, ChevronDown, ChevronRight, MessageSquare, Truck, BarChart3, HardHat, Briefcase, Package, BookOpen, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { base44 } from '@/api/base44Client';
 import { useAuth } from '@/lib/AuthContext';
@@ -38,6 +38,17 @@ export default function Layout({ children, currentPageName }) {
     setIsDesktop(mql.matches);
     return () => mql.removeEventListener('change', onChange);
   }, []);
+  // Collapsed ("rail") sidebar. Remembered, because a layout preference that
+  // resets on every page load is worse than not having one.
+  const [railed, setRailed] = useState(() => {
+    try { return localStorage.getItem('rd.sidebarRailed') === '1'; } catch { return false; }
+  });
+  const toggleRail = () => setRailed((v) => {
+    const next = !v;
+    try { localStorage.setItem('rd.sidebarRailed', next ? '1' : '0'); } catch { /* private mode */ }
+    return next;
+  });
+
   const [viewingAsRole, setViewingAsRole] = useState(null);
   const [expandedMenuItems, setExpandedMenuItems] = useState({});
   const [widgetPosition, setWidgetPosition] = useState({ x: null, y: null });
@@ -547,6 +558,24 @@ export default function Layout({ children, currentPageName }) {
 
   const filteredNavigation = getFilteredNavigation();
 
+  // The rail is a DESKTOP affordance. On a phone the sidebar is an overlay that
+  // is either open or gone, and a 72px overlay of unlabelled icons would be a
+  // worse menu than no menu — so the collapse never applies below lg.
+  const rail = railed && isDesktop;
+
+  // Where the logo takes you. 'Work' is the personal queue and lives in the
+  // `dashboard` core module, so in practice everyone with a login can reach it —
+  // but a logo that lands someone on "No access to this page" is a bug, so this
+  // falls back to whatever they CAN open rather than assuming.
+  const homeHref = (() => {
+    const prefer = ['Work', 'Dashboard', 'Inbox'];
+    for (const key of prefer) {
+      if (!access || allowedPageKeys.has(key)) return createPageUrl(key);
+    }
+    const firstReachable = filteredNavigation[0]?.subItems?.[0]?.href;
+    return firstReachable ? createPageUrl(firstReachable) : createPageUrl('Work');
+  })();
+
   const recordingContextValue = {
     recordingAppointmentId,
     startRecording: (appointmentId) => setRecordingAppointmentId(appointmentId),
@@ -585,24 +614,74 @@ export default function Layout({ children, currentPageName }) {
         aria-label="Main navigation"
         {...(!sidebarOpen && !isDesktop ? { inert: '' } : {})}
         className={cn(
-          "fixed top-0 left-0 bottom-0 w-64 bg-sidebar border-r border-sidebar-border z-50 transition-transform duration-300 lg:translate-x-0",
+          "fixed top-0 left-0 bottom-0 bg-sidebar border-r border-sidebar-border z-50 transition-all duration-300 lg:translate-x-0",
+          rail ? "w-[72px]" : "w-64",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="h-16 flex items-center justify-between px-6 border-b border-sidebar-border">
-            <BrandLogo imgClassName="h-8" onDark />
+          {/* Logo — the way home. */}
+          <div className={cn(
+            'h-16 flex items-center border-b border-sidebar-border',
+            rail ? 'justify-center px-2' : 'justify-between px-6'
+          )}>
+            {rail ? (
+              // No room for the horizontal wordmark at 72px, so the rail gets the
+              // same destination as an icon rather than a clipped logo.
+              <Link
+                to={homeHref}
+                title="Floor Daddy — my work"
+                aria-label="Floor Daddy — go to my work"
+                className="grid h-10 w-10 place-items-center rounded-xl text-sidebar-primary transition-colors hover:bg-sidebar-accent"
+              >
+                <Briefcase className="h-5 w-5" />
+              </Link>
+            ) : (
+              <Link
+                to={homeHref}
+                aria-label="Floor Daddy — go to my work"
+                onClick={() => setSidebarOpen(false)}
+                className="rounded-lg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-primary"
+              >
+                <BrandLogo imgClassName="h-8" onDark />
+              </Link>
+            )}
             <button
               onClick={() => setSidebarOpen(false)}
+              aria-label="Close navigation menu"
               className="lg:hidden p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
             >
               <X className="w-5 h-5 text-sidebar-foreground" />
             </button>
+            {!rail && (
+              <button
+                type="button"
+                onClick={toggleRail}
+                title="Collapse menu"
+                aria-label="Collapse navigation menu"
+                className="hidden lg:grid h-8 w-8 place-items-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                <PanelLeftClose className="h-[18px] w-[18px]" />
+              </button>
+            )}
           </div>
 
+          {rail && (
+            <div className="flex justify-center border-b border-sidebar-border py-2">
+              <button
+                type="button"
+                onClick={toggleRail}
+                title="Expand menu"
+                aria-label="Expand navigation menu"
+                className="grid h-9 w-9 place-items-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                <PanelLeftOpen className="h-[18px] w-[18px]" />
+              </button>
+            </div>
+          )}
+
           {/* Navigation — modules with tucked-in sub-nav */}
-          <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+          <nav className={cn('flex-1 space-y-0.5 overflow-y-auto py-4', rail ? 'px-2' : 'px-3')}>
             {filteredNavigation.map((item) => {
               const Icon = item.icon;
               const active = moduleHasActive(item);
@@ -622,29 +701,53 @@ export default function Layout({ children, currentPageName }) {
               return (
                 <div key={item.name}>
                   <button
-                    onClick={() => setExpandedMenuItems(prev => ({ ...prev, [item.name]: !(prev[item.name] ?? active) }))}
+                    onClick={() => {
+                      // In the rail there is nowhere to show sub-items, so a
+                      // click opens the menu AT the module you asked for rather
+                      // than dumping you in a collapsed list to hunt again.
+                      if (rail) {
+                        toggleRail();
+                        setExpandedMenuItems((prev) => ({ ...prev, [item.name]: true }));
+                        return;
+                      }
+                      setExpandedMenuItems(prev => ({ ...prev, [item.name]: !(prev[item.name] ?? active) }));
+                    }}
+                    title={rail ? item.name : undefined}
+                    aria-label={rail ? item.name : undefined}
+                    aria-expanded={rail ? false : isExpanded}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors",
+                      "w-full flex items-center rounded-xl transition-colors",
+                      rail ? "relative justify-center px-0 py-2.5" : "gap-3 px-3 py-2.5",
                       active
                         ? "text-sidebar-primary font-semibold"
                         : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                     )}
                   >
                     <Icon className="w-[18px] h-[18px] shrink-0" />
-                    <span className="flex-1 text-left text-[13.5px] font-medium">{item.name}</span>
-                    {!isExpanded && moduleUnread > 0 && (
-                      <span className="min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-background text-[10px] font-bold">
-                        {moduleUnread}
-                      </span>
-                    )}
-                    {isExpanded ? (
-                      <ChevronDown className="w-4 h-4 opacity-70" />
+                    {rail ? (
+                      moduleUnread > 0 && (
+                        // A count will not fit beside a 72px icon; a dot still
+                        // says "something in here needs you".
+                        <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-crit" />
+                      )
                     ) : (
-                      <ChevronRight className="w-4 h-4 opacity-60" />
+                      <>
+                        <span className="flex-1 text-left text-[13.5px] font-medium">{item.name}</span>
+                        {!isExpanded && moduleUnread > 0 && (
+                          <span className="min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-crit text-background text-[10px] font-bold">
+                            {moduleUnread}
+                          </span>
+                        )}
+                        {isExpanded ? (
+                          <ChevronDown className="w-4 h-4 opacity-70" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 opacity-60" />
+                        )}
+                      </>
                     )}
                   </button>
 
-                  {isExpanded && (
+                  {isExpanded && !rail && (
                     <div className="mb-1 ml-[26px] mt-0.5 space-y-0.5 border-l border-sidebar-border pl-3">
                       {item.subItems.map((subItem) => {
                         const subActive = pageInItem(subItem);
@@ -679,14 +782,17 @@ export default function Layout({ children, currentPageName }) {
           </nav>
 
           {/* Footer */}
-          <div className="p-6 border-t border-sidebar-border space-y-4">
+          <div className={cn('border-t border-sidebar-border', rail ? 'p-2 space-y-2' : 'p-6 space-y-4')}>
             {currentUser ? (
               <>
-                <div className="flex items-center gap-3 px-3 py-2 bg-sidebar-accent rounded-lg">
+                <div className={cn(
+                  'flex items-center bg-sidebar-accent rounded-lg',
+                  rail ? 'justify-center p-2' : 'gap-3 px-3 py-2'
+                )} title={rail ? `${currentUser.full_name} · ${currentUser.email}` : undefined}>
                   <div className="w-8 h-8 rounded-lg bg-sidebar-primary/20 flex items-center justify-center flex-shrink-0">
                     <User className="w-4 h-4 text-sidebar-primary" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className={cn('flex-1 min-w-0', rail && 'hidden')}>
                     <p className="text-sm font-medium text-sidebar-foreground truncate">
                       {currentUser.full_name}
                     </p>
@@ -700,10 +806,15 @@ export default function Layout({ children, currentPageName }) {
                 </div>
                 <button
                   onClick={() => base44.auth.logout()}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white rounded-lg transition-colors"
+                  title={rail ? 'Logout' : undefined}
+                  aria-label="Logout"
+                  className={cn(
+                    'w-full flex items-center justify-center gap-2 py-2 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-white rounded-lg transition-colors',
+                    rail ? 'px-0' : 'px-4'
+                  )}
                 >
                   <LogOut className="w-4 h-4" />
-                  Logout
+                  {!rail && 'Logout'}
                 </button>
               </>
             ) : (
@@ -715,15 +826,20 @@ export default function Layout({ children, currentPageName }) {
                 Login
               </button>
             )}
-            <p className="text-xs text-sidebar-foreground/40 text-center">
-              v1.7.7
-            </p>
+            {!rail && (
+              <p className="text-xs text-sidebar-foreground/40 text-center">
+                v1.7.7
+              </p>
+            )}
           </div>
         </div>
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64 h-screen flex flex-col overflow-hidden">
+      <div className={cn(
+        'h-screen flex flex-col overflow-hidden transition-all duration-300',
+        rail ? 'lg:pl-[72px]' : 'lg:pl-64'
+      )}>
         {/* Mobile header */}
         <div className="lg:hidden h-16 bg-sidebar border-b border-sidebar-border flex items-center px-6 flex-shrink-0">
           <button
@@ -735,9 +851,9 @@ export default function Layout({ children, currentPageName }) {
           >
             <Menu className="w-6 h-6 text-sidebar-foreground" />
           </button>
-          <div className="ml-4">
+          <Link to={homeHref} aria-label="Floor Daddy — go to my work" className="ml-4">
             <BrandLogo imgClassName="h-7 sm:h-8" onDark />
-          </div>
+          </Link>
         </div>
 
         {/* Page content */}
