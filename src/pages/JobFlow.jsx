@@ -10,6 +10,8 @@ import {
   Search,
   X,
   CheckCircle2,
+  PencilLine,
+  ShieldAlert,
 } from 'lucide-react';
 
 import PageHeader from '@/components/common/PageHeader';
@@ -24,7 +26,11 @@ import { Input } from '@/components/ui/input';
 
 import { cn } from '@/lib/utils';
 import { createPageUrl } from '@/utils';
-import { buildJobFlow, DEPARTMENTS, STAGE_BY_KEY, STAGE_TONE } from '@/lib/ops/flow';
+import { buildJobFlow } from '@/lib/ops/flow';
+import { usePublishedFlow } from '@/lib/ops/usePublishedFlow';
+import { useAuth } from '@/lib/AuthContext';
+import FlowEditor from '@/components/ops/FlowEditor';
+import { Button } from '@/components/ui/button';
 import { useBalances } from '@/lib/ops/useBalances';
 import { materialIndex, money, fmtDate, today } from '@/lib/ops/metrics';
 
@@ -82,6 +88,7 @@ export default function JobFlow() {
   const [stageFilter, setStageFilter] = useState(null);
   const [deptFilter, setDeptFilter] = useState(null);
   const [search, setSearch] = useState('');
+  const [editing, setEditing] = useState(false);
 
   const { data: sales = [], isLoading: salesLoading } = useQuery({
     queryKey: ['ops', 'jobFlow', 'sales'],
@@ -125,6 +132,12 @@ export default function JobFlow() {
   // Collection state for Gate 1. A sale missing here is UNKNOWN, not unpaid.
   const { balances } = useBalances();
 
+  // The published graph + the SQL classifier's verdicts. There is no fallback
+  // stage table in JS any more: without these, the board shows an error.
+  const { graph, stageRows, isLoading: flowMetaLoading, error: flowError } = usePublishedFlow();
+  const { access } = useAuth();
+  const isAdmin = access?.user?.is_org_admin === true;
+
   const flow = useMemo(
     () =>
       buildJobFlow({
@@ -134,14 +147,19 @@ export default function JobFlow() {
         customers,
         material: materialIndex(statusRows),
         balances,
+        stageRows,
+        graph,
         asOf: today(),
       }),
-    [sales, projects, appointments, customers, statusRows, balances]
+    [sales, projects, appointments, customers, statusRows, balances, stageRows, graph]
   );
 
   // The lifecycle minus the terminal stage — "Complete" is not somewhere a job
   // waits, so it never belongs on a board about where work is stuck.
-  const liveStages = useMemo(() => flow.byStage.filter((s) => s.key !== 'complete'), [flow.byStage]);
+  const liveStages = useMemo(
+    () => (flow?.byStage || []).filter((st) => !st.isTerminal && !st.isPlanning),
+    [flow]
+  );
 
   const pipeline = useMemo(
     () =>
@@ -157,7 +175,7 @@ export default function JobFlow() {
   // Filtered board: stage ∧ department ∧ text, then worst-first.
   const filtered = useMemo(() => {
     const q = norm(search).trim();
-    const rows = flow.active.filter((j) => {
+    const rows = (flow?.active || []).filter((j) => {
       if (stageFilter && j.stage !== stageFilter) return false;
       if (deptFilter && j.owner !== deptFilter) return false;
       if (!q) return true;
@@ -173,7 +191,7 @@ export default function JobFlow() {
         (b.ageDays ?? -1) - (a.ageDays ?? -1) ||
         b.amount - a.amount
     );
-  }, [flow.active, stageFilter, deptFilter, search]);
+  }, [flow, stageFilter, deptFilter, search]);
 
   const visible = useMemo(() => filtered.slice(0, ROW_CAP), [filtered]);
   const filteredValue = useMemo(() => filtered.reduce((a, j) => a + j.amount, 0), [filtered]);
@@ -182,13 +200,14 @@ export default function JobFlow() {
   // Who is holding up whom. Grouped by the department that can clear the blocker —
   // which is often NOT the department that owns the job.
   const blockerGroups = useMemo(() => {
+    if (!flow) return [];
     const groups = {};
     for (const b of flow.blockers) {
       const key = b.owner || 'unassigned';
       if (!groups[key]) groups[key] = [];
       groups[key].push(b);
     }
-    const order = [...Object.keys(DEPARTMENTS), 'unassigned'];
+    const order = [...Object.keys(flow.departments), 'unassigned'];
     return order
       .filter((k) => groups[k] && groups[k].length)
       .map((k) => {
@@ -201,7 +220,7 @@ export default function JobFlow() {
           );
         return {
           key: k,
-          label: DEPARTMENTS[k] || 'Unassigned',
+          label: flow.departments[k] || 'Unassigned',
           rows,
           shown: rows.slice(0, BLOCKERS_PER_DEPT),
           hidden: Math.max(0, rows.length - BLOCKERS_PER_DEPT),
@@ -212,7 +231,7 @@ export default function JobFlow() {
         };
       })
       .sort((a, b) => b.crit - a.crit || b.rows.length - a.rows.length);
-  }, [flow.blockers]);
+  }, [flow]);
 
   const blockersHidden = useMemo(
     () => blockerGroups.reduce((a, g) => a + g.hidden, 0),
@@ -244,7 +263,7 @@ export default function JobFlow() {
         header: 'Stage',
         render: (j) => (
           <div className="flex flex-wrap items-center gap-1.5">
-            <StatusPill tone={STAGE_TONE[j.stage] || 'neutral'}>{j.stageLabel}</StatusPill>
+            <StatusPill tone={j.tone || 'neutral'}>{j.stageLabel}</StatusPill>
             {j.onHold && <StatusPill tone="crit">Hold</StatusPill>}
           </div>
         ),
@@ -253,15 +272,14 @@ export default function JobFlow() {
         key: 'owner',
         header: 'Owner',
         render: (j) => {
-          const stageOwner = STAGE_BY_KEY[j.stage]?.owner || null;
-          const reassigned = stageOwner && j.owner && j.owner !== stageOwner;
+          const reassigned = j.stageOwner && j.owner && j.owner !== j.stageOwner;
           return (
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold">{j.ownerLabel || 'Unassigned'}</div>
               <div className="truncate text-xs text-muted-foreground">
                 {reassigned
-                  ? `Pulled from ${DEPARTMENTS[stageOwner]} by a blocker`
-                  : STAGE_BY_KEY[j.stage]?.blurb || ''}
+                  ? `Pulled from ${j.stageOwnerLabel || j.stageOwner} by a blocker`
+                  : j.stageBlurb || ''}
               </div>
             </div>
           );
@@ -305,10 +323,24 @@ export default function JobFlow() {
     []
   );
 
-  if (salesLoading || projectsLoading || customersLoading || appointmentsLoading) {
+  if (salesLoading || projectsLoading || customersLoading || appointmentsLoading || flowMetaLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (flowError || !flow) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background p-8 text-center">
+        <ShieldAlert className="h-10 w-10 text-crit" />
+        <h2 className="text-base font-semibold text-foreground">The published flow could not be loaded</h2>
+        <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+          Every job on this board is classified by the published stage graph and the
+          job_stage view. Rather than guess with stale constants, the board stops here.
+          {flowError?.message ? ` (${flowError.message})` : ''}
+        </p>
       </div>
     );
   }
@@ -352,9 +384,29 @@ export default function JobFlow() {
           eyebrow="Operations"
           title="Job Flow"
           subtitle={`The true stage of every live job, derived from what the data says actually happened rather than from a status label somebody remembered to change. As of ${fmtDate(flow.asOf)}.`}
-          actions={rfmsBadge}
+          actions={
+            <div className="flex items-center gap-2">
+              {rfmsBadge}
+              {isAdmin && (
+                <Button size="sm" variant={editing ? 'default' : 'outline'} className="gap-1.5"
+                  onClick={() => setEditing((v) => !v)}>
+                  <PencilLine className="h-3.5 w-3.5" /> {editing ? 'Back to board' : 'Edit flow'}
+                </Button>
+              )}
+            </div>
+          }
         />
 
+        {editing && isAdmin ? (
+          <FlowEditor onClose={() => setEditing(false)} />
+        ) : (
+        <>
+        {flow.unclassified.length > 0 && (
+          <p className="rounded-lg border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-foreground">
+            {flow.unclassified.length} job(s) not classified yet — the classifier and the data
+            queries are momentarily out of step. Refresh in a few seconds.
+          </p>
+        )}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <KpiTile
             label="Active jobs"
@@ -473,7 +525,7 @@ export default function JobFlow() {
             <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Department
             </span>
-            {Object.entries(DEPARTMENTS).map(([key, label]) => (
+            {Object.entries(flow.departments).map(([key, label]) => (
               <Chip
                 key={key}
                 active={deptFilter === key}
@@ -506,8 +558,8 @@ export default function JobFlow() {
           ) : visible.length === 0 ? (
             <EmptyState icon={Search} title="No jobs match these filters">
               {[
-                stageFilter && STAGE_BY_KEY[stageFilter]?.label,
-                deptFilter && DEPARTMENTS[deptFilter],
+                stageFilter && flow.stageByKey[stageFilter]?.label,
+                deptFilter && flow.departments[deptFilter],
                 search.trim() && `“${search.trim()}”`,
               ]
                 .filter(Boolean)
@@ -574,6 +626,8 @@ export default function JobFlow() {
             ))
           )}
         </ModuleCard>
+        </>
+        )}
       </div>
     </div>
   );

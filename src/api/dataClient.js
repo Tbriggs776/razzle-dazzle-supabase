@@ -43,6 +43,16 @@ const ENTITY_TABLE = {
   Lead: 'lead',
   Log: 'log',
   ManualSalesContract: 'manual_sales_contract',
+  // Ops Flow (0118/0119). All SELECT-only under RLS; every write goes through
+  // the publish/check/resolve RPCs below. JobStage is THE classifier view.
+  OpsFlow: 'ops_flow',
+  OpsFlowVersion: 'ops_flow_version',
+  OpsStage: 'ops_stage',
+  OpsEdge: 'ops_edge',
+  OpsDepartment: 'ops_department',
+  OpsChangeProposal: 'ops_change_proposal',
+  OpsFlowAudit: 'ops_flow_audit',
+  JobStage: 'job_stage',
   // The money ledger. Shipped in 0051/0053 but unreachable from the app until
   // now — which is why there has never been a way to record a second payment.
   Payment: 'payment',
@@ -671,6 +681,16 @@ const RPC_FUNCTIONS = {
   saveInstallerApplication:   (p) => ['save_installer_application', { p_token: p.token, p_payload: p.payload ?? {} }],
   getInstallerApplication:    (p) => ['get_installer_application', { p_token: p.token }],
   submitInstallerApplication: (p) => ['submit_installer_application', { p_token: p.token }],
+  // Ops Flow (0118). Org-admin gated server-side; the checker's dry run writes
+  // nothing, publish snapshots an immutable version and rebuilds the graph.
+  checkOpsFlow:   (p) => ['check_ops_flow',   { p_graph: p.graph }],
+  publishOpsFlow: (p) => ['publish_ops_flow', {
+    p_graph: p.graph, p_note: p.note, p_acknowledge_crit: p.acknowledgeCrit ?? false,
+  }],
+  revertOpsFlow:  (p) => ['revert_ops_flow',  { p_version: p.version, p_note: p.note ?? null }],
+  resolveOpsProposal: (p) => ['resolve_ops_proposal', {
+    p_id: p.id, p_action: p.action, p_note: p.note ?? null,
+  }],
 };
 
 // Is a serverless function actually wired (Edge Function or RPC)? UI can use this

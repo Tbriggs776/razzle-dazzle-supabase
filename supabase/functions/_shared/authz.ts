@@ -45,6 +45,19 @@ export async function requireModules(
   return null;
 }
 
+/** Allow ONLY an org admin. For the functions whose whole job is privileged
+ *  (userAdmin-pattern; opsFlowAdvise). Runs as the caller, so is_org_admin's
+ *  is_active check applies too. */
+export async function requireOrgAdmin(
+  req: Request, cors: Record<string, string>,
+): Promise<Response | null> {
+  const u = userClient(req);
+  if (!u) return deny(cors);
+  const { data, error } = await u.rpc('is_org_admin');
+  if (error || data !== true) return deny(cors);
+  return null;
+}
+
 /** Allow any active staff member (org admin or >= 1 role). For the generic
  *  dispatchers whose legitimate callers span too many modules for an honest
  *  narrow list — the point is excluding crew and inactive logins. */
