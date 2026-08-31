@@ -48,6 +48,7 @@ import {
   today,
 } from '@/lib/ops/metrics';
 import { buildJobFlow, departmentView } from '@/lib/ops/flow';
+import { usePublishedFlow } from '@/lib/ops/usePublishedFlow';
 import { useBalances } from '@/lib/ops/useBalances';
 
 // ── Local presentation helpers ───────────────────────────────────────────────
@@ -188,12 +189,33 @@ export default function OrderingTeam() {
   // desk can see both directions of the handoff: what has landed on Ordering,
   // and what Ordering is holding up for somebody downstream. No appointments are
   // needed here — nothing Ordering owns turns on one.
+  // The published graph + THE classifier (job_stage). No JS fallback exists.
+  const { graph, stageRows } = usePublishedFlow();
+
   const flow = useMemo(
-    () => buildJobFlow({ sales, projects, appointments: [], customers, material, balances, asOf }),
-    [sales, projects, customers, material, balances, asOf]
+    () => buildJobFlow({ sales, projects, appointments: [], customers, material, balances, stageRows, graph, asOf }),
+    [sales, projects, customers, material, balances, stageRows, graph, asOf]
   );
 
-  const view = useMemo(() => departmentView(flow, 'ordering'), [flow]);
+  // departmentView returns null while the published graph / classifier view are
+  // unavailable; the handoff panels then render empty WITH a banner (below)
+  // rather than silently showing a healthy-looking zero.
+  const flowUnavailable = !flow;
+  const view = useMemo(
+    () => departmentView(flow, 'ordering') ?? {
+      dept: 'ordering', label: 'Ordering',
+      waitingOnUs: [], overSla: [], weAreBlocking: [], blockedByOthers: [], value: 0,
+    },
+    [flow]
+  );
+
+  const handoffBanner = flowUnavailable ? (
+    <p className="rounded-lg border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-foreground">
+      Handoffs unavailable — the published flow graph or the job_stage view could not be
+      loaded, and this page will not classify jobs with stale constants. The counts in this
+      section read zero until it loads.
+    </p>
+  ) : null;
 
   // Worst first, so the cap can never hide a crit. A committed install date with
   // material still short is the sharpest signal this page can raise.
@@ -372,19 +394,20 @@ export default function OrderingTeam() {
           />
         </div>
 
+        {handoffBanner}
         <ModuleCard
           title="Handoffs"
           subtitle="What's waiting on Ordering, and what Ordering is holding up"
           icon={ArrowLeftRight}
           action={
-            view.overSla.length > 0 || !flow.materialKnown ? (
+            view.overSla.length > 0 || !flow?.materialKnown ? (
               <div className="flex items-center gap-2">
                 {view.overSla.length > 0 && (
                   <StatusPill tone="crit" dot>
                     {view.overSla.length} past SLA
                   </StatusPill>
                 )}
-                {!flow.materialKnown && <SyncBadge status="stale" label="RFMS not connected" />}
+                {!flow?.materialKnown && <SyncBadge status="stale" label="RFMS not connected" />}
               </div>
             ) : null
           }
@@ -393,7 +416,7 @@ export default function OrderingTeam() {
               Left is Ordering's own inbox — jobs whose next move belongs to this desk, worst first. Right
               is what Ordering is holding up for another department. A committed install date with material
               still short is the sharpest signal either side can carry.
-              {!flow.materialKnown && ' Material-gated handoffs cannot appear until RFMS is connected.'}
+              {!flow?.materialKnown && ' Material-gated handoffs cannot appear until RFMS is connected.'}
             </span>
           }
         >

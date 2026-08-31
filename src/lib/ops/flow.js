@@ -1,64 +1,50 @@
 /**
- * Job flow — the stage + handoff engine.
+ * Job flow — the stage + handoff engine, now reading the PUBLISHED graph.
  *
- * The point of this file: a job's REAL stage is derived from what the data says
- * happened, not from a status label somebody remembered to change. A project can
- * sit at "Materials Ordered" for three weeks after the material actually landed;
- * the label lies, the dates don't.
+ * What changed at the ops-flow cutover (0118/0119): this file no longer decides
+ * what stage a job is in. The `job_stage` SQL view is the ONLY classifier — its
+ * CASE is the one copy of the predicates in the system. What this file still
+ * does, unchanged:
  *
- * For every live job we answer four questions:
- *   1. What stage is it genuinely in?
- *   2. Which department owns it RIGHT NOW?
- *   3. What is blocking it from advancing?
- *   4. How long has it been sitting, and is that too long?
+ *   - blockers: the cross-cutting holds (safety/credit/deposit) and the
+ *     per-stage annotations (install date passed, no crew, material short…),
+ *     with who can clear each one — the handoff;
+ *   - crit-blocker owner reassignment (a Finance hold surfaces on any board);
+ *   - stage age + over-SLA, from the same `since` bookkeeping as before.
  *
- * Answering (2) for every job is what turns a pile of dashboards into a set of
- * inboxes — each department can be shown exactly what is waiting on them, and
- * exactly what they are holding up for someone else. That is the handoff.
+ * Stage IDENTITY (label, owner, SLA, tone, order) comes from the published
+ * ops_stage rows, so an org admin can change an SLA and every board follows
+ * without a deploy. There is deliberately NO fallback stage table here: if the
+ * view or the published graph is not loaded, buildJobFlow returns null and the
+ * page shows an error — it never silently classifies with stale constants.
  */
 
 import { isoDay, today, dayDiff, distribution, money } from './metrics';
 
-// ── Departments ──────────────────────────────────────────────────────────────
-export const DEPARTMENTS = {
-  sales: 'Sales',
-  ordering: 'Ordering',
-  scheduling: 'Scheduling',
-  install: 'Install',
-  cx: 'Customer Experience',
-  finance: 'Finance',
-};
+// ── Published graph ──────────────────────────────────────────────────────────
 
 /**
- * The lifecycle, in order. `sla` is the number of days a job should sit in the
- * stage before it is chasing someone — deliberately conservative defaults; these
- * are the numbers to tune once the team argues about them, which is the point.
+ * Shape the published rows (ops_stage / ops_department) for the engine.
+ * Returns null unless both are actually loaded — callers must treat null as
+ * "cannot classify", not as empty.
  */
-export const STAGES = [
-  { key: 'to_order',          label: 'To Order',            owner: 'ordering',   sla: 2,    blurb: 'Sold — needs placing in RFMS' },
-  { key: 'awaiting_material', label: 'Awaiting Material',   owner: 'ordering',   sla: 14,   blurb: 'Ordered — material not received' },
-  { key: 'ready_to_schedule', label: 'Ready to Schedule',   owner: 'scheduling', sla: 3,    blurb: 'Material ready — no install date' },
-  { key: 'scheduled',         label: 'Scheduled',           owner: 'install',    sla: null, blurb: 'On the calendar' },
-  { key: 'in_progress',       label: 'In Progress',         owner: 'install',    sla: 2,    blurb: 'Crew on site' },
-  { key: 'qa',                label: 'QA / Walkthrough',    owner: 'install',    sla: 3,    blurb: 'Installed — needs sign-off' },
-  { key: 'cx_followup',       label: 'Customer Follow-up',  owner: 'cx',         sla: 2,    blurb: 'Complete — needs the follow-up call' },
-  { key: 'complete',          label: 'Complete',            owner: null,         sla: null, blurb: 'Closed out' },
-];
-
-export const STAGE_BY_KEY = Object.fromEntries(STAGES.map((s) => [s.key, s]));
-export const stageIndex = (key) => STAGES.findIndex((s) => s.key === key);
-
-// Stage → StatusPill tone.
-export const STAGE_TONE = {
-  to_order: 'warn',
-  awaiting_material: 'info',
-  ready_to_schedule: 'warn',
-  scheduled: 'info',
-  in_progress: 'info',
-  qa: 'warn',
-  cx_followup: 'info',
-  complete: 'good',
-};
+export function graphFromRows(stageRows, deptRows) {
+  if (!Array.isArray(stageRows) || stageRows.length === 0) return null;
+  if (!Array.isArray(deptRows) || deptRows.length === 0) return null;
+  const stages = [...stageRows].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const departments = {};
+  for (const d of [...deptRows].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))) {
+    departments[d.key] = d.label;
+  }
+  return {
+    stages,
+    // Board lookups go by classifier_key — that is what the view emits.
+    byClassifier: Object.fromEntries(
+      stages.filter((s) => s.classifier_key).map((s) => [s.classifier_key, s])),
+    byKey: Object.fromEntries(stages.map((s) => [s.key, s])),
+    departments,
+  };
+}
 
 // ── Blockers ─────────────────────────────────────────────────────────────────
 // A blocker names the thing standing between this job and its next stage, and
@@ -68,14 +54,24 @@ function blocker(code, severity, label, detail, owner) {
 }
 
 /**
- * Decide a single job's stage, owner, blockers and next action.
- *
- * `material` is the entry from metrics.materialIndex() for this job's invoice,
- * or null when RFMS has never reported on it. Null means UNKNOWN, not "ready" —
- * we must not silently advance a job past a material gate we cannot see, so the
- * material gate only ever *holds* a job when we have real data saying it should.
+ * Annotate a single job. `stageKey` MUST be the job_stage view's verdict for
+ * this (sale, project) pair — this function trusts it completely and only adds
+ * identity, age and blockers around it. `material` semantics unchanged: null
+ * means UNKNOWN, not "ready".
  */
-export function classifyJob({ sale, project, appointment, customer, material, balance, asOf = today() }) {
+export function classifyJob({
+  sale, project, appointment, customer, material, balance, stageKey, graph, asOf = today(),
+}) {
+  const def = graph?.byClassifier?.[stageKey];
+  if (!def) {
+    // The view said a stage the published graph does not carry (or the caller
+    // never had the graph). Surfaced, never guessed at.
+    return {
+      id: project?.id || sale?.id, projectId: project?.id || null, saleId: sale?.id || null,
+      stage: stageKey || null, unclassified: true,
+    };
+  }
+
   const blockers = [];
 
   const soldOn = isoDay(sale?.sale_date);
@@ -85,10 +81,6 @@ export function classifyJob({ sale, project, appointment, customer, material, ba
   const completedOn = project ? isoDay(project.actual_completion_date) : null;
   const qaStarted = project ? isoDay(project.qa_in_progress_date) : null;
   const qaDone = project ? isoDay(project.qa_completed_date) : null;
-  const status = project?.status || null;
-
-  // Follow-up is "done" if any of the customer-experience touches landed.
-  const cxDone = !!(project && (project.check_in_completed_date || project.welcome_call_completed_date));
 
   // ── Cross-cutting blockers — these travel with the job into ANY stage, which
   // is exactly how a Finance hold becomes visible on the install board.
@@ -97,11 +89,6 @@ export function classifyJob({ sale, project, appointment, customer, material, ba
   // cases: submitCheckpoint's asbestos hard-stop writes 'on hold' (lower), the
   // UI writes 'Hold'. Compare case-insensitively — an exact match missed the
   // asbestos halt entirely, which is the one hold that must never be missed.
-  //
-  // All FOUR values in the enum stop a job, not just the two that say "hold":
-  // 'pending payment' is the deposit gate ordering waits on, and 'pending
-  // contract' means we have no signed paper. Treating them as healthy put jobs
-  // on the install board that nobody was allowed to touch.
   const HOLD_REASONS = {
     'on hold':            ['Job is flagged on hold — safety or credit stop not cleared', 'sales'],
     'hold':               ['Job is flagged on hold — safety or credit stop not cleared', 'sales'],
@@ -124,97 +111,95 @@ export function classifyJob({ sale, project, appointment, customer, material, ba
       'No sale amount recorded — nothing can be gated or ordered against this', 'sales'));
   }
 
-  // ── Stage resolution, latest-first: the furthest thing that has demonstrably
-  // happened wins, so a stale status label can never drag a job backwards.
-  let stage;
+  // ── Per-stage bookkeeping: `since` and the stage's own blockers. These are
+  // annotations on the view's verdict, copied from the pre-cutover branches so
+  // ages and over-SLA booleans did not move at the cutover. The DECISION lives
+  // in SQL; only the paperwork lives here.
   let since;
-
-  if (completedOn || status === 'Completed') {
-    if (cxDone) {
-      stage = 'complete';
+  switch (stageKey) {
+    case 'complete':
       since = isoDay(project?.check_in_completed_date) || completedOn;
-    } else {
-      stage = 'cx_followup';
+      break;
+    case 'cx_followup':
       since = completedOn || isoDay(project?.updated_date);
       blockers.push(blocker('cx_call', 'info', 'Follow-up call outstanding', 'Job finished — customer has not been called back', 'cx'));
-    }
-  } else if (qaStarted || status === 'Quality Checks') {
-    stage = 'qa';
-    since = qaStarted || isoDay(project?.updated_date);
-    if (!qaDone) {
-      blockers.push(blocker('qa', 'warn', 'Awaiting QA sign-off', 'Walkthrough not signed off', 'install'));
-    }
-  } else if (startedOn || status === 'In Progress' || (installDate && installDate <= asOf)) {
-    stage = 'in_progress';
-    since = startedOn || installDate;
-    // Install date has passed with nothing recorded — the single most common
-    // way a job silently stalls.
-    if (installDate && installDate < asOf && !completedOn) {
+      break;
+    case 'qa':
+      since = qaStarted || isoDay(project?.updated_date);
+      if (!qaDone) {
+        blockers.push(blocker('qa', 'warn', 'Awaiting QA sign-off', 'Walkthrough not signed off', 'install'));
+      }
+      break;
+    case 'in_progress':
+      since = startedOn || installDate;
+      // Install date has passed with nothing recorded — the single most common
+      // way a job silently stalls.
+      if (installDate && installDate < asOf && !completedOn) {
+        blockers.push(
+          blocker('not_closed', 'crit', 'Install date passed', `Scheduled ${installDate}, no completion recorded`, 'install')
+        );
+      }
+      break;
+    case 'scheduled':
+      since = isoDay(project?.updated_date) || soldOn;
+      if (!project?.installer_crew_name && !project?.installer_crew_id) {
+        blockers.push(blocker('no_crew', 'warn', 'No crew assigned', `Installing ${installDate} with nobody on it`, 'scheduling'));
+      }
+      // Material we KNOW is short, with a date already committed.
+      if (material && material.total > 0 && material.preReceipt > 0) {
+        blockers.push(
+          blocker('material_short', 'crit', 'Material not received',
+            `${material.preReceipt} line(s) pre-receipt for a job installing ${installDate}`, 'ordering')
+        );
+      }
+      break;
+    case 'to_order':
+      since = soldOn;
+      // GATE 1 — ordering. Material may not be ordered until Accounting has
+      // confirmed the deposit CLEARED. Read strictly from the view: `=== false`
+      // and never a JS amount comparison, so a missing balance row reads as
+      // unknown rather than as unpaid.
+      //
+      // Deliberately 'warn', not 'crit': a crit reassigns ownership of the job,
+      // and Finance has no board of its own in the flow UI yet.
+      if (balance?.deposit_satisfied === false) {
+        const short = Math.max(0, Number(balance.deposit_required || 0) - Number(balance.amount_cleared || 0));
+        blockers.push(blocker(
+          'deposit_unconfirmed', 'warn', 'Deposit not cleared',
+          Number(balance.amount_paid || 0) === 0
+            ? 'Nothing collected against this sale yet — ordering is held'
+            : `${money(short)} of the deposit has not cleared the bank yet — ordering is held`,
+          'finance',
+        ));
+      } else {
+        blockers.push(blocker('not_ordered', 'warn', 'Not in RFMS', 'Sold, but no order has been placed', 'ordering'));
+      }
+      break;
+    case 'awaiting_material':
+      since = isoDay(sale?.rfms_sync_date) || soldOn;
       blockers.push(
-        blocker('not_closed', 'crit', 'Install date passed', `Scheduled ${installDate}, no completion recorded`, 'install')
+        blocker('material_pending', 'info', 'Material on order',
+          `${material?.preReceipt ?? '?'} of ${material?.total ?? '?'} line(s) not received`, 'ordering')
       );
-    }
-  } else if (installDate) {
-    stage = 'scheduled';
-    since = isoDay(project?.updated_date) || soldOn;
-    if (!project?.installer_crew_name && !project?.installer_crew_id) {
-      blockers.push(blocker('no_crew', 'warn', 'No crew assigned', `Installing ${installDate} with nobody on it`, 'scheduling'));
-    }
-    // Material we KNOW is short, with a date already committed.
-    if (material && material.total > 0 && material.preReceipt > 0) {
-      blockers.push(
-        blocker('material_short', 'crit', 'Material not received',
-          `${material.preReceipt} line(s) pre-receipt for a job installing ${installDate}`, 'ordering')
-      );
-    }
-  } else if (!invoice) {
-    stage = 'to_order';
-    since = soldOn;
-
-    // GATE 1 — ordering. Material may not be ordered until Accounting has
-    // confirmed the deposit CLEARED, which is the owner's rule that ordering
-    // begins once the deposit is actually deposited.
-    //
-    // Read strictly from the view: `=== false` and never a JS amount comparison,
-    // so a missing balance row (not yet loaded) reads as unknown rather than as
-    // unpaid, and there is exactly one definition of "satisfied" in the system.
-    //
-    // Deliberately 'warn', not 'crit': a crit reassigns ownership of the job, and
-    // Finance has no board of its own in the flow UI yet. Promote once it does.
-    if (balance?.deposit_satisfied === false) {
-      const short = Math.max(0, Number(balance.deposit_required || 0) - Number(balance.amount_cleared || 0));
-      blockers.push(blocker(
-        'deposit_unconfirmed', 'warn', 'Deposit not cleared',
-        Number(balance.amount_paid || 0) === 0
-          ? 'Nothing collected against this sale yet — ordering is held'
-          : `${money(short)} of the deposit has not cleared the bank yet — ordering is held`,
-        'finance',
-      ));
-    } else {
-      blockers.push(blocker('not_ordered', 'warn', 'Not in RFMS', 'Sold, but no order has been placed', 'ordering'));
-    }
-  } else if (material && material.total > 0 && material.preReceipt > 0) {
-    stage = 'awaiting_material';
-    since = isoDay(sale?.rfms_sync_date) || soldOn;
-    blockers.push(
-      blocker('material_pending', 'info', 'Material on order',
-        `${material.preReceipt} of ${material.total} line(s) not received`, 'ordering')
-    );
-  } else {
-    // Ordered, nothing says material is outstanding, but no date is committed.
-    stage = 'ready_to_schedule';
-    since = isoDay(sale?.rfms_sync_date) || soldOn;
-    blockers.push(blocker('unscheduled', 'warn', 'Not scheduled', 'Ready to go — needs an install date', 'scheduling'));
+      break;
+    case 'ready_to_schedule':
+    default:
+      since = isoDay(sale?.rfms_sync_date) || soldOn;
+      blockers.push(blocker('unscheduled', 'warn', 'Not scheduled', 'Ready to go — needs an install date', 'scheduling'));
+      break;
   }
 
-  const def = STAGE_BY_KEY[stage];
   const ageDays = since ? dayDiff(since, asOf) : null;
-  const overSla = def.sla != null && ageDays != null && ageDays > def.sla;
+  // Published SLAs are CLOCK hours; ages are whole days. hours/24 keeps the
+  // pre-cutover boolean exactly for day-multiple SLAs and behaves sanely for
+  // any hour value an admin publishes later.
+  const slaDays = def.sla_hours == null ? null : def.sla_hours / 24;
+  const overSla = slaDays != null && ageDays != null && ageDays > slaDays;
 
   // The owner is normally the stage's owner — but a critical blocker owned by
   // someone else reassigns it, because that is who has to move first.
   const critical = blockers.find((b) => b.severity === 'crit');
-  const owner = critical?.owner || def.owner;
+  const owner = critical?.owner || def.owner_dept;
 
   // Sort by severity, not insertion order. Cross-cutting blockers are pushed
   // first, so taking blockers[0] hid "Install date passed" behind a deposit
@@ -227,7 +212,7 @@ export function classifyJob({ sale, project, appointment, customer, material, ba
   const nextAction =
     ranked.length > 0
       ? ranked[0].label
-      : def.owner
+      : def.owner_dept
         ? def.blurb
         : 'Nothing outstanding';
 
@@ -244,13 +229,18 @@ export function classifyJob({ sale, project, appointment, customer, material, ba
     soldOn,
     installDate,
     completedOn,
-    stage,
+    stage: stageKey,
     stageLabel: def.label,
+    stageBlurb: def.blurb,
+    stageOwner: def.owner_dept,   // pre-reassignment, for "pulled by a blocker" copy
+    stageOwnerLabel: def.owner_dept ? graph.departments[def.owner_dept] || def.owner_dept : null,
+    tone: def.tone || 'neutral',
     owner,
-    ownerLabel: owner ? DEPARTMENTS[owner] : null,
+    ownerLabel: owner ? graph.departments[owner] || owner : null,
     since,
     ageDays,
-    sla: def.sla,
+    sla: slaDays,                 // days, matching the old display (`SLA ${sla}d`)
+    slaHours: def.sla_hours ?? null,
     overSla,
     blockers: ranked, // severity-ordered, so any UI taking the first is right
     nextAction,
@@ -260,8 +250,11 @@ export function classifyJob({ sale, project, appointment, customer, material, ba
 }
 
 /**
- * Build the whole flow: every live job classified, then rolled up by stage and
- * by owning department.
+ * Build the whole flow: every live job classified BY THE VIEW, then rolled up
+ * by stage and by owning department.
+ *
+ * `stageRows` are job_stage rows; `graph` is graphFromRows(). Returns NULL when
+ * either is missing — the page must show an error, not an empty board.
  */
 export function buildJobFlow({
   sales = [],
@@ -270,23 +263,31 @@ export function buildJobFlow({
   customers = [],
   material = {},
   // sale_balance rows keyed by sale id. The view owns deposit_satisfied and
-  // fully_collected; both are non-null there by construction, so a missing entry
-  // means UNKNOWN (not yet loaded) and must never be read as "unpaid".
+  // fully_collected; a missing entry means UNKNOWN and must never read as unpaid.
   balances = {},
+  stageRows = null,
+  graph = null,
   asOf = today(),
 }) {
+  if (!graph || !Array.isArray(stageRows)) return null;
+
   const custById = Object.fromEntries(customers.map((c) => [c.id, c]));
   const apptById = Object.fromEntries(appointments.map((a) => [a.id, a]));
+  // One project per sale, same last-wins pick as before the cutover — the view
+  // carries a row per live project; the board shows one card per sale.
   const projBySale = {};
   for (const p of projects) {
     if (p.sale && !p.cancelled_date && p.status !== 'Cancelled') projBySale[p.sale] = p;
   }
+  const stageByPair = new Map();
+  for (const r of stageRows) stageByPair.set(`${r.sale_id}:${r.project_id ?? ''}`, r);
 
   const jobs = sales
     .filter((s) => !s.is_cancelled)
     .map((sale) => {
       const project = projBySale[sale.id] || null;
       const invoice = sale.invoice_number ? String(sale.invoice_number).trim() : null;
+      const viewRow = stageByPair.get(`${sale.id}:${project?.id ?? ''}`);
       return classifyJob({
         sale,
         project,
@@ -294,16 +295,33 @@ export function buildJobFlow({
         customer: sale.customer ? custById[sale.customer] : null,
         material: invoice ? material[invoice] || null : null,
         balance: balances[sale.id] || null,
+        stageKey: viewRow?.stage,
+        graph,
         asOf,
       });
     });
 
-  const active = jobs.filter((j) => j.stage !== 'complete');
+  // Jobs the two queries momentarily disagree about (a sale landed between the
+  // entity fetch and the view fetch). Never silently dropped.
+  const unclassified = jobs.filter((j) => j.unclassified);
+  const classified = jobs.filter((j) => !j.unclassified);
+  const active = classified.filter((j) => !graph.byClassifier[j.stage]?.is_terminal);
 
-  const byStage = STAGES.map((s) => {
-    const rows = jobs.filter((j) => j.stage === s.key);
+  const byStage = graph.stages.map((s) => {
+    const rows = s.classifier_key
+      ? classified.filter((j) => j.stage === s.classifier_key)
+      : []; // planning-only nodes never hold jobs
     return {
-      ...s,
+      key: s.classifier_key || s.key,
+      nodeKey: s.key,
+      label: s.label,
+      blurb: s.blurb,
+      owner: s.owner_dept,
+      tone: s.tone,
+      isTerminal: !!s.is_terminal,
+      isPlanning: !s.classifier_key,
+      sla: s.sla_hours == null ? null : s.sla_hours / 24,
+      slaHours: s.sla_hours ?? null,
       rows,
       count: rows.length,
       value: rows.reduce((a, j) => a + j.amount, 0),
@@ -313,7 +331,7 @@ export function buildJobFlow({
 
   // Per-department inbox: what is waiting on you, worst first.
   const byOwner = {};
-  for (const key of Object.keys(DEPARTMENTS)) byOwner[key] = [];
+  for (const key of Object.keys(graph.departments)) byOwner[key] = [];
   for (const j of active) {
     if (j.owner && byOwner[j.owner]) byOwner[j.owner].push(j);
   }
@@ -334,7 +352,11 @@ export function buildJobFlow({
 
   return {
     asOf,
-    jobs,
+    graph,
+    departments: graph.departments,
+    stageByKey: Object.fromEntries(byStage.map((s) => [s.key, s])),
+    jobs: classified,
+    unclassified,
     active,
     byStage,
     byOwner,
@@ -344,16 +366,17 @@ export function buildJobFlow({
     onHold: active.filter((j) => j.onHold),
     activeValue: active.reduce((a, j) => a + j.amount, 0),
     ageStats: distribution(ages),
-    materialKnown: jobs.some((j) => j.materialKnown),
+    materialKnown: classified.some((j) => j.materialKnown),
   };
 }
 
 /**
  * Handoffs: for a given department, what is landing on them versus what they
- * are holding up for somebody else. The second list is the one that changes
- * behaviour — it is hard to argue with "you are blocking four install dates".
+ * are holding up for somebody else. Returns null when the flow could not be
+ * built (graph/view not loaded) so team pages can show the same error state.
  */
 export function departmentView(flow, dept) {
+  if (!flow) return null;
   const waitingOnUs = flow.byOwner[dept] || [];
   const weAreBlocking = flow.blockers.filter((b) => b.owner === dept && b.job.owner !== dept);
   const blockedByOthers = flow.active.filter(
@@ -361,7 +384,7 @@ export function departmentView(flow, dept) {
   );
   return {
     dept,
-    label: DEPARTMENTS[dept],
+    label: flow.departments[dept] || dept,
     waitingOnUs,
     overSla: waitingOnUs.filter((j) => j.overSla),
     weAreBlocking,

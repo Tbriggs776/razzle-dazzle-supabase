@@ -45,6 +45,7 @@ import {
   STATUS_TONE,
 } from '@/lib/ops/metrics';
 import { buildJobFlow, departmentView } from '@/lib/ops/flow';
+import { usePublishedFlow } from '@/lib/ops/usePublishedFlow';
 import { useBalances } from '@/lib/ops/useBalances';
 
 // ── Presentation maps ────────────────────────────────────────────────────────
@@ -177,6 +178,9 @@ export default function InstallTeam() {
   // The same source data run through the stage engine. The board answers "what is
   // on the calendar"; the flow answers "who owns this job right now" — which is
   // what makes the handoff visible in both directions.
+  // The published graph + THE classifier (job_stage). No JS fallback exists.
+  const { graph, stageRows } = usePublishedFlow();
+
   const flow = useMemo(
     () =>
       buildJobFlow({
@@ -186,12 +190,32 @@ export default function InstallTeam() {
         customers,
         material: materialIndex(statusRows),
         balances,
+        stageRows,
+        graph,
         asOf: today(),
       }),
-    [projects, sales, customers, statusRows, balances]
+    [projects, sales, customers, statusRows, balances, stageRows, graph]
   );
 
-  const view = useMemo(() => departmentView(flow, 'install'), [flow]);
+  // departmentView returns null while the published graph / classifier view are
+  // unavailable; the handoff panels then render empty WITH a banner (below)
+  // rather than silently showing a healthy-looking zero.
+  const flowUnavailable = !flow;
+  const view = useMemo(
+    () => departmentView(flow, 'install') ?? {
+      dept: 'install', label: 'Install',
+      waitingOnUs: [], overSla: [], weAreBlocking: [], blockedByOthers: [], value: 0,
+    },
+    [flow]
+  );
+
+  const handoffBanner = flowUnavailable ? (
+    <p className="rounded-lg border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-foreground">
+      Handoffs unavailable — the published flow graph or the job_stage view could not be
+      loaded, and this page will not classify jobs with stale constants. The counts in this
+      section read zero until it loads.
+    </p>
+  ) : null;
 
   // The board itself: everything scheduled ahead of us, soonest first.
   const futureSorted = useMemo(
@@ -474,6 +498,7 @@ export default function InstallTeam() {
           />
         </div>
 
+        {handoffBanner}
         <ModuleCard
           title="Handoffs"
           subtitle="What's waiting on Install, and what Install is holding up"
