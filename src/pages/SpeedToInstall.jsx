@@ -18,6 +18,7 @@ import { AlertTriangle, BarChart3, Loader2, TrendingDown, Users } from 'lucide-r
 import PageHeader from '@/components/common/PageHeader';
 import StatusPill from '@/components/common/StatusPill';
 import DataTable from '@/components/common/DataTable';
+import { useOpenJob, canOpenJob } from '@/lib/ops/openJob';
 import KpiTile from '@/components/dashboard/KpiTile';
 import ModuleCard from '@/components/dashboard/ModuleCard';
 import WorkRow from '@/components/dashboard/WorkRow';
@@ -54,6 +55,7 @@ function ChartTooltip({ active, payload, label, rows }) {
 
 export default function SpeedToInstall() {
   const asOf = today();
+  const openJob = useOpenJob();
 
   const { data: appointments = [], isLoading: apptLoading } = useQuery({
     queryKey: ['ops', 'appointments'],
@@ -412,6 +414,7 @@ export default function SpeedToInstall() {
             {shownOutliers.map((job) => (
               <WorkRow
                 key={job.id}
+                onClick={canOpenJob(job) ? () => openJob(job) : undefined}
                 lead={`${job.days}d`}
                 primary={job.customerName}
                 meta={[

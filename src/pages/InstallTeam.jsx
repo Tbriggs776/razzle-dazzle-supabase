@@ -46,6 +46,8 @@ import {
 } from '@/lib/ops/metrics';
 import { buildJobFlow, departmentView } from '@/lib/ops/flow';
 import { usePublishedFlow } from '@/lib/ops/usePublishedFlow';
+import { useOpenJob, canOpenJob } from '@/lib/ops/openJob';
+import { cn } from '@/lib/utils';
 import { useBalances } from '@/lib/ops/useBalances';
 
 // ── Presentation maps ────────────────────────────────────────────────────────
@@ -180,6 +182,7 @@ export default function InstallTeam() {
   // what makes the handoff visible in both directions.
   // The published graph + THE classifier (job_stage). No JS fallback exists.
   const { graph, stageRows } = usePublishedFlow();
+  const openJob = useOpenJob();
 
   const flow = useMemo(
     () =>
@@ -270,6 +273,8 @@ export default function InstallTeam() {
       const late = Math.abs(r.daysOut ?? 0);
       out.push({
         key: `overdue-${r.id}`,
+        // Keep the id: an alert that names a job must be able to open it.
+        projectId: r.projectId,
         severity: 'crit',
         title: `${r.customerName} — install date has passed`,
         detail: `Scheduled ${fmtDate(r.install)} · ${plural(late, 'day', 'days')} ago · still ${r.stage} · ${money(r.amount)}`,
@@ -281,6 +286,7 @@ export default function InstallTeam() {
     for (const r of holds.slice(0, 4)) {
       out.push({
         key: `hold-${r.id}`,
+        projectId: r.projectId,
         severity: 'warn',
         title: `${r.customerName} — on hold`,
         detail: r.install
@@ -293,6 +299,7 @@ export default function InstallTeam() {
     for (const r of unscheduled.slice(0, 5)) {
       out.push({
         key: `unsched-${r.id}`,
+        projectId: r.projectId,
         severity: 'info',
         title: `${r.customerName} — not on the calendar`,
         detail: `Sold job with no install date · ${r.stage} · ${money(r.amount)}`,
@@ -536,6 +543,7 @@ export default function InstallTeam() {
                       meta={`${j.stageLabel} · ${j.nextAction}`}
                       status={j.overSla ? 'Past SLA' : 'In stage'}
                       tone={j.overSla ? 'crit' : 'info'}
+                      onClick={canOpenJob(j) ? () => openJob(j) : undefined}
                     />
                   ))
                 )}
@@ -566,6 +574,7 @@ export default function InstallTeam() {
                       severity={b.severity}
                       title={`${b.label} — ${b.job.customerName}`}
                       detail={b.detail}
+                      onClick={canOpenJob(b.job) ? () => openJob(b.job) : undefined}
                     />
                   ))
                 )}
@@ -585,7 +594,21 @@ export default function InstallTeam() {
             icon={AlertTriangle}
           >
             {openExceptions.map((x) => (
-              <div key={x.id} className="flex items-start justify-between gap-4 px-4 py-3">
+              <div
+                key={x.id}
+                // subject_id does not say which table it points at, so this only
+                // becomes a link when the exception says 'project'.
+                onClick={canOpenJob(x) ? () => openJob(x) : undefined}
+                role={canOpenJob(x) ? 'button' : undefined}
+                tabIndex={canOpenJob(x) ? 0 : undefined}
+                onKeyDown={canOpenJob(x) ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openJob(x); }
+                } : undefined}
+                className={cn(
+                  'flex items-start justify-between gap-4 px-4 py-3',
+                  canOpenJob(x) && 'cursor-pointer transition-colors hover:bg-muted/50'
+                )}
+              >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <StatusPill tone={x.severity === 'crit' ? 'crit' : 'warn'}>
@@ -637,6 +660,7 @@ export default function InstallTeam() {
                   columns={columns}
                   data={futureSorted}
                   rowKey={(r) => r.id}
+                  onRowClick={openJob}
                 />
               )}
             </ModuleCard>
@@ -674,6 +698,7 @@ export default function InstallTeam() {
                             .join('  ·  ')}
                           status={r.readiness ? READY_LABEL[r.readiness] : r.stage}
                           tone={r.readiness ? READY_TONE[r.readiness] : stageTone(r.stage)}
+                          onClick={canOpenJob(r) ? () => openJob(r) : undefined}
                         />
                       ))}
                     </React.Fragment>
@@ -739,7 +764,13 @@ export default function InstallTeam() {
                 </div>
               ) : (
                 alerts.rows.map((a) => (
-                  <AlertRow key={a.key} severity={a.severity} title={a.title} detail={a.detail} />
+                  <AlertRow
+                    key={a.key}
+                    severity={a.severity}
+                    title={a.title}
+                    detail={a.detail}
+                    onClick={canOpenJob(a) ? () => openJob(a) : undefined}
+                  />
                 ))
               )}
             </ModuleCard>

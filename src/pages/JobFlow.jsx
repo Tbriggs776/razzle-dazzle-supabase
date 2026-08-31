@@ -25,9 +25,9 @@ import PipelineBar from '@/components/dashboard/PipelineBar';
 import { Input } from '@/components/ui/input';
 
 import { cn } from '@/lib/utils';
-import { createPageUrl } from '@/utils';
 import { buildJobFlow } from '@/lib/ops/flow';
 import { usePublishedFlow } from '@/lib/ops/usePublishedFlow';
+import { useOpenJob } from '@/lib/ops/openJob';
 import { useAuth } from '@/lib/AuthContext';
 import FlowEditor from '@/components/ops/FlowEditor';
 import { Button } from '@/components/ui/button';
@@ -238,11 +238,9 @@ export default function JobFlow() {
     [blockerGroups]
   );
 
-  const openJob = (job) => {
-    if (!job) return;
-    if (job.projectId) navigate(createPageUrl('ProjectDetail') + `?id=${job.projectId}`);
-    else if (job.saleId) navigate(createPageUrl('SaleDetail') + `?id=${job.saleId}`);
-  };
+  // One resolver for every ops board (see lib/ops/openJob.js) — row shapes
+  // differ per builder and a hand-rolled copy silently no-ops on the wrong one.
+  const openJob = useOpenJob();
 
   const columns = useMemo(
     () => [

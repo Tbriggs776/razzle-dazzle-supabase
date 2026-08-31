@@ -51,7 +51,22 @@ export default function DataTable({
             <TableRow
               key={rowKey ? rowKey(row, i) : i}
               onClick={onRowClick ? () => onRowClick(row, i) : undefined}
-              className={cn(onRowClick && 'cursor-pointer')}
+              // A row that responds to a mouse must respond to a keyboard too.
+              role={onRowClick ? 'button' : undefined}
+              tabIndex={onRowClick ? 0 : undefined}
+              onKeyDown={
+                onRowClick
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onRowClick(row, i);
+                      }
+                    }
+                  : undefined
+              }
+              className={cn(
+                onRowClick && 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary'
+              )}
             >
               {columns.map((c) => (
                 <TableCell

@@ -256,6 +256,11 @@ export function buildInstallBoard({ projects = [], sales = [], customers = [], m
       const daysOut = install ? dayDiff(asOf, install) : null;
       return {
         id: p.id,
+        // Explicit ids so a row can be opened by the shared resolver. `id`
+        // alone is ambiguous across builders — here it is a project, on the
+        // ordering queue below it is a sale.
+        projectId: p.id,
+        saleId: p.sale || null,
         invoice,
         customerName: cust ? `${cust.first_name || ''} ${cust.last_name || ''}`.trim() : '—',
         city: cust?.city || '',
@@ -384,6 +389,9 @@ export function buildOrderingQueue({ sales = [], customers = [], projects = [], 
       const sold = isoDay(s.sale_date);
       return {
         id: s.id,
+        // Here `id` is a sale, not a project — the project may not exist yet.
+        saleId: s.id,
+        projectId: projBySale[s.id]?.id || null,
         customerName: cust ? `${cust.first_name || ''} ${cust.last_name || ''}`.trim() : '—',
         soldOn: sold,
         ageDays: sold ? dayDiff(sold, asOf) : null,
@@ -437,6 +445,8 @@ export function buildCycleReport({ appointments = [], sales = [], projects = [],
     const cust = p.customer ? custById[p.customer] : null;
     jobs.push({
       id: p.id,
+      projectId: p.id,
+      saleId: sale.id,
       invoice: sale.invoice_number || null,
       customerName: cust ? `${cust.first_name || ''} ${cust.last_name || ''}`.trim() : '—',
       rep: sale.assigned_dc || null,

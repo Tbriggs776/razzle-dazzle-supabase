@@ -49,6 +49,7 @@ import {
 } from '@/lib/ops/metrics';
 import { buildJobFlow, departmentView } from '@/lib/ops/flow';
 import { usePublishedFlow } from '@/lib/ops/usePublishedFlow';
+import { useOpenJob, canOpenJob } from '@/lib/ops/openJob';
 import { useBalances } from '@/lib/ops/useBalances';
 
 // ── Local presentation helpers ───────────────────────────────────────────────
@@ -191,6 +192,7 @@ export default function OrderingTeam() {
   // needed here — nothing Ordering owns turns on one.
   // The published graph + THE classifier (job_stage). No JS fallback exists.
   const { graph, stageRows } = usePublishedFlow();
+  const openJob = useOpenJob();
 
   const flow = useMemo(
     () => buildJobFlow({ sales, projects, appointments: [], customers, material, balances, stageRows, graph, asOf }),
@@ -442,6 +444,7 @@ export default function OrderingTeam() {
                   {waitingShown.map((job) => (
                     <WorkRow
                       key={job.id}
+                      onClick={canOpenJob(job) ? () => openJob(job) : undefined}
                       lead={job.ageDays != null ? `${job.ageDays}d` : '—'}
                       primary={job.customerName || '—'}
                       meta={`${job.stageLabel} · ${job.nextAction}`}
@@ -488,6 +491,7 @@ export default function OrderingTeam() {
                       severity={b.severity}
                       title={`${b.label} — ${b.job?.customerName || '—'}`}
                       detail={b.detail}
+                      onClick={canOpenJob(b.job) ? () => openJob(b.job) : undefined}
                     />
                   ))}
                   {blockingMore > 0 && (
@@ -634,6 +638,7 @@ export default function OrderingTeam() {
               return (
                 <WorkRow
                   key={row.id}
+                  onClick={canOpenJob(row) ? () => openJob(row) : undefined}
                   lead={money(row.amount)}
                   primary={row.customerName || '—'}
                   meta={meta}
