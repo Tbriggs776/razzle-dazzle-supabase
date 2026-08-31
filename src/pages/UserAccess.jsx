@@ -19,6 +19,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import RoleMatrix from '@/components/admin/RoleMatrix';
 
 // Sentinel for "no role" — the Select treats '' as "nothing chosen" and shows the placeholder,
 // so clearing a role needs a real value to select.
@@ -85,6 +86,7 @@ function ErrorBanner({ message, onDismiss }) {
 
 export default function UserAccess() {
   const qc = useQueryClient();
+  const [tab, setTab] = useState('people');
   const [search, setSearch] = useState('');
   const [banner, setBanner] = useState(null);
   const [busyKey, setBusyKey] = useState(null);
@@ -301,25 +303,41 @@ export default function UserAccess() {
     {
       key: 'role',
       header: 'Role',
-      render: (p) => (
-        <div className="w-40">
-          <Select
-            value={p.roleIds?.[0] || NO_ROLE}
-            onValueChange={(v) => changeRole(p, v)}
-            disabled={!p.hasLogin || busyKey === p.teamMemberId}
-          >
-            <SelectTrigger className="h-8 bg-card text-xs">
-              <SelectValue placeholder={p.hasLogin ? 'No role' : '—'} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NO_ROLE}>No role</SelectItem>
-              {roles.map((r) => (
-                <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      ),
+      render: (p) => {
+        const selectedName = roles.find((r) => r.id === p.roleIds?.[0])?.name || null;
+        // The roster label on Team Members grants nothing — it is a business
+        // card. When it disagrees with the ACCESS role, one of them is lying to
+        // whoever reads it, so say so rather than silently letting them drift.
+        const mismatch = p.hasLogin && p.rosterRole && selectedName
+          && p.rosterRole.trim().toLowerCase() !== selectedName.trim().toLowerCase();
+        return (
+          <div className="w-44">
+            <Select
+              value={p.roleIds?.[0] || NO_ROLE}
+              onValueChange={(v) => changeRole(p, v)}
+              disabled={!p.hasLogin || busyKey === p.teamMemberId}
+            >
+              <SelectTrigger className="h-8 bg-card text-xs">
+                <SelectValue placeholder={p.hasLogin ? 'No role' : '—'} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_ROLE}>No role</SelectItem>
+                {roles.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="mt-0.5 text-[10px] leading-tight text-muted-foreground">
+              This is access. Roster role is a label.
+            </p>
+            {mismatch && (
+              <p className="mt-0.5 text-[10px] font-medium leading-tight text-warn">
+                Roster says &ldquo;{p.rosterRole}&rdquo; — labels are not synced on purpose.
+              </p>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: 'actions',
@@ -394,6 +412,26 @@ export default function UserAccess() {
 
         <ErrorBanner message={banner} onDismiss={() => setBanner(null)} />
 
+        {/* One page, two tabs — the spec is explicit that the matrix should not
+            be a second nav item when User Access can take a tab. */}
+        <div className="flex gap-1 border-b border-border">
+          {[['people', 'People'], ['roles', 'Roles']].map(([k, label]) => (
+            <button
+              key={k}
+              onClick={() => setTab(k)}
+              className={cn(
+                'min-h-10 border-b-2 px-4 text-sm font-medium transition-colors',
+                tab === k ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'roles' && <RoleMatrix />}
+
+        {tab === 'people' && (<>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <KpiTile
             label="Staff with a login"
@@ -493,6 +531,7 @@ export default function UserAccess() {
             </div>
           </ModuleCard>
         )}
+        </>)}
       </div>
 
       {/* One-time link — the actual deliverable, since nothing is emailed. */}
