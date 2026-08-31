@@ -25,6 +25,9 @@ const ENTITY_TABLE = {
   AppointmentSettingChecklist: 'appointment_setting_checklist',
   ChecklistV2: 'checklist_v2',
   Communication: 'communication',
+  // Read-only union of `communication` and GHL messages. Writes still go to
+  // Communication above -- this is a feed, not a table you can post to.
+  CommunicationFeed: 'communication_feed',
   Customer: 'customer',
   CustomerProjectSettings: 'customer_project_settings',
   InstallerApplication: 'installer_application',
