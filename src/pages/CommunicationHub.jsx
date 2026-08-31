@@ -79,9 +79,27 @@ export default function CommunicationHub() {
     queryFn: () => base44.auth.me()
   });
 
+  // Both systems, one inbox. communication_feed unions Razzle's own messages
+  // with GoHighLevel's; see migration 0137 for the mapping.
+  //
+  // WINDOWED ON PURPOSE. The feed is ~394,000 rows and still growing, and an
+  // unbounded "newest 500" makes Postgres sort the whole thing -- measured at
+  // 1.2s and rising. A date bound lets it use the paired indexes instead: same
+  // query, 182ms. An inbox showing the last 30 days is also just better than one
+  // showing an arbitrary 500 messages.
+  const FEED_WINDOW_DAYS = 30;
+  const feedSince = useMemo(
+    () => new Date(Date.now() - FEED_WINDOW_DAYS * 86400000).toISOString(),
+    []
+  );
+
   const { data: communications = [], isLoading } = useQuery({
-    queryKey: ['communications'],
-    queryFn: () => base44.entities.Communication.list('-created_date', 500),
+    queryKey: ['communications', feedSince],
+    queryFn: () => base44.entities.CommunicationFeed.filter(
+      { created_date: { $gte: feedSince } },
+      '-created_date',
+      1500
+    ),
     refetchInterval: 15000
   });
 
@@ -199,11 +217,30 @@ export default function CommunicationHub() {
   }, 0);
 
   const handleDeleteThread = async (conv) => {
-    // Named, so a misclick on the adjacent conversation is survivable — this used
+    // Named, so a misclick on the adjacent conversation is survivable -- this used
     // to be a generic "Delete all N messages?" on a row you might not have meant.
     const who = conv.contact_name || conv.contact_phone || conv.contact_email || 'this contact';
+
+    // Only Razzle's own messages can be archived. The rest of this thread lives in
+    // GoHighLevel and is mirrored here read-only -- we cannot hide something that
+    // is not ours, and pretending to would misreport what was actually done.
+    const ownIds = conv.messages.filter(m => m.source !== 'ghl').map(m => m.id);
+    const ghlCount = conv.messages.length - ownIds.length;
+
+    if (ownIds.length === 0) {
+      toast.info(
+        `Nothing to archive -- all ${ghlCount} message(s) with ${who} came from `
+        + 'GoHighLevel and are mirrored here read-only.'
+      );
+      return;
+    }
+
     if (!window.confirm(
-      `Archive the ${conv.messages.length} message(s) with ${who}?\n\n`
+      `Archive the ${ownIds.length} message(s) with ${who}?\n\n`
+      + (ghlCount > 0
+          ? `${ghlCount} GoHighLevel message(s) in this thread will stay visible — `
+            + 'they belong to GoHighLevel and are mirrored here read-only.\n\n'
+          : '')
       + 'They are hidden from the Hub but kept on record, and an administrator can '
       + 'restore them. Nothing is permanently deleted.'
     )) return;
@@ -213,7 +250,7 @@ export default function CommunicationHub() {
       // One call for the whole thread, so the audit entry reads like the action a
       // person actually took rather than N separate deletions.
       const res = await base44.functions.invoke('archiveConversation', {
-        ids: conv.messages.map(m => m.id),
+        ids: ownIds,
       });
       const failed = invokeFailure(res);
       if (failed) {
@@ -222,7 +259,7 @@ export default function CommunicationHub() {
       }
       if (selectedKey === conv.key) { setSelectedKey(null); setShowMobileThread(false); }
       queryClient.invalidateQueries({ queryKey: ['communications'] });
-      toast.success(`Archived ${res.data?.archived ?? conv.messages.length} message(s) with ${who}.`);
+      toast.success(`Archived ${res.data?.archived ?? ownIds.length} message(s) with ${who}.`);
     } finally {
       setDeletingKey(null);
     }
