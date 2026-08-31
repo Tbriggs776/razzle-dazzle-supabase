@@ -23,6 +23,11 @@
 // rotates one. An unverified lead is worse than a missed one, so a body that
 // carries no recognised signature is refused rather than trusted.
 //
+// AN OPT-OUT HAS TO ACTUALLY STOP OUTBOUND. GHL's DND state is pushed into
+// public.suppression, which sendMessage already checks before every send, so a
+// customer who switches DND on in GHL stops receiving texts and email from here
+// too. See readDnd/applyDnd below for the semantics and the one-way rule.
+//
 // DELIVERY IS AT-LEAST-ONCE AND OUT OF ORDER. A ContactUpdate can arrive before
 // its ContactCreate, and anything can arrive twice. Both are fine here because
 // upsert_lead is keyed on identity (phone → email → ghl_contact_id), so every
@@ -118,6 +123,107 @@ const CHANNEL_BY_SOURCE: Record<string, string> = {
   chat: 'chat', 'live chat': 'chat', 'chat widget': 'chat',
   referral: 'referral', 'walk in': 'walk_in', 'walk-in': 'walk_in',
 };
+
+const GHL_DND_REASON = 'ghl_dnd';
+
+/**
+ * Phone -> E.164, byte-identical to sendMessage's normE164.
+ *
+ * THIS HAS TO MATCH OR THE SUPPRESSION IS INERT. normalize_contact() keys SMS
+ * rows on digits only, so "(480) 555-0111" stores as 4805550111 while
+ * "+14805550111" stores as 14805550111 -- different rows. sendMessage converts
+ * every destination to E.164 before it checks is_suppressed, so a suppression
+ * written from an un-normalised number is never found and silently suppresses
+ * nothing. Deliberately duplicated rather than imported: _shared has no comms
+ * module, and a copy that is wrong is far more obvious than an import that
+ * drifts.
+ */
+function normE164(p: unknown): string | null {
+  if (!p) return null;
+  const v = String(p).trim();
+  if (v.startsWith('+')) return v;
+  const digits = v.replace(/\D/g, '');
+  if (!digits) return null;
+  return digits.startsWith('1') ? `+${digits}` : `+1${digits}`;
+}
+
+/**
+ * GHL's DND state -> the channels this system can actually act on.
+ *
+ * SEMANTICS, because inverting this is the whole ballgame: in GHL a channel
+ * whose status is 'active' has DND ACTIVE -- do NOT contact. 'inactive' means
+ * sending is allowed. The top-level `dnd` boolean is a blanket override that
+ * turns every channel off at once.
+ *
+ * dndSettings also covers Call, WhatsApp, GMB and FB. There is no outbound path
+ * for any of those here -- sendMessage speaks only 'sms' and 'email', which is
+ * also all public.suppression's check constraint permits -- so they are reported
+ * on the event log rather than written somewhere nothing reads and mistaken for
+ * enforcement.
+ */
+function readDnd(c: any): { sms: boolean; email: boolean; unenforced: string[] } {
+  const settings = c?.dndSettings ?? {};
+  const statusOf = (name: string) => {
+    const key = Object.keys(settings).find((k) => k.toLowerCase() === name.toLowerCase());
+    return String((key ? settings[key]?.status : '') ?? '').toLowerCase();
+  };
+  const blanket = c?.dnd === true;
+  const on = (name: string) => blanket || statusOf(name) === 'active';
+  return {
+    sms: on('SMS'),
+    email: on('Email'),
+    unenforced: ['Call', 'WhatsApp', 'GMB', 'FB'].filter(on),
+  };
+}
+
+/**
+ * Push that state into public.suppression -- the table sendMessage consults
+ * before dispatching anything.
+ *
+ * RETRACTION IS ONE-WAY ON PURPOSE. Turning DND off in GHL clears only the
+ * suppression GHL itself created, via remove_suppression_reason. It must never
+ * delete an 'sms_stop' row, because that one came from the customer texting
+ * STOP to the carrier, and a third-party UI toggle is not consent to resume.
+ */
+async function applyDnd(s: any, c: any, contactId: string | null) {
+  const dnd = readDnd(c);
+
+  // A suppression keyed on nothing suppresses nothing, so if the payload omits
+  // an address fall back to the lead already on file rather than no-op quietly.
+  let phone: string | null = c?.phone ?? null;
+  let email: string | null = c?.email ?? null;
+  if ((!phone || !email) && contactId) {
+    const { data } = await s.from('lead')
+      .select('phone_e164, phone, email').eq('ghl_contact_id', contactId).limit(1).maybeSingle();
+    // phone_e164 is the generated column; `phone` is raw as the CSR typed it.
+    phone = phone ?? data?.phone_e164 ?? data?.phone ?? null;
+    email = email ?? data?.email ?? null;
+  }
+
+  const out: Record<string, unknown> = {
+    sms: dnd.sms, email: dnd.email,
+    ...(dnd.unenforced.length ? { noted_only: dnd.unenforced } : {}),
+  };
+
+  for (const [channel, raw, suppress] of [
+    ['sms', phone, dnd.sms],
+    ['email', email, dnd.email],
+  ] as const) {
+    const value = channel === 'sms' ? normE164(raw) : raw;
+    if (!value) { out[`${channel}_action`] = raw ? 'unusable address' : 'no address'; continue; }
+    const { error } = await s.rpc(
+      suppress ? 'add_suppression' : 'remove_suppression_reason',
+      { p_channel: channel, p_value: value, p_reason: GHL_DND_REASON },
+    );
+    if (error) {
+      console.error(`dnd ${channel} write failed`, error.message);
+      out[`${channel}_action`] = `failed: ${error.message}`;
+    } else {
+      out[`${channel}_action`] = suppress ? 'suppressed' : 'released';
+    }
+  }
+  return out;
+}
 
 function toLead(c: any, locationId: string | null) {
   const src = String(c.source ?? c.attributionSource?.sessionSource ?? '').trim().toLowerCase();
@@ -243,18 +349,16 @@ Deno.serve(async (req) => {
         }
         const { data, error } = await s.rpc('upsert_lead', { p_lead: payload });
         if (error) return await finish({ action: 'failed' }, error.message);
-        return await finish({ action: 'lead_upserted', ...(data as object) });
+        // DND travels on ordinary contact events too. Reading it only from
+        // ContactDndUpdate would leave anyone who opted out BEFORE this app was
+        // installed un-suppressed until they happened to toggle it again.
+        const dnd = await applyDnd(s, contact, contactId);
+        return await finish({ action: 'lead_upserted', ...(data as object), dnd });
       }
 
       case 'ContactDndUpdate': {
-        // An opt-out has to stop outbound contact. The lead table has no DND
-        // column, so this is recorded on the event log only and deliberately
-        // NOT silently dropped — see the note in the PR. Wiring it to a real
-        // suppression flag is a follow-up, not something to fake here.
-        return await finish({
-          action: 'dnd_noted', contactId,
-          note: 'no suppression field on lead yet — event retained for follow-up',
-        });
+        if (!contact) return await finish({ action: 'ignored', reason: 'no contact on payload' });
+        return await finish({ action: 'dnd_applied', contactId, ...(await applyDnd(s, contact, contactId)) });
       }
 
       case 'ContactDelete':
