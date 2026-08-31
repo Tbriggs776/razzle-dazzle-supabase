@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { fetchByIds } from '@/lib/fetchByIds';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -61,9 +62,16 @@ export default function MyQuotes() {
     enabled: !!currentUser
   });
 
+  // Only the leads these quotes reference, not all 17,458.
+  const leadIds = useMemo(
+    () => [...new Set(quotes.map(q => q.lead).filter(Boolean))].sort(),
+    [quotes],
+  );
+
   const { data: leads = [] } = useQuery({
-    queryKey: ['leads'],
-    queryFn: () => base44.entities.Lead.list()
+    queryKey: ['leadsByIds', leadIds],
+    queryFn: () => fetchByIds('Lead', leadIds),
+    enabled: leadIds.length > 0,
   });
 
   const { data: teamMembers = [] } = useQuery({

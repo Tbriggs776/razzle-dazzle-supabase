@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { fetchByIds } from '@/lib/fetchByIds';
 import { deliveryNote } from '@/lib/invokeResult';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -103,9 +104,16 @@ export default function ScheduleAssistant() {
     enabled: !!selectedDate
   });
 
+  // Only the leads for the appointments in the visible window.
+  const leadIds = useMemo(
+    () => [...new Set(appointments.map(a => a.customer).filter(Boolean))].sort(),
+    [appointments],
+  );
+
   const { data: leads = [] } = useQuery({
-    queryKey: ['leads'],
-    queryFn: () => base44.entities.Lead.list()
+    queryKey: ['leadsByIds', leadIds],
+    queryFn: () => fetchByIds('Lead', leadIds),
+    enabled: leadIds.length > 0,
   });
 
   const { data: checklists = [] } = useQuery({

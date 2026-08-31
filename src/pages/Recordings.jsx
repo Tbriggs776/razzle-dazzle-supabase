@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { fetchByIds } from '@/lib/fetchByIds';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -33,9 +34,16 @@ export default function Recordings() {
     }
   });
 
+  // Only the leads behind the recordings on screen.
+  const leadIds = useMemo(
+    () => [...new Set(appointments.map(a => a.customer).filter(Boolean))].sort(),
+    [appointments],
+  );
+
   const { data: leads = [] } = useQuery({
-    queryKey: ['leads'],
-    queryFn: () => base44.entities.Lead.list()
+    queryKey: ['leadsByIds', leadIds],
+    queryFn: () => fetchByIds('Lead', leadIds),
+    enabled: leadIds.length > 0,
   });
 
   const { data: teamMembers = [] } = useQuery({

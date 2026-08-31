@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
+import { fetchByIds } from '@/lib/fetchByIds';
 import { deliveryNote, invokeFailure } from '@/lib/invokeResult';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -77,9 +78,24 @@ export default function Appointments() {
     queryFn: () => base44.entities.TeamMember.list()
   });
 
+  // Only the leads these appointments actually reference.
+  //
+  // This used to be Lead.list() with no bound, which downloaded every lead in
+  // the business -- 17,458 rows, 4.8 MB, 18 sequential round trips -- so that
+  // `leads.find()` below could put a name on twenty rows. The lead table grew
+  // eight-fold when GoHighLevel contacts were imported and silently took this
+  // page with it.
+  const leadIds = useMemo(
+    () => [...new Set(appointments.map(a => a.customer).filter(Boolean))].sort(),
+    [appointments],
+  );
+
   const { data: leads = [] } = useQuery({
-    queryKey: ['leads'],
-    queryFn: () => base44.entities.Lead.list()
+    // Keyed on the ids themselves, so changing sort or page refetches only when
+    // the set of people on screen actually changes.
+    queryKey: ['leadsByIds', leadIds],
+    queryFn: () => fetchByIds('Lead', leadIds),
+    enabled: leadIds.length > 0,
   });
 
   const { data: allTasks = [] } = useQuery({

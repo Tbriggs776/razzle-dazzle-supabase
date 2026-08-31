@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import ReactQuill from 'react-quill';
 import { base44 } from '@/api/base44Client';
+import { fetchMapByIds } from '@/lib/fetchByIds';
 import { toast } from 'sonner';
 import { invokeFailure, invokeNotSent } from '@/lib/invokeResult';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -104,9 +105,12 @@ export default function Settings() {
         status: { $in: ['Scheduled', 'Rescheduled'] }
       }, 'appointment_date', 50);
       
-      // Batch fetch all leads at once
-      const allLeads = await base44.entities.Lead.list();
-      const leadsMap = new Map(allLeads.map(lead => [lead.id, lead]));
+      // Only the leads these 50 appointments reference. This used to be
+      // Lead.list() -- every lead in the business, 17,458 rows over 18 round
+      // trips -- to put names on at most 50 rows.
+      const leadsMap = new Map(
+        Object.entries(await fetchMapByIds('Lead', appts.map(a => a.customer))),
+      );
       
       // Map appointments with lead names
       const apptsWithLeads = appts.map(appt => {
