@@ -9,7 +9,8 @@
     "lint": "eslint . --quiet",
     "preview": "vite preview",
     "check:functions": "deno check --node-modules-dir=auto supabase/functions/*/index.ts",
-    "check": "npm run lint && npm run check:functions && npm run build"
+    "check": "npm run lint && npm run check:functions && npm run build",
+    "emails": "node supabase/templates/build.mjs"
   },
   "dependencies": {
     "@bytescale/sdk": "^3.0.0",
