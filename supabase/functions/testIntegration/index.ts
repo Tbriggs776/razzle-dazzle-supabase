@@ -76,10 +76,32 @@ async function testProvider(key: string, cfg: Record<string, any>): Promise<Resu
       // Mirror the runtime client (_shared/rfms.ts): HTTP Basic base64(storeQueue:apiToken)
       // against POST {base}/session/begin. (The old test used a never-set RFMS_BEARER_TOKEN with
       // Bearer auth, so it always reported "Store Token not set".)
+      const base = cfg.base_url || 'https://api.rfms.online/v2';
+
+      // Bridge path (0144): a session minted elsewhere, pasted in by an operator.
+      // session/begin cannot be used to verify it -- that is the call that fails --
+      // so authenticate against GET /customers, which RFMS documents as not
+      // contacting the store at all. It exercises the credential and nothing else.
+      const pinnedStoreId = await getSecret('RFMS_SESSION_STORE_ID');
+      const pinnedToken = await getSecret('RFMS_SESSION_TOKEN');
+      if (pinnedStoreId && pinnedToken) {
+        const pr = await fetch(`${base}/customers`, {
+          headers: { Authorization: 'Basic ' + btoa(`${pinnedStoreId}:${pinnedToken}`), 'Content-Type': 'application/json' },
+        });
+        const pt = await pr.text();
+        if (pr.status === 403) {
+          return { ok: false, message:
+            'Pinned session token refused (403). RFMS returns an empty 403 for every ' +
+            'authorization failure, so this means either the token is stale or this ' +
+            'store is not entitled to the API — it does NOT distinguish them.' };
+        }
+        if (!pr.ok) return { ok: false, message: `Pinned session rejected (HTTP ${pr.status}): ${pt.slice(0, 160)}` };
+        return { ok: true, message: `RFMS reachable with the pinned session token (GET /customers ${pr.status}). Bridge is live — session/begin is still expected to fail.` };
+      }
+
       const storeQueue = await getSecret('RFMS_STORE_QUEUE');
       const apiToken = await getSecret('RFMS_API_TOKEN');
       if (!storeQueue || !apiToken) return miss('Store Queue / API Token');
-      const base = cfg.base_url || 'https://api.rfms.online/v2';
       const r = await fetch(`${base}/session/begin`, {
         method: 'POST',
         headers: { Authorization: 'Basic ' + btoa(`${storeQueue}:${apiToken}`), 'Content-Type': 'application/json' },

@@ -28,6 +28,9 @@ export interface RfmsCtx {
   storeQueue: string;
   apiToken: string;
   tokenPosition: string; // 'password' (default) | 'username' — where the sessionToken sits in Basic
+  // A session minted elsewhere (see 0144). Both present = skip session/begin entirely.
+  pinnedStoreId: string | null;
+  pinnedToken: string | null;
 }
 
 // Returns null when RFMS isn't configured yet (caller emits { stub: true }).
@@ -36,13 +39,26 @@ export async function rfmsContext(s: any): Promise<RfmsCtx | null> {
   if (!integ?.is_enabled) return null;
   const storeQueue = await getSecret(s, 'RFMS_STORE_QUEUE');
   const apiToken = await getSecret(s, 'RFMS_API_TOKEN');
-  if (!storeQueue || !apiToken) return null;
+  // Read once per request rather than per call. Absent is the normal case.
+  const pinnedStoreId = await getSecret(s, 'RFMS_SESSION_STORE_ID');
+  const pinnedToken = await getSecret(s, 'RFMS_SESSION_TOKEN');
+
+  // EITHER credential set is sufficient. A pinned session authenticates on its own,
+  // so requiring the store credentials alongside it would make the bridge depend on
+  // exactly the thing it exists to work around -- and the store credentials are the
+  // ones currently being refused.
+  const canBegin = !!(storeQueue && apiToken);
+  const canPin = !!(pinnedStoreId && pinnedToken);
+  if (!canBegin && !canPin) return null;
+
   const cfg = (integ.config as Record<string, any>) || {};
   return {
     base: cfg.base_url || 'https://api.rfms.online/v2',
-    storeQueue,
-    apiToken,
+    storeQueue: storeQueue ?? '',
+    apiToken: apiToken ?? '',
     tokenPosition: cfg.session_token_position || 'password',
+    pinnedStoreId,
+    pinnedToken,
   };
 }
 
@@ -50,6 +66,28 @@ interface Session { storeId: string | null; sessionToken: string; }
 
 // Reuse the newest cached session until it's within 5 min of expiry; else begin a new one.
 async function getSession(s: any, ctx: RfmsCtx, forceNew = false): Promise<Session> {
+  // A session pinned by an operator wins over everything, including forceNew.
+  //
+  // session/begin currently 403s for this store, so a pinned token is the only way
+  // the client can authenticate at all. Falling through to session/begin on a 401
+  // would replace a precise, actionable failure with the same opaque 403 that sent
+  // us in circles for a morning -- so say exactly what happened and what to do.
+  //
+  // Deliberately NOT cached into rfms_session: that table is a cache of tokens this
+  // app minted and may refresh. A pinned token is operator-supplied configuration,
+  // and mixing the two would let a stale cache row shadow a freshly pasted secret.
+  if (ctx.pinnedToken && ctx.pinnedStoreId) {
+    if (forceNew) {
+      throw new Error(
+        'RFMS rejected the pinned session token (401). It has expired, or been ' +
+        'invalidated. Mint a fresh one where session/begin works and update the ' +
+        'RFMS_SESSION_TOKEN / RFMS_SESSION_STORE_ID secrets at /Integrations. This ' +
+        'app cannot mint one: POST /session/begin returns 403 for these credentials.',
+      );
+    }
+    return { storeId: ctx.pinnedStoreId, sessionToken: ctx.pinnedToken };
+  }
+
   if (!forceNew) {
     const { data: rows } = await s.from('rfms_session').select('*').order('created_date', { ascending: false }).limit(1);
     const sess = rows?.[0];
