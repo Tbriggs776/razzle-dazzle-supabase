@@ -4,8 +4,8 @@
 //
 // Fixes every base44 RFMS bug at once:
 //  - Auth is documented HTTP BASIC, not Bearer. session/begin uses Basic base64(storeQueue:apiToken);
-//    subsequent calls carry the sessionToken via Basic (placement is config-driven — a live-spike
-//    unknown). base44 sent everything as Bearer.
+//    every subsequent call uses Basic base64(storeQueue:sessionToken) — SAME username, only the
+//    password changes. base44 sent everything as Bearer.
 //  - The API is ASYNC store-and-forward: every response is { status: 'success'|'waiting'|'failed',
 //    result }. 'waiting' = the store's DB hasn't replied — poll again. base44 read results
 //    synchronously and silently treated 'waiting' as empty data. rfmsCall handles all three.
@@ -46,7 +46,7 @@ export async function rfmsContext(s: any): Promise<RfmsCtx | null> {
   };
 }
 
-interface Session { storeId: string; sessionToken: string; }
+interface Session { storeId: string | null; sessionToken: string; }
 
 // Reuse the newest cached session until it's within 5 min of expiry; else begin a new one.
 async function getSession(s: any, ctx: RfmsCtx, forceNew = false): Promise<Session> {
@@ -64,20 +64,42 @@ async function getSession(s: any, ctx: RfmsCtx, forceNew = false): Promise<Sessi
   const text = await r.text();
   let d: any; try { d = JSON.parse(text); } catch { d = text; }
   if (!r.ok) throw new Error(`RFMS session/begin HTTP ${r.status}: ${typeof d === 'string' ? d : JSON.stringify(d).slice(0, 300)}`);
-  const storeId = d.storeId ?? d.result?.storeId;
+  // storeId is NOT part of the documented session/begin response and is expected to be
+  // null. It is recorded only if RFMS volunteers one; nothing authenticates with it.
+  const storeId = d.storeId ?? d.result?.storeId ?? null;
   const sessionToken = d.sessionToken ?? d.result?.sessionToken;
   const sessionExpires = d.sessionExpires ?? d.result?.sessionExpires;
   if (!sessionToken) throw new Error(`RFMS session/begin returned no sessionToken: ${JSON.stringify(d).slice(0, 300)}`);
-  await s.from('rfms_session').insert({ store_id: storeId, session_token: sessionToken, session_expires: sessionExpires, bearer_token: btoa(`${storeId}:${sessionToken}`) });
+  await s.from('rfms_session').insert({ store_id: storeId, session_token: sessionToken, session_expires: sessionExpires, bearer_token: btoa(`${ctx.storeQueue}:${sessionToken}`) });
   return { storeId, sessionToken };
 }
 
-// Basic credential for subsequent (post-session) calls. Placement is config-driven because the
-// docs are ambiguous on username-vs-password — the live spike locks this via session_token_position.
+// Basic credential for every post-session call.
+//
+// THE USERNAME IS THE STORE QUEUE, BOTH TIMES. RFMS states it without ambiguity: "The
+// session token must be sent with all API requests as the password using HTTP Basic
+// Auth. User name should be set using the same user name you used in the first step."
+// So the pair is (storeQueue : sessionToken) and the ONLY thing that changes between
+// session/begin and everything after it is the password.
+//
+// This previously read `sess.storeId`, which session/begin does not return -- that call
+// responds {authorized, sessionToken, sessionExpires}. `storeId` is a field on a STORE
+// RECORD (GET /v2/stores/:id -> [{storeId, isDefault}]), not a credential. So the value
+// was always undefined and every authenticated request would have gone out as
+// Basic base64("undefined:<sessionToken>").
+//
+// It has never actually fired, which is why it survived review: rfms_session holds zero
+// rows because session/begin itself 403s while Web API is unchecked on install 61152.
+// One bug was standing in front of the other. The moment that box is ticked, the first
+// call would have succeeded and every call after it failed -- presenting as "the API
+// still doesn't work" and sending us back to re-check credentials that were fine.
+//
+// tokenPosition stays as an escape hatch, but the default is now the documented behaviour
+// rather than a guess awaiting a live spike.
 function sessionAuth(sess: Session, ctx: RfmsCtx): string {
   const pair = ctx.tokenPosition === 'username'
     ? `${sess.sessionToken}:${sess.sessionToken}`
-    : `${sess.storeId}:${sess.sessionToken}`;
+    : `${ctx.storeQueue}:${sess.sessionToken}`;
   return 'Basic ' + btoa(pair);
 }
 
