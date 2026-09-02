@@ -134,7 +134,11 @@ export default function CustomerProjectView() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="bg-card border-b border-border">
+      {/* A navy hero, not a white one. This is the page a customer opens from a text
+          message minutes after being on floordaddy.com, where navy is what dominates
+          — a white bar with a small logo on it reads as a portal, not as us. The
+          badge is the page's ONE accent: pink on navy, and nothing else competes. */}
+      <header className="bg-sidebar">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -142,18 +146,18 @@ export default function CustomerProjectView() {
             className="text-center"
           >
             <div className="mb-6 flex flex-col items-center">
-              <BrandLogo imgClassName="h-12 sm:h-14" />
-              <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-2">
+              <BrandLogo imgClassName="h-12 sm:h-14" onDark />
+              <p className="text-[10px] font-medium tracking-[0.18em] text-sidebar-foreground uppercase mt-3">
                 Sexy Flooring · Quality Install
               </p>
             </div>
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg ring-4 ring-brand-gold/25 mb-6">
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-brand-pink flex items-center justify-center text-white shadow-lg ring-4 ring-brand-pink/25 mb-6">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-2">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">
               Project Tracker
             </h2>
-            <p className="text-muted-foreground">Follow your project every step of the way.</p>
+            <p className="text-sidebar-foreground">Follow your project every step of the way.</p>
           </motion.div>
         </div>
       </header>

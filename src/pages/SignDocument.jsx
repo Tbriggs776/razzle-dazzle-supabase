@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/dataClient';
 import { Loader2, ShieldCheck, Check, FileText, PenLine, Lock } from 'lucide-react';
-import BrandLogo from '@/components/BrandLogo';
+import PublicPageShell from '@/components/common/PublicPageShell';
 
 // Public (anonymous) e-signature page. The `token` in the URL is the capability —
 // all reads/writes go through the token-scoped `esign` Edge Function; the browser
@@ -103,20 +103,12 @@ export default function SignDocument() {
   };
 
   const shell = (inner) => (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card/80 backdrop-blur">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div>
-            <BrandLogo imgClassName="h-7 sm:h-8" />
-            <div className="text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase mt-1.5">Secure document signing</div>
-          </div>
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Lock className="w-3.5 h-3.5" /> Encrypted
-          </div>
-        </div>
-      </header>
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">{inner}</main>
-    </div>
+    <PublicPageShell
+      eyebrow="Secure document signing"
+      aside={<><Lock className="h-3.5 w-3.5" /> Encrypted</>}
+    >
+      {inner}
+    </PublicPageShell>
   );
   const card = "bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6";
 
@@ -126,7 +118,7 @@ export default function SignDocument() {
 
   if (d.status === 'signed') return shell(
     <div className={card + " text-center py-10"}>
-      <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center mb-5"><Check className="w-8 h-8 text-emerald-600 dark:text-emerald-400" /></div>
+      <div className="w-16 h-16 mx-auto rounded-2xl bg-good/12 flex items-center justify-center mb-5"><Check className="w-8 h-8 text-good" /></div>
       <h2 className="text-2xl font-bold tracking-tight">Signed — thank you!</h2>
       <p className="text-muted-foreground mt-2 max-w-sm mx-auto">A signed copy has been emailed to you for your records.</p>
       {d.sealed_pdf_url && <a href={d.sealed_pdf_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 mt-6 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition"><FileText className="w-4 h-4" /> Download signed PDF</a>}
