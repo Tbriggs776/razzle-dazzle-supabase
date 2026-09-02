@@ -6,13 +6,14 @@ import { useAuth } from '@/lib/AuthContext';
 import { usePortalContext } from '@/lib/usePortal';
 import { invokeFailure, unwrapInvoke } from '@/lib/invokeResult';
 import { cn } from '@/lib/utils';
+import BrandLogo from '@/components/BrandLogo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   HardHat, Users, ChevronRight, MapPin, Calendar, Loader2, LogOut,
-  UserPlus, AlertTriangle, ShieldCheck,
+  UserPlus, ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -327,17 +328,24 @@ export default function Portal() {
   if (isError || !ctx?.is_installer) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
-        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center">
-          <AlertTriangle className="mx-auto mb-4 h-8 w-8 text-muted-foreground" />
-          <h1 className="mb-2 text-xl font-bold text-foreground">This is the subcontractor portal</h1>
-          <p className="mb-6 text-muted-foreground">
-            {isError
-              ? error?.message || 'We could not check your access.'
-              : 'Your login is not on a subcontractor crew. If you are staff, use the main app.'}
-          </p>
-          <Link to="/Dashboard" className="text-sm font-medium text-primary hover:underline">
-            Go to the main app
-          </Link>
+        <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card text-center">
+          {/* Branded even here. This is the screen someone hits when their access is
+              wrong -- the moment they are most likely to think the link is broken or
+              fake, and the moment a recognisable mark is worth the most. */}
+          <div className="flex items-center justify-center bg-sidebar px-6 py-3">
+            <BrandLogo imgClassName="h-6" onDark />
+          </div>
+          <div className="p-8">
+            <h1 className="mb-2 font-display text-xl font-bold text-foreground">This is the subcontractor portal</h1>
+            <p className="mb-6 text-muted-foreground">
+              {isError
+                ? error?.message || 'We could not check your access.'
+                : 'Your login is not on a subcontractor crew. If you are staff, use the main app.'}
+            </p>
+            <Link to="/Dashboard" className="text-sm font-medium text-primary hover:underline">
+              Go to the main app
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -351,6 +359,19 @@ export default function Portal() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur">
+        {/* The brand bar. A subcontractor arrives here from a text message, not from
+            the staff app, so this is the only thing telling them whose tool this is.
+            Navy because navy is what dominates floordaddy.com; BrandLogo needs
+            `onDark` or the navy "FLOOR" wordmark disappears into it. Kept to 40px --
+            this is a one-handed jobsite tool and vertical space is the scarce thing. */}
+        <div className="bg-sidebar">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-2">
+            <BrandLogo imgClassName="h-6" onDark />
+            <span className="font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground">
+              Installer portal
+            </span>
+          </div>
+        </div>
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
             <p className="truncate text-lg font-bold leading-tight text-foreground">{ctx.crew_name}</p>
@@ -369,8 +390,11 @@ export default function Portal() {
               onClick={() => setTab(key)}
               className={cn(
                 'flex min-h-11 items-center gap-2 border-b-2 px-4 text-sm font-medium transition-colors',
+                // The active tab is this page's ONE accent -- there is no hero CTA
+                // here to spend it on, and it is the only thing on screen that
+                // needs to be findable at a glance in sunlight.
                 tab === key
-                  ? 'border-primary text-foreground'
+                  ? 'border-brand-pink text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground',
               )}
             >
