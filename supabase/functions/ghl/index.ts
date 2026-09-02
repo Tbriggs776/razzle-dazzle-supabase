@@ -68,6 +68,78 @@ Deno.serve(async (req) => {
       return Response.json({ dateAddedList: cache?.date_added_list ?? [], synced_at: cache?.synced_at ?? null, contact_count: cache?.contact_count ?? 0 }, { headers: cors });
     }
 
+    // Snapshot every contact's do-not-contact state into public.ghl_contact_dnd.
+    //
+    // suppression only knows about contacts whose DND CHANGED since the webhook went
+    // live -- 32 rows against 17,524 leads. Reporting on reachability across the whole
+    // book needs the state of every contact, and GHL's contacts list is the only
+    // source for it.
+    //
+    // Writes to ghl_contact_dnd, NEVER to suppression: that table is what sendMessage
+    // consults before a send, and bulk-loading it would silently change who this
+    // system is willing to message while outbound is deliberately disarmed.
+    if (type === 'sync_dnd') {
+      if (!isInternal && !(await isOrgAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403, headers: cors });
+      const ctx = await ghlContext(s);
+      if (!ctx) return Response.json({ stub: true }, { headers: cors });
+      const headers = { Authorization: `Bearer ${ctx.token}`, Version: GHL_VERSION, Accept: 'application/json' };
+
+      // GHL semantics, and inverting this is the whole ballgame: a channel whose
+      // status is 'active' has DND ACTIVE -- do NOT contact. 'inactive' means sending
+      // is allowed. Top-level `dnd` is a blanket override. Same reading as
+      // ghlWebhook's readDnd(), deliberately identical.
+      const readDnd = (c: any) => {
+        const settings = c?.dndSettings ?? {};
+        const statusOf = (name: string) => {
+          const key = Object.keys(settings).find((k) => k.toLowerCase() === name.toLowerCase());
+          return String((key ? settings[key]?.status : '') ?? '').toLowerCase();
+        };
+        const blanket = c?.dnd === true;
+        const on = (n: string) => blanket || statusOf(n) === 'active';
+        return {
+          dnd_blanket: blanket,
+          dnd_sms: on('SMS'),
+          dnd_email: on('Email'),
+          dnd_other: ['Call', 'WhatsApp', 'GMB', 'FB'].filter(on),
+        };
+      };
+
+      let startAfter: string | null = null, startAfterId: string | null = null;
+      let page = 0, seen = 0, withDnd = 0;
+      const limit = 100, maxPages = 400;
+      const t0 = Date.now();
+
+      while (page < maxPages) {
+        // Leave the request before the platform kills it, and report where to resume
+        // from. 17k contacts at 100 a page is ~175 round trips; a slow day for GHL
+        // should degrade into "call me again", not a half-written table with no
+        // record of how far it got.
+        if (Date.now() - t0 > 50_000) {
+          return Response.json({ ok: true, partial: true, pages: page, contacts: seen, with_dnd: withDnd, startAfter, startAfterId }, { headers: cors });
+        }
+        const params = new URLSearchParams({ locationId: ctx.locationId, limit: String(limit) });
+        if (startAfter) params.set('startAfter', String(startAfter));
+        if (startAfterId) params.set('startAfterId', startAfterId);
+        const r = await fetch(`${GHL_BASE}/contacts/?${params}`, { headers });
+        if (!r.ok) return Response.json({ error: `GHL v2 API ${r.status}: ${await r.text()}`, pages: page, contacts: seen }, { status: r.status, headers: cors });
+        const d = await r.json();
+        const contacts = d.contacts || [];
+        if (!contacts.length) break;
+
+        const rows = contacts.filter((c: any) => c?.id).map((c: any) => ({
+          contact_id: c.id, ...readDnd(c), synced_at: new Date().toISOString(),
+        }));
+        withDnd += rows.filter((x: any) => x.dnd_blanket || x.dnd_sms || x.dnd_email).length;
+        seen += rows.length;
+        const { error } = await s.from('ghl_contact_dnd').upsert(rows, { onConflict: 'contact_id' });
+        if (error) return Response.json({ error: `write failed on page ${page}: ${error.message}`, contacts: seen }, { status: 500, headers: cors });
+
+        if (contacts.length < limit || !d.meta?.startAfterId) break;
+        startAfter = d.meta.startAfter; startAfterId = d.meta.startAfterId; page++;
+      }
+      return Response.json({ ok: true, done: true, pages: page, contacts: seen, with_dnd: withDnd }, { headers: cors });
+    }
+
     if (type === 'sync_contacts') {
       if (!isInternal && !(await isOrgAdmin(req))) return Response.json({ error: 'Forbidden' }, { status: 403, headers: cors });
       const ctx = await ghlContext(s);
