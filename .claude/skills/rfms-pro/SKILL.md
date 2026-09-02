@@ -128,8 +128,15 @@ Reporting semantics that differ from intuition:
 | Get quotes/orders **with lines**, search, header updates, post (not process) a payment, product & inventory search, claim headers, quote→order export, attachments | | ✓ | ✓ |
 | **Create orders WITH lines · edit orders · assign inventory** | | | ✓ |
 
-Not available at **any** tier: purchase orders, receiving, scheduling, crews,
-provider/installer pay, commissions, GL/journal, payroll, adjustments, work orders.
+Not available at **any** tier: purchase orders, receiving, commissions, GL/journal,
+payroll, adjustments, work orders.
+
+⚠️ **Scheduling, crews and provider pay ARE available** — an earlier version of this
+table listed them as unavailable, repeating the help-centre error §3 catalogues. §2.6
+documents 18 Schedule Pro endpoints, and Cyncly confirmed in writing (2026-08-31) that
+Floor Daddy holds Enterprise, whose matrix includes *"Schedule new jobs and edit existing
+jobs"*, *"Create provider records"* and *"Get scheduled jobs by crew or order number"*.
+Reads and status/notes need Plus; create/update and provider records need Enterprise.
 
 **Auth — settled, not guesswork.** Store Queue + API Token, generated in RFMS Online
 Services → RFMS Online tile → **API** button → Generate Key → pick a default user →
@@ -154,7 +161,10 @@ the same user name you used in the first step."*
 - **Do not build on a TPD key.** A TPD session is granted Plus *"regardless of the store's
   actual subscription level"* — read as a **ceiling**, it could never reach any
   Enterprise endpoint, which is exactly the set a material-authoritative integration
-  needs. Use Floor Daddy's own store credentials at Enterprise.
+  needs. Use Floor Daddy's own store credentials, which Cyncly confirmed are Enterprise
+  (2026-08-31). The remaining blocker is the per-install `Web API ☐` checkbox, which is
+  separate from the subscription entitlement and is what currently 403s
+  `/v2/session/begin`.
 
 **Transport:** everything (Mobile, Warehouse Mobile, CRM, Measure export, Next, and the
 REST API) runs through one on-prem Windows service — `RFMSDataEndpoint`, formerly

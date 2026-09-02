@@ -511,6 +511,15 @@ Installers are invited by email as guest identities (Installer = own crew; Field
 
 Explicitly **not present at any tier**: purchase orders, receiving, scheduling, crews, provider/installer pay, commissions, GL/journal, payroll, adjustments, work orders.
 
+> ⚠️ **CORRECTED — this sentence is wrong about scheduling, crews and provider pay.**
+> It is one of the ~16 help-centre API claims catalogued in §3 of the API reference.
+> §2.6 there documents 18 Schedule Pro endpoints, and Cyncly confirmed in writing
+> (2026-08-31) that Floor Daddy holds Enterprise, whose published matrix includes
+> "Schedule new jobs and edit existing jobs", "Create provider records" and "Get
+> scheduled jobs by crew or order number". Purchase orders, receiving, commissions,
+> GL/journal, payroll and adjustments remain genuinely absent.
+> Left in place rather than deleted so the catalogue of help-centre errors stays honest.
+
 ### 8.3 The token inherits a human user's permissions
 
 This is critical and easy to miss. RFMS's own guidance: the default user "should generally have broad System Option permissions." Practically:

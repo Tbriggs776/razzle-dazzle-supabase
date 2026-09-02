@@ -5,21 +5,36 @@ truth for customer **61152** and overrides any generic assumption about how RFMS
 
 ---
 
-## ⚠️ Web API is NOT enabled
+## ✅ ENTERPRISE tier — confirmed by Cyncly, 2026-08-31
 
-Under *RFMS Mobile and Web Software*: `Measure Mobile ☑`, but **`Web API ☐`**.
+Cassie Justice (Account Manager, Cyncly) confirmed in writing: *"Floor Daddy's
+subscription includes the Enterprise-level API service."* Her capability matrix
+matches §2.6 of the API reference exactly, including the two rows that decide
+whether an end-to-end scheduling integration is possible at all:
 
-Everything in the RAZZLE DAZZLE integration plan depends on the REST API. RFMS's own
-docs say API access "is included with a subscription" while also directing you to
-"contact your Client Success Manager regarding the purchase of this subscription" — so
-it is an entitlement that must be switched on.
+| Function | Std | Plus | **Ent** |
+|---|:--:|:--:|:--:|
+| Get scheduled jobs by crew or order number | — | ✓ | ✓ |
+| Change status and add notes on a job | — | ✓ | ✓ |
+| Create provider records | — | ✓ | ✓ |
+| Create and edit orders (headers and lines) | — | — | ✓ |
+| Assign inventory to orders | — | — | ✓ |
+| **Schedule new jobs and edit existing jobs** | — | — | **✓** |
 
-**Cheap confirmation:** RFMS Online Services → RFMS Online tile → **API** button (upper
-right) → Generate Key. If that will not produce a Store Queue + Token, it is not entitled.
+So the whole Schedule Pro surface is reachable: reads and status/notes at Plus,
+create/update and provider records at Enterprise. Line-level material cost and
+line statuses — which the gross-profit model and the material boards both need —
+are in scope.
 
-**Also confirm the tier.** Standard gives headers with **no line items**. Our gross-profit
-model needs line-level material cost and the material boards need line statuses, so we
-need **Enterprise**.
+### Still to switch on: the per-install Web API checkbox
+
+The subscription entitlement and the install-level toggle are two different
+things. Under *RFMS Mobile and Web Software* this install still shows
+`Measure Mobile ☑`, `Web API ☐`, and that is what returns 403 on
+`/v2/session/begin` — it is not a credential problem. Tyler is having it enabled.
+
+**Cheap confirmation once it is on:** RFMS Online Services → RFMS Online tile →
+**API** button (upper right) → Generate Key. A Store Queue + Token means it is live.
 
 The on-prem MOE API service is said to be already installed wherever RFMS Mobile, Cloud
 Link or Podium is in use. Measure Mobile is licensed here, which *may* satisfy that —
@@ -94,9 +109,18 @@ Invoice · Custom Quote · Custom Product Tag · Custom Roll/Item Inventory Tag
 
 **They already own Schedule Pro and Project Manager**, 16 users each. `DECISIONS.md` §1
 makes RAZZLE DAZZLE the scheduling system of record — which duplicates licensed software.
-That may still be correct, because **Schedule Pro has no API at any tier**, so we could
-never have synced to it anyway. But confirm whether Schedule Pro is genuinely used or is
-shelfware before rebuilding it.
+
+⚠️ **That decision was justified on a false premise and should be re-made.** This file
+previously said *"Schedule Pro has no API at any tier, so we could never have synced to
+it anyway"* — repeating one of the help-centre errors §3 of the API reference catalogues.
+It is wrong. §2.6 documents 18 Schedule Pro endpoints, and Cyncly has confirmed Floor
+Daddy holds Enterprise, which includes *"Schedule new jobs and edit existing jobs."*
+
+The sync was always possible. Owning scheduling in RAZZLE DAZZLE may still be the right
+call — one system of record, no split brain — but it is now a choice rather than a
+constraint, and the alternative (RFMS stays the scheduler, RAZZLE DAZZLE drives it
+through the API) is genuinely available. Confirm whether Schedule Pro is actually used
+or is shelfware before either path.
 
 **Customer Import Export and Product Import/Export are licensed.** That is a bulk data
 path which does **not** require the Web API — a viable route for the initial data
