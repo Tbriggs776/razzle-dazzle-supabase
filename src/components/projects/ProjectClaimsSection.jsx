@@ -17,9 +17,9 @@ import { Badge } from "@/components/ui/badge";
 import ProjectClaimForm from './ProjectClaimForm';
 
 const claimTypeColors = {
-  'Claim': 'bg-red-100 text-red-700 border-red-200',
-  'Repair': 'bg-orange-100 text-orange-700 border-orange-200',
-  'Short Item': 'bg-blue-100 text-blue-700 border-blue-200',
+  'Claim': 'bg-crit/12 text-crit border-crit/25',
+  'Repair': 'bg-warn/12 text-warn border-warn/25',
+  'Short Item': 'bg-info/12 text-info border-info/25',
 };
 
 const DEFAULT_EMAILS = [
@@ -163,63 +163,63 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.57 }}
-      className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+      className="bg-white rounded-2xl border border-border p-6 md:col-span-2"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-orange-500" />
-          <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+          <AlertTriangle className="w-5 h-5 text-warn" />
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
             Claims / Repairs / Short Items
           </h2>
         </div>
-        <Button size="sm" onClick={() => setShowForm(true)} className="bg-indigo-600 hover:bg-indigo-700">
+        <Button size="sm" onClick={() => setShowForm(true)} className="bg-info hover:bg-info">
           <Plus className="w-4 h-4 mr-1" /> New
         </Button>
       </div>
 
       {sorted.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center py-6">No claims, repairs, or short items yet</p>
+        <p className="text-sm text-muted-foreground text-center py-6">No claims, repairs, or short items yet</p>
       ) : (
         <div className="space-y-3">
           {sorted.map(claim => (
-            <div key={claim.id} className="border border-slate-200 rounded-xl overflow-hidden">
+            <div key={claim.id} className="border border-border rounded-xl overflow-hidden">
               <div className="flex items-center">
                 <button
-                  className={`flex-1 flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors ${claim.is_completed ? 'bg-green-50' : ''}`}
+                  className={`flex-1 flex items-center justify-between px-4 py-3 hover:bg-muted transition-colors ${claim.is_completed ? 'bg-good/12' : ''}`}
                   onClick={() => setExpandedId(expandedId === claim.id ? null : claim.id)}
                 >
                   <div className="flex items-center gap-3 text-left">
                     {claim.is_completed
-                      ? <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      : <AlertTriangle className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                      ? <CheckCircle2 className="w-4 h-4 text-good flex-shrink-0" />
+                      : <AlertTriangle className="w-4 h-4 text-warn flex-shrink-0" />
                     }
                     <div>
                       <div className="flex items-center gap-2">
-                        <p className={`text-sm font-medium ${claim.is_completed ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+                        <p className={`text-sm font-medium ${claim.is_completed ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                           {claim.claim_type || 'Claim'} — {claim.customer_name || 'Unknown'}
                         </p>
                         {claim.is_completed && (
-                          <Badge className="bg-green-100 text-green-700 border-green-200 text-xs px-1.5 py-0">Completed</Badge>
+                          <Badge className="bg-good/12 text-good border-good/25 text-xs px-1.5 py-0">Completed</Badge>
                         )}
                         {claim.need_to_order_material && !claim.is_completed && (
-                          <Badge className="bg-red-100 text-red-700 border-red-200 text-xs px-1.5 py-0">
+                          <Badge className="bg-crit/12 text-crit border-crit/25 text-xs px-1.5 py-0">
                             <Package className="w-3 h-3 mr-1" />Order Material
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-muted-foreground">
                         By {claim.submitted_by || 'Unknown'} · {format(new Date(claim.created_date.endsWith('Z') ? claim.created_date : claim.created_date + 'Z'), 'MMM d, yyyy h:mm a')}
-                        {claim.reference_number && <span className="ml-2 text-indigo-500 font-medium">Ref: {claim.reference_number}</span>}
-                        {claim.eta && <span className="ml-2 text-amber-600 font-medium">ETA: {claim.eta}</span>}
+                        {claim.reference_number && <span className="ml-2 text-info font-medium">Ref: {claim.reference_number}</span>}
+                        {claim.eta && <span className="ml-2 text-warn font-medium">ETA: {claim.eta}</span>}
                       </p>
                     </div>
                   </div>
-                  {expandedId === claim.id ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                  {expandedId === claim.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                 </button>
                 <button
                   onClick={() => openCompleteModal(claim)}
                   disabled={completingId === claim.id}
-                  className={`px-3 py-3 transition-colors disabled:opacity-50 ${claim.is_completed ? 'text-green-500 hover:text-green-700 hover:bg-green-50' : 'text-slate-400 hover:text-green-600 hover:bg-green-50'}`}
+                  className={`px-3 py-3 transition-colors disabled:opacity-50 ${claim.is_completed ? 'text-good hover:text-good hover:bg-good/12' : 'text-muted-foreground hover:text-good hover:bg-good/12'}`}
                   title={claim.is_completed ? 'Mark Incomplete' : 'Mark Completed'}
                 >
                   {completingId === claim.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
@@ -227,21 +227,21 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
                 <button
                   onClick={() => openResendModal(claim)}
                   disabled={sendingId === claim.id}
-                  className="px-3 py-3 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-50"
+                  className="px-3 py-3 text-info hover:text-info hover:bg-info/12 transition-colors disabled:opacity-50"
                   title="Resend Email"
                 >
                   {sendingId === claim.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </button>
                 <button
                   onClick={() => handleDelete(claim.id)}
-                  className="px-3 py-3 text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  className="px-3 py-3 text-crit hover:text-crit hover:bg-crit/12 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
 
               {expandedId === claim.id && (
-                <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-3 text-sm">
+                <div className="px-4 pb-4 border-t border-border pt-3 space-y-3 text-sm">
                   <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                     {claim.claim_type && <Row label="Type" value={<Badge className={claimTypeColors[claim.claim_type]}>{claim.claim_type}</Badge>} />}
                     {claim.job_number && <Row label="Job #" value={claim.job_number} />}
@@ -251,9 +251,9 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
                   </div>
                   {claim.notes && <Row label="Notes" value={claim.notes} block />}
                   <div className="flex flex-wrap gap-4">
-                    {claim.billable_repair && <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-200 px-2 py-1 rounded-full font-medium">Billable Repair</span>}
+                    {claim.billable_repair && <span className="text-xs bg-warn/12 text-warn border border-warn/25 px-2 py-1 rounded-full font-medium">Billable Repair</span>}
                     {claim.is_back_charge && <span className="text-xs bg-purple-100 text-purple-700 border border-purple-200 px-2 py-1 rounded-full font-medium">Back Charge</span>}
-                    {claim.payment_status && <span className={`text-xs px-2 py-1 rounded-full font-medium border ${claim.payment_status === 'Payable' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'}`}>{claim.payment_status}</span>}
+                    {claim.payment_status && <span className={`text-xs px-2 py-1 rounded-full font-medium border ${claim.payment_status === 'Payable' ? 'bg-good/12 text-good border-good/25' : 'bg-crit/12 text-crit border-crit/25'}`}>{claim.payment_status}</span>}
                   </div>
                   <Row label="Need to Order Material" value={claim.need_to_order_material ? '✅ Yes' : 'No'} />
                   {claim.need_to_order_material && claim.material_details && (
@@ -261,7 +261,7 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
                   )}
                   {/* Reference # */}
                   <div>
-                    <p className="text-xs text-slate-400 font-medium uppercase mb-1">Reference #</p>
+                    <p className="text-xs text-muted-foreground font-medium uppercase mb-1">Reference #</p>
                     {refEditId === claim.id ? (
                       <div className="flex gap-2">
                         <Input
@@ -272,15 +272,15 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
                           onKeyDown={e => e.key === 'Enter' && handleSaveRef(claim)}
                           autoFocus
                         />
-                        <Button size="sm" onClick={() => handleSaveRef(claim)} className="h-8 bg-indigo-600 hover:bg-indigo-700">Save</Button>
+                        <Button size="sm" onClick={() => handleSaveRef(claim)} className="h-8 bg-info hover:bg-info">Save</Button>
                         <Button size="sm" variant="outline" onClick={() => setRefEditId(null)} className="h-8">Cancel</Button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <span className="text-slate-700 text-sm">{claim.reference_number || <span className="text-slate-400 italic">Not set</span>}</span>
+                        <span className="text-foreground text-sm">{claim.reference_number || <span className="text-muted-foreground italic">Not set</span>}</span>
                         <button
                           onClick={() => { setRefEditId(claim.id); setRefValue(claim.reference_number || ''); }}
-                          className="text-xs text-indigo-500 hover:text-indigo-700 underline"
+                          className="text-xs text-info hover:text-info underline"
                         >
                           {claim.reference_number ? 'Edit' : 'Add'}
                         </button>
@@ -289,14 +289,14 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
                   </div>
 
                   {/* Complete button in expanded view */}
-                  <div className="pt-2 border-t border-slate-100">
+                  <div className="pt-2 border-t border-border">
                     <Button
                       size="sm"
                       onClick={() => openCompleteModal(claim)}
                       disabled={completingId === claim.id}
                       className={claim.is_completed
-                        ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'
-                        : 'bg-green-600 hover:bg-green-700 text-white'
+                        ? 'bg-muted text-muted-foreground hover:bg-muted border border-border'
+                        : 'bg-good hover:bg-good text-white'
                       }
                     >
                       {completingId === claim.id
@@ -322,7 +322,7 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label className="text-xs text-slate-500 uppercase font-medium mb-1 block">Reference # <span className="text-slate-400">(optional)</span></Label>
+              <Label className="text-xs text-muted-foreground uppercase font-medium mb-1 block">Reference # <span className="text-muted-foreground">(optional)</span></Label>
               <Input
                 placeholder="Enter reference number..."
                 value={completeRef}
@@ -331,12 +331,12 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
               />
             </div>
             <div>
-              <Label className="text-xs text-slate-500 uppercase font-medium mb-1 block">ETA <span className="text-slate-400">(optional)</span></Label>
+              <Label className="text-xs text-muted-foreground uppercase font-medium mb-1 block">ETA <span className="text-muted-foreground">(optional)</span></Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className="flex items-center gap-2 w-full border border-input rounded-md px-3 h-9 text-sm text-left bg-white hover:bg-slate-50 transition-colors">
-                    <CalendarIcon className="w-4 h-4 text-slate-400" />
-                    {completeEta ? formatDate(completeEta, 'MMM d, yyyy') : <span className="text-slate-400">Pick a date...</span>}
+                  <button className="flex items-center gap-2 w-full border border-input rounded-md px-3 h-9 text-sm text-left bg-white hover:bg-muted transition-colors">
+                    <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                    {completeEta ? formatDate(completeEta, 'MMM d, yyyy') : <span className="text-muted-foreground">Pick a date...</span>}
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -354,7 +354,7 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
             <Button variant="outline" onClick={() => setCompleteModal(null)}>Cancel</Button>
             <Button
               onClick={() => handleDoComplete(completeModal.claim, completeRef, completeEta ? formatDate(completeEta, 'MMM d, yyyy') : '', true)}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-good hover:bg-good"
             >
               <CheckCircle2 className="w-4 h-4 mr-1" /> Complete & Send Email
             </Button>
@@ -369,12 +369,12 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
             <DialogTitle>Send Report</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <p className="text-sm text-slate-500">Select recipients:</p>
+            <p className="text-sm text-muted-foreground">Select recipients:</p>
             <div className="flex flex-wrap gap-2">
               {resendEmails.map(email => (
-                <span key={email} className="flex items-center gap-1 bg-indigo-50 text-indigo-700 text-xs px-2 py-1 rounded-full">
+                <span key={email} className="flex items-center gap-1 bg-info/12 text-info text-xs px-2 py-1 rounded-full">
                   {email}
-                  <button type="button" onClick={() => setResendEmails(prev => prev.filter(e => e !== email))} className="hover:text-red-500 transition-colors">
+                  <button type="button" onClick={() => setResendEmails(prev => prev.filter(e => e !== email))} className="hover:text-crit transition-colors">
                     <X className="w-3 h-3" />
                   </button>
                 </span>
@@ -396,7 +396,7 @@ export default function ProjectClaimsSection({ project, customer, sale, currentU
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResendModal(null)}>Cancel</Button>
-            <Button onClick={handleResendConfirm} disabled={!resendEmails.length} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleResendConfirm} disabled={!resendEmails.length} className="bg-info hover:bg-info">
               <Send className="w-4 h-4 mr-1" /> Send
             </Button>
           </DialogFooter>
@@ -420,15 +420,15 @@ function Row({ label, value, block, className }) {
   if (block) {
     return (
       <div className={className}>
-        <p className="text-xs text-slate-400 font-medium uppercase mb-0.5">{label}</p>
-        <p className="text-slate-700 whitespace-pre-wrap">{value}</p>
+        <p className="text-xs text-muted-foreground font-medium uppercase mb-0.5">{label}</p>
+        <p className="text-foreground whitespace-pre-wrap">{value}</p>
       </div>
     );
   }
   return (
     <div className={className}>
-      <p className="text-xs text-slate-400 font-medium uppercase mb-0.5">{label}</p>
-      <div className="text-slate-700">{value}</div>
+      <p className="text-xs text-muted-foreground font-medium uppercase mb-0.5">{label}</p>
+      <div className="text-foreground">{value}</div>
     </div>
   );
 }

@@ -35,13 +35,13 @@ export default function ImageDescriptionInput({ initialValue, onSave }) {
             e.target.blur();
           }
         }}
-        className="flex-1 text-xs text-slate-600 bg-transparent border-0 border-b border-slate-200 focus:border-indigo-400 focus:outline-none pb-1 placeholder:text-slate-300"
+        className="flex-1 text-xs text-muted-foreground bg-transparent border-0 border-b border-border focus:border-info focus:outline-none pb-1 placeholder:text-muted-foreground"
       />
       <button
         type="button"
         onClick={handleSave}
         disabled={saving}
-        className="text-xs text-indigo-500 hover:text-indigo-700 px-1 pb-1 flex-shrink-0 font-medium disabled:opacity-50"
+        className="text-xs text-info hover:text-info px-1 pb-1 flex-shrink-0 font-medium disabled:opacity-50"
       >
         {saving ? '...' : saved ? '✓' : 'Save'}
       </button>

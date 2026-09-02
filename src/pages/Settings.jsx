@@ -746,8 +746,8 @@ export default function Settings() {
                 )}
                 </div>
 
-                <div className="mt-4 p-4 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-500/10 dark:border-blue-500/25 space-y-3">
-                  <p className="font-semibold text-blue-900 dark:text-blue-200 flex items-center gap-2">
+                <div className="mt-4 p-4 rounded-lg border border-info/25 bg-info/12 space-y-3">
+                  <p className="font-semibold text-info flex items-center gap-2">
                     <DollarSign className="w-4 h-4" />
                     Ad Spend Spreadsheet
                   </p>
@@ -792,7 +792,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Phone className="w-5 h-5 text-amber-600" />
+                  <Phone className="w-5 h-5 text-warn" />
                   Past Due Projects — Daily SMS Alert
                 </CardTitle>
                 <CardDescription>
@@ -805,7 +805,7 @@ export default function Settings() {
                   {allTeamMembersForAlert.sort((a,b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)).map(member => (
                     <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       pastDueMemberIds.includes(member.id)
-                        ? 'bg-amber-50 border-amber-300 dark:bg-amber-500/15 dark:border-amber-500/30'
+                        ? 'bg-warn/12 border-warn/25'
                         : 'bg-card border-border hover:bg-secondary'
                     }`}>
                       <input
@@ -861,7 +861,7 @@ export default function Settings() {
                     }
                   }}
                   disabled={sendingPastDueAlert}
-                  className="border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10"
+                  className="border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10"
                 >
                   {sendingPastDueAlert ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
                   Send Now
@@ -884,7 +884,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Phone className="w-5 h-5 text-orange-600" />
+                  <Phone className="w-5 h-5 text-warn" />
                   Pending Cancellation — Daily SMS Alert
                 </CardTitle>
                 <CardDescription>
@@ -897,7 +897,7 @@ export default function Settings() {
                   {allTeamMembersForAlert.sort((a,b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)).map(member => (
                     <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       pendingCancellationMemberIds.includes(member.id)
-                        ? 'bg-orange-50 border-orange-300 dark:bg-orange-500/15 dark:border-orange-500/30'
+                        ? 'bg-warn/12 border-warn/25'
                         : 'bg-card border-border hover:bg-secondary'
                     }`}>
                       <input
@@ -952,7 +952,7 @@ export default function Settings() {
                     }
                   }}
                   disabled={sendingPendingCancellationAlert}
-                  className="border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-500/40 dark:text-orange-300 dark:hover:bg-orange-500/10"
+                  className="border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10"
                 >
                   {sendingPendingCancellationAlert ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
                   Send Now
@@ -975,7 +975,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-emerald-600" />
+                  <DollarSign className="w-5 h-5 text-good" />
                   Low Gross Profit — SMS Alert
                 </CardTitle>
                 <CardDescription>
@@ -1012,7 +1012,7 @@ export default function Settings() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {allTeamMembersForAlert.sort((a,b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)).map(member => (
                     <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                      gpAlertMemberIds.includes(member.id) ? 'bg-emerald-50 border-emerald-300 dark:bg-emerald-500/15 dark:border-emerald-500/30' : 'bg-card border-border hover:bg-secondary'
+                      gpAlertMemberIds.includes(member.id) ? 'bg-good/12 border-good/25' : 'bg-card border-border hover:bg-secondary'
                     }`}>
                       <input
                         type="checkbox"
@@ -1057,7 +1057,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Phone className="w-5 h-5 text-red-600" />
+                  <Phone className="w-5 h-5 text-crit" />
                   Unassigned DC — SMS Alert
                 </CardTitle>
                 <CardDescription>
@@ -1074,7 +1074,7 @@ export default function Settings() {
                   {allTeamMembersForAlert.sort((a,b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)).map(member => {
                     const selected = (formData.unassigned_dc_alert_phones || []).includes(member.id);
                     return (
-                      <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selected ? 'bg-red-50 border-red-300 dark:bg-red-500/15 dark:border-red-500/30' : 'bg-card border-border hover:bg-secondary'}`}>
+                      <label key={member.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selected ? 'bg-crit/12 border-crit/25' : 'bg-card border-border hover:bg-secondary'}`}>
                         <input
                           type="checkbox"
                           checked={selected}
@@ -1124,7 +1124,7 @@ export default function Settings() {
                       toast.error('Failed: ' + e.message);
                     }
                   }}
-                  className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-500/40 dark:text-red-300 dark:hover:bg-red-500/10"
+                  className="border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Test Send Now
@@ -1151,7 +1151,7 @@ export default function Settings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5 text-green-600" />
+                  <MessageSquare className="w-5 h-5 text-good" />
                   Inbound SMS Alert Emails
                 </CardTitle>
                 <CardDescription>
@@ -1254,8 +1254,8 @@ export default function Settings() {
                   />
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/25 rounded-lg p-3">
-                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                <div className="bg-info/12 border border-info/25 rounded-lg p-3">
+                  <p className="text-xs text-info">
                     <strong>Available Variables:</strong> {'{customer_name}'}, {'{sale_amount}'}, {'{consultant_name}'}, {'{appointment_date}'}, {'{location_address}'}, {'{sale_detail_url}'}
                   </p>
                 </div>

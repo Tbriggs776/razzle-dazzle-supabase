@@ -303,8 +303,8 @@ export default function AppointmentSettingChecklists() {
                   >
                     <div className={cn(
                       "group bg-card rounded-2xl border p-6 transition-all duration-300",
-                      checklist.checklist_status === 'not_finished' && 'border-amber-200 bg-amber-50/30 dark:border-amber-500/25 dark:bg-amber-500/10',
-                      checklist.checklist_status === 'not_qualified' && 'border-red-200 bg-red-50/30 dark:border-red-500/25 dark:bg-red-500/10',
+                      checklist.checklist_status === 'not_finished' && 'border-warn/25 bg-warn/12/30',
+                      checklist.checklist_status === 'not_qualified' && 'border-crit/25 bg-crit/12/30',
                       (!checklist.checklist_status || checklist.checklist_status === 'active') && 'border-border hover:border-primary/40 hover:shadow-lg'
                     )}>
                       <div className="flex items-start justify-between gap-4 mb-4">
@@ -322,12 +322,12 @@ export default function AppointmentSettingChecklists() {
                             <p className="text-xs text-primary mt-1">Booked by: {csr.first_name} {csr.last_name}</p>
                           )}
                           {checklist.checklist_status === 'not_finished' && (
-                            <Badge className="mt-2 bg-amber-100 text-amber-800 border-amber-200 border dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25">
+                            <Badge className="mt-2 bg-warn/12 text-warn border-warn/25 border">
                               <AlertTriangle className="w-3 h-3 mr-1" /> Not Finished
                             </Badge>
                           )}
                           {checklist.checklist_status === 'not_qualified' && (
-                            <Badge className="mt-2 bg-red-100 text-red-800 border-red-200 border dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
+                            <Badge className="mt-2 bg-crit/12 text-crit border-crit/25 border">
                               <XCircle className="w-3 h-3 mr-1" /> Not Qualified
                             </Badge>
                           )}
@@ -349,13 +349,13 @@ export default function AppointmentSettingChecklists() {
                               <DropdownMenuContent align="end">
                                 {checklist.checklist_status !== 'not_finished' && (
                                   <DropdownMenuItem onClick={() => { setStatusDialog({ checklist, newStatus: 'not_finished' }); setStatusReason(''); }}>
-                                    <AlertTriangle className="w-4 h-4 mr-2 text-amber-500" />
+                                    <AlertTriangle className="w-4 h-4 mr-2 text-warn" />
                                     Mark as Not Finished
                                   </DropdownMenuItem>
                                 )}
                                 {checklist.checklist_status !== 'not_qualified' && (
                                   <DropdownMenuItem onClick={() => { setStatusDialog({ checklist, newStatus: 'not_qualified' }); setStatusReason(''); }}>
-                                    <XCircle className="w-4 h-4 mr-2 text-red-500" />
+                                    <XCircle className="w-4 h-4 mr-2 text-crit" />
                                     Mark as Not Qualified
                                   </DropdownMenuItem>
                                 )}
@@ -388,7 +388,7 @@ export default function AppointmentSettingChecklists() {
                             <div
                               className={cn(
                                 "h-full transition-all duration-500",
-                                status.percentage === 100 ? "bg-green-500" : "bg-primary"
+                                status.percentage === 100 ? "bg-good" : "bg-primary"
                               )}
                               style={{ width: `${status.percentage}%` }}
                             />
@@ -405,7 +405,7 @@ export default function AppointmentSettingChecklists() {
                             className={cn(
                               'border',
                               checklist.appointmentData.status === 'Lead' && 'bg-secondary text-secondary-foreground border-border',
-                              checklist.appointmentData.status === 'Scheduled' && 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25'
+                              checklist.appointmentData.status === 'Scheduled' && 'bg-info/12 text-info border-info/25'
                             )}
                           >
                             {checklist.appointmentData.status}
@@ -440,7 +440,7 @@ export default function AppointmentSettingChecklists() {
                           
                           {/* Time to schedule */}
                           {timeToSchedule && (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25">
+                            <Badge variant="outline" className="bg-good/12 text-good border-good/25">
                               ⚡ {timeToSchedule}
                             </Badge>
                           )}
@@ -491,7 +491,7 @@ export default function AppointmentSettingChecklists() {
               <Button
                 onClick={() => updateStatusMutation.mutate({ id: statusDialog.checklist.id, checklist_status: statusDialog.newStatus, checklist_status_reason: statusReason })}
                 disabled={updateStatusMutation.isPending}
-                className={statusDialog?.newStatus === 'not_qualified' ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-500 hover:bg-amber-600'}
+                className={statusDialog?.newStatus === 'not_qualified' ? 'bg-crit hover:bg-crit' : 'bg-warn hover:bg-warn'}
               >
                 {updateStatusMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm'}
               </Button>

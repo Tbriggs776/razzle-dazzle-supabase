@@ -301,7 +301,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+          <Loader2 className="w-6 h-6 text-info animate-spin" />
         </CardContent>
       </Card>
     );
@@ -319,12 +319,12 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
               onClick={toggleAllSections}
               variant="outline"
               size="sm"
-              className="border-slate-200"
+              className="border-border"
             >
               {expandedItems.length > 0 ? 'Collapse All' : 'Expand All'}
             </Button>
             {(createMutation.isPending || updateMutation.isPending) && (
-              <div className="flex items-center gap-2 text-sm text-slate-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Saving...
               </div>
@@ -334,20 +334,20 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
         
         {/* Progress Bar */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm text-slate-600">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span className="font-medium">Progress</span>
             <span className="font-semibold">{status.percentage}%</span>
           </div>
-          <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-3 bg-muted rounded-full overflow-hidden">
             <div
               className={cn(
                 "h-full transition-all duration-500",
-                status.percentage === 100 ? "bg-green-500" : "bg-indigo-600"
+                status.percentage === 100 ? "bg-good" : "bg-info"
               )}
               style={{ width: `${status.percentage}%` }}
             />
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             {status.completed} of {status.total} sections completed
           </p>
         </div>
@@ -389,7 +389,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="contact" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-blue-600" />
+                <User className="w-5 h-5 text-info" />
                 <span className="font-semibold">Customer Contact Info</span>
               </div>
             </AccordionTrigger>
@@ -487,14 +487,14 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="property" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <Home className="w-5 h-5 text-green-600" />
+                <Home className="w-5 h-5 text-good" />
                 <span className="font-semibold">Property / Project Details</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label>Project Notes/Detailed Summary *</Label>
-                <p className="text-xs text-slate-500 mb-1">
+                <p className="text-xs text-muted-foreground mb-1">
                   Enter insights to set the DC up for success at the appointment (e.g., 60 months 0% interest was a massive factor, wife wears the pants so make sure to get her onboard, etc.)
                 </p>
                 <Textarea
@@ -528,11 +528,11 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
                   </SelectContent>
                 </Select>
                 {formData.home_built_era === 'On or before 1978' && (
-                  <div className="flex items-center gap-3 p-4 bg-red-50 border-2 border-red-500 rounded-lg mt-2">
+                  <div className="flex items-center gap-3 p-4 bg-crit/12 border-2 border-crit rounded-lg mt-2">
                     <span className="text-3xl">🛑</span>
                     <div>
-                      <p className="text-red-700 font-bold text-lg">STOP — On or Before 1978</p>
-                      <p className="text-red-600 text-sm font-medium">Asbestos risk — notify the DC and follow proper protocol before scheduling.</p>
+                      <p className="text-crit font-bold text-lg">STOP — On or Before 1978</p>
+                      <p className="text-crit text-sm font-medium">Asbestos risk — notify the DC and follow proper protocol before scheduling.</p>
                     </div>
                   </div>
                 )}
@@ -553,7 +553,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="reason" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <Wrench className="w-5 h-5 text-orange-600" />
+                <Wrench className="w-5 h-5 text-warn" />
                 <span className="font-semibold">Reason & Scope</span>
               </div>
             </AccordionTrigger>
@@ -640,7 +640,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="valueadds" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <Lightbulb className="w-5 h-5 text-yellow-600" />
+                <Lightbulb className="w-5 h-5 text-warn" />
                 <span className="font-semibold">Additional Options / Value Adds</span>
               </div>
             </AccordionTrigger>
@@ -720,7 +720,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="financing" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <DollarSign className="w-5 h-5 text-green-600" />
+                <DollarSign className="w-5 h-5 text-good" />
                 <span className="font-semibold">Incentives, Financing, Budget</span>
               </div>
             </AccordionTrigger>
@@ -836,7 +836,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="budget" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <BarChart3 className="w-5 h-5 text-indigo-600" />
+                <BarChart3 className="w-5 h-5 text-info" />
                 <span className="font-semibold">Budget & Project Minimums</span>
               </div>
             </AccordionTrigger>
@@ -849,12 +849,12 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
                   placeholder="$5,000"
                 />
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-info/12 border border-info/25 rounded-lg p-4">
                 <div className="flex items-start gap-2">
-                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <Info className="w-5 h-5 text-info flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-blue-900 mb-2">Project Minimums</p>
-                    <ul className="text-sm text-blue-800 space-y-1">
+                    <p className="font-semibold text-info mb-2">Project Minimums</p>
+                    <ul className="text-sm text-info space-y-1">
                       <li>• Carpet & Sheet Vinyl – $1500</li>
                       <li>• LVP & Laminate – $2500</li>
                       <li>• Hardwood & Tile – $3500</li>
@@ -869,13 +869,13 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="scheduling" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-red-600" />
+                <Calendar className="w-5 h-5 text-crit" />
                 <span className="font-semibold">Scheduling</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-4 pt-4">
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <p className="text-sm text-amber-900">
+              <div className="bg-warn/12 border border-warn/25 rounded-lg p-4">
+                <p className="text-sm text-warn">
                   <strong>Both Available Prompt:</strong> Ask if both parties can be present for the appointment if applicable.
                 </p>
               </div>
@@ -983,7 +983,7 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="verification" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                <CheckCircle2 className="w-5 h-5 text-good" />
                 <span className="font-semibold">Verification Step</span>
               </div>
             </AccordionTrigger>
@@ -1007,23 +1007,23 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="photos" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <Camera className="w-5 h-5 text-blue-600" />
+                <Camera className="w-5 h-5 text-info" />
                 <span className="font-semibold">Photos</span>
                 {(formData.photos || []).length > 0 && (
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{formData.photos.length}</span>
+                  <span className="text-xs bg-info/12 text-info px-2 py-0.5 rounded-full">{formData.photos.length}</span>
                 )}
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-4 pt-4">
               <div>
                 <label className={cn(
-                  "flex items-center justify-center gap-2 w-full h-12 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-colors",
+                  "flex items-center justify-center gap-2 w-full h-12 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-info hover:bg-info/12 transition-colors",
                   uploadingPhoto && "opacity-50 pointer-events-none"
                 )}>
                   {uploadingPhoto ? (
-                    <><Loader2 className="w-4 h-4 animate-spin text-indigo-600" /><span className="text-sm text-slate-600">Uploading...</span></>
+                    <><Loader2 className="w-4 h-4 animate-spin text-info" /><span className="text-sm text-muted-foreground">Uploading...</span></>
                   ) : (
-                    <><Camera className="w-4 h-4 text-slate-500" /><span className="text-sm text-slate-600">Add Photos</span></>
+                    <><Camera className="w-4 h-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">Add Photos</span></>
                   )}
                   <input type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} disabled={uploadingPhoto} />
                 </label>
@@ -1032,10 +1032,10 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {formData.photos.map((url, idx) => (
                     <div key={idx} className="relative group aspect-square">
-                      <SignedImage src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover rounded-lg border border-slate-200" />
+                      <SignedImage src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover rounded-lg border border-border" />
                       <button
                         onClick={() => handleRemovePhoto(idx)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-crit text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -1047,12 +1047,12 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           </AccordionItem>
 
           {/* Final Categories */}
-          <AccordionItem value="finalcategories" className="border-2 border-indigo-200 rounded-lg px-4 bg-indigo-50/30">
+          <AccordionItem value="finalcategories" className="border-2 border-info/25 rounded-lg px-4 bg-info/12/30">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-indigo-600" />
-                <span className="font-semibold text-indigo-800">Final Categories *</span>
-                <span className="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">Required</span>
+                <CheckCircle2 className="w-5 h-5 text-info" />
+                <span className="font-semibold text-info">Final Categories *</span>
+                <span className="text-xs bg-info/12 text-info px-2 py-0.5 rounded-full">Required</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-6 pt-4">
@@ -1068,8 +1068,8 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
                       className={cn(
                         'px-3 py-2 rounded-lg border text-sm font-medium transition-colors',
                         formData.home_size === option
-                          ? 'bg-indigo-600 text-white border-indigo-600'
-                          : 'bg-white text-slate-700 border-slate-300 hover:border-indigo-400'
+                          ? 'bg-info text-white border-info'
+                          : 'bg-white text-foreground border-border hover:border-info'
                       )}
                     >
                       {option}
@@ -1092,8 +1092,8 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
                         className={cn(
                           'px-3 py-2 rounded-lg border text-sm font-medium transition-colors',
                           selected
-                            ? 'bg-indigo-600 text-white border-indigo-600'
-                            : 'bg-white text-slate-700 border-slate-300 hover:border-indigo-400'
+                            ? 'bg-info text-white border-info'
+                            : 'bg-white text-foreground border-border hover:border-info'
                         )}
                       >
                         {option}
@@ -1115,8 +1115,8 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
                       className={cn(
                         'px-3 py-2 rounded-lg border text-sm font-medium transition-colors',
                         formData.budget_range === option
-                          ? 'bg-indigo-600 text-white border-indigo-600'
-                          : 'bg-white text-slate-700 border-slate-300 hover:border-indigo-400'
+                          ? 'bg-info text-white border-info'
+                          : 'bg-white text-foreground border-border hover:border-info'
                       )}
                     >
                       {option}
@@ -1131,16 +1131,16 @@ export default function ChecklistPanel({ checklistId, appointmentId, onChecklist
           <AccordionItem value="outro" className="border rounded-lg px-4">
             <AccordionTrigger className="hover:no-underline">
               <div className="flex items-center gap-3">
-                <Info className="w-5 h-5 text-slate-600" />
+                <Info className="w-5 h-5 text-muted-foreground" />
                 <span className="font-semibold">Outro</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-4 pt-4">
-              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
-                <p className="text-sm text-slate-700">
+              <div className="bg-muted border border-border rounded-lg p-4 space-y-3">
+                <p className="text-sm text-foreground">
                   <strong>Outro Script:</strong> Thank the customer for their time and confirm they've received the appointment confirmation.
                 </p>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-foreground">
                   <strong>Visualizer Tool Note:</strong> Remind customer about the online visualizer tool to explore flooring options before the appointment.
                 </p>
               </div>

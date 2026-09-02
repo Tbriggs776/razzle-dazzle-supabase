@@ -34,16 +34,16 @@ export default function ProjectProgressTracker({ project, projectLogs = [] }) {
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 border border-slate-100">
-      <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider text-center mb-8">
+    <div className="bg-white rounded-xl p-6 border border-border">
+      <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-center mb-8">
         Project Progress
       </h2>
       <div className="overflow-x-auto">
       <div className="relative min-w-[520px]">
         {/* Progress Line */}
-        <div className="absolute top-5 left-0 right-0 h-1 bg-slate-200">
+        <div className="absolute top-5 left-0 right-0 h-1 bg-muted">
           <div
-            className="h-full bg-indigo-600 transition-all duration-500"
+            className="h-full bg-info transition-all duration-500"
             style={{ width: `${(currentStepIndex / (statusSteps.length - 1)) * 115}%` }}
           />
         </div>
@@ -60,32 +60,32 @@ export default function ProjectProgressTracker({ project, projectLogs = [] }) {
               <div key={step} className="flex flex-col items-center" style={{ width: `${100 / statusSteps.length}%` }}>
                 <div className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-4 border-white",
-                  isCompleted || isCurrent ? "bg-indigo-600" : "bg-slate-200"
+                  isCompleted || isCurrent ? "bg-info" : "bg-muted"
                 )}>
                   {isCompleted || isCurrent ? (
                     <CheckCircle2 className="w-5 h-5 text-white" />
                   ) : (
-                    <Circle className="w-5 h-5 text-slate-400" />
+                    <Circle className="w-5 h-5 text-muted-foreground" />
                   )}
                 </div>
                 <p className={cn(
                   "mt-3 text-xs font-medium text-center px-1",
-                  isCurrent ? "text-indigo-600" : isCompleted ? "text-slate-700" : "text-slate-400"
+                  isCurrent ? "text-info" : isCompleted ? "text-foreground" : "text-muted-foreground"
                 )}>
                   {step}
                 </p>
                 {timestamp && (
-                  <p className="mt-0.5 text-[10px] text-slate-400 text-center px-1 leading-tight">
+                  <p className="mt-0.5 text-[10px] text-muted-foreground text-center px-1 leading-tight">
                     {format(timestamp, 'M/d/yy h:mm a')}
                   </p>
                 )}
                 {isScheduled && project.installation_date && (
                   <div className="mt-1 text-center">
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       {format(new Date(project.installation_date + 'T00:00:00'), 'MMM d')}
                     </p>
                     {project.installation_date_status && (
-                      <p className="text-xs text-red-600 font-medium mt-0.5">
+                      <p className="text-xs text-crit font-medium mt-0.5">
                         {project.installation_date_status}
                       </p>
                     )}

@@ -16,9 +16,9 @@ function Toggle({ on, onClick, label }) {
 
 const STATUS = {
   not_configured: { label: 'Not configured', cls: 'bg-secondary text-muted-foreground border-border' },
-  configured: { label: 'Configured, untested', cls: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25' },
-  verified: { label: 'Verified', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25' },
-  error: { label: 'Error', cls: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25' },
+  configured: { label: 'Configured, untested', cls: 'bg-warn/12 text-warn border-warn/25' },
+  verified: { label: 'Verified', cls: 'bg-good/12 text-good border-good/25' },
+  error: { label: 'Error', cls: 'bg-crit/12 text-crit border-crit/25' },
   disabled: { label: 'Disabled', cls: 'bg-secondary text-muted-foreground border-border' },
 };
 
@@ -141,13 +141,13 @@ function IntegrationCard({ integ, onChanged }) {
       </div>
 
       {msg && (
-        <div className={`mt-4 text-sm flex items-start gap-2 rounded-lg px-3 py-2 border ${msg.ok ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25'}`}>
+        <div className={`mt-4 text-sm flex items-start gap-2 rounded-lg px-3 py-2 border ${msg.ok ? 'bg-good/12 text-good border-good/25' : 'bg-crit/12 text-crit border-crit/25'}`}>
           {msg.ok ? <Check className="w-4 h-4 mt-0.5 shrink-0" /> : <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />}
           <span>{msg.text}</span>
         </div>
       )}
       {!msg && integ.status === 'error' && integ.last_error && (
-        <div className="mt-4 text-sm flex items-start gap-2 rounded-lg px-3 py-2 border bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
+        <div className="mt-4 text-sm flex items-start gap-2 rounded-lg px-3 py-2 border bg-crit/12 text-crit border-crit/25">
           <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /><span>{integ.last_error}</span>
         </div>
       )}
@@ -195,7 +195,7 @@ function EsignTypeCard({ t }) {
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex items-center gap-2.5">
           <h3 className="text-lg font-bold text-foreground">{t.label}</h3>
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${enabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25' : 'bg-secondary text-muted-foreground border-border'}`}>{enabled ? 'E-sign on' : 'E-sign off'}</span>
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${enabled ? 'bg-good/12 text-good border-good/25' : 'bg-secondary text-muted-foreground border-border'}`}>{enabled ? 'E-sign on' : 'E-sign off'}</span>
         </div>
         <Toggle on={enabled} onClick={() => setEnabled((v) => !v)} label="Require e-signature" />
       </div>
@@ -217,7 +217,7 @@ function EsignTypeCard({ t }) {
         </div>
       </div>
       {msg && (
-        <div className={`mt-4 text-sm flex items-center gap-2 rounded-lg px-3 py-2 border ${msg.ok ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25'}`}>
+        <div className={`mt-4 text-sm flex items-center gap-2 rounded-lg px-3 py-2 border ${msg.ok ? 'bg-good/12 text-good border-good/25' : 'bg-crit/12 text-crit border-crit/25'}`}>
           {msg.ok ? <Check className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}<span>{msg.text}</span>
         </div>
       )}
@@ -247,7 +247,7 @@ function EsignSettings() {
           <p className="text-muted-foreground mt-0.5">Choose which documents require a signature, and how signers verify their identity.</p>
         </div>
       </div>
-      {error ? <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">{error}</div>
+      {error ? <div className="bg-crit/12 border border-crit/25 text-crit rounded-lg px-4 py-3 text-sm">{error}</div>
         : !types ? <div className="flex justify-center py-10"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
         : <div className="space-y-5">{types.map((t) => <EsignTypeCard key={t.document_type} t={t} />)}</div>}
     </div>
@@ -283,7 +283,7 @@ export default function Integrations() {
             </div>
           </div>
           <div className="mt-4 flex items-start gap-2 text-sm text-muted-foreground bg-card border border-border rounded-lg px-4 py-3">
-            <ShieldCheck className="w-4 h-4 mt-0.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <ShieldCheck className="w-4 h-4 mt-0.5 text-good shrink-0" />
             <span>Secrets are encrypted in Supabase Vault and are never shown back in the browser. Enter a key, click <b>Save</b>, then <b>Test connection</b> to verify it works.</span>
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function Integrations() {
         {loading ? (
           <div className="flex justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /></div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">{error}</div>
+          <div className="bg-crit/12 border border-crit/25 text-crit rounded-lg px-4 py-3 text-sm">{error}</div>
         ) : (
           // Grouped by category. Flat was fine at eight providers; at thirteen the
           // telephony and advertising credentials are impossible to find in one

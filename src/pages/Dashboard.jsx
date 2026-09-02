@@ -420,7 +420,7 @@ export default function Dashboard() {
         <section>
           <SectionHeader title="Install Balance" />
           <div className="border border-border rounded-xl p-5 flex items-start gap-4 bg-card">
-            <span className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${inBalance ? 'bg-brand-navy text-white' : backlogged ? 'bg-brand-pink text-white' : 'bg-amber-500 text-white'}`}>
+            <span className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${inBalance ? 'bg-brand-navy text-white' : backlogged ? 'bg-brand-pink text-white' : 'bg-warn text-white'}`}>
               {inBalance ? 'In Balance' : backlogged ? 'Backlogged' : 'Surplus Capacity'}
             </span>
             <p className="text-sm text-foreground mt-0.5">

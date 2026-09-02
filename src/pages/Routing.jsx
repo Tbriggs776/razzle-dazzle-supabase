@@ -122,14 +122,14 @@ export default function Routing() {
 
         {/* The honest banner: while this is true, one person gets everything. */}
         {unstaffed.length > 0 && (
-          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/10">
+          <div className="rounded-xl border border-warn/25 bg-warn/12 p-4">
             <div className="flex items-start gap-3">
-              <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+              <TriangleAlert className="mt-0.5 h-5 w-5 shrink-0 text-warn" />
               <div>
-                <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                <p className="text-sm font-semibold text-warn">
                   {unstaffed.length} of the workflow rules have no staffed department
                 </p>
-                <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-300/90">
+                <p className="mt-0.5 text-xs text-warn">
                   Work still gets assigned — it falls back to org admins so nothing is lost. But until
                   a department has members, one person receives the whole company's work. Adding people
                   below is the fix, and it is not a code change.
@@ -198,7 +198,7 @@ export default function Routing() {
                         onClick={() => setMember.mutate({
                           dept: d.key, userId: r.user_id, isMember: true, isOnCall: !r.is_on_call,
                         })}>
-                        <Radio className={cn('h-3.5 w-3.5', r.is_on_call && 'text-emerald-600')} />
+                        <Radio className={cn('h-3.5 w-3.5', r.is_on_call && 'text-good')} />
                       </Button>
                       <Button size="sm" variant="ghost" disabled={setMember.isPending && setMember.variables?.userId === r.user_id}
                         title="Lead receives escalations"
@@ -253,10 +253,10 @@ export default function Routing() {
         )}
 
         {!healthLoading && unstaffed.length === 0 && noLogin.length === 0 && (
-          <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+          <div className="rounded-xl border border-good/25 bg-good/12 p-4">
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              <p className="text-sm text-emerald-900 dark:text-emerald-200">
+              <CheckCircle2 className="h-5 w-5 text-good" />
+              <p className="text-sm text-good">
                 Every rule has a staffed department and everyone on the roster can be reached.
               </p>
             </div>

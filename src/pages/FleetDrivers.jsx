@@ -10,9 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Users, Loader2, Pencil, Trash2, Phone, Mail, UserPlus } from 'lucide-react';
 
 const statusColors = {
-  active: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
+  active: 'bg-good/12 text-good border-good/25',
   inactive: 'bg-secondary text-secondary-foreground border-border',
-  on_leave: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25'
+  on_leave: 'bg-warn/12 text-warn border-warn/25'
 };
 
 const EMPTY = { first_name: '', last_name: '', phone: '', email: '', license_number: '', status: 'active', notes: '' };

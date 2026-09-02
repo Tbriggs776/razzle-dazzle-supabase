@@ -82,7 +82,7 @@ export function CameraCapture({ onCapture, label }) {
                   <X className="w-4 h-4 mr-2" />
                   Cancel
                 </Button>
-                <Button onClick={capture} className="bg-indigo-600 hover:bg-indigo-700">
+                <Button onClick={capture} className="bg-info hover:bg-info">
                   <Camera className="w-4 h-4 mr-2" />
                   Capture
                 </Button>
@@ -93,7 +93,7 @@ export function CameraCapture({ onCapture, label }) {
                   <RotateCw className="w-4 h-4 mr-2" />
                   Retake
                 </Button>
-                <Button onClick={confirm} className="bg-green-600 hover:bg-green-700">
+                <Button onClick={confirm} className="bg-good hover:bg-good">
                   <Check className="w-4 h-4 mr-2" />
                   Use Photo
                 </Button>

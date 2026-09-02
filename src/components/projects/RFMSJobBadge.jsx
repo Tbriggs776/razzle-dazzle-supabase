@@ -34,16 +34,16 @@ export default function RFMSJobBadge({ invoiceNumber }) {
   return (
     <div className="flex flex-wrap gap-2 mt-2">
       {jobs.map((job) => (
-        <div key={job.jobId} className="flex items-center gap-3 text-xs bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1.5">
+        <div key={job.jobId} className="flex items-center gap-3 text-xs bg-info/12 border border-indigo-100 rounded-lg px-3 py-1.5">
           {job.crewName && (
-            <span className="flex items-center gap-1 text-indigo-700 font-medium">
+            <span className="flex items-center gap-1 text-info font-medium">
               <Users className="w-3 h-3" />
               {job.crewName}
             </span>
           )}
           {(job.scheduledStart || job.scheduledEnd) && (
-            <span className="flex items-center gap-1 text-slate-600">
-              <CalendarIcon className="w-3 h-3 text-indigo-400" />
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <CalendarIcon className="w-3 h-3 text-info" />
               {parseDate(job.scheduledStart)}
               {job.scheduledEnd && job.scheduledEnd !== job.scheduledStart && (
                 <> – {parseDate(job.scheduledEnd)}</>
@@ -51,7 +51,7 @@ export default function RFMSJobBadge({ invoiceNumber }) {
             </span>
           )}
           {job.jobStatus && (
-            <span className="text-indigo-500">{job.jobStatus}</span>
+            <span className="text-info">{job.jobStatus}</span>
           )}
         </div>
       ))}

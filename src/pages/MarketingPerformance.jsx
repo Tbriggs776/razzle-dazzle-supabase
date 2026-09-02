@@ -543,7 +543,7 @@ export default function MarketingPerformance() {
               <p className="text-xs text-muted-foreground mt-2">
                 Expected format: one row per day, first column = date, remaining columns = ad platform spend.
                 Monthly TV, Grass Roots & Print Media actuals are read automatically from the <strong>"OtherChannels"</strong> tab in this same spreadsheet.
-                {!spreadsheetId && <span className="text-amber-600 font-medium"> No spreadsheet connected yet.</span>}
+                {!spreadsheetId && <span className="text-warn font-medium"> No spreadsheet connected yet.</span>}
               </p>
             </div>
           )}
@@ -576,9 +576,9 @@ export default function MarketingPerformance() {
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         ) : adSpendError ? (
-          <div className="p-6 bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/25 rounded-xl">
-            <p className="text-sm font-medium text-red-700 dark:text-red-300">Error loading ad spend data:</p>
-            <p className="text-sm text-red-600 dark:text-red-400 mt-1">{adSpendError}</p>
+          <div className="p-6 bg-crit/12 border border-crit/25 rounded-xl">
+            <p className="text-sm font-medium text-crit">Error loading ad spend data:</p>
+            <p className="text-sm text-crit mt-1">{adSpendError}</p>
             <button onClick={loadAdSpend} className="mt-3 px-3 py-1.5 text-sm bg-destructive text-destructive-foreground rounded-lg hover:opacity-90 transition-opacity">
               Retry
             </button>
@@ -639,7 +639,7 @@ export default function MarketingPerformance() {
                   <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Cancelled Appts</span>
                   <CalendarDays className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-3xl font-black text-red-500">{summary.totalCancelledAppts}</p>
+                <p className="text-3xl font-black text-crit">{summary.totalCancelledAppts}</p>
                 <p className="text-xs text-muted-foreground mt-1">{summary.totalAppointments + summary.totalCancelledAppts > 0 ? ((summary.totalCancelledAppts / (summary.totalAppointments + summary.totalCancelledAppts)) * 100).toFixed(1) : 0}% cancel rate</p>
               </div>
 
@@ -666,7 +666,7 @@ export default function MarketingPerformance() {
                   <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Total Sale Revenue</span>
                   <DollarSign className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-3xl font-black text-emerald-600">{fmtMoney(summary.totalSalesRevenue)}</p>
+                <p className="text-3xl font-black text-good">{fmtMoney(summary.totalSalesRevenue)}</p>
                 <p className="text-xs text-muted-foreground mt-1">{summary.totalSales} sales · {fmtMoney2(summary.avgCPS)} cost/sale</p>
               </div>
 
@@ -675,7 +675,7 @@ export default function MarketingPerformance() {
                   <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Avg Cost / Sale</span>
                   <Target className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-3xl font-black text-amber-600">{fmtMoney2(summary.avgCPS)}</p>
+                <p className="text-3xl font-black text-warn">{fmtMoney2(summary.avgCPS)}</p>
                 <p className="text-xs text-muted-foreground mt-1">across {summary.daysWithData} days</p>
               </div>
             </div>
@@ -701,8 +701,8 @@ export default function MarketingPerformance() {
                     <span className="font-medium text-muted-foreground">{leadsTrend.avgSecondHalf}</span>
                   </div>
                   <div className={`flex items-center gap-1 px-2 py-1 rounded-full font-bold ${
-                    leadsTrend.trendDir === 'up' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300' :
-                    leadsTrend.trendDir === 'down' ? 'bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300' : 'bg-secondary text-muted-foreground'
+                    leadsTrend.trendDir === 'up' ? 'bg-good/12 text-good' :
+                    leadsTrend.trendDir === 'down' ? 'bg-crit/12 text-crit' : 'bg-secondary text-muted-foreground'
                   }`}>
                     {leadsTrend.trendDir === 'up' && <TrendingUp className="w-3.5 h-3.5" />}
                     {leadsTrend.trendDir === 'down' && <TrendingDown className="w-3.5 h-3.5" />}
@@ -840,7 +840,7 @@ export default function MarketingPerformance() {
                             <td className="px-4 py-3 text-right font-semibold text-foreground">{m.totalSpend > 0 ? `$${m.totalSpend.toLocaleString()}` : '—'}</td>
                             <td className="px-4 py-3 text-right text-muted-foreground">{m.leads}</td>
                             <td className="px-4 py-3 text-right text-muted-foreground">{m.appointments}</td>
-                            <td className="px-4 py-3 text-right text-red-500">{m.cancelled}</td>
+                            <td className="px-4 py-3 text-right text-crit">{m.cancelled}</td>
                             <td className="px-4 py-3 text-right text-muted-foreground">{m.sales}</td>
                             <td className="px-4 py-3 text-right font-bold" style={{ color: '#16803c' }}>{m.salesRevenue > 0 ? `$${m.salesRevenue.toLocaleString()}` : '—'}</td>
                             <td className="px-4 py-3 text-right font-bold" style={{ color: '#5d3fd3' }}>{m.leads > 0 ? `$${cpl.toFixed(2)}` : '—'}</td>
@@ -893,12 +893,12 @@ export default function MarketingPerformance() {
                         <td className="px-4 py-3 text-right font-semibold text-foreground">{d.spend > 0 ? `$${d.spend.toLocaleString()}` : '—'}</td>
                         <td className="px-4 py-3 text-right text-muted-foreground">{d.leads}</td>
                         <td className="px-4 py-3 text-right text-muted-foreground">{d.appointments}</td>
-                        <td className="px-4 py-3 text-right text-red-500">{d.cancelledAppts}</td>
+                        <td className="px-4 py-3 text-right text-crit">{d.cancelledAppts}</td>
                         <td className="px-4 py-3 text-right text-muted-foreground">{d.sales}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-emerald-600">{d.salesRevenue > 0 ? `$${d.salesRevenue.toLocaleString()}` : '—'}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-good">{d.salesRevenue > 0 ? `$${d.salesRevenue.toLocaleString()}` : '—'}</td>
                         <td className="px-4 py-3 text-right font-semibold text-primary">{d.leads > 0 ? `$${d.cpl.toFixed(2)}` : '—'}</td>
                         <td className="px-4 py-3 text-right font-semibold text-cyan-600">{d.appointments > 0 ? `$${d.cpa.toFixed(2)}` : '—'}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-amber-600">{d.sales > 0 ? `$${d.cps.toFixed(2)}` : '—'}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-warn">{d.sales > 0 ? `$${d.cps.toFixed(2)}` : '—'}</td>
                         <td className="px-4 py-3 text-right font-semibold text-purple-600">{d.spend > 0 ? (d.salesRevenue / d.spend).toFixed(2) : '—'}</td>
                       </tr>
                     ))}

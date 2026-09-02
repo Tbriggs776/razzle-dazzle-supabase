@@ -149,25 +149,25 @@ export default function AudioRecorder({ appointmentId, onUploadComplete }) {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 max-w-[calc(100vw-3rem)]">
-      <div className="bg-white rounded-2xl shadow-2xl border-2 border-indigo-200 p-4 sm:p-6 w-full sm:w-80">
+      <div className="bg-white rounded-2xl shadow-2xl border-2 border-info/25 p-4 sm:p-6 w-full sm:w-80">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <div className={cn(
               "w-3 h-3 rounded-full",
-              isRecording && !isPaused ? "bg-red-500 animate-pulse" : "bg-slate-300"
+              isRecording && !isPaused ? "bg-crit animate-pulse" : "bg-slate-300"
             )} />
-            <span className="text-sm font-semibold text-slate-800">Audio Recording</span>
+            <span className="text-sm font-semibold text-foreground">Audio Recording</span>
           </div>
           {uploadSuccess && (
-            <CheckCircle2 className="w-5 h-5 text-green-600" />
+            <CheckCircle2 className="w-5 h-5 text-good" />
           )}
         </div>
 
         <div className="text-center mb-4">
-          <div className="text-3xl font-mono font-bold text-slate-800">
+          <div className="text-3xl font-mono font-bold text-foreground">
             {formatTime(recordedTime)}
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {isRecording && !isPaused ? 'Recording...' : isPaused ? 'Paused' : audioBlob ? 'Ready to upload' : 'Not recording'}
           </p>
         </div>
@@ -176,7 +176,7 @@ export default function AudioRecorder({ appointmentId, onUploadComplete }) {
           {!isRecording && !audioBlob && (
             <Button
               onClick={startRecording}
-              className="flex-1 bg-red-600 hover:bg-red-700"
+              className="flex-1 bg-crit hover:bg-crit"
             >
               <Mic className="w-4 h-4 mr-2" />
               Start
@@ -207,7 +207,7 @@ export default function AudioRecorder({ appointmentId, onUploadComplete }) {
             <>
               <Button
                 onClick={resumeRecording}
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-good hover:bg-good"
               >
                 <Play className="w-4 h-4 mr-2" />
                 Resume
@@ -237,7 +237,7 @@ export default function AudioRecorder({ appointmentId, onUploadComplete }) {
               </Button>
               <Button
                 onClick={uploadRecording}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700"
+                className="flex-1 bg-info hover:bg-info"
               >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload
@@ -247,7 +247,7 @@ export default function AudioRecorder({ appointmentId, onUploadComplete }) {
 
           {uploadSuccess && (
             <Button disabled className="flex-1">
-              <CheckCircle2 className="w-4 h-4 mr-2 text-green-600" />
+              <CheckCircle2 className="w-4 h-4 mr-2 text-good" />
               Upload queued for analysis
             </Button>
           )}

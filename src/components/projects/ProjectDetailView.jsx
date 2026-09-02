@@ -23,12 +23,12 @@ import { cn } from '@/lib/utils';
 import PhotoLightbox from '@/components/PhotoLightbox';
 
 const statusColors = {
-  'Accepted': 'bg-blue-100 text-blue-800 border-blue-200',
+  'Accepted': 'bg-info/12 text-info border-info/25',
   'Materials Ordered': 'bg-purple-100 text-purple-800 border-purple-200',
-  'Scheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'In Progress': 'bg-orange-100 text-orange-800 border-orange-200',
-  'Quality Checks': 'bg-indigo-100 text-indigo-800 border-indigo-200',
-  'Completed': 'bg-green-100 text-green-800 border-green-200'
+  'Scheduled': 'bg-warn/12 text-warn border-warn/25',
+  'In Progress': 'bg-warn/12 text-warn border-warn/25',
+  'Quality Checks': 'bg-info/12 text-info border-info/25',
+  'Completed': 'bg-good/12 text-good border-good/25'
 };
 
 const statusSteps = [
@@ -98,14 +98,14 @@ export default function ProjectDetailView({
   // Get latest customer experience action
   const getLatestCustomerExperience = () => {
     const actions = [
-      { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-      { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', color: 'bg-green-100 text-green-800 border-green-200' },
-      { date: project.check_in_attempted_date, label: 'Check-In Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-      { date: project.check_in_completed_date, label: 'Check-In Completed', color: 'bg-green-100 text-green-800 border-green-200' },
-      { date: project.pre_install_call_attempted_date, label: 'Pre-Install Call Attempted', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-      { date: project.pre_install_call_completed_date, label: 'Pre-Install Call Completed', color: 'bg-green-100 text-green-800 border-green-200' },
-      { date: project.qa_in_progress_date, label: 'QA In Progress', color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
-      { date: project.qa_completed_date, label: 'QA Completed', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' }
+      { date: project.welcome_call_attempted_date, label: 'Welcome Call Attempted', color: 'bg-info/12 text-info border-info/25' },
+      { date: project.welcome_call_completed_date, label: 'Welcome Call Completed', color: 'bg-good/12 text-good border-good/25' },
+      { date: project.check_in_attempted_date, label: 'Check-In Attempted', color: 'bg-info/12 text-info border-info/25' },
+      { date: project.check_in_completed_date, label: 'Check-In Completed', color: 'bg-good/12 text-good border-good/25' },
+      { date: project.pre_install_call_attempted_date, label: 'Pre-Install Call Attempted', color: 'bg-info/12 text-info border-info/25' },
+      { date: project.pre_install_call_completed_date, label: 'Pre-Install Call Completed', color: 'bg-good/12 text-good border-good/25' },
+      { date: project.qa_in_progress_date, label: 'QA In Progress', color: 'bg-info/12 text-info border-info/25' },
+      { date: project.qa_completed_date, label: 'QA Completed', color: 'bg-good/12 text-good border-good/25' }
     ].filter(a => a.date);
     
     if (actions.length === 0) return null;
@@ -268,13 +268,13 @@ export default function ProjectDetailView({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-muted">
       {/* Header */}
-      <div className="bg-white border-b border-slate-100">
+      <div className="bg-white border-b border-border">
         <div className="max-w-4xl mx-auto px-6 py-6">
           <Link
             to={createPageUrl('Projects')}
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Projects
@@ -291,9 +291,9 @@ export default function ProjectDetailView({
             </div>
 
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-slate-800 tracking-tight">{customerName}</h1>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">{customerName}</h1>
               {project.created_date && (
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Project created: {format(new Date(project.created_date), 'MMMM d, yyyy h:mm a')}
                 </p>
               )}
@@ -302,7 +302,7 @@ export default function ProjectDetailView({
                   {project.status}
                 </Badge>
                 {project.installation_date_status && (
-                  <Badge className="border text-lg px-4 py-1 bg-red-100 text-red-800 border-red-200">
+                  <Badge className="border text-lg px-4 py-1 bg-crit/12 text-crit border-crit/25">
                     {project.installation_date_status}
                   </Badge>
                 )}
@@ -328,7 +328,7 @@ export default function ProjectDetailView({
                 <Button
                   onClick={onEditClick}
                   variant="outline"
-                  className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                  className="border-info/25 text-info hover:bg-info/12"
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Project
@@ -336,7 +336,7 @@ export default function ProjectDetailView({
                 <Button
                   onClick={onDeleteClick}
                   variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50"
+                  className="border-crit/25 text-crit hover:bg-crit/12"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
@@ -345,15 +345,15 @@ export default function ProjectDetailView({
             </div>
 
             {/* Progress Tracker */}
-            <div className="bg-white rounded-xl p-6 border border-slate-100">
-              <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider text-center mb-8">
+            <div className="bg-white rounded-xl p-6 border border-border">
+              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider text-center mb-8">
                 Project Progress
               </h2>
               <div className="relative">
                 {/* Progress Line */}
-                <div className="absolute top-5 left-0 right-0 h-1 bg-slate-200">
+                <div className="absolute top-5 left-0 right-0 h-1 bg-muted">
                   <div 
-                    className="h-full bg-indigo-600 transition-all duration-500"
+                    className="h-full bg-info transition-all duration-500"
                     style={{ width: `${(currentStepIndex / (statusSteps.length - 1)) * 115}%` }}
                   />
                 </div>
@@ -369,27 +369,27 @@ export default function ProjectDetailView({
                       <div key={step} className="flex flex-col items-center" style={{ width: `${100 / statusSteps.length}%` }}>
                         <div className={cn(
                           "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-4 border-white",
-                          isCompleted || isCurrent ? "bg-indigo-600" : "bg-slate-200"
+                          isCompleted || isCurrent ? "bg-info" : "bg-muted"
                         )}>
                           {isCompleted || isCurrent ? (
                             <CheckCircle2 className="w-5 h-5 text-white" />
                           ) : (
-                            <Circle className="w-5 h-5 text-slate-400" />
+                            <Circle className="w-5 h-5 text-muted-foreground" />
                           )}
                         </div>
                         <p className={cn(
                           "mt-3 text-xs font-medium text-center px-1",
-                          isCurrent ? "text-indigo-600" : isCompleted ? "text-slate-700" : "text-slate-400"
+                          isCurrent ? "text-info" : isCompleted ? "text-foreground" : "text-muted-foreground"
                         )}>
                           {step}
                         </p>
                         {isScheduled && project.installation_date && (
                           <div className="mt-1">
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-muted-foreground">
                               {format(new Date(project.installation_date + 'T00:00:00'), 'MMM d')}
                             </p>
                             {project.installation_date_status && (
-                              <p className="text-xs text-red-600 font-medium mt-0.5">
+                              <p className="text-xs text-crit font-medium mt-0.5">
                                 {project.installation_date_status}
                               </p>
                             )}
@@ -404,18 +404,18 @@ export default function ProjectDetailView({
 
             {/* Admin Quick Copy Block */}
             {currentUser?.role === 'admin' && daysSinceCleared >= 3 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <div className="bg-warn/12 border border-warn/25 rounded-xl p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1">
-                    <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-1">Quick Copy — {daysSinceCleared} days in status</p>
-                    <p className="text-sm font-mono text-slate-700 break-all">
+                    <p className="text-xs font-semibold text-warn uppercase tracking-wider mb-1">Quick Copy — {daysSinceCleared} days in status</p>
+                    <p className="text-sm font-mono text-foreground break-all">
                       Job: {customerName} | CG#: {sale?.invoice_number || 'N/A'} | Created: {project.created_date ? format(new Date(project.created_date), 'MM/dd/yyyy') : 'N/A'} | Status: {project.installation_date_status || project.status} | Days: {daysSinceCleared}
                     </p>
                   </div>
                   <Button
                     onClick={() => handleCopyJobInfo(sale)}
                     variant="outline"
-                    className="border-amber-300 text-amber-700 hover:bg-amber-100 flex-shrink-0"
+                    className="border-warn/25 text-warn hover:bg-warn/12 flex-shrink-0"
                   >
                     <Copy className="w-4 h-4 mr-2" />
                     {copied ? 'Copied!' : 'Copy'}

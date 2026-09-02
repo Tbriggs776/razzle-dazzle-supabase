@@ -51,7 +51,7 @@ export default function OrderProcessorTools({
         <Button
           onClick={onSetInstallationClick}
           variant="outline"
-          className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
+          className="w-full border-info/25 text-info hover:bg-info/12"
         >
           <CalendarIcon className="w-4 h-4 mr-2" />
           Set Installation Date
@@ -61,7 +61,7 @@ export default function OrderProcessorTools({
         <Button
           onClick={onRescheduleClick}
           variant="outline"
-          className="w-full border-yellow-200 text-yellow-600 hover:bg-yellow-50"
+          className="w-full border-warn/25 text-warn hover:bg-warn/12"
         >
           <Clock className="w-4 h-4 mr-2" />
           Reschedule Installation
@@ -71,7 +71,7 @@ export default function OrderProcessorTools({
         <Button
           onClick={() => openSignedFile(sale.contract_file_url)}
           variant="outline"
-          className="w-full border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+          className="w-full border-info/25 text-info hover:bg-info/12"
         >
           <Download className="w-4 h-4 mr-2" />
           Download Contract
@@ -94,8 +94,8 @@ export default function OrderProcessorTools({
 
       {/* Installation Status Buttons */}
       {project.installation_date && (
-        <div className="pt-3 border-t border-slate-200 space-y-2">
-          <p className="text-xs font-medium text-slate-500 uppercase">Installation Status</p>
+        <div className="pt-3 border-t border-border space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase">Installation Status</p>
           <div className="grid grid-cols-2 gap-2">
             <Button
               onClick={() => {
@@ -105,7 +105,7 @@ export default function OrderProcessorTools({
               disabled={updateProjectMutation.isPending}
               variant="outline"
               size="sm"
-              className="border-orange-200 text-orange-600 hover:bg-orange-50"
+              className="border-warn/25 text-warn hover:bg-warn/12"
             >
               {updatingStatus === 'pending payment' && updateProjectMutation.isPending ? (
                 <>
@@ -129,7 +129,7 @@ export default function OrderProcessorTools({
               disabled={updateProjectMutation.isPending}
               variant="outline"
               size="sm"
-              className="border-orange-200 text-orange-600 hover:bg-orange-50"
+              className="border-warn/25 text-warn hover:bg-warn/12"
             >
               {updatingStatus === 'pending contract' && updateProjectMutation.isPending ? (
                 <>
@@ -153,7 +153,7 @@ export default function OrderProcessorTools({
               disabled={updateProjectMutation.isPending}
               variant="outline"
               size="sm"
-              className="border-orange-200 text-orange-600 hover:bg-orange-50"
+              className="border-warn/25 text-warn hover:bg-warn/12"
             >
               {updatingStatus === 'on hold' && updateProjectMutation.isPending ? (
                 <>
@@ -177,7 +177,7 @@ export default function OrderProcessorTools({
               disabled={updateProjectMutation.isPending}
               variant="outline"
               size="sm"
-              className="border-red-200 text-red-600 hover:bg-red-50"
+              className="border-crit/25 text-crit hover:bg-crit/12"
             >
               {updatingStatus === 'pending cancellation' && updateProjectMutation.isPending ? (
                 <>
@@ -204,7 +204,7 @@ export default function OrderProcessorTools({
               disabled={updateProjectMutation.isPending}
               variant="outline"
               size="sm"
-              className="border-slate-200 text-slate-600 hover:bg-slate-50"
+              className="border-border text-muted-foreground hover:bg-muted"
             >
               {updatingStatus === 'clear' && updateProjectMutation.isPending ? (
                 <>

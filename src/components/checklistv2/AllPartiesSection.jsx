@@ -73,68 +73,68 @@ export default function AllPartiesSection({ formData, onChange }) {
   const isComplete = !!track && !belowMinimum;
 
   return (
-    <div className="border-2 border-indigo-200 rounded-xl overflow-hidden">
+    <div className="border-2 border-info/25 rounded-xl overflow-hidden">
       {/* Header */}
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-indigo-50 border-b border-indigo-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-info/12 border-b border-info/25"
       )}>
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-9 h-9 rounded-lg flex items-center justify-center",
-            isComplete ? "bg-green-100" : "bg-indigo-100"
+            isComplete ? "bg-good/12" : "bg-info/12"
           )}>
             {isComplete
-              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
-              : <Users className="w-5 h-5 text-indigo-600" />
+              ? <CheckCircle2 className="w-5 h-5 text-good" />
+              : <Users className="w-5 h-5 text-info" />
             }
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 8 — All Parties + Soft Pre-Qual</p>
-            <p className="text-xs text-slate-500">Project minimums, decision-maker discovery, and consequence ladder</p>
+            <p className="font-bold text-foreground">Section 8 — All Parties + Soft Pre-Qual</p>
+            <p className="text-xs text-muted-foreground">Project minimums, decision-maker discovery, and consequence ladder</p>
           </div>
         </div>
         {isComplete && (
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>
+          <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>
         )}
       </div>
 
       <div className="p-5 space-y-5 bg-white">
 
         {/* 8a — Project Minimums */}
-        <div className="rounded-lg border-2 border-slate-200 bg-slate-50 overflow-hidden">
+        <div className="rounded-lg border-2 border-border bg-muted overflow-hidden">
           <button
             type="button"
             onClick={() => setMinimsOpen(o => !o)}
             className="w-full flex items-center justify-between px-4 py-3 text-left"
           >
             <div>
-              <p className="text-sm font-bold text-slate-800">8a — Project Minimums</p>
-              <p className="text-xs text-slate-500 mt-0.5">Carpet $1,500 · LVP/Laminate $2,500 · Hardwood/Tile $3,500</p>
+              <p className="text-sm font-bold text-foreground">8a — Project Minimums</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Carpet $1,500 · LVP/Laminate $2,500 · Hardwood/Tile $3,500</p>
             </div>
-            {minimsOpen ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
+            {minimsOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
           </button>
           {minimsOpen && (
-            <div className="px-4 pb-4 border-t border-slate-200 pt-3 space-y-3">
-              <p className="text-sm text-slate-700 italic leading-relaxed">
+            <div className="px-4 pb-4 border-t border-border pt-3 space-y-3">
+              <p className="text-sm text-foreground italic leading-relaxed">
                 "Quick housekeeping note — so you know how we're set up: our project minimums are $1,500 for carpet, $2,500 for LVP or laminate, and $3,500 for hardwood or tile. Based on what you've told me, you're probably going to expect at least that much, so we're good to keep going."
               </p>
               <div
                 onClick={() => onChange('prequal_below_minimum', !belowMinimum)}
                 className={cn(
                   "flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all",
-                  belowMinimum ? "border-red-400 bg-red-50" : "border-slate-200 bg-white hover:border-red-300"
+                  belowMinimum ? "border-crit bg-crit/12" : "border-border bg-white hover:border-crit/25"
                 )}
               >
                 <div className={cn(
                   "w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5",
-                  belowMinimum ? "bg-red-500 border-red-500" : "border-slate-400 bg-white"
+                  belowMinimum ? "bg-crit border-crit" : "border-border bg-white"
                 )}>
                   {belowMinimum && <AlertTriangle className="w-3 h-3 text-white" />}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-red-700">⚠ Caller appears to be below minimum</p>
-                  <p className="text-xs text-slate-500 mt-0.5">Route to Section 9 — Below Minimum exit line</p>
+                  <p className="text-sm font-semibold text-crit">⚠ Caller appears to be below minimum</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Route to Section 9 — Below Minimum exit line</p>
                 </div>
               </div>
             </div>
@@ -142,45 +142,45 @@ export default function AllPartiesSection({ formData, onChange }) {
         </div>
 
         {/* 8b — Decision-Maker Conversation */}
-        <div className="rounded-lg border-2 border-slate-200 bg-slate-50 overflow-hidden">
+        <div className="rounded-lg border-2 border-border bg-muted overflow-hidden">
           <button
             type="button"
             onClick={() => setDmOpen(o => !o)}
             className="w-full flex items-center justify-between px-4 py-3 text-left"
           >
             <div>
-              <p className="text-sm font-bold text-slate-800">8b — The Decision-Maker Conversation</p>
-              <p className="text-xs text-slate-500 mt-0.5">Steps 1–6 + consequence ladder for Track C</p>
+              <p className="text-sm font-bold text-foreground">8b — The Decision-Maker Conversation</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Steps 1–6 + consequence ladder for Track C</p>
             </div>
-            {dmOpen ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
+            {dmOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
           </button>
           {dmOpen && (
-            <div className="border-t border-slate-200">
+            <div className="border-t border-border">
               {/* Steps 1-6 */}
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-border">
                 {CONSEQUENCE_STEPS.map((s) => (
                   <div key={s.step} className="px-4 py-3 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full bg-indigo-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                      <span className="w-5 h-5 rounded-full bg-info text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
                         {s.step}
                       </span>
-                      <p className="text-xs font-bold text-indigo-700 uppercase tracking-wide">{s.label}</p>
+                      <p className="text-xs font-bold text-info uppercase tracking-wide">{s.label}</p>
                     </div>
-                    <p className="text-sm text-slate-700 italic leading-relaxed pl-7">"{s.script}"</p>
+                    <p className="text-sm text-foreground italic leading-relaxed pl-7">"{s.script}"</p>
                     {s.note && (
-                      <p className="text-xs font-bold text-red-600 pl-7 mt-1">{s.note}</p>
+                      <p className="text-xs font-bold text-crit pl-7 mt-1">{s.note}</p>
                     )}
                   </div>
                 ))}
               </div>
 
               {/* Track routing guide */}
-              <div className="px-4 pb-4 pt-3 bg-indigo-50 border-t border-indigo-100">
-                <p className="text-xs font-bold text-indigo-700 uppercase tracking-wider mb-2">Track Guide</p>
-                <div className="space-y-2 text-xs text-slate-700">
-                  <div className="flex gap-2"><span className="font-bold text-green-700">Track A</span><span>— "Just me / no one else" → confirm solo authority → skip to 8c</span></div>
-                  <div className="flex gap-2"><span className="font-bold text-blue-700">Track B</span><span>— Partner confirmed present → get partner name + confirm 90 min → drop $500 cherry → 8c</span></div>
-                  <div className="flex gap-2"><span className="font-bold text-orange-700">Track C</span><span>— Partner exists but uncertain → run Steps 3–6 + ladder if needed</span></div>
+              <div className="px-4 pb-4 pt-3 bg-info/12 border-t border-indigo-100">
+                <p className="text-xs font-bold text-info uppercase tracking-wider mb-2">Track Guide</p>
+                <div className="space-y-2 text-xs text-foreground">
+                  <div className="flex gap-2"><span className="font-bold text-good">Track A</span><span>— "Just me / no one else" → confirm solo authority → skip to 8c</span></div>
+                  <div className="flex gap-2"><span className="font-bold text-info">Track B</span><span>— Partner confirmed present → get partner name + confirm 90 min → drop $500 cherry → 8c</span></div>
+                  <div className="flex gap-2"><span className="font-bold text-warn">Track C</span><span>— Partner exists but uncertain → run Steps 3–6 + ladder if needed</span></div>
                 </div>
               </div>
             </div>
@@ -188,34 +188,34 @@ export default function AllPartiesSection({ formData, onChange }) {
         </div>
 
         {/* Track C Ladder */}
-        <div className="rounded-lg border-2 border-orange-200 bg-orange-50 overflow-hidden">
+        <div className="rounded-lg border-2 border-warn/25 bg-warn/12 overflow-hidden">
           <button
             type="button"
             onClick={() => setLadderOpen(o => !o)}
             className="w-full flex items-center justify-between px-4 py-3 text-left"
           >
             <div>
-              <p className="text-sm font-bold text-slate-800">Track C — Consequence Ladder</p>
-              <p className="text-xs text-slate-500 mt-0.5">Run only if partner exists but presence is uncertain</p>
+              <p className="text-sm font-bold text-foreground">Track C — Consequence Ladder</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Run only if partner exists but presence is uncertain</p>
             </div>
-            {ladderOpen ? <ChevronUp className="w-4 h-4 text-orange-500" /> : <ChevronDown className="w-4 h-4 text-orange-500" />}
+            {ladderOpen ? <ChevronUp className="w-4 h-4 text-warn" /> : <ChevronDown className="w-4 h-4 text-warn" />}
           </button>
           {ladderOpen && (
-            <div className="border-t border-orange-200 divide-y divide-orange-100">
+            <div className="border-t border-warn/25 divide-y divide-orange-100">
               {LADDER_RUNGS.map((r) => (
                 <div key={r.rung} className="px-4 py-3 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-warn text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
                       {r.rung}
                     </span>
-                    <p className="text-xs font-bold text-orange-700 uppercase tracking-wide">{r.label}</p>
+                    <p className="text-xs font-bold text-warn uppercase tracking-wide">{r.label}</p>
                   </div>
-                  <p className="text-sm text-slate-700 italic leading-relaxed pl-7">"{r.script}"</p>
+                  <p className="text-sm text-foreground italic leading-relaxed pl-7">"{r.script}"</p>
                 </div>
               ))}
-              <div className="px-4 py-3 bg-red-50">
-                <p className="text-xs font-bold text-red-700 mb-1">CRM Action — Rung 3 Only</p>
-                <ul className="text-xs text-red-700 space-y-0.5 list-disc list-inside">
+              <div className="px-4 py-3 bg-crit/12">
+                <p className="text-xs font-bold text-crit mb-1">CRM Action — Rung 3 Only</p>
+                <ul className="text-xs text-crit space-y-0.5 list-disc list-inside">
                   <li>Flag appointment as "Solo-DM"</li>
                   <li>Notify design consultant in advance</li>
                   <li>DO NOT promise the $500 incentive</li>
@@ -227,7 +227,7 @@ export default function AllPartiesSection({ formData, onChange }) {
 
         {/* Outcome — Result Selection */}
         <div className="space-y-3">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Outcome / Result</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Outcome / Result</p>
           <div className="space-y-2">
             {Object.entries(TRACKS).map(([key, label]) => {
               const selected = track === key;
@@ -239,24 +239,24 @@ export default function AllPartiesSection({ formData, onChange }) {
                     "flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all select-none",
                     selected
                       ? key === 'solo_one_leg'
-                        ? "border-orange-400 bg-orange-50"
-                        : "border-indigo-400 bg-indigo-50"
-                      : "border-slate-200 bg-slate-50 hover:border-indigo-300"
+                        ? "border-warn bg-warn/12"
+                        : "border-info bg-info/12"
+                      : "border-border bg-muted hover:border-info/25"
                   )}
                 >
                   <div className={cn(
                     "w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0",
                     selected
-                      ? key === 'solo_one_leg' ? "border-orange-500 bg-orange-500" : "border-indigo-500 bg-indigo-500"
-                      : "border-slate-400 bg-white"
+                      ? key === 'solo_one_leg' ? "border-warn bg-warn" : "border-info bg-info"
+                      : "border-border bg-white"
                   )}>
                     {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                   <p className={cn(
                     "text-sm font-semibold",
                     selected
-                      ? key === 'solo_one_leg' ? "text-orange-800" : "text-indigo-800"
-                      : "text-slate-700"
+                      ? key === 'solo_one_leg' ? "text-warn" : "text-info"
+                      : "text-foreground"
                   )}>
                     {label}
                   </p>
@@ -271,16 +271,16 @@ export default function AllPartiesSection({ formData, onChange }) {
               onClick={() => onChange('prequal_ladder_covered', !ladderCovered)}
               className={cn(
                 "ml-6 flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all select-none",
-                ladderCovered ? "border-green-400 bg-green-50" : "border-orange-300 bg-orange-50 hover:border-green-400"
+                ladderCovered ? "border-good bg-good/12" : "border-warn/25 bg-warn/12 hover:border-good"
               )}
             >
               <div className={cn(
                 "w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0",
-                ladderCovered ? "bg-green-500 border-green-500" : "border-orange-400 bg-white"
+                ladderCovered ? "bg-good border-good" : "border-warn bg-white"
               )}>
                 {ladderCovered && <CheckCircle2 className="w-2.5 h-2.5 text-white" />}
               </div>
-              <p className={cn("text-sm font-semibold", ladderCovered ? "text-green-800" : "text-orange-700")}>
+              <p className={cn("text-sm font-semibold", ladderCovered ? "text-good" : "text-warn")}>
                 Ladder rungs covered for Solo DM
               </p>
             </div>

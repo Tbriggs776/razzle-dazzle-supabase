@@ -421,6 +421,7 @@ export default function Layout({ children, currentPageName }) {
     {
       name: 'Reports', icon: BarChart3,
       subItems: [
+        { name: 'Custom Reports', href: 'CustomReports', pages: ['CustomReports'] },
         { name: 'Scoreboard', href: 'Dashboard', pages: ['Dashboard'] },
         { name: 'Appointments', href: 'AppointmentReports', pages: ['AppointmentReports'] },
         { name: 'Sales', href: 'SalesReports', pages: ['SalesReports'] },

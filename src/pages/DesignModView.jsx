@@ -121,7 +121,7 @@ export default function DesignModView() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
         <div className="bg-card rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
-          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <CheckCircle2 className="w-16 h-16 text-good mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-foreground mb-2">Design Modification Signed</h1>
           <p className="text-muted-foreground">Thank you! Your design modification has been signed and submitted. Our team will be in touch shortly.</p>
         </div>
@@ -135,8 +135,8 @@ export default function DesignModView() {
       <div className="min-h-screen bg-background py-10 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <CheckCircle2 className="w-5 h-5 text-green-500" />
-            <span className="text-green-600 font-semibold text-sm">Signed on {signedDate}</span>
+            <CheckCircle2 className="w-5 h-5 text-good" />
+            <span className="text-good font-semibold text-sm">Signed on {signedDate}</span>
           </div>
           <div className="text-center mb-8">
             <p className="font-semibold text-foreground">ROC352055</p>

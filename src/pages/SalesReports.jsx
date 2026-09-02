@@ -498,7 +498,7 @@ export default function SalesReports() {
     if (change === null) return <p className="text-xs text-muted-foreground mt-1">No prior data</p>;
     const isUp = change >= 0;
     const Icon = Math.abs(change) < 0.5 ? ArrowRight : isUp ? ArrowUpRight : ArrowDownRight;
-    const color = isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400';
+    const color = isUp ? 'text-good' : 'text-crit';
     const prevFormatted = isCurrency
       ? `$${previous.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
       : isPct
@@ -590,7 +590,7 @@ export default function SalesReports() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    <DollarSign className="w-4 h-4 text-good" />
                     Avg Order Value
                   </CardTitle>
                 </CardHeader>
@@ -605,7 +605,7 @@ export default function SalesReports() {
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <TrendingUp className="w-4 h-4 text-good" />
                     Total Sales
                   </CardTitle>
                 </CardHeader>
@@ -910,7 +910,7 @@ export default function SalesReports() {
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         <Button variant="outline" size="sm" onClick={copyTable} className="gap-1.5">
-                          {copiedTable ? <Check className="w-4 h-4 text-green-600 dark:text-green-400" /> : <Copy className="w-4 h-4" />}
+                          {copiedTable ? <Check className="w-4 h-4 text-good" /> : <Copy className="w-4 h-4" />}
                           {copiedTable ? 'Copied!' : 'Copy'}
                         </Button>
                         <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5">
@@ -927,7 +927,7 @@ export default function SalesReports() {
                         className="flex-1 h-9 px-3 text-sm border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
                       />
                       {Object.keys(tableFilters).length > 0 && (
-                        <button onClick={() => setTableFilters({})} className="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 whitespace-nowrap px-2 py-1 border border-red-200 dark:border-red-500/25 rounded">Clear Filters</button>
+                        <button onClick={() => setTableFilters({})} className="text-xs text-crit hover:text-crit dark:hover:text-crit whitespace-nowrap px-2 py-1 border border-crit/25 rounded">Clear Filters</button>
                       )}
                     </div>
                   </CardHeader>
@@ -957,11 +957,11 @@ export default function SalesReports() {
                               <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{saleDate}</td>
                               <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">{customerName}</td>
                               <td className="px-4 py-3">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-good/12 text-good border border-emerald-100">
                                   {leadSource}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-right font-semibold text-green-600 dark:text-green-400 whitespace-nowrap">
+                              <td className="px-4 py-3 text-right font-semibold text-good whitespace-nowrap">
                                 ${saleAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                               </td>
                               <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{consultantName}</td>
@@ -1099,11 +1099,11 @@ export default function SalesReports() {
                       <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">All Consultants — {format(dateFilter.start, 'MMM d')} to {format(dateFilter.end, 'MMM d, yyyy')}</p>
                       <div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-center">
                         <div>
-                          <p className="text-lg font-bold text-green-700 dark:text-green-400">${totalRev.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-lg font-bold text-good">${totalRev.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                           <p className="text-xs text-muted-foreground">total revenue</p>
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400">${avgAOV.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-lg font-bold text-good">${avgAOV.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                           <p className="text-xs text-muted-foreground">avg order value</p>
                         </div>
                         <div>
@@ -1111,9 +1111,9 @@ export default function SalesReports() {
                           <p className="text-xs text-muted-foreground">{totalSalesCount}/{totalAppts} conversion</p>
                         </div>
                         <div>
-                          <p className="text-lg font-bold text-blue-700 dark:text-blue-400">{avgGPPct.toFixed(1)}%</p>
+                          <p className="text-lg font-bold text-info">{avgGPPct.toFixed(1)}%</p>
                           <p className="text-xs text-muted-foreground">avg gp%</p>
-                          <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">${totalGP.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-sm font-semibold text-info">${totalGP.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                         </div>
                         <div>
                           <p className="text-lg font-bold text-purple-700 dark:text-purple-400">{totalFUWins}</p>
@@ -1147,13 +1147,13 @@ export default function SalesReports() {
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                          <p className="text-lg font-bold text-good">
                             ${consultant.totalSalesValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <p className="text-xs text-muted-foreground">total sales</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                          <p className="text-lg font-bold text-good">
                             ${consultant.aov.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
                           <p className="text-xs text-muted-foreground">avg order value</p>
@@ -1163,9 +1163,9 @@ export default function SalesReports() {
                           <p className="text-xs text-muted-foreground">conversion rate</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{(consultant.avgGP || 0).toFixed(1)}%</p>
+                          <p className="text-lg font-bold text-info">{(consultant.avgGP || 0).toFixed(1)}%</p>
                           <p className="text-xs text-muted-foreground">avg gp%</p>
-                          <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">${(consultant.totalGPDollars || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          <p className="text-sm font-semibold text-info">${(consultant.totalGPDollars || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-lg font-bold text-purple-600 dark:text-purple-400">{consultant.followUpClosedCount} <span className="text-xs text-muted-foreground">/ {consultant.totalFollowUpAppointments}</span></p>
@@ -1215,9 +1215,9 @@ export default function SalesReports() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                        apt.status === 'In Route' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300' :
-                        apt.status === 'On Site' ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300' :
-                        'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300'
+                        apt.status === 'In Route' ? 'bg-info/12 text-info' :
+                        apt.status === 'On Site' ? 'bg-warn/12 text-warn' :
+                        'bg-warn/12 text-warn'
                       }`}>{apt.status}</span>
                       <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                     </div>
@@ -1434,11 +1434,11 @@ export default function SalesReports() {
                 }
 
                 const priorStatusColors = {
-                  'one-leg': 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+                  'one-leg': 'bg-warn/12 text-warn border-warn/25',
                   'follow-up': 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
-                  'pitch and miss': 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
-                  'lost': 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-                  'credit decline': 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/25',
+                  'pitch and miss': 'bg-warn/12 text-warn border-warn/25',
+                  'lost': 'bg-crit/12 text-crit border-crit/25',
+                  'credit decline': 'bg-crit/12 text-crit border-crit/25',
                 };
                 const priorKey = priorStatus?.toLowerCase();
                 const priorColor = priorStatusColors[priorKey] || 'bg-secondary text-muted-foreground border-border';
@@ -1463,12 +1463,12 @@ export default function SalesReports() {
                           <div className="flex items-center gap-1.5 mt-1.5">
                             <Badge variant="outline" className={`text-xs ${priorColor}`}>{priorStatus}</Badge>
                             <span className="text-muted-foreground text-xs">→</span>
-                            <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25">Sold</Badge>
+                            <Badge variant="outline" className="text-xs bg-good/12 text-good border-good/25">Sold</Badge>
                           </div>
                         )}
                       </div>
                       <div className="flex items-center gap-3">
-                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">${getEffectiveSaleAmount(sale).toLocaleString()}</p>
+                        <p className="text-sm font-bold text-good">${getEffectiveSaleAmount(sale).toLocaleString()}</p>
                         <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
                       </div>
                     </Link>
@@ -1527,17 +1527,17 @@ export default function SalesReports() {
                     <p className="text-xs text-muted-foreground">Total Appointments</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{closedSales.length}</p>
+                    <p className="text-2xl font-bold text-info">{closedSales.length}</p>
                     <p className="text-xs text-muted-foreground">Total Sales</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    <p className="text-2xl font-bold text-good">
                       ${selectedConsultant.totalSalesValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                     <p className="text-xs text-muted-foreground">Total Revenue</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                    <p className="text-2xl font-bold text-good">
                       ${selectedConsultant.aov.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                     <p className="text-xs text-muted-foreground">Avg Order Value</p>
@@ -1551,7 +1551,7 @@ export default function SalesReports() {
                 <Tabs defaultValue="closed">
                   <TabsList className="w-full">
                     <TabsTrigger value="closed" className="flex-1">
-                      Closed Deals <span className="ml-1.5 bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 text-xs font-bold px-1.5 py-0.5 rounded-full">{closedSales.length}</span>
+                      Closed Deals <span className="ml-1.5 bg-good/12 text-good text-xs font-bold px-1.5 py-0.5 rounded-full">{closedSales.length}</span>
                     </TabsTrigger>
                     <TabsTrigger value="followup" className="flex-1">
                       Follow-Up Wins <span className="ml-1.5 bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300 text-xs font-bold px-1.5 py-0.5 rounded-full">{(() => {
@@ -1561,7 +1561,7 @@ export default function SalesReports() {
                       })()}</span>
                     </TabsTrigger>
                     <TabsTrigger value="notwon" className="flex-1">
-                      Not Won <span className="ml-1.5 bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300 text-xs font-bold px-1.5 py-0.5 rounded-full">{notWonAppointments.length}</span>
+                      Not Won <span className="ml-1.5 bg-crit/12 text-crit text-xs font-bold px-1.5 py-0.5 rounded-full">{notWonAppointments.length}</span>
                     </TabsTrigger>
                   </TabsList>
 
@@ -1599,14 +1599,14 @@ export default function SalesReports() {
                               </div>
                               <div className="flex items-center gap-4">
                                 <div className="text-right">
-                                  <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                  <p className="text-sm font-bold text-good">
                                     ${getEffectiveSaleAmount(sale).toLocaleString()}
                                   </p>
                                   <p className="text-xs text-muted-foreground">sale</p>
                                 </div>
                                 {gpPercent !== null && (
                                   <div className="text-right">
-                                    <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{gpPercent.toFixed(1)}%</p>
+                                    <p className="text-sm font-bold text-info">{gpPercent.toFixed(1)}%</p>
                                     <p className="text-xs text-muted-foreground">${(() => {
                                       if (sale.rfms_order_data?.result?.lines) {
                                         const totalCost = sale.rfms_order_data.result.lines.reduce((s, item) => s + (item.unitCost * item.quantity), 0);
@@ -1665,14 +1665,14 @@ export default function SalesReports() {
                                     </div>
                                     <div className="flex items-center gap-4">
                                       <div className="text-right">
-                                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                        <p className="text-sm font-bold text-good">
                                           ${getEffectiveSaleAmount(sale).toLocaleString()}
                                         </p>
                                         <p className="text-xs text-muted-foreground">sale</p>
                                       </div>
                                       {gpPercent !== null && (
                                         <div className="text-right">
-                                          <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{gpPercent.toFixed(1)}%</p>
+                                          <p className="text-sm font-bold text-info">{gpPercent.toFixed(1)}%</p>
                                           <p className="text-xs text-muted-foreground">${(() => {
                                             if (sale.rfms_order_data?.result?.lines) {
                                               const totalCost = sale.rfms_order_data.result.lines.reduce((s, item) => s + (item.unitCost * item.quantity), 0);
@@ -1705,13 +1705,13 @@ export default function SalesReports() {
                           const checklist = allChecklists.find(c => c.appointment === apt.id);
                           const lastNote = apt.notes && apt.notes.length > 0 ? apt.notes[apt.notes.length - 1] : null;
                           const statusColors = {
-                            'Lost': 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300',
-                            'Pitch and Miss': 'bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300',
-                            'One-Leg': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/15 dark:text-yellow-300',
-                            'Credit Decline': 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',
+                            'Lost': 'bg-crit/12 text-crit',
+                            'Pitch and Miss': 'bg-warn/12 text-warn',
+                            'One-Leg': 'bg-warn/12 text-warn',
+                            'Credit Decline': 'bg-crit/12 text-crit',
                             'Cancelled': 'bg-secondary text-muted-foreground',
                             'Follow-Up': 'bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300',
-                            'Completed': 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300',
+                            'Completed': 'bg-info/12 text-info',
                           };
                           return (
                             <Link

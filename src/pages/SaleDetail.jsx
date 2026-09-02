@@ -949,7 +949,7 @@ export default function SaleDetail() {
                   <div className="rounded-lg border border-border px-3 py-2">
                     <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Deposit</p>
                     <p className={cn('text-sm font-semibold',
-                      depositSatisfied ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
+                      depositSatisfied ? 'text-good' : 'text-warn')}>
                       {depositSatisfied ? 'Cleared' : 'Not cleared'}
                     </p>
                     <p className="mt-0.5 text-[11px] text-muted-foreground">
@@ -959,7 +959,7 @@ export default function SaleDetail() {
                   <div className="rounded-lg border border-border px-3 py-2">
                     <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Before install</p>
                     <p className={cn('text-sm font-semibold',
-                      fullyCollected ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400')}>
+                      fullyCollected ? 'text-good' : 'text-warn')}>
                       {fullyCollected ? 'Paid in full' : `${money(balance.balance_due)} due`}
                     </p>
                     <p className="mt-0.5 text-[11px] text-muted-foreground">

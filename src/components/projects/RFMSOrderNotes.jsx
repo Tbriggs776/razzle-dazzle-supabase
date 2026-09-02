@@ -14,9 +14,9 @@ const noteTypeLabels = {
 };
 
 const noteTypeColors = {
-  publicNotes: 'border-slate-200 text-slate-600',
-  privateNotes: 'border-amber-200 text-amber-600',
-  workOrderNotes: 'border-blue-200 text-blue-600'
+  publicNotes: 'border-border text-muted-foreground',
+  privateNotes: 'border-warn/25 text-warn',
+  workOrderNotes: 'border-info/25 text-info'
 };
 
 export default function RFMSOrderNotes({ invoiceNumber, currentUser }) {
@@ -69,11 +69,11 @@ export default function RFMSOrderNotes({ invoiceNumber, currentUser }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2">
+    <div className="bg-white rounded-2xl border border-border p-6 md:col-span-2">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <StickyNote className="w-4 h-4 text-slate-400" />
-          <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+          <StickyNote className="w-4 h-4 text-muted-foreground" />
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
             RFMS Order Notes (Live)
           </h2>
         </div>
@@ -82,7 +82,7 @@ export default function RFMSOrderNotes({ invoiceNumber, currentUser }) {
           disabled={isFetching}
           variant="outline"
           size="sm"
-          className="border-blue-200 text-blue-600 hover:bg-blue-50"
+          className="border-info/25 text-info hover:bg-info/12"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
           Refresh
@@ -91,40 +91,40 @@ export default function RFMSOrderNotes({ invoiceNumber, currentUser }) {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-6">
-          <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+          <Loader2 className="w-5 h-5 text-info animate-spin" />
         </div>
       ) : error ? (
-        <p className="text-sm text-red-500 text-center py-4">Failed to load RFMS notes: {error.message}</p>
+        <p className="text-sm text-crit text-center py-4">Failed to load RFMS notes: {error.message}</p>
       ) : !hasNotes ? (
-        <p className="text-sm text-slate-400 text-center py-4">No notes found on RFMS order #{invoiceNumber}</p>
+        <p className="text-sm text-muted-foreground text-center py-4">No notes found on RFMS order #{invoiceNumber}</p>
       ) : (
         <div className="space-y-4">
           {data.publicNotes && (
             <div>
-              <p className="text-xs font-medium text-slate-500 mb-1">Public Notes</p>
-              <div className="bg-slate-50 rounded-lg p-3 text-sm text-slate-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: data.publicNotes }} />
+              <p className="text-xs font-medium text-muted-foreground mb-1">Public Notes</p>
+              <div className="bg-muted rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: data.publicNotes }} />
             </div>
           )}
           {data.privateNotes && (
             <div>
-              <p className="text-xs font-medium text-slate-500 mb-1">Private Notes</p>
-              <div className="bg-amber-50 rounded-lg p-3 text-sm text-slate-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: data.privateNotes }} />
+              <p className="text-xs font-medium text-muted-foreground mb-1">Private Notes</p>
+              <div className="bg-warn/12 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: data.privateNotes }} />
             </div>
           )}
           {data.workOrderNotes && (
             <div>
-              <p className="text-xs font-medium text-slate-500 mb-1">Work Order Notes</p>
-              <div className="bg-blue-50 rounded-lg p-3 text-sm text-slate-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: data.workOrderNotes }} />
+              <p className="text-xs font-medium text-muted-foreground mb-1">Work Order Notes</p>
+              <div className="bg-info/12 rounded-lg p-3 text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: data.workOrderNotes }} />
             </div>
           )}
           {data.lineNotes && data.lineNotes.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-slate-500 mb-2">Line Item Notes</p>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Line Item Notes</p>
               <div className="space-y-2">
                 {data.lineNotes.map((line, idx) => (
-                  <div key={idx} className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-slate-600 mb-1">Line {line.lineNumber} — {line.styleName}</p>
-                    <div className="text-sm text-slate-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: line.notes }} />
+                  <div key={idx} className="bg-muted rounded-lg p-3">
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">Line {line.lineNumber} — {line.styleName}</p>
+                    <div className="text-sm text-foreground prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: line.notes }} />
                   </div>
                 ))}
               </div>
@@ -134,14 +134,14 @@ export default function RFMSOrderNotes({ invoiceNumber, currentUser }) {
       )}
 
       {/* Append Note Box */}
-      <div className="mt-6 pt-4 border-t border-slate-200">
+      <div className="mt-6 pt-4 border-t border-border">
         <div className="flex items-center gap-2 mb-3">
-          <Plus className="w-4 h-4 text-indigo-500" />
-          <h3 className="text-sm font-medium text-slate-600">Append Note to RFMS</h3>
+          <Plus className="w-4 h-4 text-info" />
+          <h3 className="text-sm font-medium text-muted-foreground">Append Note to RFMS</h3>
         </div>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500 whitespace-nowrap">Note type:</span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">Note type:</span>
             <Select value={noteType} onValueChange={setNoteType}>
               <SelectTrigger className={`h-8 text-xs w-48 ${noteTypeColors[noteType]}`}>
                 <SelectValue />
@@ -160,17 +160,17 @@ export default function RFMSOrderNotes({ invoiceNumber, currentUser }) {
             rows={3}
             className="text-sm"
           />
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-muted-foreground">
             Your name and timestamp will be added automatically: [{currentUser?.full_name || currentUser?.email || 'Your Name'} - now]
           </p>
           {appendError && (
-            <p className="text-xs text-red-500">{appendError}</p>
+            <p className="text-xs text-crit">{appendError}</p>
           )}
           <Button
             onClick={handleAppendNote}
             disabled={appending || !noteText.trim()}
             size="sm"
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-info hover:bg-info"
           >
             {appending ? (
               <><Loader2 className="w-3 h-3 mr-1 animate-spin" />Appending...</>

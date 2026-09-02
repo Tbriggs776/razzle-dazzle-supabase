@@ -71,8 +71,8 @@ export default function RescheduledAppointments() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-yellow-50 dark:bg-yellow-500/15 flex items-center justify-center mb-6">
-              <RefreshCw className="w-10 h-10 text-yellow-400 dark:text-yellow-300" />
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-warn/12 flex items-center justify-center mb-6">
+              <RefreshCw className="w-10 h-10 text-warn" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">
               {searchQuery ? 'No appointments found' : 'No rescheduled appointments'}

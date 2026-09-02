@@ -10,20 +10,20 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const statusColors = {
-  'Lead': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200',
-  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  'Lead': 'bg-muted text-foreground border-border',
+  'Awaiting Assignment': 'bg-warn/12 text-warn border-warn/25',
+  'Scheduled': 'bg-info/12 text-info border-info/25',
+  'Rescheduled': 'bg-warn/12 text-warn border-warn/25',
   'In Route': 'bg-cyan-100 text-cyan-800 border-cyan-200',
-  'On Site': 'bg-green-100 text-green-800 border-green-200',
-  'Cancelled': 'bg-red-100 text-red-800 border-red-200',
-  'Completed': 'bg-slate-100 text-slate-700 border-slate-200',
-  'Sold': 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  'Lost': 'bg-red-100 text-red-800 border-red-200',
-  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200',
-  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200',
-  'Follow-Up': 'bg-red-100 text-red-800 border-red-200'
+  'On Site': 'bg-good/12 text-good border-good/25',
+  'Cancelled': 'bg-crit/12 text-crit border-crit/25',
+  'Completed': 'bg-muted text-foreground border-border',
+  'Sold': 'bg-good/12 text-good border-good/25',
+  'Lost': 'bg-crit/12 text-crit border-crit/25',
+  'Pitch and Miss': 'bg-warn/12 text-warn border-warn/25',
+  'One-Leg': 'bg-warn/12 text-warn border-warn/25',
+  'Credit Decline': 'bg-crit/12 text-crit border-crit/25',
+  'Follow-Up': 'bg-crit/12 text-crit border-crit/25'
 };
 
 const COMPLETED_STATUSES = ['Sold', 'Lost', 'Pitch and Miss', 'One-Leg', 'Completed'];
@@ -53,11 +53,11 @@ export default function AppointmentCard({ appointment, index, preloadedData }) {
     >
       <Link
         to={createPageUrl('AppointmentDetail') + `?id=${appointment.id}&from=MyAppointments`}
-        className="group block bg-white rounded-2xl border border-slate-100 p-6 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300"
+        className="group block bg-white rounded-2xl border border-border p-6 hover:border-info/25 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300"
       >
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="min-w-0">
-            <h3 className="text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
+            <h3 className="text-lg font-semibold text-foreground group-hover:text-info transition-colors">
               {leadName}
             </h3>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -65,17 +65,17 @@ export default function AppointmentCard({ appointment, index, preloadedData }) {
                 {appointment.status}
               </Badge>
               {(appointment.status === 'Scheduled' || appointment.status === 'Awaiting Assignment') && (
-                <Badge variant="secondary" className={cn('border', appointment.assigned_dc ? 'bg-green-100 text-green-800 border-green-200' : 'bg-amber-100 text-amber-800 border-amber-200')}>
+                <Badge variant="secondary" className={cn('border', appointment.assigned_dc ? 'bg-good/12 text-good border-good/25' : 'bg-warn/12 text-warn border-warn/25')}>
                   {appointment.assigned_dc ? 'Assigned' : 'Unassigned'}
                 </Badge>
               )}
               {appointment.rfms_sync_status === 'synced' && (
-                <Badge variant="secondary" className="border bg-green-50 text-green-700 border-green-200">
+                <Badge variant="secondary" className="border bg-good/12 text-good border-good/25">
                   RFMS Synced
                 </Badge>
               )}
               {appointment.rfms_sync_status === 'error' && (
-                <Badge variant="secondary" className="border bg-red-50 text-red-700 border-red-200">
+                <Badge variant="secondary" className="border bg-crit/12 text-crit border-crit/25">
                   RFMS Error
                 </Badge>
               )}
@@ -89,8 +89,8 @@ export default function AppointmentCard({ appointment, index, preloadedData }) {
                   variant="secondary" 
                   className={cn('border font-mono text-xs max-w-full break-all',
                     appointment.google_calendar_event_id
-                      ? 'bg-blue-50 text-blue-700 border-blue-200'
-                      : 'bg-slate-100 text-slate-500 border-slate-200'
+                      ? 'bg-info/12 text-info border-info/25'
+                      : 'bg-muted text-muted-foreground border-border'
                   )}
                 >
                   GCal: {appointment.google_calendar_event_id || 'None'}
@@ -98,46 +98,46 @@ export default function AppointmentCard({ appointment, index, preloadedData }) {
               )}
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all flex-shrink-0" />
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-info group-hover:translate-x-1 transition-all flex-shrink-0" />
         </div>
 
         <div className="space-y-3">
           {appointment.appointment_date && (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Calendar className="w-4 h-4 text-slate-400" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="w-4 h-4 text-muted-foreground" />
               <span>{format(new Date(appointment.appointment_date + 'T00:00:00'), 'EEEE, MMMM d, yyyy')}</span>
             </div>
           )}
           
           {appointment.appointment_block && (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Clock className="w-4 h-4 text-slate-400" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="w-4 h-4 text-muted-foreground" />
               <span>{appointment.appointment_block}</span>
             </div>
           )}
 
           {appointment.location_address && (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <MapPin className="w-4 h-4 text-slate-400" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="w-4 h-4 text-muted-foreground" />
               <span className="truncate">{appointment.location_address}</span>
             </div>
           )}
 
           {csr && (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Users className="w-4 h-4 text-slate-400" />
-              <span className="truncate"><span className="text-slate-400">Booked by:</span> {csr.first_name} {csr.last_name}</span>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <span className="truncate"><span className="text-muted-foreground">Booked by:</span> {csr.first_name} {csr.last_name}</span>
             </div>
           )}
           {dc && (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Users className="w-4 h-4 text-slate-400" />
-              <span className="truncate"><span className="text-slate-400">DC:</span> {dc.first_name} {dc.last_name}</span>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Users className="w-4 h-4 text-muted-foreground" />
+              <span className="truncate"><span className="text-muted-foreground">DC:</span> {dc.first_name} {dc.last_name}</span>
             </div>
           )}
 
           {duration && (
-            <div className="flex items-center gap-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg px-3 py-1.5">
+            <div className="flex items-center gap-2 text-sm font-medium text-info bg-info/12 rounded-lg px-3 py-1.5">
               <Clock className="w-4 h-4" />
               <span>
                 {duration.hours > 0 ? `${duration.hours}h ${duration.minutes}m` : `${duration.minutes}m`} on site
@@ -146,14 +146,14 @@ export default function AppointmentCard({ appointment, index, preloadedData }) {
           )}
 
           {checklist?.project_budget && (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <DollarSign className="w-4 h-4 text-slate-400" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <DollarSign className="w-4 h-4 text-muted-foreground" />
               <span>{checklist.project_budget}</span>
             </div>
           )}
 
           {appointment.created_date && (
-            <div className="flex items-center gap-2 text-xs text-slate-400 pt-2 border-t border-slate-100">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border">
               <Clock className="w-3.5 h-3.5" />
               <span>
                 {format(new Date(appointment.created_date), 'MMM d, yyyy')} at {format(new Date(appointment.created_date), 'h:mm a')}

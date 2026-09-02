@@ -113,7 +113,7 @@ export default function NotificationTemplates({
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-green-600" />
+                    <MessageSquare className="w-5 h-5 text-good" />
                     Lead Notification
                   </CardTitle>
                   <CardDescription className="mt-1">Sent to lead when appointment is created</CardDescription>
@@ -123,27 +123,27 @@ export default function NotificationTemplates({
             </CardHeader>
             <CardContent>
               <div className="mb-4">
-                <Label className="text-slate-700 font-medium mb-3 block">SMS Notification</Label>
+                <Label className="text-foreground font-medium mb-3 block">SMS Notification</Label>
                 <Textarea value={formData.lead_appointment_created_template} onChange={(e) => setFormData({ ...formData, lead_appointment_created_template: e.target.value })} placeholder="Enter your SMS template..." className="min-h-32 font-mono text-sm" disabled={!formData.send_lead_sms} />
               </div>
-              <div className="border-t border-slate-200 pt-4 mt-4">
+              <div className="border-t border-border pt-4 mt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-slate-700 font-medium">Email Notification to Team</Label>
+                  <Label className="text-foreground font-medium">Email Notification to Team</Label>
                   <Switch checked={formData.send_lead_appointment_created_email} onCheckedChange={(c) => setFormData({ ...formData, send_lead_appointment_created_email: c })} />
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                    <input type="text" value={formData.lead_appointment_created_email_subject} onChange={(e) => setFormData({ ...formData, lead_appointment_created_email_subject: e.target.value })} placeholder="e.g., New Appointment Scheduled - {lead_name}" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_lead_appointment_created_email} />
+                    <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                    <input type="text" value={formData.lead_appointment_created_email_subject} onChange={(e) => setFormData({ ...formData, lead_appointment_created_email_subject: e.target.value })} placeholder="e.g., New Appointment Scheduled - {lead_name}" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_lead_appointment_created_email} />
                   </div>
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                    <div className="bg-white border border-border rounded-lg overflow-hidden">
                       <ReactQuill key="lead_appointment_created_email_template" value={formData.lead_appointment_created_email_template} onChange={handleQuillChange('lead_appointment_created_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_lead_appointment_created_email} style={{ minHeight: '200px' }} />
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">Sent to CC recipients when appointment is created</p>
+                <p className="text-xs text-muted-foreground mt-2">Sent to CC recipients when appointment is created</p>
                 <TestEmailButton emailType="appointment_created" />
               </div>
             </CardContent>
@@ -168,19 +168,19 @@ export default function NotificationTemplates({
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                  <input type="text" value={formData.lead_day1_followup_email_subject} onChange={(e) => setFormData({ ...formData, lead_day1_followup_email_subject: e.target.value })} placeholder="e.g., We're excited to meet you, {lead_first_name}!" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_lead_day1_followup_email} />
+                  <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                  <input type="text" value={formData.lead_day1_followup_email_subject} onChange={(e) => setFormData({ ...formData, lead_day1_followup_email_subject: e.target.value })} placeholder="e.g., We're excited to meet you, {lead_first_name}!" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_lead_day1_followup_email} />
                 </div>
                 <div>
-                  <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                  <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                  <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                  <div className="bg-white border border-border rounded-lg overflow-hidden">
                     <ReactQuill key="lead_day1_followup_email_template" value={formData.lead_day1_followup_email_template} onChange={handleQuillChange('lead_day1_followup_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_lead_day1_followup_email} style={{ minHeight: '200px' }} />
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 mt-2">Sent directly to the lead's email address 1 day after appointment creation</p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
-                <p className="text-xs text-blue-700">
+              <p className="text-xs text-muted-foreground mt-2">Sent directly to the lead's email address 1 day after appointment creation</p>
+              <div className="bg-info/12 border border-info/25 rounded-lg p-3 mt-3">
+                <p className="text-xs text-info">
                   <strong>Available Variables:</strong> {'{lead_first_name}'}, {'{lead_last_name}'}, {'{lead_name}'}, {'{appointment_date}'}, {'{appointment_time}'}, {'{location_address}'}, {'{lead_tracking_url}'}
                 </p>
               </div>
@@ -196,7 +196,7 @@ export default function NotificationTemplates({
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-sky-600" />
+                    <MessageSquare className="w-5 h-5 text-info" />
                     Day 2 Follow-Up Email to Lead
                   </CardTitle>
                   <CardDescription className="mt-1">Sent to lead 2 days after appointment is created (via daily cron)</CardDescription>
@@ -207,19 +207,19 @@ export default function NotificationTemplates({
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                  <input type="text" value={formData.lead_day2_followup_email_subject} onChange={(e) => setFormData({ ...formData, lead_day2_followup_email_subject: e.target.value })} placeholder="e.g., A quick note from Floor Daddy, {lead_first_name}!" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_lead_day2_followup_email} />
+                  <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                  <input type="text" value={formData.lead_day2_followup_email_subject} onChange={(e) => setFormData({ ...formData, lead_day2_followup_email_subject: e.target.value })} placeholder="e.g., A quick note from Floor Daddy, {lead_first_name}!" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_lead_day2_followup_email} />
                 </div>
                 <div>
-                  <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                  <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                  <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                  <div className="bg-white border border-border rounded-lg overflow-hidden">
                     <ReactQuill key="lead_day2_followup_email_template" value={formData.lead_day2_followup_email_template} onChange={handleQuillChange('lead_day2_followup_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_lead_day2_followup_email} style={{ minHeight: '200px' }} />
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 mt-2">Sent directly to the lead's email address 2 days after appointment creation</p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
-                <p className="text-xs text-blue-700">
+              <p className="text-xs text-muted-foreground mt-2">Sent directly to the lead's email address 2 days after appointment creation</p>
+              <div className="bg-info/12 border border-info/25 rounded-lg p-3 mt-3">
+                <p className="text-xs text-info">
                   <strong>Available Variables:</strong> {'{lead_first_name}'}, {'{lead_last_name}'}, {'{lead_name}'}, {'{appointment_date}'}, {'{appointment_time}'}, {'{location_address}'}, {'{lead_tracking_url}'}
                 </p>
               </div>
@@ -246,19 +246,19 @@ export default function NotificationTemplates({
             <CardContent>
               <div className="space-y-3">
                 <div>
-                  <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                  <input type="text" value={formData.lead_day3_followup_email_subject} onChange={(e) => setFormData({ ...formData, lead_day3_followup_email_subject: e.target.value })} placeholder="e.g., We're looking forward to seeing you, {lead_first_name}!" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_lead_day3_followup_email} />
+                  <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                  <input type="text" value={formData.lead_day3_followup_email_subject} onChange={(e) => setFormData({ ...formData, lead_day3_followup_email_subject: e.target.value })} placeholder="e.g., We're looking forward to seeing you, {lead_first_name}!" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_lead_day3_followup_email} />
                 </div>
                 <div>
-                  <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                  <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                  <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                  <div className="bg-white border border-border rounded-lg overflow-hidden">
                     <ReactQuill key="lead_day3_followup_email_template" value={formData.lead_day3_followup_email_template} onChange={handleQuillChange('lead_day3_followup_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_lead_day3_followup_email} style={{ minHeight: '200px' }} />
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 mt-2">Sent directly to the lead's email address 3 days after appointment creation</p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
-                <p className="text-xs text-blue-700">
+              <p className="text-xs text-muted-foreground mt-2">Sent directly to the lead's email address 3 days after appointment creation</p>
+              <div className="bg-info/12 border border-info/25 rounded-lg p-3 mt-3">
+                <p className="text-xs text-info">
                   <strong>Available Variables:</strong> {'{lead_first_name}'}, {'{lead_last_name}'}, {'{lead_name}'}, {'{appointment_date}'}, {'{appointment_time}'}, {'{location_address}'}, {'{lead_tracking_url}'}
                 </p>
               </div>
@@ -273,7 +273,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-indigo-600" />Consultant Notification</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-info" />Consultant Notification</CardTitle>
                   <CardDescription className="mt-1">Sent to consultant when assigned to appointment</CardDescription>
                 </div>
                 <Switch checked={formData.send_consultant_sms} onCheckedChange={(c) => setFormData({ ...formData, send_consultant_sms: c })} />
@@ -309,7 +309,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-yellow-600" />Lead Reschedule Notification</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-warn" />Lead Reschedule Notification</CardTitle>
                   <CardDescription className="mt-1">Sent to lead when appointment is rescheduled</CardDescription>
                 </div>
                 <Switch checked={formData.send_lead_sms} onCheckedChange={(c) => setFormData({ ...formData, send_lead_sms: c })} />
@@ -317,22 +317,22 @@ export default function NotificationTemplates({
             </CardHeader>
             <CardContent>
               <div className="mb-4">
-                <Label className="text-slate-700 font-medium mb-3 block">SMS Notification</Label>
+                <Label className="text-foreground font-medium mb-3 block">SMS Notification</Label>
                 <Textarea value={formData.lead_rescheduled_template} onChange={(e) => setFormData({ ...formData, lead_rescheduled_template: e.target.value })} placeholder="Enter your SMS template..." className="min-h-32 font-mono text-sm" disabled={!formData.send_lead_sms} />
               </div>
-              <div className="border-t border-slate-200 pt-4 mt-4">
+              <div className="border-t border-border pt-4 mt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-slate-700 font-medium">Email Notification to Team</Label>
+                  <Label className="text-foreground font-medium">Email Notification to Team</Label>
                   <Switch checked={formData.send_lead_rescheduled_email} onCheckedChange={(c) => setFormData({ ...formData, send_lead_rescheduled_email: c })} />
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                    <input type="text" value={formData.lead_rescheduled_email_subject} onChange={(e) => setFormData({ ...formData, lead_rescheduled_email_subject: e.target.value })} placeholder="e.g., Appointment Rescheduled - {lead_name}" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_lead_rescheduled_email} />
+                    <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                    <input type="text" value={formData.lead_rescheduled_email_subject} onChange={(e) => setFormData({ ...formData, lead_rescheduled_email_subject: e.target.value })} placeholder="e.g., Appointment Rescheduled - {lead_name}" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_lead_rescheduled_email} />
                   </div>
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                    <div className="bg-white border border-border rounded-lg overflow-hidden">
                       <ReactQuill key="lead_rescheduled_email_template" value={formData.lead_rescheduled_email_template} onChange={handleQuillChange('lead_rescheduled_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_lead_rescheduled_email} style={{ minHeight: '200px' }} />
                     </div>
                   </div>
@@ -349,7 +349,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-yellow-600" />Consultant Reschedule Notification</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-warn" />Consultant Reschedule Notification</CardTitle>
                   <CardDescription className="mt-1">Sent to consultant when appointment is rescheduled</CardDescription>
                 </div>
                 <Switch checked={formData.send_consultant_sms} onCheckedChange={(c) => setFormData({ ...formData, send_consultant_sms: c })} />
@@ -367,7 +367,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-red-600" />Lead Cancellation Notification</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-crit" />Lead Cancellation Notification</CardTitle>
                   <CardDescription className="mt-1">Sent to lead when appointment is cancelled</CardDescription>
                 </div>
                 <Switch checked={formData.send_lead_sms} onCheckedChange={(c) => setFormData({ ...formData, send_lead_sms: c })} />
@@ -375,19 +375,19 @@ export default function NotificationTemplates({
             </CardHeader>
             <CardContent>
               <Textarea value={formData.lead_cancelled_template} onChange={(e) => setFormData({ ...formData, lead_cancelled_template: e.target.value })} placeholder="Enter your SMS template..." className="min-h-32 font-mono text-sm" disabled={!formData.send_lead_sms} />
-              <div className="border-t border-slate-200 pt-4 mt-4">
+              <div className="border-t border-border pt-4 mt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-slate-700 font-medium">Email Notification to Team</Label>
+                  <Label className="text-foreground font-medium">Email Notification to Team</Label>
                   <Switch checked={formData.send_lead_cancelled_email} onCheckedChange={(c) => setFormData({ ...formData, send_lead_cancelled_email: c })} />
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                    <input type="text" value={formData.lead_cancelled_email_subject} onChange={(e) => setFormData({ ...formData, lead_cancelled_email_subject: e.target.value })} placeholder="e.g., Appointment Cancelled - {lead_name}" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_lead_cancelled_email} />
+                    <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                    <input type="text" value={formData.lead_cancelled_email_subject} onChange={(e) => setFormData({ ...formData, lead_cancelled_email_subject: e.target.value })} placeholder="e.g., Appointment Cancelled - {lead_name}" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_lead_cancelled_email} />
                   </div>
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                    <div className="bg-white border border-border rounded-lg overflow-hidden">
                       <ReactQuill key="lead_cancelled_email_template" value={formData.lead_cancelled_email_template} onChange={handleQuillChange('lead_cancelled_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_lead_cancelled_email} style={{ minHeight: '200px' }} />
                     </div>
                   </div>
@@ -404,7 +404,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-red-600" />Consultant Cancellation Notification</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-crit" />Consultant Cancellation Notification</CardTitle>
                   <CardDescription className="mt-1">Sent to consultant when appointment is cancelled</CardDescription>
                 </div>
                 <Switch checked={formData.send_consultant_sms} onCheckedChange={(c) => setFormData({ ...formData, send_consultant_sms: c })} />
@@ -422,7 +422,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-blue-600" />Consultant "On My Way" Notification</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-info" />Consultant "On My Way" Notification</CardTitle>
                   <CardDescription className="mt-1">Sent to lead when consultant clicks "On My Way"</CardDescription>
                 </div>
                 <Switch checked={formData.send_lead_sms} onCheckedChange={(c) => setFormData({ ...formData, send_lead_sms: c })} />
@@ -440,7 +440,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-green-600" />Consultant "I've Arrived" Notification</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-good" />Consultant "I've Arrived" Notification</CardTitle>
                   <CardDescription className="mt-1">Sent to lead when consultant clicks "I've Arrived"</CardDescription>
                 </div>
                 <Switch checked={formData.send_lead_sms} onCheckedChange={(c) => setFormData({ ...formData, send_lead_sms: c })} />
@@ -458,7 +458,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-slate-600" />Lead Not Sold Notification</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-muted-foreground" />Lead Not Sold Notification</CardTitle>
                   <CardDescription className="mt-1">Sent to lead when appointment is marked as Lost, Pitch and Miss, One-Leg, or Credit Decline</CardDescription>
                 </div>
                 <Switch checked={formData.send_lead_not_sold_sms} onCheckedChange={(c) => setFormData({ ...formData, send_lead_not_sold_sms: c })} />
@@ -466,22 +466,22 @@ export default function NotificationTemplates({
             </CardHeader>
             <CardContent>
               <div className="mb-4">
-                <Label className="text-slate-700 font-medium mb-3 block">SMS Notification</Label>
+                <Label className="text-foreground font-medium mb-3 block">SMS Notification</Label>
                 <Textarea value={formData.lead_not_sold_template} onChange={(e) => setFormData({ ...formData, lead_not_sold_template: e.target.value })} placeholder="Enter your SMS template..." className="min-h-32 font-mono text-sm" disabled={!formData.send_lead_not_sold_sms} />
               </div>
-              <div className="border-t border-slate-200 pt-4 mt-4">
+              <div className="border-t border-border pt-4 mt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-slate-700 font-medium">Email Notification to Lead</Label>
+                  <Label className="text-foreground font-medium">Email Notification to Lead</Label>
                   <Switch checked={formData.send_lead_not_sold_email} onCheckedChange={(c) => setFormData({ ...formData, send_lead_not_sold_email: c })} />
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                    <input type="text" value={formData.lead_not_sold_email_subject} onChange={(e) => setFormData({ ...formData, lead_not_sold_email_subject: e.target.value })} placeholder="e.g., Thank You For Your Time - {lead_name}" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_lead_not_sold_email} />
+                    <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                    <input type="text" value={formData.lead_not_sold_email_subject} onChange={(e) => setFormData({ ...formData, lead_not_sold_email_subject: e.target.value })} placeholder="e.g., Thank You For Your Time - {lead_name}" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_lead_not_sold_email} />
                   </div>
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                    <div className="bg-white border border-border rounded-lg overflow-hidden">
                       <ReactQuill key="lead_not_sold_email_template" value={formData.lead_not_sold_email_template} onChange={handleQuillChange('lead_not_sold_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_lead_not_sold_email} style={{ minHeight: '200px' }} />
                     </div>
                   </div>
@@ -498,7 +498,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-emerald-600" />Customer Sale Confirmation</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-good" />Customer Sale Confirmation</CardTitle>
                   <CardDescription className="mt-1">Sent to customer when appointment is marked as sold</CardDescription>
                 </div>
                 <Switch checked={formData.send_customer_sale_sms} onCheckedChange={(c) => setFormData({ ...formData, send_customer_sale_sms: c })} />
@@ -506,19 +506,19 @@ export default function NotificationTemplates({
             </CardHeader>
             <CardContent>
               <Textarea value={formData.customer_sale_confirmation_template} onChange={(e) => setFormData({ ...formData, customer_sale_confirmation_template: e.target.value })} placeholder="Enter your SMS template..." className="min-h-32 font-mono text-sm" disabled={!formData.send_customer_sale_sms} />
-              <div className="border-t border-slate-200 pt-4 mt-4">
+              <div className="border-t border-border pt-4 mt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-slate-700 font-medium">Email Notification to Team</Label>
+                  <Label className="text-foreground font-medium">Email Notification to Team</Label>
                   <Switch checked={formData.send_customer_sale_confirmation_email} onCheckedChange={(c) => setFormData({ ...formData, send_customer_sale_confirmation_email: c })} />
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                    <input type="text" value={formData.customer_sale_confirmation_email_subject} onChange={(e) => setFormData({ ...formData, customer_sale_confirmation_email_subject: e.target.value })} placeholder="e.g., New Sale Closed - {customer_name}" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_customer_sale_confirmation_email} />
+                    <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                    <input type="text" value={formData.customer_sale_confirmation_email_subject} onChange={(e) => setFormData({ ...formData, customer_sale_confirmation_email_subject: e.target.value })} placeholder="e.g., New Sale Closed - {customer_name}" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_customer_sale_confirmation_email} />
                   </div>
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                    <div className="bg-white border border-border rounded-lg overflow-hidden">
                       <ReactQuill key="customer_sale_confirmation_email_template" value={formData.customer_sale_confirmation_email_template} onChange={handleQuillChange('customer_sale_confirmation_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_customer_sale_confirmation_email} style={{ minHeight: '200px' }} />
                     </div>
                   </div>
@@ -535,7 +535,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-orange-600" />Customer Project Created</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-warn" />Customer Project Created</CardTitle>
                   <CardDescription className="mt-1">Sent to customer when project is created</CardDescription>
                 </div>
                 <Switch checked={formData.send_customer_project_sms} onCheckedChange={(c) => setFormData({ ...formData, send_customer_project_sms: c })} />
@@ -543,19 +543,19 @@ export default function NotificationTemplates({
             </CardHeader>
             <CardContent>
               <Textarea value={formData.customer_project_created_template} onChange={(e) => setFormData({ ...formData, customer_project_created_template: e.target.value })} placeholder="Enter your SMS template..." className="min-h-32 font-mono text-sm" disabled={!formData.send_customer_project_sms} />
-              <div className="border-t border-slate-200 pt-4 mt-4">
+              <div className="border-t border-border pt-4 mt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-slate-700 font-medium">Email Notification to Customer</Label>
+                  <Label className="text-foreground font-medium">Email Notification to Customer</Label>
                   <Switch checked={formData.send_customer_project_created_email} onCheckedChange={(c) => setFormData({ ...formData, send_customer_project_created_email: c })} />
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                    <input type="text" value={formData.customer_project_created_email_subject} onChange={(e) => setFormData({ ...formData, customer_project_created_email_subject: e.target.value })} placeholder="e.g., Your Floor Daddy Project - {customer_name}" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_customer_project_created_email} />
+                    <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                    <input type="text" value={formData.customer_project_created_email_subject} onChange={(e) => setFormData({ ...formData, customer_project_created_email_subject: e.target.value })} placeholder="e.g., Your Floor Daddy Project - {customer_name}" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_customer_project_created_email} />
                   </div>
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                    <div className="bg-white border border-border rounded-lg overflow-hidden">
                       <ReactQuill key="customer_project_created_email_template" value={formData.customer_project_created_email_template} onChange={handleQuillChange('customer_project_created_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_customer_project_created_email} style={{ minHeight: '200px' }} />
                     </div>
                   </div>
@@ -572,7 +572,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-red-600" />DC Ticket Assigned</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-crit" />DC Ticket Assigned</CardTitle>
                   <CardDescription className="mt-1">Sent to Design Consultant when ticket is assigned</CardDescription>
                 </div>
                 <Switch checked={formData.send_dc_ticket_sms} onCheckedChange={(c) => setFormData({ ...formData, send_dc_ticket_sms: c })} />
@@ -590,7 +590,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-green-600" />Requester Category Resolved</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-good" />Requester Category Resolved</CardTitle>
                   <CardDescription className="mt-1">Sent to Order Processor when a ticket category is resolved</CardDescription>
                 </div>
                 <Switch checked={formData.send_requester_resolved_sms} onCheckedChange={(c) => setFormData({ ...formData, send_requester_resolved_sms: c })} />
@@ -608,7 +608,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-blue-600" />DC New Message Notification</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-info" />DC New Message Notification</CardTitle>
                   <CardDescription className="mt-1">Sent to DC when they receive a new message on a ticket</CardDescription>
                 </div>
                 <Switch checked={formData.send_ticket_message_sms} onCheckedChange={(c) => setFormData({ ...formData, send_ticket_message_sms: c })} />
@@ -644,7 +644,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-orange-600" />DC Resolution Denied</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-warn" />DC Resolution Denied</CardTitle>
                   <CardDescription className="mt-1">Sent to DC when resolution request is denied</CardDescription>
                 </div>
                 <Switch checked={formData.send_dc_resolution_denied_sms} onCheckedChange={(c) => setFormData({ ...formData, send_dc_resolution_denied_sms: c })} />
@@ -662,7 +662,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-indigo-600" />DC Ticket Reminder</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-info" />DC Ticket Reminder</CardTitle>
                   <CardDescription className="mt-1">Manual reminder sent to DC about open tickets</CardDescription>
                 </div>
                 <Switch checked={formData.send_dc_ticket_reminder_sms} onCheckedChange={(c) => setFormData({ ...formData, send_dc_ticket_reminder_sms: c })} />
@@ -688,10 +688,10 @@ export default function NotificationTemplates({
             </CardHeader>
             <CardContent>
               <Textarea value={formData.dc_followup_reminder_template} onChange={(e) => setFormData({ ...formData, dc_followup_reminder_template: e.target.value })} placeholder="Enter your SMS template..." className="min-h-32 font-mono text-sm" disabled={!formData.send_dc_followup_reminder_sms} />
-              <p className="text-xs text-slate-500 mt-2">Available variables: {'{dc_first_name}'}, {'{count}'}, {'{customer_last_names}'}, {'{tasks_url}'}</p>
+              <p className="text-xs text-muted-foreground mt-2">Available variables: {'{dc_first_name}'}, {'{count}'}, {'{customer_last_names}'}, {'{tasks_url}'}</p>
               <div className="space-y-3 mt-4">
                 <div>
-                  <Label className="text-sm text-slate-700 mb-2 block">Test Against Specific DC</Label>
+                  <Label className="text-sm text-foreground mb-2 block">Test Against Specific DC</Label>
                   <Select value={selectedTestDC} onValueChange={setSelectedTestDC}>
                     <SelectTrigger className="w-full"><SelectValue placeholder="Select DC to test..." /></SelectTrigger>
                     <SelectContent>
@@ -706,10 +706,10 @@ export default function NotificationTemplates({
                   {testingFollowUpReminders ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</> : <><PlayCircle className="w-4 h-4 mr-2" />Send Test Now</>}
                 </Button>
               </div>
-              <p className="text-xs text-blue-600 mt-2">ℹ Automated daily at 9 AM to all DCs with follow-up appointments</p>
+              <p className="text-xs text-info mt-2">ℹ Automated daily at 9 AM to all DCs with follow-up appointments</p>
               {lastFollowUpRun && (
-                <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mt-3">
-                  <p className="text-xs text-slate-600"><strong>Last Run:</strong> {new Date(lastFollowUpRun.created_date).toLocaleString()}</p>
+                <div className="bg-muted border border-border rounded-lg p-3 mt-3">
+                  <p className="text-xs text-muted-foreground"><strong>Last Run:</strong> {new Date(lastFollowUpRun.created_date).toLocaleString()}</p>
                 </div>
               )}
             </CardContent>
@@ -720,17 +720,17 @@ export default function NotificationTemplates({
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.46 }}>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-indigo-600" />Email Diversion for Testing</CardTitle>
+              <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-info" />Email Diversion for Testing</CardTitle>
               <CardDescription className="mt-1">Divert notification emails to a test address</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-slate-700 font-medium">Test Email Address</Label>
-                <p className="text-xs text-slate-500 mt-1 mb-3">When diversion is enabled, all emails will be sent here instead</p>
-                <input type="email" value={formData.divert_emails_to} onChange={(e) => setFormData({ ...formData, divert_emails_to: e.target.value })} placeholder="test@example.com" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" />
+                <Label className="text-foreground font-medium">Test Email Address</Label>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">When diversion is enabled, all emails will be sent here instead</p>
+                <input type="email" value={formData.divert_emails_to} onChange={(e) => setFormData({ ...formData, divert_emails_to: e.target.value })} placeholder="test@example.com" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info text-sm" />
               </div>
-              <div className="border-t border-slate-200 pt-4 space-y-3">
-                <Label className="text-slate-700 font-medium">Enable Diversion For:</Label>
+              <div className="border-t border-border pt-4 space-y-3">
+                <Label className="text-foreground font-medium">Enable Diversion For:</Label>
                 {[
                   { label: 'Lead Appointment Created', field: 'divert_lead_appointment_created_email' },
                   { label: 'Day 1 Follow-Up Email', field: 'divert_lead_day1_followup_email' },
@@ -743,14 +743,14 @@ export default function NotificationTemplates({
                   { label: '24-Hour Reminder', field: 'divert_lead_reminder_email' },
                   { label: 'Lead Not Sold', field: 'divert_lead_not_sold_email' },
                 ].map(({ label, field }) => (
-                  <div key={field} className="flex items-center justify-between p-3 rounded-lg border border-slate-200">
-                    <p className="text-sm font-medium text-slate-800">{label}</p>
+                  <div key={field} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                    <p className="text-sm font-medium text-foreground">{label}</p>
                     <Switch checked={formData[field] || false} onCheckedChange={(c) => setFormData({ ...formData, [field]: c })} />
                   </div>
                 ))}
               </div>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p className="text-xs text-amber-700"><strong>Testing Mode:</strong> When enabled, emails go to the test address. Remember to disable after testing!</p>
+              <div className="bg-warn/12 border border-warn/25 rounded-lg p-3">
+                <p className="text-xs text-warn"><strong>Testing Mode:</strong> When enabled, emails go to the test address. Remember to disable after testing!</p>
               </div>
             </CardContent>
           </Card>
@@ -760,24 +760,24 @@ export default function NotificationTemplates({
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.465 }}>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Calendar className="w-5 h-5 text-indigo-600" />Calendar CC Settings</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Calendar className="w-5 h-5 text-info" />Calendar CC Settings</CardTitle>
               <CardDescription className="mt-1">Configure recipients for all appointment calendar invites</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-slate-700 font-medium">Group Calendar ID</Label>
-                <p className="text-xs text-slate-500 mt-1 mb-3">Enter your Google Calendar group ID</p>
-                <input type="text" value={formData.cc_group_calendar_id} onChange={(e) => setFormData({ ...formData, cc_group_calendar_id: e.target.value })} placeholder="c_xxxxx@group.calendar.google.com" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" />
+                <Label className="text-foreground font-medium">Group Calendar ID</Label>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">Enter your Google Calendar group ID</p>
+                <input type="text" value={formData.cc_group_calendar_id} onChange={(e) => setFormData({ ...formData, cc_group_calendar_id: e.target.value })} placeholder="c_xxxxx@group.calendar.google.com" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" />
               </div>
-              <div className="border-t border-slate-200 pt-4">
-                <Label className="text-slate-700 font-medium">Additional CC Emails</Label>
-                <p className="text-xs text-slate-500 mt-1 mb-3">Add email addresses to be CC'd on all calendar invites and notification emails</p>
+              <div className="border-t border-border pt-4">
+                <Label className="text-foreground font-medium">Additional CC Emails</Label>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">Add email addresses to be CC'd on all calendar invites and notification emails</p>
                 <EmailInput value={formData.cc_emails || []} onChange={(emails) => setFormData({ ...formData, cc_emails: emails })} placeholder="Type email and press Enter..." />
               </div>
-              <div className="border-t border-slate-200 pt-4">
-                <Label className="text-slate-700 font-medium">Reply-To Email Address</Label>
-                <p className="text-xs text-slate-500 mt-1 mb-3">Set a reply-to address for all notification emails (optional)</p>
-                <input type="email" value={formData.reply_to_email || ''} onChange={(e) => setFormData({ ...formData, reply_to_email: e.target.value })} placeholder="support@example.com" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" />
+              <div className="border-t border-border pt-4">
+                <Label className="text-foreground font-medium">Reply-To Email Address</Label>
+                <p className="text-xs text-muted-foreground mt-1 mb-3">Set a reply-to address for all notification emails (optional)</p>
+                <input type="email" value={formData.reply_to_email || ''} onChange={(e) => setFormData({ ...formData, reply_to_email: e.target.value })} placeholder="support@example.com" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info text-sm" />
               </div>
             </CardContent>
           </Card>
@@ -787,24 +787,24 @@ export default function NotificationTemplates({
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.47 }}>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Tag className="w-5 h-5 text-indigo-600" />Value Add Keywords for Transcript Analysis</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Tag className="w-5 h-5 text-info" />Value Add Keywords for Transcript Analysis</CardTitle>
               <CardDescription className="mt-1">Keywords to identify in transcripts for tracking value adds</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <Label className="text-slate-700 font-medium mb-3 block">Add Keywords</Label>
+                  <Label className="text-foreground font-medium mb-3 block">Add Keywords</Label>
                   <div className="flex gap-2">
-                    <input type="text" value={keywordInput} onChange={(e) => setKeywordInput(e.target.value)} onKeyPress={handleKeywordKeyPress} placeholder="Type keyword and press Enter..." className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" />
+                    <input type="text" value={keywordInput} onChange={(e) => setKeywordInput(e.target.value)} onKeyPress={handleKeywordKeyPress} placeholder="Type keyword and press Enter..." className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info text-sm" />
                     <Button type="button" onClick={addKeyword} variant="outline" size="sm">Add</Button>
                   </div>
                 </div>
                 {formData.value_add_keywords?.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {formData.value_add_keywords.map((keyword, idx) => (
-                      <Badge key={idx} variant="outline" className="px-3 py-1.5 text-sm bg-indigo-50 text-indigo-700 border-indigo-200">
+                      <Badge key={idx} variant="outline" className="px-3 py-1.5 text-sm bg-info/12 text-info border-info/25">
                         {keyword}
-                        <button onClick={() => removeKeyword(keyword)} className="ml-2 hover:text-indigo-900"><X className="w-3 h-3" /></button>
+                        <button onClick={() => removeKeyword(keyword)} className="ml-2 hover:text-info"><X className="w-3 h-3" /></button>
                       </Badge>
                     ))}
                   </div>
@@ -818,21 +818,21 @@ export default function NotificationTemplates({
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.475 }}>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Camera className="w-5 h-5 text-indigo-600" />Sale Photo Requirements</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Camera className="w-5 h-5 text-info" />Sale Photo Requirements</CardTitle>
               <CardDescription className="mt-1">Configure which photos are required when marking appointments as sold</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200">
+              <div className="flex items-center justify-between p-4 rounded-lg border border-border">
                 <div>
-                  <p className="font-medium text-slate-800">RAZZLE DAZZLE Folder Photo</p>
-                  <p className="text-sm text-slate-500 mt-1">Require photo of folder left at property</p>
+                  <p className="font-medium text-foreground">RAZZLE DAZZLE Folder Photo</p>
+                  <p className="text-sm text-muted-foreground mt-1">Require photo of folder left at property</p>
                 </div>
                 <Switch checked={formData.require_folder_photo} onCheckedChange={(c) => setFormData({ ...formData, require_folder_photo: c })} />
               </div>
-              <div className="flex items-center justify-between p-4 rounded-lg border border-slate-200">
+              <div className="flex items-center justify-between p-4 rounded-lg border border-border">
                 <div>
-                  <p className="font-medium text-slate-800">Yard Sign Photo</p>
-                  <p className="text-sm text-slate-500 mt-1">Require photo of yard sign (unless customer opts out)</p>
+                  <p className="font-medium text-foreground">Yard Sign Photo</p>
+                  <p className="text-sm text-muted-foreground mt-1">Require photo of yard sign (unless customer opts out)</p>
                 </div>
                 <Switch checked={formData.require_yard_sign_photo} onCheckedChange={(c) => setFormData({ ...formData, require_yard_sign_photo: c })} />
               </div>
@@ -846,7 +846,7 @@ export default function NotificationTemplates({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-blue-600" />24-Hour Appointment Reminder</CardTitle>
+                  <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-info" />24-Hour Appointment Reminder</CardTitle>
                   <CardDescription className="mt-1">Sent to lead 24 hours before appointment (via cron job)</CardDescription>
                 </div>
                 <Switch checked={formData.send_reminders} onCheckedChange={(c) => setFormData({ ...formData, send_reminders: c })} />
@@ -854,22 +854,22 @@ export default function NotificationTemplates({
             </CardHeader>
             <CardContent>
               <div className="mb-4">
-                <Label className="text-slate-700 font-medium mb-3 block">SMS Notification</Label>
+                <Label className="text-foreground font-medium mb-3 block">SMS Notification</Label>
                 <Textarea value={formData.lead_reminder_template} onChange={(e) => setFormData({ ...formData, lead_reminder_template: e.target.value })} placeholder="Enter your reminder SMS template..." className="min-h-32 font-mono text-sm" disabled={!formData.send_reminders} />
               </div>
-              <div className="border-t border-slate-200 pt-4 mt-4">
+              <div className="border-t border-border pt-4 mt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <Label className="text-slate-700 font-medium">Email Notification to Lead</Label>
+                  <Label className="text-foreground font-medium">Email Notification to Lead</Label>
                   <Switch checked={formData.send_lead_reminder_email} onCheckedChange={(c) => setFormData({ ...formData, send_lead_reminder_email: c })} />
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Subject Line</Label>
-                    <input type="text" value={formData.lead_reminder_email_subject} onChange={(e) => setFormData({ ...formData, lead_reminder_email_subject: e.target.value })} placeholder="e.g., Reminder: Your Floor Daddy Appointment Tomorrow - {lead_name}" className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm" disabled={!formData.send_lead_reminder_email} />
+                    <Label className="text-foreground text-sm mb-2 block">Subject Line</Label>
+                    <input type="text" value={formData.lead_reminder_email_subject} onChange={(e) => setFormData({ ...formData, lead_reminder_email_subject: e.target.value })} placeholder="e.g., Reminder: Your Floor Daddy Appointment Tomorrow - {lead_name}" className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-info font-mono text-sm" disabled={!formData.send_lead_reminder_email} />
                   </div>
                   <div>
-                    <Label className="text-slate-700 text-sm mb-2 block">Email Body</Label>
-                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                    <Label className="text-foreground text-sm mb-2 block">Email Body</Label>
+                    <div className="bg-white border border-border rounded-lg overflow-hidden">
                       <ReactQuill key="lead_reminder_email_template" value={formData.lead_reminder_email_template} onChange={handleQuillChange('lead_reminder_email_template')} theme="snow" modules={quillModules} readOnly={!formData.send_lead_reminder_email} style={{ minHeight: '200px' }} />
                     </div>
                   </div>
@@ -878,7 +878,7 @@ export default function NotificationTemplates({
               </div>
               <div className="space-y-3 mt-4">
                 <div>
-                  <Label className="text-sm text-slate-700 mb-2 block">Test Against Specific Appointment</Label>
+                  <Label className="text-sm text-foreground mb-2 block">Test Against Specific Appointment</Label>
                   <Select value={selectedTestAppointment} onValueChange={setSelectedTestAppointment}>
                     <SelectTrigger className="w-full"><SelectValue placeholder="Select appointment to test..." /></SelectTrigger>
                     <SelectContent>
@@ -898,10 +898,10 @@ export default function NotificationTemplates({
                   </Button>
                 </div>
               </div>
-              {cronStatus === 'success' && <p className="text-xs text-green-600 mt-2">✓ Cron job created successfully! Reminders will run daily at 9 AM.</p>}
-              {cronStatus === 'deleted' && <p className="text-xs text-green-600 mt-2">✓ Cron job deleted successfully.</p>}
-              {cronStatus === 'error' && <p className="text-xs text-red-600 mt-2">✗ Failed. Check your CRONJOB_ORG_API_KEY secret.</p>}
-              {!checkingCron && cronExists && !cronStatus && <p className="text-xs text-blue-600 mt-2">ℹ Daily cron job is active (runs at 9 AM).</p>}
+              {cronStatus === 'success' && <p className="text-xs text-good mt-2">✓ Cron job created successfully! Reminders will run daily at 9 AM.</p>}
+              {cronStatus === 'deleted' && <p className="text-xs text-good mt-2">✓ Cron job deleted successfully.</p>}
+              {cronStatus === 'error' && <p className="text-xs text-crit mt-2">✗ Failed. Check your CRONJOB_ORG_API_KEY secret.</p>}
+              {!checkingCron && cronExists && !cronStatus && <p className="text-xs text-info mt-2">ℹ Daily cron job is active (runs at 9 AM).</p>}
             </CardContent>
           </Card>
         </motion.div>
@@ -910,7 +910,7 @@ export default function NotificationTemplates({
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.485 }}>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-emerald-600" />Daily Finance Report Recipients</CardTitle>
+              <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-good" />Daily Finance Report Recipients</CardTitle>
               <CardDescription className="mt-1">These addresses receive a daily email listing all pending payment projects with a link to the Finance page</CardDescription>
             </CardHeader>
             <CardContent>
@@ -919,13 +919,13 @@ export default function NotificationTemplates({
                 onChange={(emails) => setFormData({ ...formData, finance_report_emails: emails })}
                 placeholder="Type email and press Enter..."
               />
-              <p className="text-xs text-blue-600 mt-3">ℹ Sent automatically every morning at 8 AM (Arizona time). Only sent when pending payment projects exist.</p>
+              <p className="text-xs text-info mt-3">ℹ Sent automatically every morning at 8 AM (Arizona time). Only sent when pending payment projects exist.</p>
             </CardContent>
           </Card>
         </motion.div>
 
         {/* Save Button */}
-        <Button onClick={handleSave} disabled={saveMutation.isPending} className="w-full bg-indigo-600 hover:bg-indigo-700 h-12">
+        <Button onClick={handleSave} disabled={saveMutation.isPending} className="w-full bg-info hover:bg-info h-12">
           {saveMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : <><Save className="w-4 h-4 mr-2" />Save Settings</>}
         </Button>
       </div>
@@ -936,20 +936,20 @@ export default function NotificationTemplates({
           <Card className="sticky top-6">
             <CardHeader>
               <CardTitle className="text-lg">Available Variables</CardTitle>
-              <p className="text-sm text-slate-500">Click to copy to clipboard</p>
+              <p className="text-sm text-muted-foreground">Click to copy to clipboard</p>
             </CardHeader>
             <CardContent className="space-y-4">
               {Object.entries(AVAILABLE_VARIABLES).map(([group, vars]) => (
                 <div key={group}>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-2 capitalize">{group} Information</h3>
+                  <h3 className="text-sm font-semibold text-foreground mb-2 capitalize">{group} Information</h3>
                   <div className="space-y-1">
                     {vars.map(({ variable, description }) => (
-                      <button key={variable} onClick={() => copyVariable(variable)} className="w-full text-left p-2 rounded-lg hover:bg-slate-50 transition-colors group">
+                      <button key={variable} onClick={() => copyVariable(variable)} className="w-full text-left p-2 rounded-lg hover:bg-muted transition-colors group">
                         <div className="flex items-center justify-between">
-                          <code className="text-xs font-mono text-green-600 bg-green-50 px-2 py-1 rounded">{variable}</code>
-                          {copiedVariable === variable ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />}
+                          <code className="text-xs font-mono text-good bg-good/12 px-2 py-1 rounded">{variable}</code>
+                          {copiedVariable === variable ? <Check className="w-3 h-3 text-good" /> : <Copy className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />}
                         </div>
-                        <p className="text-xs text-slate-500 mt-1">{description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{description}</p>
                       </button>
                     ))}
                   </div>

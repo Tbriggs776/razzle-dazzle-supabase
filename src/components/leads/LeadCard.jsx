@@ -17,7 +17,7 @@ export default function LeadCard({ lead, index }) {
     >
       <Link
         to={createPageUrl('LeadDetail') + `?id=${lead.id}`}
-        className="group block bg-white rounded-2xl border border-slate-100 p-6 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300"
+        className="group block bg-white rounded-2xl border border-border p-6 hover:border-info/25 hover:shadow-lg hover:shadow-indigo-50 transition-all duration-300"
       >
         <div className="flex items-start gap-4">
           {/* Avatar */}
@@ -28,31 +28,31 @@ export default function LeadCard({ lead, index }) {
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
+              <h3 className="text-lg font-semibold text-foreground group-hover:text-info transition-colors truncate">
                 {fullName}
               </h3>
-              <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all flex-shrink-0" />
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-info group-hover:translate-x-1 transition-all flex-shrink-0" />
             </div>
 
             <div className="mt-3 space-y-2">
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Mail className="w-4 h-4 text-slate-400" />
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Mail className="w-4 h-4 text-muted-foreground" />
                 <span className="truncate">{lead.email}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Phone className="w-4 h-4 text-slate-400" />
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Phone className="w-4 h-4 text-muted-foreground" />
                 <span>{lead.phone}</span>
               </div>
               {hasAddress && (
-                <div className="flex items-center gap-2 text-sm text-slate-500">
-                  <MapPin className="w-4 h-4 text-slate-400" />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="w-4 h-4 text-muted-foreground" />
                   <span className="truncate">
                     {[lead.city, lead.state].filter(Boolean).join(', ')}
                   </span>
                 </div>
               )}
               {lead.created_date && (
-                <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="w-3.5 h-3.5" />
                   <span>
                     {new Date(lead.created_date).toLocaleString('en-US', {

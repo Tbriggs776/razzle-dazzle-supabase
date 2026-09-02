@@ -254,7 +254,7 @@ export default function RegionMapEditor({ regions, journeyOrders, onPolygonDrawn
           >
             <Popup>
               <div className="text-sm font-semibold">{region.region_name}</div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-xs text-muted-foreground mt-1">
                 {region.zip_codes?.length || 0} ZIP codes
               </div>
             </Popup>
@@ -273,9 +273,9 @@ export default function RegionMapEditor({ regions, journeyOrders, onPolygonDrawn
           >
             <Popup>
               <div className="text-sm font-semibold">{order.customer_name}</div>
-              <div className="text-xs text-gray-500">{order.address}</div>
+              <div className="text-xs text-muted-foreground">{order.address}</div>
               {order.region_name && (
-                <div className="text-xs font-medium text-indigo-600 mt-1">{order.region_name}</div>
+                <div className="text-xs font-medium text-info mt-1">{order.region_name}</div>
               )}
             </Popup>
           </Marker>

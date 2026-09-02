@@ -40,9 +40,9 @@ export default function TagManager() {
     <div className="space-y-4">
       {/* Existing Tags */}
       {isLoading ? (
-        <div className="flex items-center gap-2 text-slate-400 text-sm"><Loader2 className="w-4 h-4 animate-spin" /> Loading tags...</div>
+        <div className="flex items-center gap-2 text-muted-foreground text-sm"><Loader2 className="w-4 h-4 animate-spin" /> Loading tags...</div>
       ) : tags.length === 0 ? (
-        <p className="text-sm text-slate-400">No tags created yet.</p>
+        <p className="text-sm text-muted-foreground">No tags created yet.</p>
       ) : (
         <div className="flex flex-wrap gap-2">
           {tags.map(tag => (
@@ -66,7 +66,7 @@ export default function TagManager() {
       )}
 
       {/* Create New Tag */}
-      <div className="flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap">
+      <div className="flex items-center gap-2 pt-2 border-t border-border flex-wrap">
         <Input
           value={newEmoji}
           onChange={e => setNewEmoji(e.target.value)}
@@ -85,13 +85,13 @@ export default function TagManager() {
           type="color"
           value={newColor}
           onChange={e => setNewColor(e.target.value)}
-          className="w-10 h-9 rounded-md border border-slate-200 cursor-pointer"
+          className="w-10 h-9 rounded-md border border-border cursor-pointer"
           title="Pick color"
         />
         <Button
           onClick={handleCreate}
           disabled={!newName.trim() || createMutation.isPending}
-          className="bg-indigo-600 hover:bg-indigo-700"
+          className="bg-info hover:bg-info"
           size="sm"
         >
           {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4 mr-1" />Add Tag</>}

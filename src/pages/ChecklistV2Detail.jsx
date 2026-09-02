@@ -304,7 +304,7 @@ export default function ChecklistV2Detail() {
             ) : canConvert && (
               <Button
                 onClick={() => setShowConvertDialog(true)}
-                className="h-8 px-3 bg-green-600 hover:bg-green-700 text-white text-xs"
+                className="h-8 px-3 bg-good hover:bg-good text-white text-xs"
               >
                 <Calendar className="w-3.5 h-3.5 mr-1.5" />
                 Convert
@@ -317,7 +317,7 @@ export default function ChecklistV2Detail() {
               </div>
             )}
             {saveStatus === 'saved' && (
-              <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+              <div className="flex items-center gap-1.5 text-xs text-good">
                 <CheckCircle2 className="w-3 h-3" />
                 Saved
               </div>
@@ -326,7 +326,7 @@ export default function ChecklistV2Detail() {
             <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-3 py-1">
               <div className="w-20 h-1.5 bg-primary/20 rounded-full overflow-hidden">
                 <div
-                  className={cn("h-full transition-all duration-500", percentage === 100 ? "bg-green-500" : "bg-primary")}
+                  className={cn("h-full transition-all duration-500", percentage === 100 ? "bg-good" : "bg-primary")}
                   style={{ width: `${percentage}%` }}
                 />
               </div>
@@ -380,7 +380,7 @@ export default function ChecklistV2Detail() {
             <Button
               onClick={() => convertToAppointmentMutation.mutate()}
               disabled={convertToAppointmentMutation.isPending || !selectedCSR}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-good hover:bg-good"
             >
               {convertToAppointmentMutation.isPending ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Converting...</>

@@ -144,7 +144,7 @@ ${JSON.stringify(payload, null, 2)}`,
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-indigo-600" />
+              <Sparkles className="w-5 h-5 text-info" />
               AI Staffing Recommendations
             </CardTitle>
             <CardDescription>
@@ -164,12 +164,12 @@ ${JSON.stringify(payload, null, 2)}`,
       </CardHeader>
       <CardContent>
         {loading && !recommendation ? (
-          <div className="flex items-center gap-3 py-8 text-slate-500">
+          <div className="flex items-center gap-3 py-8 text-muted-foreground">
             <Loader2 className="w-5 h-5 animate-spin" />
             Analyzing appointment flow, DC performance, and schedule gaps...
           </div>
         ) : (
-          <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
             {recommendation}
           </p>
         )}

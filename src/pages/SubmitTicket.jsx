@@ -260,9 +260,9 @@ export default function SubmitTicket() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
             {error && (
-              <div className="flex items-center gap-2 p-4 rounded-lg bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/25">
-                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+              <div className="flex items-center gap-2 p-4 rounded-lg bg-crit/12 border border-crit/25">
+                <AlertCircle className="w-5 h-5 text-crit flex-shrink-0" />
+                <p className="text-sm text-crit">{error}</p>
               </div>
             )}
 

@@ -228,17 +228,17 @@ export default function PreInstallChecklistModal({ open, onClose, onComplete, le
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl w-full max-h-[92vh] flex flex-col p-0 gap-0">
         {/* Fixed header */}
-        <DialogHeader className="px-6 py-4 border-b border-slate-200 flex-shrink-0">
-          <DialogTitle className="text-center text-xl font-bold text-blue-700 tracking-wide">
+        <DialogHeader className="px-6 py-4 border-b border-border flex-shrink-0">
+          <DialogTitle className="text-center text-xl font-bold text-info tracking-wide">
             PRE-INSTALLATION CHECKLIST
           </DialogTitle>
           <div className="flex gap-4 mt-2 text-sm">
-            <div className="flex-1 border border-slate-300 rounded px-3 py-1.5">
-              <span className="text-slate-500 mr-1">Name:</span>
+            <div className="flex-1 border border-border rounded px-3 py-1.5">
+              <span className="text-muted-foreground mr-1">Name:</span>
               <span className="font-medium">{customerName}</span>
             </div>
-            <div className="flex-1 border border-slate-300 rounded px-3 py-1.5">
-              <span className="text-slate-500 mr-1">Date:</span>
+            <div className="flex-1 border border-border rounded px-3 py-1.5">
+              <span className="text-muted-foreground mr-1">Date:</span>
               <span className="font-medium">{today}</span>
             </div>
           </div>
@@ -249,10 +249,10 @@ export default function PreInstallChecklistModal({ open, onClose, onComplete, le
           {CHECKLIST_ITEMS.map((item) => (
             <div key={item.id} className="flex gap-3">
               {/* Initials badge */}
-              <span className="flex-shrink-0 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5 h-fit mt-0.5 min-w-[32px] text-center">
+              <span className="flex-shrink-0 text-xs font-bold text-info bg-info/12 border border-info/25 rounded px-1.5 py-0.5 h-fit mt-0.5 min-w-[32px] text-center">
                 {initials}
               </span>
-              <div className="flex-1 text-sm leading-relaxed text-slate-700">
+              <div className="flex-1 text-sm leading-relaxed text-foreground">
                 {item.hasProductInput ? (
                   <>
                     <span className="font-bold">Product Confirmation</span>{' '}
@@ -261,8 +261,8 @@ export default function PreInstallChecklistModal({ open, onClose, onComplete, le
                       value={productInfo}
                       onChange={e => setProductInfo(e.target.value)}
                       placeholder="Enter product name, style and color..."
-                      className="inline-block border-b-2 border-blue-400 bg-transparent text-blue-700 font-medium placeholder:text-slate-400 placeholder:text-xs focus:outline-none focus:border-blue-600 mx-1 px-1 min-w-[200px] text-sm"
-                    /><span className="text-red-500 font-bold ml-1">*</span>
+                      className="inline-block border-b-2 border-info bg-transparent text-info font-medium placeholder:text-muted-foreground placeholder:text-xs focus:outline-none focus:border-info mx-1 px-1 min-w-[200px] text-sm"
+                    /><span className="text-crit font-bold ml-1">*</span>
                     {', '}{item.textAfter}
                   </>
                 ) : (
@@ -278,22 +278,22 @@ export default function PreInstallChecklistModal({ open, onClose, onComplete, le
           ))}
 
           {/* Signature section */}
-          <div className="border-t-2 border-slate-300 pt-6 space-y-4">
-            <p className="text-sm text-slate-600 font-medium">
+          <div className="border-t-2 border-border pt-6 space-y-4">
+            <p className="text-sm text-muted-foreground font-medium">
               By signing below, the customer acknowledges they have read and agree to all items above.
             </p>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-semibold text-slate-700">Customer Signature *</label>
+                <label className="text-sm font-semibold text-foreground">Customer Signature *</label>
                 <button
                   onClick={clearSignature}
-                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <RotateCcw className="w-3 h-3" />
                   Clear
                 </button>
               </div>
-              <div className="border-2 border-slate-300 rounded-xl bg-white overflow-hidden touch-none">
+              <div className="border-2 border-border rounded-xl bg-white overflow-hidden touch-none">
                 <canvas
                   ref={canvasRef}
                   width={600}
@@ -308,28 +308,28 @@ export default function PreInstallChecklistModal({ open, onClose, onComplete, le
                   onTouchEnd={endDraw}
                 />
               </div>
-              <p className="text-xs text-slate-400 mt-1 text-center">Sign above using mouse or touch</p>
+              <p className="text-xs text-muted-foreground mt-1 text-center">Sign above using mouse or touch</p>
             </div>
 
             <div className="flex items-center gap-3 pt-2 pb-4">
-              <div className="flex-1 border border-slate-300 rounded px-3 py-1.5 text-sm">
-                <span className="text-slate-500 mr-1">Buyer's Signature</span>
+              <div className="flex-1 border border-border rounded px-3 py-1.5 text-sm">
+                <span className="text-muted-foreground mr-1">Buyer's Signature</span>
               </div>
-              <div className="border border-slate-300 rounded px-3 py-1.5 text-sm">
-                <span className="text-slate-500 mr-1">Date:</span>
+              <div className="border border-border rounded px-3 py-1.5 text-sm">
+                <span className="text-muted-foreground mr-1">Date:</span>
                 <span>{today}</span>
               </div>
             </div>
 
-            <div className="text-sm text-slate-600 flex gap-6">
-              <span><span className="text-slate-500">Buyer:</span> <span className="font-medium">{customerName}</span></span>
-              {lead?.email && <span><span className="text-slate-500">Email:</span> <span className="font-medium">{lead.email}</span></span>}
+            <div className="text-sm text-muted-foreground flex gap-6">
+              <span><span className="text-muted-foreground">Buyer:</span> <span className="font-medium">{customerName}</span></span>
+              {lead?.email && <span><span className="text-muted-foreground">Email:</span> <span className="font-medium">{lead.email}</span></span>}
             </div>
           </div>
         </div>
 
         {/* Fixed footer */}
-        <div className="px-6 py-4 border-t border-slate-200 flex-shrink-0 flex gap-3">
+        <div className="px-6 py-4 border-t border-border flex-shrink-0 flex gap-3">
           <Button variant="outline" onClick={onClose} className="flex-1" disabled={uploading}>
             Cancel
           </Button>
@@ -337,7 +337,7 @@ export default function PreInstallChecklistModal({ open, onClose, onComplete, le
             <Button
               onClick={handleSubmit}
               disabled={!hasSigned || !productInfo.trim() || uploading}
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-info hover:bg-info"
             >
               {uploading ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
@@ -346,7 +346,7 @@ export default function PreInstallChecklistModal({ open, onClose, onComplete, le
               )}
             </Button>
             {(!hasSigned || !productInfo.trim()) && (
-              <p className="text-xs text-amber-600 text-center">
+              <p className="text-xs text-warn text-center">
                 {!productInfo.trim() && !hasSigned
                   ? 'Product confirmation and signature required'
                   : !productInfo.trim()

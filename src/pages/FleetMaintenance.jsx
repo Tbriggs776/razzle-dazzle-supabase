@@ -27,10 +27,10 @@ const SERVICE_TYPES = [
 import { format } from 'date-fns';
 
 const statusColors = {
-  scheduled: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  in_progress: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
-  completed: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
-  overdue: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  scheduled: 'bg-info/12 text-info border-info/25',
+  in_progress: 'bg-warn/12 text-warn border-warn/25',
+  completed: 'bg-good/12 text-good border-good/25',
+  overdue: 'bg-crit/12 text-crit border-crit/25',
   cancelled: 'bg-secondary text-secondary-foreground border-border'
 };
 

@@ -71,8 +71,8 @@ export default function CancelledAppointments() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-red-50 dark:bg-red-500/15 flex items-center justify-center mb-6">
-              <XCircle className="w-10 h-10 text-red-400 dark:text-red-300" />
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-crit/12 flex items-center justify-center mb-6">
+              <XCircle className="w-10 h-10 text-crit" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">
               {searchQuery ? 'No appointments found' : 'No cancelled appointments'}

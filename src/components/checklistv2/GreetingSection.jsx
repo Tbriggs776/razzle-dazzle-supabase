@@ -46,47 +46,47 @@ export default function GreetingSection({ formData, onChange }) {
   const isComplete = formData.greeting_completed && formData.caller_type;
 
   return (
-    <div className="border-2 border-indigo-200 rounded-xl overflow-hidden">
+    <div className="border-2 border-info/25 rounded-xl overflow-hidden">
       {/* Section Header */}
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-indigo-50 border-b border-indigo-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-info/12 border-b border-info/25"
       )}>
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-9 h-9 rounded-lg flex items-center justify-center",
-            isComplete ? "bg-green-100" : "bg-indigo-100"
+            isComplete ? "bg-good/12" : "bg-info/12"
           )}>
             {isComplete
-              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
-              : <Phone className="w-5 h-5 text-indigo-600" />
+              ? <CheckCircle2 className="w-5 h-5 text-good" />
+              : <Phone className="w-5 h-5 text-info" />
             }
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 1 — Greeting</p>
-            <p className="text-xs text-slate-500">Answer the call & identify caller type</p>
+            <p className="font-bold text-foreground">Section 1 — Greeting</p>
+            <p className="text-xs text-muted-foreground">Answer the call & identify caller type</p>
           </div>
         </div>
         {isComplete && (
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>
+          <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>
         )}
       </div>
 
       <div className="p-5 space-y-6 bg-white">
         {/* Script */}
         <Accordion type="single" collapsible defaultValue="script">
-          <AccordionItem value="script" className="border border-slate-200 rounded-lg overflow-hidden">
-            <AccordionTrigger className="px-4 py-3 hover:no-underline bg-slate-50 hover:bg-slate-100 text-sm font-semibold text-slate-700">
+          <AccordionItem value="script" className="border border-border rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline bg-muted hover:bg-muted text-sm font-semibold text-foreground">
               📋 View Script
             </AccordionTrigger>
             <AccordionContent className="px-0 pb-0">
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-border">
                 {SCRIPT_LINES.map((line, idx) => (
                   <div key={idx} className="flex gap-3 px-4 py-3">
-                    <span className="flex-shrink-0 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2 py-1 rounded h-fit mt-0.5">
+                    <span className="flex-shrink-0 text-xs font-bold text-info bg-info/12 border border-info/25 px-2 py-1 rounded h-fit mt-0.5">
                       {line.speaker}
                     </span>
-                    <p className="text-sm text-slate-700 italic leading-relaxed">{line.text}</p>
+                    <p className="text-sm text-foreground italic leading-relaxed">{line.text}</p>
                   </div>
                 ))}
               </div>
@@ -97,8 +97,8 @@ export default function GreetingSection({ formData, onChange }) {
         {/* Caller Type Branch */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
-            <Label className="font-semibold text-slate-700">Branch on their answer — what type of caller is this?</Label>
+            <AlertTriangle className="w-4 h-4 text-warn" />
+            <Label className="font-semibold text-foreground">Branch on their answer — what type of caller is this?</Label>
           </div>
           <div className="grid gap-2">
             {CALLER_TYPES.map((type) => {
@@ -111,10 +111,10 @@ export default function GreetingSection({ formData, onChange }) {
                   className={cn(
                     "flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all",
                     selected
-                      ? type.color === 'green' ? "border-green-500 bg-green-50"
-                        : type.color === 'amber' ? "border-amber-500 bg-amber-50"
-                        : "border-blue-500 bg-blue-50"
-                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                      ? type.color === 'green' ? "border-good bg-good/12"
+                        : type.color === 'amber' ? "border-warn bg-warn/12"
+                        : "border-info bg-info/12"
+                      : "border-border bg-white hover:border-border hover:bg-muted"
                   )}
                 >
                   <span className="text-xl leading-none mt-0.5">{type.icon}</span>
@@ -122,19 +122,19 @@ export default function GreetingSection({ formData, onChange }) {
                     <p className={cn(
                       "font-semibold text-sm",
                       selected
-                        ? type.color === 'green' ? "text-green-800"
-                          : type.color === 'amber' ? "text-amber-800"
-                          : "text-blue-800"
-                        : "text-slate-700"
+                        ? type.color === 'green' ? "text-good"
+                          : type.color === 'amber' ? "text-warn"
+                          : "text-info"
+                        : "text-foreground"
                     )}>
                       {type.label}
                     </p>
                     {selected && (
                       <p className={cn(
                         "text-xs mt-1 flex items-center gap-1",
-                        type.color === 'green' ? "text-green-700"
-                          : type.color === 'amber' ? "text-amber-700"
-                          : "text-blue-700"
+                        type.color === 'green' ? "text-good"
+                          : type.color === 'amber' ? "text-warn"
+                          : "text-info"
                       )}>
                         <ChevronRight className="w-3 h-3" />
                         {type.instruction}
@@ -150,7 +150,7 @@ export default function GreetingSection({ formData, onChange }) {
         {/* Notes for non-estimate callers */}
         {formData.caller_type && formData.caller_type !== 'New Estimate / Flooring' && (
           <div className="space-y-2">
-            <Label className="font-medium text-slate-700">Notes / Routing Details</Label>
+            <Label className="font-medium text-foreground">Notes / Routing Details</Label>
             <Textarea
               value={formData.caller_type_notes || ''}
               onChange={(e) => onChange('caller_type_notes', e.target.value)}
@@ -164,17 +164,17 @@ export default function GreetingSection({ formData, onChange }) {
         <div className={cn(
           "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
           formData.greeting_completed
-            ? "border-green-400 bg-green-50"
-            : "border-slate-200 bg-slate-50 hover:border-indigo-300"
+            ? "border-good bg-good/12"
+            : "border-border bg-muted hover:border-info/25"
         )}
           onClick={() => onChange('greeting_completed', !formData.greeting_completed)}
         >
           <Checkbox
             checked={formData.greeting_completed || false}
             onCheckedChange={(checked) => onChange('greeting_completed', checked)}
-            className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+            className="data-[state=checked]:bg-good data-[state=checked]:border-good"
           />
-          <Label className="cursor-pointer font-semibold text-slate-700">
+          <Label className="cursor-pointer font-semibold text-foreground">
             Greeting completed — caller identified
           </Label>
         </div>

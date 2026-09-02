@@ -18,10 +18,10 @@ const logTypeIcons = {
 };
 
 const levelColors = {
-  'error': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'warning': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
-  'info': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  'debug': 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-500/15 dark:text-slate-300 dark:border-slate-500/25'
+  'error': 'bg-crit/12 text-crit border-crit/25',
+  'warning': 'bg-warn/12 text-warn border-warn/25',
+  'info': 'bg-info/12 text-info border-info/25',
+  'debug': 'bg-muted text-muted-foreground border-border'
 };
 
 const levelIcons = {
@@ -213,7 +213,7 @@ export default function Logs() {
                       </div>
                       <p className="text-sm font-medium mb-2">{log.message}</p>
                       {log.error_message && (
-                        <p className="text-sm text-red-700 dark:text-red-300 mb-2">Error: {log.error_message}</p>
+                        <p className="text-sm text-crit mb-2">Error: {log.error_message}</p>
                       )}
                       {log.appointment_id && (
                         <p className="text-xs text-muted-foreground mb-2">Appointment: {log.appointment_id}</p>

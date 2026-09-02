@@ -22,12 +22,12 @@ const ROLES = [
 ];
 
 const roleColors = {
-  "Admin": "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300",
-  "Design Consultant": "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300",
-  "Customer Service Rep": "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
-  "Order Processor": "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
-  "Sales Manager": "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300",
-  "Finance Manager": "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+  "Admin": "bg-crit/12 text-crit",
+  "Design Consultant": "bg-info/12 text-info",
+  "Customer Service Rep": "bg-info/12 text-info",
+  "Order Processor": "bg-warn/12 text-warn",
+  "Sales Manager": "bg-good/12 text-good",
+  "Finance Manager": "bg-good/12 text-good",
   "Operations": "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300",
   "Customer Experience Coordinator": "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-300",
 };

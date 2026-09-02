@@ -46,12 +46,12 @@ const getColorStyles = (hexColor) => {
 
 const STATUS_COLORS = {
   'Lead': 'bg-secondary text-foreground border-border',
-  'Awaiting Assignment': 'bg-amber-100 text-amber-700 border-amber-200',
-  'Scheduled': 'bg-blue-100 text-blue-700 border-blue-200',
+  'Awaiting Assignment': 'bg-warn/12 text-warn border-warn/25',
+  'Scheduled': 'bg-info/12 text-info border-info/25',
   'Rescheduled': 'bg-primary/10 text-primary border-primary/20',
-  'Completed': 'bg-green-100 text-green-700 border-green-200',
-  'Sold': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  'Cancelled': 'bg-red-100 text-red-700 border-red-200'
+  'Completed': 'bg-good/12 text-good border-good/25',
+  'Sold': 'bg-good/12 text-good border-good/25',
+  'Cancelled': 'bg-crit/12 text-crit border-crit/25'
 };
 
 export default function ScheduleAssistant() {
@@ -463,7 +463,7 @@ export default function ScheduleAssistant() {
            <DialogHeader>
              <DialogTitle>
                {confirmDialog?.doubleBookWarning ? (
-                 <span className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                 <span className="flex items-center gap-2 text-warn">
                    <AlertCircle className="w-5 h-5" />
                    Double Booking Warning
                  </span>
@@ -482,12 +482,12 @@ export default function ScheduleAssistant() {
            {confirmDialog && (
              <div className="space-y-4 py-4">
                {confirmDialog.doubleBookWarning && (
-                 <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25">
-                   <p className="text-sm font-semibold text-amber-900 dark:text-amber-300 mb-2">Existing Appointment:</p>
-                   <p className="text-sm text-amber-800 dark:text-amber-300">
+                 <div className="p-3 rounded-lg bg-warn/12 border border-warn/25">
+                   <p className="text-sm font-semibold text-warn mb-2">Existing Appointment:</p>
+                   <p className="text-sm text-warn">
                      {confirmDialog.doubleBookWarning.conflictLead?.first_name} {confirmDialog.doubleBookWarning.conflictLead?.last_name}
                    </p>
-                   <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                   <p className="text-xs text-warn mt-1">
                      Same time block on {format(parseISO(confirmDialog.appointment.appointment_date), 'MMM d')}
                    </p>
                  </div>
@@ -580,7 +580,7 @@ export default function ScheduleAssistant() {
             <Button
               onClick={handleConfirm}
               disabled={updateAppointmentMutation.isPending}
-              className={confirmDialog?.doubleBookWarning ? "bg-amber-600 hover:bg-amber-700" : "bg-primary text-primary-foreground hover:opacity-90"}
+              className={confirmDialog?.doubleBookWarning ? "bg-warn hover:bg-warn" : "bg-primary text-primary-foreground hover:opacity-90"}
             >
               {updateAppointmentMutation.isPending ? (
                 <>
@@ -667,10 +667,10 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
           })}
         </div>
 
-        <div className="grid grid-cols-[250px_repeat(4,minmax(200px,1fr))] border-b-2 border-amber-300 bg-amber-50">
-          <div className="p-4 flex items-center gap-3 sticky left-0 bg-amber-50 z-10">
-            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
+        <div className="grid grid-cols-[250px_repeat(4,minmax(200px,1fr))] border-b-2 border-warn/25 bg-warn/12">
+          <div className="p-4 flex items-center gap-3 sticky left-0 bg-warn/12 z-10">
+            <div className="w-10 h-10 rounded-full bg-warn/12 flex items-center justify-center">
+              <AlertCircle className="w-5 h-5 text-warn" />
             </div>
             <span className="font-semibold text-foreground">Unassigned</span>
           </div>
@@ -682,7 +682,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                   {...provided.droppableProps}
                   className={cn(
                     "p-2 border-l border-border min-h-[80px]",
-                    snapshot.isDraggingOver && "bg-amber-100"
+                    snapshot.isDraggingOver && "bg-warn/12"
                   )}
                 >
                   <div className="space-y-2">
@@ -759,7 +759,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                                className={cn(
                                  "bg-white rounded-lg border p-2 cursor-move hover:shadow-md transition-shadow",
                                  snapshot.isDragging && "shadow-xl opacity-90",
-                                 appts.length > 1 && "border-amber-400 border-l-4"
+                                 appts.length > 1 && "border-warn border-l-4"
                                )}
                               >
                                <AppointmentCard 
@@ -988,7 +988,7 @@ function DayView({ consultants, appointments, leads, checklists, checklistsV2 = 
                                     className={cn(
                                      "bg-white rounded border p-1.5 cursor-move",
                                      snapshot.isDragging && "shadow-xl opacity-90",
-                                     appts.length > 1 && "border-amber-400 border-l-2"
+                                     appts.length > 1 && "border-warn border-l-2"
                                     )}
                                     >
                                     <AppointmentCard 
@@ -1216,7 +1216,7 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
       <Dialog open={!!doubleBookWarning} onOpenChange={() => setDoubleBookWarning(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+            <DialogTitle className="flex items-center gap-2 text-warn">
               <AlertCircle className="w-5 h-5" />
               Double Booking Warning
             </DialogTitle>
@@ -1227,12 +1227,12 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
 
           {doubleBookWarning && (
             <div className="space-y-4 py-4">
-              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25">
-                <p className="text-sm font-semibold text-amber-900 dark:text-amber-300 mb-2">Existing Appointment:</p>
-                <p className="text-sm text-amber-800 dark:text-amber-300">
+              <div className="p-3 rounded-lg bg-warn/12 border border-warn/25">
+                <p className="text-sm font-semibold text-warn mb-2">Existing Appointment:</p>
+                <p className="text-sm text-warn">
                   {doubleBookWarning.conflictLead?.first_name} {doubleBookWarning.conflictLead?.last_name}
                 </p>
-                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                <p className="text-xs text-warn mt-1">
                   Same time block on {format(parseISO(appointment.appointment_date), 'MMM d')}
                 </p>
               </div>
@@ -1251,7 +1251,7 @@ function AppointmentCard({ appointment, lead, checklist, checklistV2 = null, com
             </Button>
             <Button
               onClick={() => doubleBookWarning && proceedWithAssignment(doubleBookWarning.consultantId)}
-              className="bg-amber-600 hover:bg-amber-700"
+              className="bg-warn hover:bg-warn"
             >
               Proceed Anyway
             </Button>
