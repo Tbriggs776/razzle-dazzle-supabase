@@ -104,18 +104,45 @@ Deno.serve(async (req) => {
         };
       };
 
-      let startAfter: string | null = null, startAfterId: string | null = null;
-      let page = 0, seen = 0, withDnd = 0;
+      // THE CURSOR IS PERSISTED, not returned. Returning it assumes the caller sees
+      // the response, and the first real run proved that assumption false: pg_net
+      // times out at 5s while this function legitimately runs for 50, so the cursor
+      // went into a response nobody read and the next call restarted from page one --
+      // making the table permanently unfinishable past one budget's worth of pages.
+      // Parking it in a row means "call me again" actually resumes.
+      const CURSOR_KEY = 'contact_dnd';
+      const { data: saved } = await s.from('ghl_sync_state')
+        .select('cursor, is_complete, items_seen').eq('key', CURSOR_KEY).maybeSingle();
+      const resuming = p?.restart !== true && saved?.is_complete === false && !!saved?.cursor;
+      let startAfter: string | null = resuming ? (saved.cursor.split('|')[0] || null) : null;
+      let startAfterId: string | null = resuming ? (saved.cursor.split('|')[1] || null) : null;
+      let page = 0, withDnd = 0;
+      // Carried across resumes so the reported total is the run, not the page.
+      let seen = resuming ? (saved.items_seen ?? 0) : 0;
       const limit = 100, maxPages = 400;
       const t0 = Date.now();
 
+      const park = async (complete: boolean) => {
+        await s.from('ghl_sync_state').upsert({
+          key: CURSOR_KEY,
+          cursor: complete ? null : `${startAfter ?? ''}|${startAfterId ?? ''}`,
+          page,
+          items_seen: seen,
+          items_written: seen,
+          is_complete: complete,
+          last_run_at: new Date().toISOString(),
+          started_at: new Date().toISOString(),
+          updated_date: new Date().toISOString(),
+        }, { onConflict: 'key' });
+      };
+
       while (page < maxPages) {
-        // Leave the request before the platform kills it, and report where to resume
-        // from. 17k contacts at 100 a page is ~175 round trips; a slow day for GHL
-        // should degrade into "call me again", not a half-written table with no
-        // record of how far it got.
-        if (Date.now() - t0 > 50_000) {
-          return Response.json({ ok: true, partial: true, pages: page, contacts: seen, with_dnd: withDnd, startAfter, startAfterId }, { headers: cors });
+        // Leave the request before the platform kills it. 17k contacts at 100 a page
+        // is ~175 round trips; a slow day at GHL should degrade into "call me again",
+        // not a half-written table with no record of how far it got.
+        if (Date.now() - t0 > 45_000) {
+          await park(false);
+          return Response.json({ ok: true, partial: true, resumable: true, pages: page, contacts: seen, with_dnd: withDnd }, { headers: cors });
         }
         const params = new URLSearchParams({ locationId: ctx.locationId, limit: String(limit) });
         if (startAfter) params.set('startAfter', String(startAfter));
@@ -137,6 +164,7 @@ Deno.serve(async (req) => {
         if (contacts.length < limit || !d.meta?.startAfterId) break;
         startAfter = d.meta.startAfter; startAfterId = d.meta.startAfterId; page++;
       }
+      await park(true);
       return Response.json({ ok: true, done: true, pages: page, contacts: seen, with_dnd: withDnd }, { headers: cors });
     }
 
