@@ -58,6 +58,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.resendWebhook]
 verify_jwt = false
+[functions.rfmsOrderSync]
+verify_jwt = false
 [functions.rfmsQuery]
 verify_jwt = false
 [functions.sendLeadMessage]
