@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import BrandLogo from '@/components/BrandLogo';
+import PublicPageShell from '@/components/common/PublicPageShell';
 
 // Customer-facing project tracker. Floor Daddy brand (navy + razzle pink + gold),
 // themed via app tokens (dark-mode aware), mobile-first: the progress tracker is a
@@ -87,9 +88,9 @@ export default function CustomerProjectView() {
   // only one of them means the customer should do something about their link.
   if (isError) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-6">
-        <div className="max-w-sm text-center">
-          <h2 className="mb-2 text-xl font-semibold text-foreground">We could not load your project</h2>
+      <PublicPageShell eyebrow="Project tracker" footer={false}>
+        <div className="mx-auto max-w-sm py-12 text-center">
+          <h2 className="mb-2 font-display text-xl font-semibold text-foreground">We could not load your project</h2>
           <p className="mb-4 text-muted-foreground">This is a connection problem, not a missing project — it is still here. Please try again in a moment.</p>
           <button
             type="button"
@@ -99,18 +100,25 @@ export default function CustomerProjectView() {
             Try again
           </button>
         </div>
-      </div>
+      </PublicPageShell>
     );
   }
 
+  // Branded on purpose. "Project not found" is the moment a customer decides the
+  // link they were texted is broken or fake — the mark is worth the most here, and
+  // the phone number turns a dead end into a call.
   if (!project) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-6">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-foreground mb-2">Project not found</h2>
-          <p className="text-muted-foreground">Please check your link, or contact us for a new one.</p>
+      <PublicPageShell eyebrow="Project tracker" footer={false}>
+        <div className="mx-auto max-w-sm py-12 text-center">
+          <h2 className="font-display text-xl font-semibold text-foreground mb-2">Project not found</h2>
+          <p className="text-muted-foreground">
+            Please check your link, or call Customer Care on{' '}
+            <a href="tel:480-764-2412" className="font-semibold text-brand-pink hover:underline">480-764-2412</a>{' '}
+            for a new one.
+          </p>
         </div>
-      </div>
+      </PublicPageShell>
     );
   }
 
