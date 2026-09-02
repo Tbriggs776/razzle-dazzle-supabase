@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/lib/supabaseClient';
 import { invokeFailure } from '@/lib/invokeResult';
-import BrandLogo from '@/components/BrandLogo';
+import PublicPageShell from '@/components/common/PublicPageShell';
 import {
   Loader2, Check, ShieldCheck, HardHat, BadgeCheck, AlertTriangle,
   Upload, FileText, Building2, User, ShieldAlert, Banknote, Send,
@@ -197,26 +197,23 @@ export default function InstallerApply() {
     setSubmitting(false);
   };
 
+  // Sticky: this is a ~10-minute form and the mark should not scroll away from
+  // someone deciding whether to hand over their licence and W-9.
   const shell = (inner) => (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card/80 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div>
-            <BrandLogo imgClassName="h-7 sm:h-8" />
-            <div className="text-[10px] font-medium tracking-[0.16em] text-muted-foreground uppercase mt-1.5">Installer onboarding</div>
-          </div>
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck className="w-3.5 h-3.5" /> Secure</div>
-        </div>
-      </header>
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">{inner}</main>
-    </div>
+    <PublicPageShell
+      eyebrow="Installer onboarding"
+      aside={<><ShieldCheck className="h-3.5 w-3.5" /> Secure</>}
+      sticky
+    >
+      {inner}
+    </PublicPageShell>
   );
 
   if (loading) return shell(<div className="flex justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>);
 
   if (submitted) return shell(
     <div className={card + ' text-center py-10'}>
-      <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center mb-5"><Check className="w-8 h-8 text-emerald-600 dark:text-emerald-400" /></div>
+      <div className="w-16 h-16 mx-auto rounded-2xl bg-good/12 flex items-center justify-center mb-5"><Check className="w-8 h-8 text-good" /></div>
       <h2 className="text-2xl font-bold tracking-tight">Application submitted</h2>
       <p className="text-muted-foreground mt-2 max-w-md mx-auto">Thanks! Our team will review your license, insurance, and documents. Once approved, we'll email you a link to e-sign your Subcontractor Agreement, Claims &amp; Warranty Agreement{form.elect_direct_deposit ? ', and Direct Deposit authorization' : ''}.</p>
     </div>
@@ -225,8 +222,8 @@ export default function InstallerApply() {
   const Doc = ({ kind, label, required }) => (
     <div className="flex items-center justify-between gap-3 py-2.5 border-b border-border last:border-0">
       <div className="min-w-0">
-        <p className="text-sm font-medium truncate">{label}{required && <span className="text-red-500"> *</span>}</p>
-        {files[kind] && <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5"><Check className="w-3 h-3" /> Uploaded</p>}
+        <p className="text-sm font-medium truncate">{label}{required && <span className="text-crit"> *</span>}</p>
+        {files[kind] && <p className="text-[11px] text-good flex items-center gap-1 mt-0.5"><Check className="w-3 h-3" /> Uploaded</p>}
       </div>
       <label className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-input text-xs font-medium cursor-pointer hover:bg-muted transition">
         {uploading[kind] ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
@@ -250,7 +247,7 @@ export default function InstallerApply() {
         </div>
       </section>
 
-      {error && <div className="rounded-xl border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 px-4 py-3 text-sm flex items-start gap-2"><AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /><span>{error}</span></div>}
+      {error && <div className="rounded-xl border border-crit/30 bg-crit/10 text-crit px-4 py-3 text-sm flex items-start gap-2"><AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" /><span>{error}</span></div>}
 
       {/* Only shown to someone who arrived WITHOUT a token — i.e. they lost the
           link. The link goes to the email already on the application; the ROC
@@ -323,17 +320,17 @@ export default function InstallerApply() {
           <button onClick={verifyRoc} disabled={rocBusy || !form.roc_license_no} className="shrink-0 bg-primary text-primary-foreground px-4 rounded-lg font-semibold text-sm disabled:opacity-50 hover:opacity-90 transition">{rocBusy ? '…' : 'Verify'}</button>
         </div>
         {roc && (roc.notFound || roc.business_name === undefined ? (
-          <p className="mt-3 text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> No active AZ license found for that number. Double-check the number.</p>
+          <p className="mt-3 text-sm text-warn flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> No active AZ license found for that number. Double-check the number.</p>
         ) : (
           <div className="mt-3 rounded-xl border border-border bg-muted/50 p-3 text-sm">
             <div className="flex items-center gap-2 font-medium">
-              {roc.is_active ? <BadgeCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <AlertTriangle className="w-4 h-4 text-red-500" />}
+              {roc.is_active ? <BadgeCheck className="w-4 h-4 text-good" /> : <AlertTriangle className="w-4 h-4 text-crit" />}
               {roc.business_name} — {roc.is_active ? 'Active' : (roc.status || 'Not active')}
             </div>
             <div className="text-muted-foreground mt-1 text-xs">
               Classifications: {(roc.classes || []).map((c) => c.class).join(', ') || '—'} · Expires {roc.expiration_date || '—'}
             </div>
-            {!hasFlooringClass && <p className="text-amber-600 dark:text-amber-400 text-xs mt-1.5">Note: no floor-covering class (C-8 / CR-8 / R-8) found. Flooring installs require one — you can still apply.</p>}
+            {!hasFlooringClass && <p className="text-warn text-xs mt-1.5">Note: no floor-covering class (C-8 / CR-8 / R-8) found. Flooring installs require one — you can still apply.</p>}
           </div>
         ))}
       </section>
@@ -419,7 +416,7 @@ export default function InstallerApply() {
       <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
         <div className="text-xs text-muted-foreground">
           {saving ? 'Saving…' : 'Progress saved to this link.'}
-          {missingDocs.length > 0 && <span className="block text-amber-600 dark:text-amber-400 mt-0.5">Still needed: {missingDocs.join(', ')}</span>}
+          {missingDocs.length > 0 && <span className="block text-warn mt-0.5">Still needed: {missingDocs.join(', ')}</span>}
         </div>
         {blockers.length > 0 && (
           <div className="mb-3 rounded-lg border border-warn/40 bg-warn/10 p-3">
