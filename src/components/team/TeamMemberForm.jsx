@@ -60,27 +60,27 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Personal Information */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Personal Information</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Personal Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="first_name" className="text-slate-700">First Name *</Label>
+            <Label htmlFor="first_name" className="text-foreground">First Name *</Label>
             <Input
               id="first_name"
               value={formData.first_name}
               onChange={(e) => handleChange('first_name', e.target.value)}
               required
-              className="h-12 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+              className="h-12 border-border focus:border-info focus:ring-info transition-all"
               placeholder="John"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="last_name" className="text-slate-700">Last Name *</Label>
+            <Label htmlFor="last_name" className="text-foreground">Last Name *</Label>
             <Input
               id="last_name"
               value={formData.last_name}
               onChange={(e) => handleChange('last_name', e.target.value)}
               required
-              className="h-12 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+              className="h-12 border-border focus:border-info focus:ring-info transition-all"
               placeholder="Doe"
             />
           </div>
@@ -89,27 +89,27 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
 
       {/* Contact Information */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Contact Information</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Contact Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-slate-700">Email *</Label>
+            <Label htmlFor="email" className="text-foreground">Email *</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => handleChange('email', e.target.value)}
               required
-              className="h-12 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+              className="h-12 border-border focus:border-info focus:ring-info transition-all"
               placeholder="john@example.com"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-slate-700">Phone</Label>
+            <Label htmlFor="phone" className="text-foreground">Phone</Label>
             <PhoneInput
               id="phone"
               value={formData.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
-              className="h-12 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+              className="h-12 border-border focus:border-info focus:ring-info transition-all"
             />
           </div>
         </div>
@@ -117,10 +117,10 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
 
       {/* Profile Photo */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Profile Photo</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Profile Photo</h3>
         <div className="space-y-4">
           {formData.profile_photo && (
-            <div className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-slate-200">
+            <div className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-border">
               <SignedImage
                 src={formData.profile_photo}
                 alt="Profile"
@@ -129,7 +129,7 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, profile_photo: '' }))}
-                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                className="absolute top-2 right-2 p-1 bg-crit text-white rounded-full hover:bg-crit transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -162,7 +162,7 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
                 variant="outline"
                 disabled={uploading}
                 onClick={() => document.getElementById('photo-upload').click()}
-                className="h-12 px-6 border-slate-200 cursor-pointer"
+                className="h-12 px-6 border-border cursor-pointer"
               >
                 {uploading ? (
                   <>
@@ -177,21 +177,21 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
                 )}
               </Button>
             </label>
-            <p className="text-xs text-slate-500 mt-2">Recommended: Square image, at least 200x200px</p>
+            <p className="text-xs text-muted-foreground mt-2">Recommended: Square image, at least 200x200px</p>
           </div>
         </div>
       </div>
 
       {/* Bio */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Bio</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Bio</h3>
         <div className="space-y-2">
-          <Label htmlFor="bio" className="text-slate-700">Short Bio</Label>
+          <Label htmlFor="bio" className="text-foreground">Short Bio</Label>
           <Textarea
             id="bio"
             value={formData.bio}
             onChange={(e) => handleChange('bio', e.target.value)}
-            className="border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all resize-none"
+            className="border-border focus:border-info focus:ring-info transition-all resize-none"
             placeholder="A short description shown to customers on their appointment page..."
             rows={3}
           />
@@ -200,12 +200,12 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
 
       {/* Role & Status */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Role & Status</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Role & Status</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="role" className="text-slate-700">Role</Label>
+            <Label htmlFor="role" className="text-foreground">Role</Label>
             <Select value={formData.role} onValueChange={(value) => handleChange('role', value)}>
-              <SelectTrigger className="h-12 border-slate-200">
+              <SelectTrigger className="h-12 border-border">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
@@ -218,13 +218,13 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
             </Select>
           </div>
           <div className="space-y-2">
-            <Label className="text-slate-700">Active Status</Label>
-            <div className="flex items-center gap-3 h-12 px-4 border border-slate-200 rounded-lg">
+            <Label className="text-foreground">Active Status</Label>
+            <div className="flex items-center gap-3 h-12 px-4 border border-border rounded-lg">
               <Switch
                 checked={formData.is_active}
                 onCheckedChange={(checked) => handleChange('is_active', checked)}
               />
-              <span className="text-sm text-slate-600">
+              <span className="text-sm text-muted-foreground">
                 {formData.is_active ? 'Active' : 'Inactive'}
               </span>
             </div>
@@ -235,7 +235,7 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
       {/* Calendar Color (Design Consultants Only) */}
       {formData.role === 'Design Consultant' && (
         <div className="space-y-6">
-          <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Calendar Color</h3>
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Calendar Color</h3>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <input
@@ -245,8 +245,8 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
                 className="w-16 h-16 rounded-lg cursor-pointer"
               />
               <div>
-                <p className="text-sm font-medium text-slate-700">Selected Color</p>
-                <p className="text-sm text-slate-500 font-mono mt-1">{formData.calendar_color}</p>
+                <p className="text-sm font-medium text-foreground">Selected Color</p>
+                <p className="text-sm text-muted-foreground font-mono mt-1">{formData.calendar_color}</p>
               </div>
             </div>
             <div className="grid grid-cols-5 gap-2">
@@ -264,7 +264,7 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
                 />
               ))}
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               This color will be used for appointment cards and calendar display in the Schedule Assistant.
             </p>
           </div>
@@ -273,12 +273,12 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
 
       {/* Calendar Integration */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Calendar Integration</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Calendar Integration</h3>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
+          <div className="flex items-center justify-between p-4 border border-border rounded-lg">
             <div>
-              <Label className="text-slate-700">Enable Google Calendar Integration</Label>
-              <p className="text-sm text-slate-500 mt-1">
+              <Label className="text-foreground">Enable Google Calendar Integration</Label>
+              <p className="text-sm text-muted-foreground mt-1">
                 Sync appointments with Google Calendar
               </p>
             </div>
@@ -291,30 +291,30 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
           {formData.calendar_integration_enabled && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="google_calendar_id" className="text-slate-700">
+                <Label htmlFor="google_calendar_id" className="text-foreground">
                   Google Calendar ID (Optional)
                 </Label>
                 <Input
                   id="google_calendar_id"
                   value={formData.google_calendar_id}
                   onChange={(e) => handleChange('google_calendar_id', e.target.value)}
-                  className="h-12 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+                  className="h-12 border-border focus:border-info focus:ring-info transition-all"
                   placeholder="example@group.calendar.google.com"
                 />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Leave blank to use primary calendar. For a specific calendar, find this ID in Google Calendar settings under "Integrate calendar"
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="timezone" className="text-slate-700">
+                <Label htmlFor="timezone" className="text-foreground">
                   Timezone
                 </Label>
                 <Select
                   value={formData.timezone}
                   onValueChange={(value) => handleChange('timezone', value)}
                 >
-                  <SelectTrigger className="h-12 border-slate-200">
+                  <SelectTrigger className="h-12 border-border">
                     <SelectValue placeholder="Select timezone" />
                   </SelectTrigger>
                   <SelectContent>
@@ -325,7 +325,7 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
                     <SelectItem value="America/New_York">America/New_York (EST)</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Calendar events will be created in this timezone.
                 </p>
               </div>
@@ -335,19 +335,19 @@ export default function TeamMemberForm({ teamMember, onSubmit, onCancel, isLoadi
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-4 pt-6 border-t border-slate-100">
+      <div className="flex items-center justify-end gap-4 pt-6 border-t border-border">
         <Button
           type="button"
           variant="ghost"
           onClick={onCancel}
-          className="px-6 h-11 text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+          className="px-6 h-11 text-muted-foreground hover:text-foreground hover:bg-muted"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={isLoading}
-          className="px-8 h-11 bg-indigo-600 hover:bg-indigo-700 text-white transition-all"
+          className="px-8 h-11 bg-info hover:bg-info text-white transition-all"
         >
           {isLoading ? (
             <>

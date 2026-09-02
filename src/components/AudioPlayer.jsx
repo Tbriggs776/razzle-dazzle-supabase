@@ -254,16 +254,16 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border border-border p-6 shadow-sm overflow-hidden">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
+          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
           {recordingStatus && (
             <div className={cn(
               "px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1",
-              recordingStatus === 'uploading' && "bg-amber-100 text-amber-700",
+              recordingStatus === 'uploading' && "bg-warn/12 text-warn",
               recordingStatus === 'analyzing' && "bg-purple-100 text-purple-700",
-              recordingStatus === 'completed' && "bg-green-100 text-green-700"
+              recordingStatus === 'completed' && "bg-good/12 text-good"
             )}>
               {recordingStatus === 'uploading' && (
                 <>
@@ -286,7 +286,7 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
           size="sm"
           onClick={downloadRecording}
           disabled={isLoading || error}
-          className="h-8 text-slate-600 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-50"
+          className="h-8 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-50"
         >
           <Download className="w-4 h-4" />
         </Button>
@@ -294,22 +294,22 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
 
       {/* Tone Analysis */}
       {sentimentData && sentimentData.length > 0 && duration > 0 && (
-        <div className="mb-6 bg-slate-50 rounded-xl border border-slate-200 p-6">
+        <div className="mb-6 bg-muted rounded-xl border border-border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-slate-800">Tone Analysis</h3>
+            <h3 className="text-sm font-semibold text-foreground">Tone Analysis</h3>
           </div>
           
           <div 
             ref={graphRef}
-            className="relative h-48 bg-white rounded-lg overflow-hidden cursor-pointer border border-slate-200"
+            className="relative h-48 bg-white rounded-lg overflow-hidden cursor-pointer border border-border"
             onClick={handleGraphClick}
             onMouseMove={handleGraphHover}
             onMouseLeave={() => setHoverData(null)}
           >
             {/* Y-axis labels */}
-            <div className="absolute left-3 top-2 text-[10px] text-slate-500 font-medium uppercase tracking-wider">Positive</div>
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-medium uppercase tracking-wider">Neutral</div>
-            <div className="absolute left-3 bottom-2 text-[10px] text-slate-500 font-medium uppercase tracking-wider">Negative</div>
+            <div className="absolute left-3 top-2 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Positive</div>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Neutral</div>
+            <div className="absolute left-3 bottom-2 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Negative</div>
 
             {/* Grid lines */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none">
@@ -377,13 +377,13 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
                       <span className="text-slate-200">{speakerNames?.speaker_A || 'Client'}:</span>
                       <span className={cn(
                         "font-semibold",
-                        hoverData.speakerA.value > 0.3 ? "text-green-400" : 
-                        hoverData.speakerA.value < -0.3 ? "text-red-400" : "text-slate-300"
+                        hoverData.speakerA.value > 0.3 ? "text-good" : 
+                        hoverData.speakerA.value < -0.3 ? "text-crit" : "text-muted-foreground"
                       )}>
                         {hoverData.speakerA.value > 0.3 ? 'Positive' : 
                          hoverData.speakerA.value < -0.3 ? 'Negative' : 'Neutral'}
                       </span>
-                      <span className="text-slate-400">
+                      <span className="text-muted-foreground">
                         ({hoverData.speakerA.value.toFixed(2)})
                       </span>
                     </div>
@@ -394,13 +394,13 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
                       <span className="text-slate-200">{speakerNames?.speaker_B || 'Team Member'}:</span>
                       <span className={cn(
                         "font-semibold",
-                        hoverData.speakerB.value > 0.3 ? "text-green-400" : 
-                        hoverData.speakerB.value < -0.3 ? "text-red-400" : "text-slate-300"
+                        hoverData.speakerB.value > 0.3 ? "text-good" : 
+                        hoverData.speakerB.value < -0.3 ? "text-crit" : "text-muted-foreground"
                       )}>
                         {hoverData.speakerB.value > 0.3 ? 'Positive' : 
                          hoverData.speakerB.value < -0.3 ? 'Negative' : 'Neutral'}
                       </span>
-                      <span className="text-slate-400">
+                      <span className="text-muted-foreground">
                         ({hoverData.speakerB.value.toFixed(2)})
                       </span>
                     </div>
@@ -414,11 +414,11 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
           <div className="flex items-center justify-center gap-6 mt-4">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-sm bg-gradient-to-b from-[#F5C84C]/70 to-[#F5C84C]/5 border border-[#F5C84C]/30" />
-              <span className="text-xs text-slate-700 font-medium">{speakerNames?.speaker_A || 'Client'}</span>
+              <span className="text-xs text-foreground font-medium">{speakerNames?.speaker_A || 'Client'}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 rounded-sm bg-gradient-to-b from-[#F26B6B]/70 to-[#F26B6B]/5 border border-[#F26B6B]/30" />
-              <span className="text-xs text-slate-700 font-medium">{speakerNames?.speaker_B || 'Team Member'}</span>
+              <span className="text-xs text-foreground font-medium">{speakerNames?.speaker_B || 'Team Member'}</span>
             </div>
           </div>
         </div>
@@ -427,26 +427,26 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
       <audio ref={audioRef} />
 
       {error ? (
-        <div className="mb-4 flex items-center justify-center h-16 bg-red-500/10 rounded-lg border border-red-500/20">
-          <p className="text-red-400 text-sm">{error}</p>
+        <div className="mb-4 flex items-center justify-center h-16 bg-crit/10 rounded-lg border border-crit/20">
+          <p className="text-crit text-sm">{error}</p>
         </div>
       ) : !audioUrl ? (
-        <div className="mb-4 flex items-center justify-center h-16 bg-amber-50 rounded-lg border border-amber-200">
-          <p className="text-amber-700 text-sm">No recording URL available</p>
+        <div className="mb-4 flex items-center justify-center h-16 bg-warn/12 rounded-lg border border-warn/25">
+          <p className="text-warn text-sm">No recording URL available</p>
         </div>
       ) : (
         <div className="mb-4 space-y-2">
           <div
             ref={progressBarRef}
             onClick={handleProgressClick}
-            className="h-2 bg-slate-200 rounded-full cursor-pointer hover:h-3 transition-all group"
+            className="h-2 bg-muted rounded-full cursor-pointer hover:h-3 transition-all group"
           >
             <div
-              className="h-full bg-indigo-600 rounded-full transition-all"
+              className="h-full bg-info rounded-full transition-all"
               style={{ width: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%' }}
             />
           </div>
-          <div className="flex items-center justify-between px-1 text-xs text-slate-500 font-mono">
+          <div className="flex items-center justify-between px-1 text-xs text-muted-foreground font-mono">
             <span>{formatTime(currentTime)}</span>
             <span>{isLoading ? '--:--' : formatTime(duration)}</span>
           </div>
@@ -461,7 +461,7 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
             size="icon"
             className={cn(
               "w-10 h-10 rounded-full flex-shrink-0",
-              isPlaying ? "bg-indigo-600 hover:bg-indigo-700" : "bg-indigo-600 hover:bg-indigo-700"
+              isPlaying ? "bg-info hover:bg-info" : "bg-info hover:bg-info"
             )}
           >
             {isPlaying ? (
@@ -476,24 +476,24 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
           </Button>
 
           {currentSpeaker && (
-            <div className="text-sm font-medium text-slate-700">
-              <span className="text-indigo-600">{currentSpeaker}</span>
+            <div className="text-sm font-medium text-foreground">
+              <span className="text-info">{currentSpeaker}</span>
             </div>
           )}
         </div>
 
         {/* Current Transcript Segment */}
         {currentUtterance && (
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+          <div className="bg-muted rounded-lg p-4 border border-border">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">
+              <span className="text-xs font-semibold text-info uppercase tracking-wide">
                 {currentSpeaker || 'Current'}
               </span>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 {formatTime(currentUtterance.start / 1000)}
               </span>
             </div>
-            <p className="text-sm text-slate-700 leading-relaxed">
+            <p className="text-sm text-foreground leading-relaxed">
               {currentUtterance.words && currentUtterance.words.length > 0 ? (
                 currentUtterance.words.map((word, idx) => {
                   const wordStartTime = word.start / 1000;
@@ -504,7 +504,7 @@ export default function AudioPlayer({ audioUrl, title = "Conversation Recording"
                       key={idx}
                       className={cn(
                         "transition-all duration-100",
-                        isActive && "bg-indigo-200 text-indigo-900 font-semibold px-1 rounded"
+                        isActive && "bg-indigo-200 text-info font-semibold px-1 rounded"
                       )}
                     >
                       {word.text}{' '}

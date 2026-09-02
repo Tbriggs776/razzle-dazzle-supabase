@@ -10,9 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Car, Loader2, Pencil, Trash2 } from 'lucide-react';
 
 const statusColors = {
-  active: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
+  active: 'bg-good/12 text-good border-good/25',
   inactive: 'bg-secondary text-secondary-foreground border-border',
-  maintenance: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25'
+  maintenance: 'bg-warn/12 text-warn border-warn/25'
 };
 
 const EMPTY = { make: '', model: '', year: '', vin: '', license_plate: '', status: 'active', notes: '' };

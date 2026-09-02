@@ -32,32 +32,32 @@ export default function RFMSCrewSchedule({ invoiceNumber }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2">
-      <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+    <div className="bg-white rounded-2xl border border-border p-6 md:col-span-2">
+      <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
         RFMS Crew Schedule
       </h2>
       {isLoading ? (
         <div className="flex items-center justify-center py-6">
-          <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+          <Loader2 className="w-5 h-5 text-info animate-spin" />
         </div>
       ) : jobs.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center py-4">No crew schedule found for invoice #{invoiceNumber}</p>
+        <p className="text-sm text-muted-foreground text-center py-4">No crew schedule found for invoice #{invoiceNumber}</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {jobs.map((job) => (
-            <div key={job.jobId} className="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
-              <p className="text-sm font-semibold text-indigo-800 mb-2">{job.crewName || 'Unassigned'}</p>
+            <div key={job.jobId} className="p-4 rounded-xl bg-info/12 border border-indigo-100">
+              <p className="text-sm font-semibold text-info mb-2">{job.crewName || 'Unassigned'}</p>
               <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <CalendarIcon className="w-3.5 h-3.5 text-indigo-500" />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <CalendarIcon className="w-3.5 h-3.5 text-info" />
                   <span>Start: <strong>{parseDate(job.scheduledStart)}</strong></span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-600">
-                  <CalendarIcon className="w-3.5 h-3.5 text-indigo-400" />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <CalendarIcon className="w-3.5 h-3.5 text-info" />
                   <span>End: <strong>{parseDate(job.scheduledEnd)}</strong></span>
                 </div>
                 {job.jobStatus && (
-                  <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                  <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-info/12 text-info">
                     {job.jobStatus}
                   </span>
                 )}

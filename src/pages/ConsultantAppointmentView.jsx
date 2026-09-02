@@ -44,19 +44,19 @@ import { SignedImage } from '@/lib/fileUrl';
 
 const statusColors = {
   'Lead': 'bg-secondary text-secondary-foreground border-border',
-  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
-  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'Awaiting Assignment': 'bg-warn/12 text-warn border-warn/25',
+  'Scheduled': 'bg-info/12 text-info border-info/25',
+  'Rescheduled': 'bg-warn/12 text-warn border-warn/25',
   'In Route': 'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/25',
-  'On Site': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
-  'Cancelled': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'On Site': 'bg-good/12 text-good border-good/25',
+  'Cancelled': 'bg-crit/12 text-crit border-crit/25',
   'Completed': 'bg-secondary text-secondary-foreground border-border',
-  'Sold': 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25',
-  'Lost': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
-  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
-  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/25',
-  'Follow-Up': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25'
+  'Sold': 'bg-good/12 text-good border-good/25',
+  'Lost': 'bg-crit/12 text-crit border-crit/25',
+  'Pitch and Miss': 'bg-warn/12 text-warn border-warn/25',
+  'One-Leg': 'bg-warn/12 text-warn border-warn/25',
+  'Credit Decline': 'bg-crit/12 text-crit border-crit/25',
+  'Follow-Up': 'bg-crit/12 text-crit border-crit/25'
 };
 
 export default function ConsultantAppointmentView() {
@@ -755,21 +755,21 @@ export default function ConsultantAppointmentView() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Unique Product Color Banner */}
       {(checklist?.unique_product_color) && (
-        <div className="flex items-center gap-4 px-4 sm:px-6 py-4 bg-orange-50 border-b-2 border-orange-400 dark:bg-orange-500/10 dark:border-orange-500/40">
+        <div className="flex items-center gap-4 px-4 sm:px-6 py-4 bg-warn/12 border-b-2 border-warn">
           <span className="text-3xl flex-shrink-0">⚠️</span>
           <div>
-            <p className="text-orange-700 dark:text-orange-300 font-bold text-lg leading-tight">Unique Product Color — Reference Notes</p>
-            <p className="text-orange-600 dark:text-orange-400 text-sm font-medium">Customer has a specific/unique color in mind. Review the checklist notes before presenting options.</p>
+            <p className="text-warn font-bold text-lg leading-tight">Unique Product Color — Reference Notes</p>
+            <p className="text-warn text-sm font-medium">Customer has a specific/unique color in mind. Review the checklist notes before presenting options.</p>
           </div>
         </div>
       )}
       {/* 1978 Asbestos Banner - top of page */}
       {(checklist?.home_built_era === 'On or before 1978' || checklistV2?.home_built_era === 'On or before 1978') && (
-        <div className="flex items-center gap-4 px-4 sm:px-6 py-4 bg-red-50 border-b-2 border-red-400 dark:bg-red-500/10 dark:border-red-500/40">
+        <div className="flex items-center gap-4 px-4 sm:px-6 py-4 bg-crit/12 border-b-2 border-crit">
           <span className="text-3xl flex-shrink-0">🛑</span>
           <div>
-            <p className="text-red-700 dark:text-red-300 font-bold text-lg leading-tight">STOP — Home Built On or Before 1978</p>
-            <p className="text-red-600 dark:text-red-400 text-sm font-medium">Lead paint & asbestos risk — follow proper protocol and EPA RRP procedures before any demo or installation.</p>
+            <p className="text-crit font-bold text-lg leading-tight">STOP — Home Built On or Before 1978</p>
+            <p className="text-crit text-sm font-medium">Lead paint & asbestos risk — follow proper protocol and EPA RRP procedures before any demo or installation.</p>
           </div>
         </div>
       )}
@@ -882,19 +882,19 @@ export default function ConsultantAppointmentView() {
                  </button>
                  {showSkipToResult && (
                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-secondary border-t border-border">
-                     <Button onClick={() => handleStatusSelect('Sold')} disabled={!appointment.assigned_dc} className="bg-emerald-600 hover:bg-emerald-700 h-11">
+                     <Button onClick={() => handleStatusSelect('Sold')} disabled={!appointment.assigned_dc} className="bg-good hover:bg-good h-11">
                        <Trophy className="w-4 h-4 mr-2" />Sold
                      </Button>
-                     <Button onClick={() => handleStatusSelect('Lost')} disabled={!appointment.assigned_dc} variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-11">
+                     <Button onClick={() => handleStatusSelect('Lost')} disabled={!appointment.assigned_dc} variant="outline" className="border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10 h-11">
                        <X className="w-4 h-4 mr-2" />Lost
                      </Button>
-                     <Button onClick={() => handleStatusSelect('Pitch and Miss')} disabled={!appointment.assigned_dc} variant="outline" className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-400 dark:hover:bg-orange-500/10 h-11">
+                     <Button onClick={() => handleStatusSelect('Pitch and Miss')} disabled={!appointment.assigned_dc} variant="outline" className="border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10 h-11">
                        Pitch and Miss
                      </Button>
-                     <Button onClick={() => handleStatusSelect('One-Leg')} disabled={!appointment.assigned_dc} variant="outline" className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-500/30 dark:text-yellow-400 dark:hover:bg-yellow-500/10 h-11">
+                     <Button onClick={() => handleStatusSelect('One-Leg')} disabled={!appointment.assigned_dc} variant="outline" className="border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10 h-11">
                        One-Leg
                      </Button>
-                     <Button onClick={() => handleStatusSelect('Credit Decline')} disabled={!appointment.assigned_dc} variant="outline" className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10 h-11 col-span-2">
+                     <Button onClick={() => handleStatusSelect('Credit Decline')} disabled={!appointment.assigned_dc} variant="outline" className="border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10 h-11 col-span-2">
                        Credit Decline
                      </Button>
                    </div>
@@ -907,18 +907,18 @@ export default function ConsultantAppointmentView() {
                 <div className={cn(
                   "w-full border rounded-xl p-4 text-center transition-all duration-300",
                   appointment.status === 'On Site' 
-                    ? "bg-green-50 border-green-200 dark:bg-green-500/10 dark:border-green-500/25"
+                    ? "bg-good/12 border-good/25"
                     : "bg-cyan-50 border-cyan-200 dark:bg-cyan-500/10 dark:border-cyan-500/25"
                 )}>
                   <p className={cn(
                     "font-medium",
-                    appointment.status === 'On Site' ? "text-green-800 dark:text-green-300" : "text-cyan-800 dark:text-cyan-300"
+                    appointment.status === 'On Site' ? "text-good" : "text-cyan-800 dark:text-cyan-300"
                   )}>
                     {appointment.status === 'On Site' ? 'On Site with Customer' : 'En Route to Customer'}
                   </p>
                   <p className={cn(
                     "text-sm mt-1",
-                    appointment.status === 'On Site' ? "text-green-600 dark:text-green-400" : "text-cyan-600 dark:text-cyan-400"
+                    appointment.status === 'On Site' ? "text-good" : "text-cyan-600 dark:text-cyan-400"
                   )}>
                     {appointment.status === 'On Site' 
                       ? `Arrived at ${new Date(appointment.consultant_arrived_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`
@@ -972,7 +972,7 @@ export default function ConsultantAppointmentView() {
                       }
                     }}
                     disabled={sendingOnMyWay}
-                    className="w-full bg-green-600 hover:bg-green-700 h-12"
+                    className="w-full bg-good hover:bg-good h-12"
                   >
                     {sendingOnMyWay ? (
                       <>
@@ -1043,7 +1043,7 @@ export default function ConsultantAppointmentView() {
                 <Button
                   onClick={() => handleStatusSelect('Sold')}
                   disabled={!appointment.assigned_dc}
-                  className="bg-emerald-600 hover:bg-emerald-700 h-12"
+                  className="bg-good hover:bg-good h-12"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   Mark as Won
@@ -1052,7 +1052,7 @@ export default function ConsultantAppointmentView() {
                   onClick={() => handleStatusSelect('Lost')}
                   disabled={!appointment.assigned_dc}
                   variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-12"
+                  className="border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10 h-12"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Mark as Lost
@@ -1066,7 +1066,7 @@ export default function ConsultantAppointmentView() {
                 <Button
                   onClick={() => handleStatusSelect('Sold')}
                   disabled={!appointment.assigned_dc}
-                  className="bg-emerald-600 hover:bg-emerald-700 h-12"
+                  className="bg-good hover:bg-good h-12"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   Mark as Won
@@ -1075,7 +1075,7 @@ export default function ConsultantAppointmentView() {
                   onClick={() => handleStatusSelect('Lost')}
                   disabled={!appointment.assigned_dc}
                   variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-12"
+                  className="border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10 h-12"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Mark as Lost
@@ -1084,7 +1084,7 @@ export default function ConsultantAppointmentView() {
                   onClick={() => handleStatusSelect('Pitch and Miss')}
                   disabled={!appointment.assigned_dc}
                   variant="outline"
-                  className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-400 dark:hover:bg-orange-500/10 h-12 col-span-2"
+                  className="border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10 h-12 col-span-2"
                 >
                   Pitch and Miss
                 </Button>
@@ -1097,7 +1097,7 @@ export default function ConsultantAppointmentView() {
                 <Button
                   onClick={() => handleStatusSelect('Sold')}
                   disabled={!appointment.assigned_dc}
-                  className="bg-emerald-600 hover:bg-emerald-700 h-12"
+                  className="bg-good hover:bg-good h-12"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
                   Mark as Won
@@ -1106,7 +1106,7 @@ export default function ConsultantAppointmentView() {
                   onClick={() => handleStatusSelect('Lost')}
                   disabled={!appointment.assigned_dc}
                   variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-12"
+                  className="border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10 h-12"
                 >
                   <X className="w-4 h-4 mr-2" />
                   Mark as Lost
@@ -1120,7 +1120,7 @@ export default function ConsultantAppointmentView() {
                <Button
                  onClick={() => handleStatusSelect('Sold')}
                  disabled={!appointment.assigned_dc}
-                 className="bg-emerald-600 hover:bg-emerald-700 h-12"
+                 className="bg-good hover:bg-good h-12"
                >
                  <CheckCircle2 className="w-4 h-4 mr-2" />
                  Mark as Sold
@@ -1129,7 +1129,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('Lost')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 h-12"
+                 className="border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10 h-12"
                >
                  Mark as Lost
                </Button>
@@ -1148,7 +1148,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('Pitch and Miss')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-400 dark:hover:bg-orange-500/10 h-12"
+                 className="border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10 h-12"
                >
                  Pitch and Miss
                </Button>
@@ -1156,7 +1156,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('One-Leg')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-500/30 dark:text-yellow-400 dark:hover:bg-yellow-500/10 h-12"
+                 className="border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10 h-12"
                >
                  One-Leg
                </Button>
@@ -1164,7 +1164,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('Credit Decline')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10 h-12"
+                 className="border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10 h-12"
                >
                  Credit Decline
                </Button>
@@ -1172,7 +1172,7 @@ export default function ConsultantAppointmentView() {
                  onClick={() => handleStatusSelect('Rescheduled')}
                  disabled={!appointment.assigned_dc}
                  variant="outline"
-                 className="border-yellow-200 text-yellow-600 hover:bg-yellow-50 dark:border-yellow-500/30 dark:text-yellow-400 dark:hover:bg-yellow-500/10 h-12 col-span-2"
+                 className="border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10 h-12 col-span-2"
                  >
                  Needs Rescheduled
                </Button>
@@ -1401,11 +1401,11 @@ export default function ConsultantAppointmentView() {
 
           {/* 1978 Banner - always visible when checklist has this value */}
           {(checklist?.home_built_era === 'On or before 1978' || checklistV2?.home_built_era === 'On or before 1978') && (
-            <div className="flex items-center gap-4 p-5 bg-red-50 border-2 border-red-500 rounded-xl md:col-span-2 dark:bg-red-500/10 dark:border-red-500/40">
+            <div className="flex items-center gap-4 p-5 bg-crit/12 border-2 border-crit rounded-xl md:col-span-2">
               <span className="text-4xl flex-shrink-0">🛑</span>
               <div>
-                <p className="text-red-700 dark:text-red-300 font-bold text-xl">STOP — Home Built On or Before 1978</p>
-                <p className="text-red-600 dark:text-red-400 font-medium">Lead paint & asbestos risk — follow proper protocol and EPA RRP procedures before any demo or installation.</p>
+                <p className="text-crit font-bold text-xl">STOP — Home Built On or Before 1978</p>
+                <p className="text-crit font-medium">Lead paint & asbestos risk — follow proper protocol and EPA RRP procedures before any demo or installation.</p>
               </div>
             </div>
           )}
@@ -1490,14 +1490,14 @@ export default function ConsultantAppointmentView() {
           <div className="space-y-4 py-4">
             {/* Pre-Install Checklist Section */}
             {selectedStatus === 'Sold' && !preInstallData && (
-              <div className="space-y-3 p-4 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-500/25 dark:bg-amber-500/10">
-                <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Pre-Installation Checklist</p>
-                <p className="text-xs text-amber-700 dark:text-amber-300">Have the customer sign in person, or send to their email.</p>
+              <div className="space-y-3 p-4 rounded-xl border border-warn/25 bg-warn/12">
+                <p className="text-sm font-semibold text-warn">Pre-Installation Checklist</p>
+                <p className="text-xs text-warn">Have the customer sign in person, or send to their email.</p>
                 <Button
                   type="button"
                   onClick={() => { setShowStatusDialog(false); setShowPreInstallChecklist(true); }}
                   variant="outline"
-                  className="w-full border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/15"
+                  className="w-full border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/15"
                 >
                   <Pen className="w-4 h-4 mr-2" />Sign In Person
                 </Button>
@@ -1517,7 +1517,7 @@ export default function ConsultantAppointmentView() {
                     className="bg-card"
                   />
                   {standaloneSent ? (
-                    <p className="text-sm text-green-700 dark:text-green-400 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />Checklist email sent!</p>
+                    <p className="text-sm text-good flex items-center gap-2"><CheckCircle2 className="w-4 h-4" />Checklist email sent!</p>
                   ) : (
                     <Button
                       type="button"
@@ -1535,11 +1535,11 @@ export default function ConsultantAppointmentView() {
 
             {/* Pre-install checklist completed indicator */}
             {selectedStatus === 'Sold' && preInstallData && (
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25">
-                <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-good/12 border border-good/25">
+                <CheckCircle2 className="w-5 h-5 text-good flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-green-800 dark:text-green-300">Pre-Installation Checklist Signed ✓</p>
-                  <p className="text-xs text-green-600 dark:text-green-400">Product: {preInstallData.productInfo}</p>
+                  <p className="text-sm font-semibold text-good">Pre-Installation Checklist Signed ✓</p>
+                  <p className="text-xs text-good">Product: {preInstallData.productInfo}</p>
                 </div>
               </div>
             )}
@@ -1575,7 +1575,7 @@ export default function ConsultantAppointmentView() {
                     )}
                   </Button>
                   {contractFileUrl && (
-                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
+                    <p className="text-sm text-good flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4" />
                       Contract uploaded successfully
                     </p>
@@ -1678,7 +1678,7 @@ export default function ConsultantAppointmentView() {
                 ) : folderPhotoUrl ? (
                   <div>
                     <SignedImage src={folderPhotoUrl} alt="Folder" className="w-full h-48 object-cover rounded-lg border border-border" />
-                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
+                    <p className="text-sm text-good flex items-center gap-2 mt-2">
                       <CheckCircle2 className="w-4 h-4" />
                       Folder photo uploaded
                     </p>
@@ -1714,7 +1714,7 @@ export default function ConsultantAppointmentView() {
                     ) : yardSignPhotoUrl ? (
                       <div>
                         <SignedImage src={yardSignPhotoUrl} alt="Yard Sign" className="w-full h-48 object-cover rounded-lg border border-border" />
-                        <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
+                        <p className="text-sm text-good flex items-center gap-2 mt-2">
                           <CheckCircle2 className="w-4 h-4" />
                           Yard sign photo uploaded
                         </p>
@@ -1799,7 +1799,7 @@ export default function ConsultantAppointmentView() {
                 ) : driverLicensePhotoUrl ? (
                   <div>
                     <SignedImage src={driverLicensePhotoUrl} alt="Driver's License" className="w-full h-48 object-cover rounded-lg border border-border" />
-                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2 mt-2">
+                    <p className="text-sm text-good flex items-center gap-2 mt-2">
                       <CheckCircle2 className="w-4 h-4" />
                       Driver's license photo uploaded
                     </p>
@@ -1872,11 +1872,11 @@ export default function ConsultantAppointmentView() {
               )}
 
               {depositPaymentMethod === 'Check' && !checkDepositCompleted && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-3 dark:bg-blue-500/10 dark:border-blue-500/25">
-                  <p className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                <div className="p-4 bg-info/12 border border-info/25 rounded-lg space-y-3">
+                  <p className="text-sm font-medium text-info">
                     Please deposit the check using the Chase Mobile App:
                   </p>
-                  <ol className="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-decimal list-inside">
+                  <ol className="text-sm text-info space-y-1 list-decimal list-inside">
                     <li>Open the Chase Mobile app</li>
                     <li>Select "Deposit" and "Remote Deposit"</li>
                     <li>Follow the prompts to photograph and deposit the check</li>
@@ -1893,8 +1893,8 @@ export default function ConsultantAppointmentView() {
               )}
 
               {depositPaymentMethod === 'Check' && checkDepositCompleted && (
-                <div className="p-4 bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25 rounded-lg">
-                  <p className="text-sm text-green-800 dark:text-green-300 flex items-center gap-2">
+                <div className="p-4 bg-good/12 border border-good/25 rounded-lg">
+                  <p className="text-sm text-good flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4" />
                     Check deposit completed
                   </p>
@@ -1989,7 +1989,7 @@ export default function ConsultantAppointmentView() {
                 markStatusMutation.isPending
               }
               className={cn(
-                selectedStatus === 'Sold' && 'bg-emerald-600 hover:bg-emerald-700'
+                selectedStatus === 'Sold' && 'bg-good hover:bg-good'
               )}
             >
               {markStatusMutation.isPending ? (

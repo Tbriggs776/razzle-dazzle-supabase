@@ -421,7 +421,7 @@ export default function ChecklistDetail() {
                   </div>
                 )}
                 {getTimeToSchedule() && (
-                  <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 border border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25 rounded-lg text-xs font-medium">
+                  <div className="flex items-center gap-2 px-3 py-1 bg-good/12 text-good border border-good/25 rounded-lg text-xs font-medium">
                     ⚡ Converted in {getTimeToSchedule()}
                   </div>
                 )}
@@ -464,7 +464,7 @@ export default function ChecklistDetail() {
               disabled={saveStatus !== 'idle'}
               variant="outline"
               className={saveStatus === 'saved'
-                ? "h-10 px-5 border-green-600 bg-green-50 text-green-600 dark:border-green-500/30 dark:bg-green-500/15 dark:text-green-300"
+                ? "h-10 px-5 border-good bg-good/12 text-good"
                 : "h-10 px-5 border-border hover:bg-secondary"
               }
             >
@@ -603,7 +603,7 @@ export default function ChecklistDetail() {
             <Button
               onClick={() => convertToAppointmentMutation.mutate()}
               disabled={convertToAppointmentMutation.isPending || !selectedCSR}
-              className={!selectedCSR ? "bg-secondary text-muted-foreground cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}
+              className={!selectedCSR ? "bg-secondary text-muted-foreground cursor-not-allowed" : "bg-good hover:bg-good"}
             >
               {convertToAppointmentMutation.isPending ? (
                 <>

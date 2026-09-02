@@ -189,8 +189,8 @@ export default function RecordingDetail() {
               <div className="flex items-center gap-3 text-foreground">
                 <div className="w-5 h-5 flex items-center justify-center">
                   <div className={`w-3 h-3 rounded-full ${
-                    appointment.status === 'Sold' ? 'bg-green-500' :
-                    appointment.status === 'Completed' ? 'bg-blue-500' :
+                    appointment.status === 'Sold' ? 'bg-good' :
+                    appointment.status === 'Completed' ? 'bg-info' :
                     'bg-muted-foreground'
                   }`} />
                 </div>
@@ -379,25 +379,25 @@ export default function RecordingDetail() {
                       <>
                         {/* Summary Stats */}
                         <div className="grid grid-cols-2 gap-4 mb-6">
-                          <div className="bg-green-50 dark:bg-green-500/15 border border-green-200 dark:border-green-500/25 rounded-lg p-4">
+                          <div className="bg-good/12 border border-good/25 rounded-lg p-4">
                             <div className="flex items-center gap-2">
-                              <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400" />
+                              <CheckCircle2 className="w-5 h-5 text-good" />
                               <div>
-                                <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                                <p className="text-2xl font-bold text-good">
                                   {valueAddAnalysis.filter(v => v.mentioned).length}
                                 </p>
-                                <p className="text-xs text-green-600 dark:text-green-400">Mentioned</p>
+                                <p className="text-xs text-good">Mentioned</p>
                               </div>
                             </div>
                           </div>
-                          <div className="bg-red-50 dark:bg-red-500/15 border border-red-200 dark:border-red-500/25 rounded-lg p-4">
+                          <div className="bg-crit/12 border border-crit/25 rounded-lg p-4">
                             <div className="flex items-center gap-2">
-                              <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                              <XCircle className="w-5 h-5 text-crit" />
                               <div>
-                                <p className="text-2xl font-bold text-red-700 dark:text-red-300">
+                                <p className="text-2xl font-bold text-crit">
                                   {valueAddAnalysis.filter(v => !v.mentioned).length}
                                 </p>
-                                <p className="text-xs text-red-600 dark:text-red-400">Not Mentioned</p>
+                                <p className="text-xs text-crit">Not Mentioned</p>
                               </div>
                             </div>
                           </div>
@@ -410,21 +410,21 @@ export default function RecordingDetail() {
                             className={cn(
                               "p-4 rounded-lg border-2",
                               item.mentioned
-                                ? "bg-green-50 dark:bg-green-500/15 border-green-200 dark:border-green-500/25"
-                                : "bg-red-50 dark:bg-red-500/15 border-red-200 dark:border-red-500/25"
+                                ? "bg-good/12 border-good/25"
+                                : "bg-crit/12 border-crit/25"
                             )}
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex items-start gap-3 flex-1">
                                 {item.mentioned ? (
-                                  <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                                  <CheckCircle2 className="w-5 h-5 text-good flex-shrink-0 mt-0.5" />
                                 ) : (
-                                  <XCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                                  <XCircle className="w-5 h-5 text-crit flex-shrink-0 mt-0.5" />
                                 )}
                                 <div className="flex-1">
                                   <p className={cn(
                                     "font-medium",
-                                    item.mentioned ? "text-green-900 dark:text-green-200" : "text-red-900 dark:text-red-200"
+                                    item.mentioned ? "text-good" : "text-crit"
                                   )}>
                                     {item.keyword}
                                   </p>
@@ -446,7 +446,7 @@ export default function RecordingDetail() {
                                           return (
                                             <>
                                               {text.substring(0, startIdx)}
-                                              <span className="bg-yellow-200 dark:bg-yellow-500/30 font-semibold px-1 rounded">
+                                              <span className="bg-yellow-200 font-semibold px-1 rounded">
                                                 {text.substring(startIdx, endIdx)}
                                               </span>
                                               {text.substring(endIdx)}
@@ -457,11 +457,11 @@ export default function RecordingDetail() {
                                         return (
                                           <div
                                             key={mIdx}
-                                            className="bg-card border border-green-200 dark:border-green-500/25 rounded-lg p-3"
+                                            className="bg-card border border-good/25 rounded-lg p-3"
                                           >
                                             <div className="flex items-center gap-2 mb-2">
-                                              <Clock className="w-3 h-3 text-green-600 dark:text-green-400" />
-                                              <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+                                              <Clock className="w-3 h-3 text-good" />
+                                              <span className="text-xs font-semibold text-good">
                                                 {Math.floor(mention.timestamp / 60)}:{String(Math.floor(mention.timestamp % 60)).padStart(2, '0')}
                                               </span>
                                             </div>
@@ -469,8 +469,8 @@ export default function RecordingDetail() {
                                               {renderTextWithHighlight()}
                                             </p>
                                             {mention.matchingWords && (
-                                              <div className="mt-2 pt-2 border-t border-green-200 dark:border-green-500/25">
-                                                <p className="text-xs text-green-600 dark:text-green-400">
+                                              <div className="mt-2 pt-2 border-t border-good/25">
+                                                <p className="text-xs text-good">
                                                   <span className="font-semibold">Matching words:</span> {mention.matchingWords}
                                                 </p>
                                               </div>
@@ -482,7 +482,7 @@ export default function RecordingDetail() {
                                   )}
 
                                   {!item.mentioned && (
-                                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                                    <p className="text-xs text-crit mt-1">
                                       Not mentioned during conversation
                                     </p>
                                   )}
@@ -624,8 +624,8 @@ export default function RecordingDetail() {
                                 {speakerLabel}
                               </Badge>
                               <Badge className={cn(
-                                sentiment.sentiment === 'POSITIVE' && "bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300",
-                                sentiment.sentiment === 'NEGATIVE' && "bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-300",
+                                sentiment.sentiment === 'POSITIVE' && "bg-good/12 text-good",
+                                sentiment.sentiment === 'NEGATIVE' && "bg-crit/12 text-crit",
                                 sentiment.sentiment === 'NEUTRAL' && "bg-secondary text-foreground"
                               )}>
                                 {sentiment.sentiment}

@@ -174,7 +174,7 @@ export default function Calculators() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Excess Coverage:</span>
-                      <span className="font-semibold text-green-600 dark:text-green-400">+{result.excess.toFixed(0)} sq ft</span>
+                      <span className="font-semibold text-good">+{result.excess.toFixed(0)} sq ft</span>
                     </div>
                   </div>
                 </motion.div>

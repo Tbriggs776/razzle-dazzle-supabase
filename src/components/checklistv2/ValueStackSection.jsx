@@ -42,68 +42,68 @@ export default function ValueStackSection({ formData, onChange }) {
   const isComplete = !!formData.value_stack_delivered;
 
   return (
-    <div className="border-2 border-yellow-200 rounded-xl overflow-hidden">
+    <div className="border-2 border-warn/25 rounded-xl overflow-hidden">
       {/* Header */}
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-yellow-50 border-b border-yellow-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-warn/12 border-b border-warn/25"
       )}>
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-9 h-9 rounded-lg flex items-center justify-center",
-            isComplete ? "bg-green-100" : "bg-yellow-100"
+            isComplete ? "bg-good/12" : "bg-warn/12"
           )}>
             {isComplete
-              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
-              : <Star className="w-5 h-5 text-yellow-600" />
+              ? <CheckCircle2 className="w-5 h-5 text-good" />
+              : <Star className="w-5 h-5 text-warn" />
             }
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 7 — Value Stack</p>
-            <p className="text-xs text-slate-500">Walk through every standard inclusion — do not skip</p>
+            <p className="font-bold text-foreground">Section 7 — Value Stack</p>
+            <p className="text-xs text-muted-foreground">Walk through every standard inclusion — do not skip</p>
           </div>
         </div>
         {isComplete && (
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>
+          <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>
         )}
       </div>
 
       <div className="p-5 space-y-4 bg-white">
 
         {/* Opener */}
-        <div className="rounded-lg border-2 border-yellow-200 bg-yellow-50 px-4 py-3">
-          <p className="text-sm font-semibold text-yellow-900 italic">
+        <div className="rounded-lg border-2 border-warn/25 bg-warn/12 px-4 py-3">
+          <p className="text-sm font-semibold text-warn italic">
             "Let me tell you what comes standard with us that you won't get anywhere else…"
           </p>
         </div>
 
         {/* Collapsible full script */}
-        <div className="rounded-lg border-2 border-slate-200 bg-slate-50 overflow-hidden">
+        <div className="rounded-lg border-2 border-border bg-muted overflow-hidden">
           <button
             type="button"
             onClick={() => setScriptOpen(o => !o)}
             className="w-full flex items-center justify-between px-4 py-3 text-left"
           >
-            <span className="text-sm font-semibold text-slate-700">View Full Script</span>
+            <span className="text-sm font-semibold text-foreground">View Full Script</span>
             {scriptOpen
-              ? <ChevronUp className="w-4 h-4 text-slate-500" />
-              : <ChevronDown className="w-4 h-4 text-slate-500" />
+              ? <ChevronUp className="w-4 h-4 text-muted-foreground" />
+              : <ChevronDown className="w-4 h-4 text-muted-foreground" />
             }
           </button>
           {scriptOpen && (
-            <div className="border-t border-slate-200 divide-y divide-slate-100">
+            <div className="border-t border-border divide-y divide-border">
               {VALUE_ITEMS.map((item) => (
                 <div key={item.number} className="px-4 py-3 space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-yellow-400 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-warn text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
                       {item.number}
                     </span>
-                    <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">{item.title}</p>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{item.title}</p>
                     {item.note && (
-                      <span className="ml-auto text-[10px] font-semibold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-full">{item.note}</span>
+                      <span className="ml-auto text-[10px] font-semibold text-warn bg-warn/12 px-2 py-0.5 rounded-full">{item.note}</span>
                     )}
                   </div>
-                  <p className="text-sm text-slate-700 italic leading-relaxed pl-7">"{item.script}"</p>
+                  <p className="text-sm text-foreground italic leading-relaxed pl-7">"{item.script}"</p>
                 </div>
               ))}
             </div>
@@ -113,13 +113,13 @@ export default function ValueStackSection({ formData, onChange }) {
         {/* Quick-reference cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {VALUE_ITEMS.map((item) => (
-            <div key={item.number} className="flex items-start gap-2.5 p-3 rounded-lg border border-slate-200 bg-slate-50">
-              <span className="w-5 h-5 rounded-full bg-yellow-400 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div key={item.number} className="flex items-start gap-2.5 p-3 rounded-lg border border-border bg-muted">
+              <span className="w-5 h-5 rounded-full bg-warn text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                 {item.number}
               </span>
               <div>
-                <p className="text-sm font-semibold text-slate-800">{item.title}</p>
-                {item.note && <p className="text-[11px] text-yellow-700 font-medium mt-0.5">{item.note}</p>}
+                <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                {item.note && <p className="text-[11px] text-warn font-medium mt-0.5">{item.note}</p>}
               </div>
             </div>
           ))}
@@ -131,19 +131,19 @@ export default function ValueStackSection({ formData, onChange }) {
           className={cn(
             "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all select-none",
             isComplete
-              ? "border-green-400 bg-green-50"
-              : "border-slate-200 bg-slate-50 hover:border-yellow-400"
+              ? "border-good bg-good/12"
+              : "border-border bg-muted hover:border-warn"
           )}
         >
           <div className={cn(
             "w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors",
-            isComplete ? "bg-green-500 border-green-500" : "border-slate-400 bg-white"
+            isComplete ? "bg-good border-good" : "border-border bg-white"
           )}>
             {isComplete && <CheckCircle2 className="w-3 h-3 text-white" />}
           </div>
           <p className={cn(
             "text-sm font-semibold",
-            isComplete ? "text-green-800" : "text-slate-700"
+            isComplete ? "text-good" : "text-foreground"
           )}>
             Full value stack delivered — customer knows everything included
           </p>

@@ -88,8 +88,8 @@ export default function ScheduledThisWeek() {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-blue-50 dark:bg-blue-500/15 flex items-center justify-center mb-6">
-              <Calendar className="w-10 h-10 text-blue-400 dark:text-blue-300" />
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-info/12 flex items-center justify-center mb-6">
+              <Calendar className="w-10 h-10 text-info" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">
               {searchQuery ? 'No appointments found' : 'No scheduled appointments this week'}

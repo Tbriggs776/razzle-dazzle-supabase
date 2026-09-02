@@ -87,12 +87,12 @@ function CalendarMonth({ year, month, rangeStart, rangeEnd, hoverDate, onDayClic
 
   return (
     <div className="w-full lg:w-64">
-      <div className="text-center font-semibold text-slate-700 mb-3 text-sm">
+      <div className="text-center font-semibold text-foreground mb-3 text-sm">
         {MONTHS[month]} {year}
       </div>
       <div className="grid grid-cols-7 mb-1">
         {DAYS.map(d => (
-          <div key={d} className="text-center text-xs text-slate-400 font-medium py-1">{d}</div>
+          <div key={d} className="text-center text-xs text-muted-foreground font-medium py-1">{d}</div>
         ))}
       </div>
       <div className="grid grid-cols-7">
@@ -112,10 +112,10 @@ function CalendarMonth({ year, month, rangeStart, rangeEnd, hoverDate, onDayClic
               onMouseEnter={() => onDayHover(day)}
               className={[
                 'relative h-8 text-sm transition-colors',
-                isFuture ? 'text-slate-300 cursor-not-allowed' : 'cursor-pointer',
+                isFuture ? 'text-muted-foreground cursor-not-allowed' : 'cursor-pointer',
                 isStart || isEnd ? 'bg-slate-800 text-white font-bold rounded-md z-10' : '',
-                inRange ? 'bg-slate-100 text-slate-700' : '',
-                !isStart && !isEnd && !inRange && !isFuture ? 'hover:bg-slate-50 text-slate-700' : '',
+                inRange ? 'bg-muted text-foreground' : '',
+                !isStart && !isEnd && !inRange && !isFuture ? 'hover:bg-muted text-foreground' : '',
                 isToday && !isStart && !isEnd ? 'font-bold underline' : '',
               ].filter(Boolean).join(' ')}
             >
@@ -206,21 +206,21 @@ export default function DateRangePicker({ value, onChange }) {
     <div className="relative inline-block" ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+        className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg bg-white text-sm font-medium text-foreground hover:bg-muted transition-colors shadow-sm"
       >
-        <Calendar className="w-4 h-4 text-slate-500" />
+        <Calendar className="w-4 h-4 text-muted-foreground" />
         {displayLabel}
       </button>
 
       {open && (
-        <div className="fixed left-1/2 top-1/2 z-50 flex w-[calc(100vw-2rem)] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl lg:absolute lg:left-auto lg:right-0 lg:top-full lg:mt-2 lg:w-auto lg:max-h-none lg:translate-x-0 lg:translate-y-0 lg:flex-row lg:overflow-visible">
+        <div className="fixed left-1/2 top-1/2 z-50 flex w-[calc(100vw-2rem)] max-h-[85vh] -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto bg-white border border-border rounded-xl shadow-xl lg:absolute lg:left-auto lg:right-0 lg:top-full lg:mt-2 lg:w-auto lg:max-h-none lg:translate-x-0 lg:translate-y-0 lg:flex-row lg:overflow-visible">
           {/* Presets */}
-          <div className="grid grid-cols-2 gap-1 border-b border-slate-100 p-3 lg:w-40 lg:grid-cols-1 lg:gap-0.5 lg:border-b-0 lg:border-r">
+          <div className="grid grid-cols-2 gap-1 border-b border-border p-3 lg:w-40 lg:grid-cols-1 lg:gap-0.5 lg:border-b-0 lg:border-r">
             {PRESETS.map(p => (
               <button
                 key={p.label}
                 onClick={() => handlePreset(p)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${activePreset === p.label ? 'bg-slate-800 text-white font-semibold' : 'text-slate-600 hover:bg-slate-50'}`}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${activePreset === p.label ? 'bg-slate-800 text-white font-semibold' : 'text-muted-foreground hover:bg-muted'}`}
               >
                 {p.label}
               </button>
@@ -230,7 +230,7 @@ export default function DateRangePicker({ value, onChange }) {
           {/* Calendars */}
           <div className="min-w-0 p-4">
             <div className="flex items-center gap-2 mb-3 lg:gap-4">
-              <button onClick={prevMonth} className="shrink-0 p-1 rounded hover:bg-slate-100 text-slate-500">‹</button>
+              <button onClick={prevMonth} className="shrink-0 p-1 rounded hover:bg-muted text-muted-foreground">‹</button>
               <div className="flex min-w-0 flex-col gap-6 flex-1 justify-center lg:flex-row lg:gap-8">
                 <CalendarMonth
                   year={leftYear} month={leftMonth}
@@ -243,13 +243,13 @@ export default function DateRangePicker({ value, onChange }) {
                   onDayClick={handleDayClick} onDayHover={setHoverDate}
                 />
               </div>
-              <button onClick={nextMonth} className="shrink-0 p-1 rounded hover:bg-slate-100 text-slate-500">›</button>
+              <button onClick={nextMonth} className="shrink-0 p-1 rounded hover:bg-muted text-muted-foreground">›</button>
             </div>
 
             {/* Custom date inputs */}
-            <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100">
+            <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-border">
               <div className="flex min-w-0 items-center gap-2">
-                <label className="text-xs text-slate-400 font-medium">Start:</label>
+                <label className="text-xs text-muted-foreground font-medium">Start:</label>
                 <input
                   type="date"
                   value={rangeStart ? rangeStart.toLocaleDateString('en-CA') : ''}
@@ -262,11 +262,11 @@ export default function DateRangePicker({ value, onChange }) {
                       setActivePreset(null);
                     }
                   }}
-                  className="text-sm border border-slate-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  className="text-sm border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-slate-400"
                 />
               </div>
               <div className="flex min-w-0 items-center gap-2">
-                <label className="text-xs text-slate-400 font-medium">End:</label>
+                <label className="text-xs text-muted-foreground font-medium">End:</label>
                 <input
                   type="date"
                   value={rangeEnd ? rangeEnd.toLocaleDateString('en-CA') : ''}
@@ -279,16 +279,16 @@ export default function DateRangePicker({ value, onChange }) {
                       setActivePreset(null);
                     }
                   }}
-                  className="text-sm border border-slate-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  className="text-sm border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-slate-400"
                 />
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100">
-              <span className="text-xs text-slate-400">Dates shown in Mountain Standard Time (Arizona)</span>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border">
+              <span className="text-xs text-muted-foreground">Dates shown in Mountain Standard Time (Arizona)</span>
               <div className="ml-auto flex shrink-0 gap-2">
-                <button onClick={handleCancel} className="px-4 py-1.5 rounded-lg border border-slate-300 text-sm font-medium text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button onClick={handleCancel} className="px-4 py-1.5 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:bg-muted">Cancel</button>
                 <button
                   onClick={handleUpdate}
                   disabled={!rangeStart || !rangeEnd}

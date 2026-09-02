@@ -13,25 +13,25 @@ export default function TimeframeSection({ formData, onChange }) {
   const isComplete = !!formData.project_timeframe;
 
   return (
-    <div className="border-2 border-indigo-200 rounded-xl overflow-hidden">
+    <div className="border-2 border-info/25 rounded-xl overflow-hidden">
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-indigo-50 border-b border-indigo-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-info/12 border-b border-info/25"
       )}>
         <div className="flex items-center gap-3">
-          <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", isComplete ? "bg-green-100" : "bg-indigo-100")}>
-            {isComplete ? <CheckCircle2 className="w-5 h-5 text-green-600" /> : <Clock className="w-5 h-5 text-indigo-600" />}
+          <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", isComplete ? "bg-good/12" : "bg-info/12")}>
+            {isComplete ? <CheckCircle2 className="w-5 h-5 text-good" /> : <Clock className="w-5 h-5 text-info" />}
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 11 — Time Frame</p>
-            <p className="text-xs text-slate-500">When does the customer want to move forward?</p>
+            <p className="font-bold text-foreground">Section 11 — Time Frame</p>
+            <p className="text-xs text-muted-foreground">When does the customer want to move forward?</p>
           </div>
         </div>
-        {isComplete && <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>}
+        {isComplete && <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>}
       </div>
 
       <div className="p-5 bg-white space-y-2">
-        <p className="text-sm font-medium text-slate-700">Project Timeframe</p>
+        <p className="text-sm font-medium text-foreground">Project Timeframe</p>
         <LocalInput
           value={formData.project_timeframe || ''}
           onBlur={(v) => onChange('project_timeframe', v)}

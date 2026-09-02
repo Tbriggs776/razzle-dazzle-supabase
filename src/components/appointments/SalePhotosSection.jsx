@@ -27,16 +27,16 @@ export default function SalePhotosSection({ sale, lead }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 }}
-      className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+      className="bg-white rounded-2xl border border-border p-6 md:col-span-2"
     >
-      <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">
+      <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
         Sale Documentation Photos
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {sale.folder_photo_url && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-slate-700">RAZZLE DAZZLE Folder</p>
+              <p className="text-sm font-medium text-foreground">RAZZLE DAZZLE Folder</p>
               <Button
                 size="sm"
                 variant="ghost"
@@ -49,7 +49,7 @@ export default function SalePhotosSection({ sale, lead }) {
             <SignedImage
               src={sale.folder_photo_url}
               alt="RAZZLE DAZZLE Folder"
-              className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openSignedFile(sale.folder_photo_url)}
             />
           </div>
@@ -57,7 +57,7 @@ export default function SalePhotosSection({ sale, lead }) {
         {sale.yard_sign_photo_url && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-slate-700">Yard Sign</p>
+              <p className="text-sm font-medium text-foreground">Yard Sign</p>
               <Button
                 size="sm"
                 variant="ghost"
@@ -70,7 +70,7 @@ export default function SalePhotosSection({ sale, lead }) {
             <SignedImage
               src={sale.yard_sign_photo_url}
               alt="Yard Sign"
-              className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openSignedFile(sale.yard_sign_photo_url)}
             />
           </div>
@@ -78,7 +78,7 @@ export default function SalePhotosSection({ sale, lead }) {
         {sale.driver_license_photo_url && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-slate-700">Driver's License</p>
+              <p className="text-sm font-medium text-foreground">Driver's License</p>
               <Button
                 size="sm"
                 variant="ghost"
@@ -91,20 +91,20 @@ export default function SalePhotosSection({ sale, lead }) {
             <SignedImage
               src={sale.driver_license_photo_url}
               alt="Driver's License"
-              className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openSignedFile(sale.driver_license_photo_url)}
             />
           </div>
         )}
         {sale.yard_sign_opted_out && !sale.yard_sign_photo_url && (
-          <div className="flex items-center justify-center h-64 rounded-lg border border-slate-200 bg-slate-50">
-            <p className="text-sm text-slate-500">Customer opted out of yard sign</p>
+          <div className="flex items-center justify-center h-64 rounded-lg border border-border bg-muted">
+            <p className="text-sm text-muted-foreground">Customer opted out of yard sign</p>
           </div>
         )}
         {sale.product_photos && sale.product_photos.map((url, idx) => (
           <div key={idx}>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-slate-700">Final Product {idx + 1}</p>
+              <p className="text-sm font-medium text-foreground">Final Product {idx + 1}</p>
               <Button
                 size="sm"
                 variant="ghost"
@@ -117,7 +117,7 @@ export default function SalePhotosSection({ sale, lead }) {
             <SignedImage
               src={url}
               alt={`Final Product ${idx + 1}`}
-              className="w-full h-64 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-full h-64 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => openSignedFile(url)}
             />
           </div>

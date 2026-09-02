@@ -10,16 +10,16 @@ export default function AppointmentProgressTracker({ appointment }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-slate-100 p-6 mb-6"
+      className="bg-white rounded-2xl border border-border p-6 mb-6"
     >
-      <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-6">
+      <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6">
         Appointment Progress
       </h2>
       <div className="flex items-center justify-between relative">
         {/* Progress Line */}
-        <div className="absolute top-5 left-0 right-0 h-0.5 bg-slate-200" style={{ zIndex: 0 }}>
+        <div className="absolute top-5 left-0 right-0 h-0.5 bg-muted" style={{ zIndex: 0 }}>
           <div 
-            className="h-full bg-indigo-600 transition-all duration-500"
+            className="h-full bg-info transition-all duration-500"
             style={{ 
               width: appointment.status === 'In Route' ? '0%' : 
                      appointment.status === 'On Site' ? '50%' : '100%'
@@ -31,7 +31,7 @@ export default function AppointmentProgressTracker({ appointment }) {
         <div className="flex flex-col items-center relative z-10">
           <div className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors",
-            appointment.consultant_en_route_time ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-400"
+            appointment.consultant_en_route_time ? "bg-info text-white" : "bg-muted text-muted-foreground"
           )}>
             {appointment.consultant_en_route_time ? (
               <Check className="w-5 h-5" />
@@ -41,20 +41,20 @@ export default function AppointmentProgressTracker({ appointment }) {
           </div>
           <p className={cn(
             "text-xs font-medium mb-1",
-            appointment.consultant_en_route_time ? "text-indigo-600" : "text-slate-400"
+            appointment.consultant_en_route_time ? "text-info" : "text-muted-foreground"
           )}>
             In Route
           </p>
           {appointment.consultant_en_route_time && (
             <>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {new Date(appointment.consultant_en_route_time).toLocaleTimeString('en-US', { 
                   hour: 'numeric', 
                   minute: '2-digit', 
                   hour12: true 
                 })}
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 {new Date(appointment.consultant_en_route_time).toLocaleDateString('en-US', { 
                   month: 'short', 
                   day: 'numeric' 
@@ -68,7 +68,7 @@ export default function AppointmentProgressTracker({ appointment }) {
         <div className="flex flex-col items-center relative z-10">
           <div className={cn(
             "w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors",
-            appointment.consultant_arrived_time ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-400"
+            appointment.consultant_arrived_time ? "bg-info text-white" : "bg-muted text-muted-foreground"
           )}>
             {appointment.consultant_arrived_time ? (
               <Check className="w-5 h-5" />
@@ -78,20 +78,20 @@ export default function AppointmentProgressTracker({ appointment }) {
           </div>
           <p className={cn(
             "text-xs font-medium mb-1",
-            appointment.consultant_arrived_time ? "text-indigo-600" : "text-slate-400"
+            appointment.consultant_arrived_time ? "text-info" : "text-muted-foreground"
           )}>
             On Site
           </p>
           {appointment.consultant_arrived_time && (
             <>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {new Date(appointment.consultant_arrived_time).toLocaleTimeString('en-US', { 
                   hour: 'numeric', 
                   minute: '2-digit', 
                   hour12: true 
                 })}
               </p>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 {new Date(appointment.consultant_arrived_time).toLocaleDateString('en-US', { 
                   month: 'short', 
                   day: 'numeric' 
@@ -107,9 +107,9 @@ export default function AppointmentProgressTracker({ appointment }) {
             "w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors",
             COMPLETED_STATUSES.includes(appointment.status) 
               ? appointment.status === 'Sold' 
-                ? "bg-emerald-600 text-white" 
-                : "bg-indigo-600 text-white"
-              : "bg-slate-200 text-slate-400"
+                ? "bg-good text-white" 
+                : "bg-info text-white"
+              : "bg-muted text-muted-foreground"
           )}>
             {COMPLETED_STATUSES.includes(appointment.status) ? (
               <Check className="w-5 h-5" />
@@ -120,17 +120,17 @@ export default function AppointmentProgressTracker({ appointment }) {
           <p className={cn(
             "text-xs font-medium mb-1",
             COMPLETED_STATUSES.includes(appointment.status) 
-              ? "text-indigo-600" 
-              : "text-slate-400"
+              ? "text-info" 
+              : "text-muted-foreground"
           )}>
             Completed
           </p>
           {COMPLETED_STATUSES.includes(appointment.status) && (
             <p className={cn(
               "text-xs font-semibold",
-              appointment.status === 'Sold' ? "text-emerald-600" :
-              appointment.status === 'Lost' ? "text-red-600" :
-              "text-slate-600"
+              appointment.status === 'Sold' ? "text-good" :
+              appointment.status === 'Lost' ? "text-crit" :
+              "text-muted-foreground"
             )}>
               {appointment.status}
             </p>

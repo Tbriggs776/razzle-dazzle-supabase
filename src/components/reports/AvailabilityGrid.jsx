@@ -170,23 +170,23 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setWeekOffset(prev => prev - 1)}
-              className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+              className="p-2 rounded-lg border border-border hover:bg-muted transition-colors"
             >
-              <ChevronLeft className="w-4 h-4 text-slate-600" />
+              <ChevronLeft className="w-4 h-4 text-muted-foreground" />
             </button>
-            <span className="text-sm font-semibold text-slate-700 min-w-[200px] text-center">
+            <span className="text-sm font-semibold text-foreground min-w-[200px] text-center">
               {weekLabel}
             </span>
             <button
               onClick={() => setWeekOffset(prev => prev + 1)}
-              className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+              className="p-2 rounded-lg border border-border hover:bg-muted transition-colors"
             >
-              <ChevronRight className="w-4 h-4 text-slate-600" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
             {weekOffset !== 0 && (
               <button
                 onClick={() => setWeekOffset(0)}
-                className="ml-1 px-3 py-1.5 text-xs font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                className="ml-1 px-3 py-1.5 text-xs font-medium text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors"
               >
                 Today
               </button>
@@ -197,7 +197,7 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
         {/* DC suggestion controls */}
         <div className="flex items-end gap-4 mt-3">
           <div className="space-y-1.5">
-            <Label className="text-xs text-slate-500">Lookback Period</Label>
+            <Label className="text-xs text-muted-foreground">Lookback Period</Label>
             <Select value={String(lookbackDays)} onValueChange={(v) => setLookbackDays(Number(v))}>
               <SelectTrigger className="w-36">
                 <SelectValue />
@@ -209,7 +209,7 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs text-slate-500">Appts / DC / Day</Label>
+            <Label className="text-xs text-muted-foreground">Appts / DC / Day</Label>
             <Input
               type="number"
               min="1"
@@ -225,14 +225,14 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="text-left font-semibold text-slate-600 px-3 py-2 min-w-[140px]">
+              <tr className="border-b border-border bg-muted">
+                <th className="text-left font-semibold text-muted-foreground px-3 py-2 min-w-[140px]">
                   Design Consultant
                 </th>
                 {DAYS.map((d, i) => (
-                  <th key={d} className="text-center font-semibold text-slate-600 px-3 py-2 w-20">
+                  <th key={d} className="text-center font-semibold text-muted-foreground px-3 py-2 w-20">
                     <div>{d}</div>
-                    <div className="text-xs font-normal text-slate-400">
+                    <div className="text-xs font-normal text-muted-foreground">
                       {format(weekDates[i], 'M/d')}
                     </div>
                   </th>
@@ -244,8 +244,8 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
                 const avail = dc.availability || [];
                 const dcBooked = bookedByDcAndDay[dc.id] || {};
                 return (
-                  <tr key={dc.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="font-medium text-slate-700 px-3 py-2">
+                  <tr key={dc.id} className="border-b border-border hover:bg-muted">
+                    <td className="font-medium text-foreground px-3 py-2">
                       {dc.first_name} {dc.last_name}
                     </td>
                     {DAYS.map(d => {
@@ -258,8 +258,8 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
                             disabled={savingId === dc.id}
                             className={`w-12 h-12 rounded-lg flex flex-col items-center justify-center transition-colors mx-auto ${
                               isAvailable
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                : 'bg-slate-50 text-slate-300 hover:bg-slate-100'
+                                ? 'bg-good/12 text-good hover:bg-green-200'
+                                : 'bg-muted text-muted-foreground hover:bg-muted'
                             }`}
                           >
                             {savingId === dc.id ? (
@@ -268,7 +268,7 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
                               <>
                                 {isAvailable && <X className="w-3.5 h-3.5" />}
                                 {booked > 0 && (
-                                  <span className={`text-xs font-bold ${isAvailable ? 'text-green-700' : 'text-slate-500'}`}>
+                                  <span className={`text-xs font-bold ${isAvailable ? 'text-good' : 'text-muted-foreground'}`}>
                                     {booked}
                                   </span>
                                 )}
@@ -282,45 +282,45 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
                 );
               })}
               {/* Available DCs per day */}
-              <tr className="border-t-2 border-slate-300 bg-slate-50 font-semibold">
-                <td className="text-slate-700 px-3 py-2">Available DCs</td>
+              <tr className="border-t-2 border-border bg-muted font-semibold">
+                <td className="text-foreground px-3 py-2">Available DCs</td>
                 {DAYS.map(d => (
-                  <td key={d} className="text-center text-slate-700 px-3 py-2">
+                  <td key={d} className="text-center text-foreground px-3 py-2">
                     {availableByDay[d]}
                   </td>
                 ))}
               </tr>
               {/* Booked appointments per day */}
-              <tr className="bg-amber-50 font-bold">
-                <td className="text-amber-700 px-3 py-2">Booked This Week</td>
+              <tr className="bg-warn/12 font-bold">
+                <td className="text-warn px-3 py-2">Booked This Week</td>
                 {DAYS.map(d => (
-                  <td key={d} className="text-center text-amber-700 px-3 py-2">
+                  <td key={d} className="text-center text-warn px-3 py-2">
                     {bookedByDay[d]}
                   </td>
                 ))}
               </tr>
               {/* Historical average appts per day of week */}
-              <tr className="bg-blue-50 font-semibold">
-                <td className="text-blue-700 px-3 py-2">
+              <tr className="bg-info/12 font-semibold">
+                <td className="text-info px-3 py-2">
                   Avg Appts/Day
-                  <span className="block text-xs font-normal text-blue-400">
+                  <span className="block text-xs font-normal text-info">
                     ({lookbackDays}d lookback)
                   </span>
                 </td>
                 {DAYS.map(d => (
-                  <td key={d} className="text-center text-blue-700 px-3 py-2">
+                  <td key={d} className="text-center text-info px-3 py-2">
                     {historicalFlow.avgByDay[d].toFixed(1)}
                   </td>
                 ))}
               </tr>
               {/* Suggested DCs needed */}
-              <tr className="bg-indigo-50 font-bold">
-                <td className="text-indigo-700 px-3 py-2">
+              <tr className="bg-info/12 font-bold">
+                <td className="text-info px-3 py-2">
                   <div className="flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5" />
                     Suggested DCs
                   </div>
-                  <span className="block text-xs font-normal text-indigo-400">
+                  <span className="block text-xs font-normal text-info">
                     based on {apptsPerDcPerDay} appts/DC/day
                   </span>
                 </td>
@@ -331,14 +331,14 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
                   return (
                     <td key={d} className="text-center px-3 py-2">
                       <div className="flex flex-col items-center">
-                        <span className="text-indigo-700">{suggested}</span>
+                        <span className="text-info">{suggested}</span>
                         {gap > 0 && (
-                          <span className="text-xs text-red-500 font-medium">
+                          <span className="text-xs text-crit font-medium">
                             +{gap} needed
                           </span>
                         )}
                         {gap <= 0 && suggested > 0 && (
-                          <span className="text-xs text-green-500 font-medium">✓ covered</span>
+                          <span className="text-xs text-good font-medium">✓ covered</span>
                         )}
                       </div>
                     </td>
@@ -351,27 +351,27 @@ export default function AvailabilityGrid({ designConsultants, appointments }) {
 
         {/* Weekly summary */}
         <div className="flex flex-wrap gap-4 mt-4 justify-end">
-          <div className="bg-slate-50 rounded-lg px-4 py-3 text-center min-w-[120px]">
-            <p className="text-xs text-slate-500 mb-1">DCs on Team</p>
-            <p className="text-2xl font-bold text-slate-800">{designConsultants.length}</p>
+          <div className="bg-muted rounded-lg px-4 py-3 text-center min-w-[120px]">
+            <p className="text-xs text-muted-foreground mb-1">DCs on Team</p>
+            <p className="text-2xl font-bold text-foreground">{designConsultants.length}</p>
           </div>
-          <div className="bg-indigo-50 rounded-lg px-4 py-3 text-center min-w-[120px]">
-            <p className="text-xs text-indigo-500 mb-1">DCs Needed (peak day)</p>
-            <p className="text-2xl font-bold text-indigo-600">
+          <div className="bg-info/12 rounded-lg px-4 py-3 text-center min-w-[120px]">
+            <p className="text-xs text-info mb-1">DCs Needed (peak day)</p>
+            <p className="text-2xl font-bold text-info">
               {Math.max(...DAYS.map(d => historicalFlow.suggestedByDay[d]), 0)}
             </p>
           </div>
-          <div className="bg-amber-50 rounded-lg px-4 py-3 text-center min-w-[120px]">
-            <p className="text-xs text-amber-500 mb-1">Booked This Week</p>
-            <p className="text-2xl font-bold text-amber-600">{totalBooked}</p>
+          <div className="bg-warn/12 rounded-lg px-4 py-3 text-center min-w-[120px]">
+            <p className="text-xs text-warn mb-1">Booked This Week</p>
+            <p className="text-2xl font-bold text-warn">{totalBooked}</p>
           </div>
-          <div className="bg-slate-50 rounded-lg px-4 py-3 text-center min-w-[120px]">
-            <p className="text-xs text-slate-500 mb-1">Avail. DC-days / Wk</p>
-            <p className="text-2xl font-bold text-slate-800">{totalAvailable}</p>
+          <div className="bg-muted rounded-lg px-4 py-3 text-center min-w-[120px]">
+            <p className="text-xs text-muted-foreground mb-1">Avail. DC-days / Wk</p>
+            <p className="text-2xl font-bold text-foreground">{totalAvailable}</p>
           </div>
-          <div className="bg-indigo-50 rounded-lg px-4 py-3 text-center min-w-[120px]">
-            <p className="text-xs text-indigo-500 mb-1">Needed DC-days / Wk</p>
-            <p className="text-2xl font-bold text-indigo-600">
+          <div className="bg-info/12 rounded-lg px-4 py-3 text-center min-w-[120px]">
+            <p className="text-xs text-info mb-1">Needed DC-days / Wk</p>
+            <p className="text-2xl font-bold text-info">
               {DAYS.reduce((sum, d) => sum + historicalFlow.suggestedByDay[d], 0)}
             </p>
           </div>

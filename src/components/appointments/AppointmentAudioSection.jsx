@@ -28,7 +28,7 @@ export default function AppointmentAudioSection({
             <div className="bg-gradient-to-br from-slate-900 to-indigo-900 rounded-2xl border border-slate-700 p-6">
               <h3 className="text-sm font-semibold text-white mb-4">Conversation Recording</h3>
               <div className="flex items-center justify-center h-20">
-                <p className="text-slate-400 text-sm">Awaiting recording upload...</p>
+                <p className="text-muted-foreground text-sm">Awaiting recording upload...</p>
               </div>
             </div>
           )}
@@ -43,9 +43,9 @@ export default function AppointmentAudioSection({
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <div className="bg-white rounded-2xl border border-slate-100 p-6">
-            <h3 className="text-sm font-semibold text-slate-800 mb-3">Record Conversation</h3>
-            <p className="text-sm text-slate-600 mb-4">
+          <div className="bg-white rounded-2xl border border-border p-6">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Record Conversation</h3>
+            <p className="text-sm text-muted-foreground mb-4">
               {recordingAppointmentId === appointmentId 
                 ? 'Recording in progress (continues even if you navigate away)...' 
                 : 'Click below to start recording the conversation'}
@@ -53,7 +53,7 @@ export default function AppointmentAudioSection({
             {recordingAppointmentId !== appointmentId && (
               <Button
                 onClick={() => startRecording(appointmentId)}
-                className="bg-red-600 hover:bg-red-700"
+                className="bg-crit hover:bg-crit"
               >
                 Start Recording
               </Button>

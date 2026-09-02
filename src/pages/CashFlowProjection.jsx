@@ -10,10 +10,10 @@ import { Loader2, RefreshCw, DollarSign, TrendingUp, AlertCircle, Code } from 'l
 import { format, parseISO, startOfMonth, endOfMonth, startOfYear, subMonths } from 'date-fns';
 
 const STATUS_COLORS = {
-  'Job Costed': 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
-  'Cancelled': 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'On Order': 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
-  'Scheduled': 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  'Job Costed': 'bg-good/12 text-good border-good/25',
+  'Cancelled': 'bg-crit/12 text-crit border-crit/25',
+  'On Order': 'bg-warn/12 text-warn border-warn/25',
+  'Scheduled': 'bg-info/12 text-info border-info/25',
   'In Progress': 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
 };
 
@@ -243,7 +243,7 @@ export default function CashFlowProjection() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-500/25 flex items-center gap-3 text-red-700 dark:text-red-300">
+          <div className="mb-6 p-4 rounded-xl bg-crit/12 border border-crit/25 flex items-center gap-3 text-crit">
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
             <span>{error}</span>
           </div>
@@ -263,21 +263,21 @@ export default function CashFlowProjection() {
                 </div>
               </div>
               <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-4">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
+                <div className="w-12 h-12 bg-good/12 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-good" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Collected</p>
-                  <p className="text-2xl font-bold text-green-700">{formatCurrency(totalPaid)}</p>
+                  <p className="text-2xl font-bold text-good">{formatCurrency(totalPaid)}</p>
                 </div>
               </div>
               <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-4">
-                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6 text-amber-600" />
+                <div className="w-12 h-12 bg-warn/12 rounded-xl flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-warn" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Balance Due</p>
-                  <p className="text-2xl font-bold text-amber-700">{formatCurrency(totalBalanceDue)}</p>
+                  <p className="text-2xl font-bold text-warn">{formatCurrency(totalBalanceDue)}</p>
                 </div>
               </div>
             </div>
@@ -294,8 +294,8 @@ export default function CashFlowProjection() {
                   </h2>
                   <div className="flex gap-1.5">
                     <button onClick={() => setAlertFilter('all')} className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${alertFilter === 'all' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:border-muted-foreground'}`}>All</button>
-                    <button onClick={() => setAlertFilter('red')} className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${alertFilter === 'red' ? 'bg-destructive text-destructive-foreground border-destructive' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/25 hover:border-red-400'}`}>🔴 Past Due</button>
-                    <button onClick={() => setAlertFilter('yellow')} className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${alertFilter === 'yellow' ? 'bg-yellow-500 text-white border-yellow-500' : 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-300 dark:border-yellow-500/25 hover:border-yellow-400'}`}>🟡 Due Soon</button>
+                    <button onClick={() => setAlertFilter('red')} className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${alertFilter === 'red' ? 'bg-destructive text-destructive-foreground border-destructive' : 'bg-crit/12 text-crit border-crit/25 hover:border-crit'}`}>🔴 Past Due</button>
+                    <button onClick={() => setAlertFilter('yellow')} className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${alertFilter === 'yellow' ? 'bg-warn text-white border-warn' : 'bg-warn/12 text-warn border-warn/25 hover:border-warn'}`}>🟡 Due Soon</button>
                   </div>
                 </div>
 
@@ -326,7 +326,7 @@ export default function CashFlowProjection() {
                       const isPastDueBalance = order.balanceDue > 0 && installDateStr && installDateStr < todayStr;
                       const isUpcomingBalance = !isPastDueBalance && order.balanceDue > 0 && installDateStr && installDateStr >= todayStr && installDateStr <= in3DaysStr;
                       return (
-                        <tr key={order.documentNumber + (order.id || order.databaseId)} className={isPastDueBalance ? 'bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors' : isUpcomingBalance ? 'bg-yellow-50 dark:bg-yellow-500/10 hover:bg-yellow-100 dark:hover:bg-yellow-500/20 transition-colors' : 'hover:bg-secondary transition-colors'}>
+                        <tr key={order.documentNumber + (order.id || order.databaseId)} className={isPastDueBalance ? 'bg-crit/12 hover:bg-crit/12 dark:hover:bg-crit/20 transition-colors' : isUpcomingBalance ? 'bg-warn/12 hover:bg-warn/12 dark:hover:bg-warn/20 transition-colors' : 'hover:bg-secondary transition-colors'}>
                          <td className="px-4 py-3 text-sm font-mono font-medium text-primary">
                            <div className="flex items-center gap-1.5">
                              {order.documentNumber}
@@ -350,11 +350,11 @@ export default function CashFlowProjection() {
                           <td className="px-4 py-3 text-sm text-muted-foreground">{order.salesperson1 || '—'}</td>
                           <td className="px-4 py-3 text-sm font-semibold text-foreground">{formatCurrency(order.grandTotal || order.orderTotal)}</td>
                           <td className="px-4 py-3 text-sm font-semibold">
-                            <span className={order.balanceDue > 0 ? 'text-amber-700' : 'text-muted-foreground'}>
+                            <span className={order.balanceDue > 0 ? 'text-warn' : 'text-muted-foreground'}>
                               {formatCurrency(order.balanceDue)}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm font-semibold text-green-700">{formatCurrency(order.paid || collected)}</td>
+                          <td className="px-4 py-3 text-sm font-semibold text-good">{formatCurrency(order.paid || collected)}</td>
                         </tr>
                       );
                     })}
@@ -364,8 +364,8 @@ export default function CashFlowProjection() {
                       <tr>
                         <td colSpan={6} className="px-4 py-3 text-sm font-bold text-foreground">Totals ({filteredOrders.length} orders)</td>
                         <td className="px-4 py-3 text-sm font-bold text-foreground">{formatCurrency(totalRevenue)}</td>
-                        <td className="px-4 py-3 text-sm font-bold text-amber-700">{formatCurrency(totalBalanceDue)}</td>
-                        <td className="px-4 py-3 text-sm font-bold text-green-700">{formatCurrency(totalPaid)}</td>
+                        <td className="px-4 py-3 text-sm font-bold text-warn">{formatCurrency(totalBalanceDue)}</td>
+                        <td className="px-4 py-3 text-sm font-bold text-good">{formatCurrency(totalPaid)}</td>
                       </tr>
                     </tfoot>
                   )}
@@ -390,7 +390,7 @@ export default function CashFlowProjection() {
             <DialogTitle>Raw RFMS Data — {jsonOrder?.documentNumber}</DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-auto">
-            <pre className="bg-slate-900 text-green-300 text-xs rounded-lg p-4 whitespace-pre-wrap break-all">
+            <pre className="bg-slate-900 text-good text-xs rounded-lg p-4 whitespace-pre-wrap break-all">
               {JSON.stringify(jsonOrder, null, 2)}
             </pre>
           </div>

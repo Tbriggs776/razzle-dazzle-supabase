@@ -47,19 +47,19 @@ import ResultStatusDialog from '@/components/appointments/ResultStatusDialog';
 
 const statusColors = {
   'Lead': 'bg-secondary text-secondary-foreground border-border',
-  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
-  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'Awaiting Assignment': 'bg-warn/12 text-warn border-warn/25',
+  'Scheduled': 'bg-info/12 text-info border-info/25',
+  'Rescheduled': 'bg-warn/12 text-warn border-warn/25',
   'In Route': 'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/25',
-  'On Site': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
-  'Cancelled': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  'On Site': 'bg-good/12 text-good border-good/25',
+  'Cancelled': 'bg-crit/12 text-crit border-crit/25',
   'Completed': 'bg-secondary text-secondary-foreground border-border',
-  'Sold': 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25',
-  'Lost': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
-  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
-  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/25',
-  'Follow-Up': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25'
+  'Sold': 'bg-good/12 text-good border-good/25',
+  'Lost': 'bg-crit/12 text-crit border-crit/25',
+  'Pitch and Miss': 'bg-warn/12 text-warn border-warn/25',
+  'One-Leg': 'bg-warn/12 text-warn border-warn/25',
+  'Credit Decline': 'bg-crit/12 text-crit border-crit/25',
+  'Follow-Up': 'bg-crit/12 text-crit border-crit/25'
 };
 
 const COMPLETED_STATUSES = ['Sold', 'Lost', 'Pitch and Miss', 'One-Leg', 'Completed'];
@@ -930,13 +930,13 @@ export default function AppointmentDetail() {
                     {appointment.status}
                   </Badge>
                   {(appointment.status === 'Scheduled' || appointment.status === 'Awaiting Assignment') && (
-                    <Badge variant="secondary" className={cn('border', appointment.assigned_dc ? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25' : 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25')}>
+                    <Badge variant="secondary" className={cn('border', appointment.assigned_dc ? 'bg-good/12 text-good border-good/25' : 'bg-warn/12 text-warn border-warn/25')}>
                       {appointment.assigned_dc ? 'Assigned' : 'Unassigned'}
                     </Badge>
                   )}
                   {appointment.status === 'Sold' && sale && (
                     <Link to={createPageUrl('SaleDetail') + `?id=${sale.id}`}>
-                      <Badge variant="secondary" className="border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25 dark:hover:bg-emerald-500/25 cursor-pointer">
+                      <Badge variant="secondary" className="border bg-good/12 text-good border-good/25 hover:bg-good/12 dark:hover:bg-good/25 cursor-pointer">
                         View Sale Record →
                       </Badge>
                     </Link>
@@ -946,7 +946,7 @@ export default function AppointmentDetail() {
                       variant="secondary" 
                       className={cn('border font-mono text-xs max-w-full break-all',
                         appointment.google_calendar_event_id
-                          ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25'
+                          ? 'bg-info/12 text-info border-info/25'
                           : 'bg-secondary text-muted-foreground border-border'
                       )}
                     >
@@ -959,7 +959,7 @@ export default function AppointmentDetail() {
                     </Badge>
                   )}
                   {appointment.reminder_email_sent_at && (
-                    <Badge variant="secondary" className="border bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/25 text-xs">
+                    <Badge variant="secondary" className="border bg-info/12 text-info border-info/25 text-xs">
                       ✉ Reminder Sent
                     </Badge>
                   )}
@@ -996,7 +996,7 @@ export default function AppointmentDetail() {
                 <Button
                   variant="outline"
                   disabled
-                  className="h-11 px-5 border-green-200 dark:border-green-500/30 text-green-600 dark:text-green-300 bg-green-50 dark:bg-green-500/15"
+                  className="h-11 px-5 border-good/25 text-good bg-good/12"
                 >
                   <Check className="w-4 h-4 mr-2" />
                   Synced with RFMS Measure Mobile
@@ -1070,7 +1070,7 @@ export default function AppointmentDetail() {
               <Link to={createPageUrl('LeadAppointmentView') + `?id=${appointmentId}`} target="_blank">
                 <Button
                   variant="outline"
-                  className="h-11 px-5 border-green-200 dark:border-green-500/30 text-green-600 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-500/10"
+                  className="h-11 px-5 border-good/25 text-good hover:bg-good/12 dark:hover:bg-good/10"
                 >
                   <LinkIcon className="w-4 h-4 mr-2" />
                   View as Lead
@@ -1087,7 +1087,7 @@ export default function AppointmentDetail() {
                       });
                       setShowRescheduleDialog(true);
                     }}
-                    className="h-11 px-5 border-yellow-200 dark:border-yellow-500/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-500/10"
+                    className="h-11 px-5 border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10"
                   >
                     Reschedule
                   </Button>
@@ -1164,12 +1164,12 @@ export default function AppointmentDetail() {
 
       {/* 1978 Warning Banner */}
       {is1978OrBefore && (
-        <div className="bg-red-600 text-white px-6 py-4">
+        <div className="bg-crit text-white px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center gap-4">
             <span className="text-3xl">🛑</span>
             <div>
               <p className="font-bold text-lg">STOP — Home Built On or Before 1978</p>
-              <p className="text-red-100 text-sm">Asbestos risk — notify the DC and follow proper protocol before proceeding.</p>
+              <p className="text-crit text-sm">Asbestos risk — notify the DC and follow proper protocol before proceeding.</p>
             </div>
           </div>
         </div>
@@ -1196,8 +1196,8 @@ export default function AppointmentDetail() {
             </h2>
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
+                <div className="w-10 h-10 rounded-lg bg-good/12 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-good" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-0.5">Amount</p>
@@ -1263,12 +1263,12 @@ export default function AppointmentDetail() {
             </div>
             <div className="space-y-4">
               {csr && (
-                <div className="flex items-center gap-4 p-3 rounded-xl bg-green-50 dark:bg-green-500/10">
-                  <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
-                    <Users className="w-5 h-5 text-green-600 dark:text-green-300" />
+                <div className="flex items-center gap-4 p-3 rounded-xl bg-good/12">
+                  <div className="w-10 h-10 rounded-lg bg-good/12 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-good" />
                   </div>
                   <div>
-                    <p className="text-xs text-green-600 dark:text-green-300 mb-0.5">Customer Service Rep</p>
+                    <p className="text-xs text-good mb-0.5">Customer Service Rep</p>
                     <p className="text-foreground">{csr.first_name} {csr.last_name}</p>
                   </div>
                 </div>
@@ -1303,8 +1303,8 @@ export default function AppointmentDetail() {
             {appointment.location_address ? (
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-3">
-                  <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-500/15 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-orange-600 dark:text-orange-300" />
+                  <div className="w-10 h-10 rounded-lg bg-warn/12 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-warn" />
                   </div>
                   <div>
                     <p className="text-foreground">{appointment.location_address}</p>
@@ -1351,7 +1351,7 @@ export default function AppointmentDetail() {
                   onClick={copyLeadLinkToClipboard}
                   variant="outline"
                   disabled={generatingLeadShortUrl}
-                  className="h-12 px-5 border-green-200 hover:bg-green-50 dark:border-green-500/30 dark:hover:bg-green-500/10 flex-shrink-0"
+                  className="h-12 px-5 border-good/25 hover:bg-good/12 dark:hover:bg-good/10 flex-shrink-0"
                 >
                   {generatingLeadShortUrl ? (
                     <>
@@ -1360,7 +1360,7 @@ export default function AppointmentDetail() {
                     </>
                   ) : leadLinkCopied ? (
                     <>
-                      <Check className="w-4 h-4 mr-2 text-green-600 dark:text-green-300" />
+                      <Check className="w-4 h-4 mr-2 text-good" />
                       Copied!
                     </>
                   ) : (
@@ -1404,7 +1404,7 @@ export default function AppointmentDetail() {
                     </>
                   ) : consultantLinkCopied ? (
                     <>
-                      <Check className="w-4 h-4 mr-2 text-green-600 dark:text-green-300" />
+                      <Check className="w-4 h-4 mr-2 text-good" />
                       Copied!
                     </>
                   ) : (
@@ -1448,8 +1448,8 @@ export default function AppointmentDetail() {
                     </h3>
                     <div className="space-y-2">
                       {openTasks.map((task) => (
-                        <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25">
-                          <Circle className="w-4 h-4 text-amber-600 dark:text-amber-300 mt-0.5 flex-shrink-0" />
+                        <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg bg-warn/12 border border-warn/25">
+                          <Circle className="w-4 h-4 text-warn mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
                               <div>
@@ -1475,8 +1475,8 @@ export default function AppointmentDetail() {
                     </h3>
                     <div className="space-y-2">
                       {completedTasks.map((task) => (
-                        <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-500/10 dark:border-green-500/25">
-                          <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-300 mt-0.5 flex-shrink-0" />
+                        <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg bg-good/12 border border-good/25">
+                          <CheckCircle2 className="w-4 h-4 text-good mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
                               <div>
@@ -1717,7 +1717,7 @@ export default function AppointmentDetail() {
             <Button
               onClick={() => rescheduleMutation.mutate(rescheduleData)}
               disabled={rescheduleMutation.isPending || !rescheduleData.appointment_date || !rescheduleData.appointment_block}
-              className="bg-yellow-600 hover:bg-yellow-700"
+              className="bg-warn hover:bg-warn"
             >
               {rescheduleMutation.isPending ? (
                 <>
@@ -1738,7 +1738,7 @@ export default function AppointmentDetail() {
           <DialogHeader>
             <DialogTitle className={cn(
               "text-xl font-bold",
-              doubleBookWarning ? "flex items-center gap-2 text-amber-600 dark:text-amber-300" : "text-foreground"
+              doubleBookWarning ? "flex items-center gap-2 text-warn" : "text-foreground"
             )}>
               {doubleBookWarning ? (
                 <>
@@ -1758,12 +1758,12 @@ export default function AppointmentDetail() {
           </DialogHeader>
           {doubleBookWarning ? (
             <div className="space-y-4 py-4">
-              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/25">
-                <p className="text-sm font-semibold text-amber-900 dark:text-amber-200 mb-2">Existing Appointment:</p>
-                <p className="text-sm text-amber-800 dark:text-amber-300">
+              <div className="p-3 rounded-lg bg-warn/12 border border-warn/25">
+                <p className="text-sm font-semibold text-warn mb-2">Existing Appointment:</p>
+                <p className="text-sm text-warn">
                   {doubleBookWarning.conflictLead?.first_name} {doubleBookWarning.conflictLead?.last_name}
                 </p>
-                <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                <p className="text-xs text-warn mt-1">
                   Same time block on {format(parseISO(appointment.appointment_date), 'MMM d')}
                 </p>
               </div>
@@ -1871,7 +1871,7 @@ export default function AppointmentDetail() {
                 }
               }}
               disabled={updateMutation.isPending}
-              className={doubleBookWarning ? "bg-amber-600 hover:bg-amber-700" : "bg-primary text-primary-foreground hover:opacity-90"}
+              className={doubleBookWarning ? "bg-warn hover:bg-warn" : "bg-primary text-primary-foreground hover:opacity-90"}
             >
               {updateMutation.isPending ? (
                 <>
@@ -2036,12 +2036,12 @@ export default function AppointmentDetail() {
                   return response;
                 })}
                 disabled={!!runningAction}
-                className="h-20 flex-col border-green-200 hover:bg-green-50 dark:border-green-500/30 dark:hover:bg-green-500/10"
+                className="h-20 flex-col border-good/25 hover:bg-good/12 dark:hover:bg-good/10"
               >
                 {runningAction === 'Send Customer SMS' ? (
                   <Loader2 className="w-5 h-5 mb-2 animate-spin" />
                 ) : (
-                  <Mail className="w-5 h-5 mb-2 text-green-600 dark:text-green-300" />
+                  <Mail className="w-5 h-5 mb-2 text-good" />
                 )}
                 <span className="text-sm">Send Customer SMS</span>
               </Button>
@@ -2096,12 +2096,12 @@ export default function AppointmentDetail() {
                   return response;
                 })}
                 disabled={!!runningAction}
-                className="h-20 flex-col border-orange-200 hover:bg-orange-50 dark:border-orange-500/30 dark:hover:bg-orange-500/10"
+                className="h-20 flex-col border-warn/25 hover:bg-warn/12 dark:hover:bg-warn/10"
               >
                 {runningAction === 'Send Confirmation Email' ? (
                   <Loader2 className="w-5 h-5 mb-2 animate-spin" />
                 ) : (
-                  <Mail className="w-5 h-5 mb-2 text-orange-600 dark:text-orange-300" />
+                  <Mail className="w-5 h-5 mb-2 text-warn" />
                 )}
                 <span className="text-sm">Send Confirmation Email</span>
               </Button>
@@ -2111,10 +2111,10 @@ export default function AppointmentDetail() {
             {actionResults.length > 0 && (
               <div className="mt-6 bg-slate-900 rounded-lg p-4 text-white font-mono text-xs overflow-auto max-h-96">
                 {actionResults.map((result, i) => (
-                  <div key={i} className={cn('mb-2', result.type === 'error' && 'text-red-400', result.type === 'success' && 'text-green-400')}>
+                  <div key={i} className={cn('mb-2', result.type === 'error' && 'text-crit', result.type === 'success' && 'text-good')}>
                     <div>{result.message}</div>
                     {result.data && (
-                      <pre className="mt-1 text-slate-300 overflow-auto">
+                      <pre className="mt-1 text-muted-foreground overflow-auto">
                         {JSON.stringify(result.data, null, 2)}
                       </pre>
                     )}

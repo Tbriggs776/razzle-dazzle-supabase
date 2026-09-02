@@ -220,8 +220,8 @@ export default function Recordings() {
                     <div className="flex flex-col gap-2 items-end">
                       <div className={cn(
                         "px-3 py-1 rounded-full text-xs font-medium flex-shrink-0",
-                        appointment.status === 'Sold' && "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300",
-                        appointment.status === 'Completed' && "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
+                        appointment.status === 'Sold' && "bg-good/12 text-good",
+                        appointment.status === 'Completed' && "bg-info/12 text-info",
                         !['Sold', 'Completed'].includes(appointment.status) && "bg-secondary text-secondary-foreground"
                       )}>
                         {appointment.status}
@@ -230,9 +230,9 @@ export default function Recordings() {
                       {appointment.recording_status && (
                         <div className={cn(
                           "px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 flex items-center gap-1",
-                          appointment.recording_status === 'uploading' && "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+                          appointment.recording_status === 'uploading' && "bg-warn/12 text-warn",
                           appointment.recording_status === 'analyzing' && "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300",
-                          appointment.recording_status === 'completed' && "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300"
+                          appointment.recording_status === 'completed' && "bg-good/12 text-good"
                         )}>
                           {appointment.recording_status === 'uploading' && (
                             <>

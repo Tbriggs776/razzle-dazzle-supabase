@@ -96,18 +96,18 @@ export default function AISummarySection({ formData, onChange }) {
     <div className="border-2 border-purple-200 rounded-xl overflow-hidden">
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-purple-50 border-b border-purple-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-purple-50 border-b border-purple-200"
       )}>
         <div className="flex items-center gap-3">
-          <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", isComplete ? "bg-green-100" : "bg-purple-100")}>
-            {isComplete ? <CheckCircle2 className="w-5 h-5 text-green-600" /> : <Sparkles className="w-5 h-5 text-purple-600" />}
+          <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", isComplete ? "bg-good/12" : "bg-purple-100")}>
+            {isComplete ? <CheckCircle2 className="w-5 h-5 text-good" /> : <Sparkles className="w-5 h-5 text-purple-600" />}
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 16 — AI Call Summary</p>
-            <p className="text-xs text-slate-500">Auto-generated summary for the design consultant</p>
+            <p className="font-bold text-foreground">Section 16 — AI Call Summary</p>
+            <p className="text-xs text-muted-foreground">Auto-generated summary for the design consultant</p>
           </div>
         </div>
-        {isComplete && <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>}
+        {isComplete && <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>}
       </div>
 
       <div className="p-5 bg-white space-y-4">
@@ -125,11 +125,11 @@ export default function AISummarySection({ formData, onChange }) {
         </Button>
 
         {generateError && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{generateError}</p>
+          <p className="text-sm text-crit bg-crit/12 border border-crit/25 rounded-lg px-3 py-2">{generateError}</p>
         )}
 
         <div className="space-y-2">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Summary (edit as needed)</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Summary (edit as needed)</p>
           <LocalTextarea
             value={formData.ai_summary || ''}
             onBlur={(v) => onChange('ai_summary', v)}
@@ -139,7 +139,7 @@ export default function AISummarySection({ formData, onChange }) {
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Additional Notes</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Additional Notes</p>
           <LocalTextarea
             value={formData.other_project_notes || ''}
             onBlur={(v) => onChange('other_project_notes', v)}

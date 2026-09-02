@@ -49,17 +49,17 @@ export default function EmailInput({ value = [], onChange, placeholder = "Type e
 
   return (
     <div className="w-full space-y-2">
-      <div className="border border-slate-200 rounded-lg p-3 flex flex-wrap gap-2 items-start bg-white focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all">
+      <div className="border border-border rounded-lg p-3 flex flex-wrap gap-2 items-start bg-white focus-within:ring-2 focus-within:ring-info focus-within:border-transparent transition-all">
         {value.map((email) => (
           <div
             key={email}
-            className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-sm font-medium border border-indigo-200"
+            className="flex items-center gap-2 bg-info/12 text-info px-3 py-1.5 rounded-lg text-sm font-medium border border-info/25"
           >
             <span>{email}</span>
             <button
               type="button"
               onClick={() => removeEmail(email)}
-              className="hover:bg-indigo-100 rounded p-0.5 transition-colors"
+              className="hover:bg-info/12 rounded p-0.5 transition-colors"
               aria-label={`Remove ${email}`}
             >
               <X className="w-3.5 h-3.5" />
@@ -75,7 +75,7 @@ export default function EmailInput({ value = [], onChange, placeholder = "Type e
           className="flex-1 min-w-32 outline-none bg-transparent text-sm font-mono"
         />
       </div>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-crit">{error}</p>}
     </div>
   );
 }

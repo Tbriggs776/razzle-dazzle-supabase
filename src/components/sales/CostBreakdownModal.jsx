@@ -18,7 +18,7 @@ export default function CostBreakdownModal({ open, onClose, data }) {
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="bg-slate-50">
+              <TableRow className="bg-muted">
                 <TableHead>Style Name</TableHead>
                 <TableHead className="text-right">Quantity</TableHead>
                 <TableHead className="text-right">Unit Cost</TableHead>
@@ -41,22 +41,22 @@ export default function CostBreakdownModal({ open, onClose, data }) {
           </Table>
         </div>
 
-        <div className="border-t-2 border-slate-300 pt-4 mt-2 space-y-2">
+        <div className="border-t-2 border-border pt-4 mt-2 space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-sm font-semibold text-slate-800">Total Cost:</span>
-            <span className="text-lg font-bold text-slate-700">{fmtDollar(totalCost)}</span>
+            <span className="text-sm font-semibold text-foreground">Total Cost:</span>
+            <span className="text-lg font-bold text-foreground">{fmtDollar(totalCost)}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm font-semibold text-slate-800">Order Total:</span>
-            <span className="text-lg font-bold text-emerald-600">{fmtDollar(orderTotal)}</span>
+            <span className="text-sm font-semibold text-foreground">Order Total:</span>
+            <span className="text-lg font-bold text-good">{fmtDollar(orderTotal)}</span>
           </div>
-          <div className="flex justify-between items-center pt-2 border-t border-slate-200">
-            <span className="text-sm font-semibold text-slate-800">Gross Profit %:</span>
-            <span className="text-lg font-bold text-blue-600">{grossProfitPercent.toFixed(2)}%</span>
+          <div className="flex justify-between items-center pt-2 border-t border-border">
+            <span className="text-sm font-semibold text-foreground">Gross Profit %:</span>
+            <span className="text-lg font-bold text-info">{grossProfitPercent.toFixed(2)}%</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm font-semibold text-slate-800">Gross Profit $:</span>
-            <span className="text-lg font-bold text-green-600">{fmtDollar(orderTotal - totalCost)}</span>
+            <span className="text-sm font-semibold text-foreground">Gross Profit $:</span>
+            <span className="text-lg font-bold text-good">{fmtDollar(orderTotal - totalCost)}</span>
           </div>
         </div>
       </DialogContent>

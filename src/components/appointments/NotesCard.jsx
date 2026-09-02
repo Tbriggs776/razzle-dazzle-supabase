@@ -13,10 +13,10 @@ export default function NotesCard({ appointment, updateMutation }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.7 }}
-      className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+      className="bg-white rounded-2xl border border-border p-6 md:col-span-2"
     >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
           Notes
         </h2>
         <Button
@@ -34,14 +34,14 @@ export default function NotesCard({ appointment, updateMutation }) {
       {appointment.notes && appointment.notes.length > 0 ? (
         <div className="space-y-3 mb-4">
           {appointment.notes.map((note, index) => (
-            <div key={index} className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+            <div key={index} className="p-4 rounded-lg bg-muted border border-border">
               <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 mb-2">
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <span className="text-xs font-medium text-purple-600">{note.context || 'Note'}</span>
-                  <span className="text-xs text-slate-400">•</span>
-                  <span className="text-xs text-slate-500">{note.user_name}</span>
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <span className="text-xs text-muted-foreground">{note.user_name}</span>
                 </div>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-muted-foreground">
                   {new Date(note.timestamp).toLocaleString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -52,12 +52,12 @@ export default function NotesCard({ appointment, updateMutation }) {
                   })}
                 </span>
               </div>
-              <p className="text-slate-700 whitespace-pre-wrap">{note.content}</p>
+              <p className="text-foreground whitespace-pre-wrap">{note.content}</p>
             </div>
           ))}
         </div>
       ) : !editingNotes && (
-        <p className="text-slate-400 text-center py-6 mb-4">No notes yet</p>
+        <p className="text-muted-foreground text-center py-6 mb-4">No notes yet</p>
       )}
 
       {/* Add New Note */}
@@ -66,7 +66,7 @@ export default function NotesCard({ appointment, updateMutation }) {
           <textarea
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
-            className="w-full p-4 border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full p-4 border border-border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             rows="4"
             placeholder="Add a new note..."
           />
@@ -77,7 +77,7 @@ export default function NotesCard({ appointment, updateMutation }) {
                 setEditingNotes(false);
                 setNewNote('');
               }}
-              className="border-slate-200"
+              className="border-border"
             >
               Cancel
             </Button>

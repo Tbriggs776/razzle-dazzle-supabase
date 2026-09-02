@@ -34,7 +34,7 @@ export default function InstallersList({ installers, onChange, crews, crewsLoadi
       <div className="flex items-center justify-between mb-1">
         <Label>Installer(s)</Label>
         {installers.length < MAX_INSTALLERS && (
-          <button type="button" onClick={addInstaller} className="text-xs text-indigo-600 hover:underline flex items-center gap-1">
+          <button type="button" onClick={addInstaller} className="text-xs text-info hover:underline flex items-center gap-1">
             <Plus className="w-3 h-3" /> Add Installer
           </button>
         )}
@@ -78,7 +78,7 @@ export default function InstallersList({ installers, onChange, crews, crewsLoadi
               </div>
             )}
             {installers.length > 1 && (
-              <button type="button" onClick={() => removeInstaller(index)} className="text-slate-400 hover:text-red-500 transition-colors">
+              <button type="button" onClick={() => removeInstaller(index)} className="text-muted-foreground hover:text-crit transition-colors">
                 <X className="w-4 h-4" />
               </button>
             )}
@@ -86,7 +86,7 @@ export default function InstallersList({ installers, onChange, crews, crewsLoadi
         ))}
       </div>
       {installers.length >= MAX_INSTALLERS && (
-        <p className="text-xs text-slate-400 mt-1">Maximum of {MAX_INSTALLERS} installers reached.</p>
+        <p className="text-xs text-muted-foreground mt-1">Maximum of {MAX_INSTALLERS} installers reached.</p>
       )}
     </div>
   );

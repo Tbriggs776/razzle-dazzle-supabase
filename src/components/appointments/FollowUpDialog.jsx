@@ -165,7 +165,7 @@ export default function FollowUpDialog({ open, onClose, appointment, lead, curre
               <Button
                 onClick={handleMarkWon}
                 disabled={!notes.trim() || saveMutation.isPending}
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="flex-1 bg-good hover:bg-good text-white"
               >
                 <Trophy className="w-4 h-4 mr-2" />
                 Mark as Won
@@ -174,7 +174,7 @@ export default function FollowUpDialog({ open, onClose, appointment, lead, curre
                 onClick={handleMarkLost}
                 disabled={!notes.trim() || saveMutation.isPending}
                 variant="outline"
-                className="flex-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+                className="flex-1 border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10"
               >
                 {saveMutation.isPending ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -193,7 +193,7 @@ export default function FollowUpDialog({ open, onClose, appointment, lead, curre
               <Button
                 onClick={handleSave}
                 disabled={!notes.trim() || !dueDate || saveMutation.isPending}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="flex-1 bg-info hover:bg-info text-white"
               >
                 {saveMutation.isPending ? (
                   <>

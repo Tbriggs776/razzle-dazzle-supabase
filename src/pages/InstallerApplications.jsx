@@ -12,10 +12,10 @@ import { format, parseISO, isValid } from 'date-fns';
 
 const STATUS_BADGE = {
   draft: 'bg-secondary text-secondary-foreground border-border',
-  submitted: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
-  under_review: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  approved: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/25',
-  rejected: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
+  submitted: 'bg-warn/12 text-warn border-warn/25',
+  under_review: 'bg-info/12 text-info border-info/25',
+  approved: 'bg-good/12 text-good border-good/25',
+  rejected: 'bg-crit/12 text-crit border-crit/25',
 };
 const FILTERS = ['submitted', 'under_review', 'approved', 'rejected', 'all'];
 const DOC_LABELS = { roc_license_file: 'ROC license', bond_file: 'Bond', coi_file: 'COI + endorsements', w9_file: 'W-9', voided_check_file: 'Voided check' };
@@ -203,8 +203,8 @@ export default function InstallerApplications() {
                       <span className={cn('text-xs px-2.5 py-1 rounded-full border capitalize', STATUS_BADGE[selected.status])}>{selected.status.replace('_', ' ')}</span>
                     </div>
                     <div className={cn('rounded-lg border p-3 text-sm flex items-start gap-2',
-                      selected.roc_is_active ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-500/25 dark:bg-emerald-500/10' : 'border-amber-200 bg-amber-50 dark:border-amber-500/25 dark:bg-amber-500/10')}>
-                      {selected.roc_is_active ? <BadgeCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5" /> : <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5" />}
+                      selected.roc_is_active ? 'border-good/25 bg-good/12' : 'border-warn/25 bg-warn/12')}>
+                      {selected.roc_is_active ? <BadgeCheck className="w-4 h-4 text-good mt-0.5" /> : <AlertTriangle className="w-4 h-4 text-warn mt-0.5" />}
                       <div>
                         <p className="font-medium">ROC {selected.roc_license_no || '—'} — {selected.roc_is_active ? 'Active' : (selected.roc_status || 'Not verified active')}</p>
                         <p className="text-muted-foreground text-xs mt-0.5">
@@ -286,7 +286,7 @@ export default function InstallerApplications() {
                           <div>
                             <p className="font-medium">{label}</p>
                             {signedAt
-                              ? <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><Check className="w-3 h-3" /> Signed {fmtDate(signedAt)}</p>
+                              ? <p className="text-[11px] text-good flex items-center gap-1"><Check className="w-3 h-3" /> Signed {fmtDate(signedAt)}</p>
                               : <p className="text-[11px] text-muted-foreground">Not signed yet</p>}
                           </div>
                           {!signedAt && (
@@ -328,7 +328,7 @@ export default function InstallerApplications() {
                     </section>
                   )}
                   {selected.installer_id && (
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:border-emerald-500/25 dark:bg-emerald-500/10 p-4 text-sm text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                    <div className="rounded-xl border border-good/25 bg-good/12 p-4 text-sm text-good flex items-center gap-2">
                       <BadgeCheck className="w-4 h-4" /> Onboarded as an active installer crew.
                     </div>
                   )}
@@ -341,11 +341,11 @@ export default function InstallerApplications() {
                       className="w-full bg-background border border-input rounded-lg px-3 py-2.5 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-ring" />
                     <div className="flex flex-wrap gap-2">
                       <button onClick={() => act('approved')} disabled={busy}
-                        className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
+                        className="inline-flex items-center gap-1.5 bg-good hover:bg-good text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
                         {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Approve
                       </button>
                       <button onClick={() => act('rejected')} disabled={busy}
-                        className="inline-flex items-center gap-1.5 border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10 px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
+                        className="inline-flex items-center gap-1.5 border border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10 px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
                         <X className="w-4 h-4" /> Reject
                       </button>
                       {selected.status !== 'under_review' && (

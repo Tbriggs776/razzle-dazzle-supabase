@@ -107,66 +107,66 @@ export default function InspectionReportsSection({ project, customer, sale, curr
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.56 }}
-      className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+      className="bg-white rounded-2xl border border-border p-6 md:col-span-2"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <ClipboardCheck className="w-5 h-5 text-indigo-600" />
-          <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
+          <ClipboardCheck className="w-5 h-5 text-info" />
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
             Inspection Reports
           </h2>
         </div>
         <Button
           size="sm"
           onClick={() => setShowForm(true)}
-          className="bg-indigo-600 hover:bg-indigo-700"
+          className="bg-info hover:bg-info"
         >
           <Plus className="w-4 h-4 mr-1" /> New Report
         </Button>
       </div>
 
       {sorted.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center py-6">No inspection reports yet</p>
+        <p className="text-sm text-muted-foreground text-center py-6">No inspection reports yet</p>
       ) : (
         <div className="space-y-3">
           {sorted.map(report => (
-            <div key={report.id} className="border border-slate-200 rounded-xl overflow-hidden">
+            <div key={report.id} className="border border-border rounded-xl overflow-hidden">
               <div className="flex items-center">
                 <button
-                  className="flex-1 flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors"
+                  className="flex-1 flex items-center justify-between px-4 py-3 hover:bg-muted transition-colors"
                   onClick={() => setExpandedId(expandedId === report.id ? null : report.id)}
                 >
                   <div className="flex items-center gap-3 text-left">
-                    <ClipboardCheck className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                    <ClipboardCheck className="w-4 h-4 text-info flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-slate-800">
+                      <p className="text-sm font-medium text-foreground">
                         Inspection — {report.inspected_on ? format(new Date(report.inspected_on + 'T00:00:00'), 'MMM d, yyyy') : 'No date'}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-muted-foreground">
                         By {report.inspected_by || 'Unknown'} · Created {format(new Date(report.created_date.endsWith('Z') ? report.created_date : report.created_date + 'Z'), 'MMM d, yyyy h:mm a')}
                       </p>
                     </div>
                   </div>
-                  {expandedId === report.id ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                  {expandedId === report.id ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                 </button>
                 <button
                   onClick={() => openResendModal(report)}
                   disabled={sendingId === report.id}
-                  className="px-3 py-3 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors disabled:opacity-50"
+                  className="px-3 py-3 text-info hover:text-info hover:bg-info/12 transition-colors disabled:opacity-50"
                   title="Resend PDF Email"
                 >
                   {sendingId === report.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </button>
                 <button
                   onClick={() => handleDelete(report.id)}
-                  className="px-3 py-3 text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  className="px-3 py-3 text-crit hover:text-crit hover:bg-crit/12 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
 
               {expandedId === report.id && (
-                <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-3 text-sm">
+                <div className="px-4 pb-4 border-t border-border pt-3 space-y-3 text-sm">
                   <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                     {report.customer_name && <Row label="Customer" value={report.customer_name} />}
                     {report.job_number && <Row label="Job #" value={report.job_number} />}
@@ -191,13 +191,13 @@ export default function InspectionReportsSection({ project, customer, sale, curr
                   {report.resolution && <Row label="Resolution" value={report.resolution} block />}
                   {report.images && report.images.length > 0 && (
                     <div>
-                      <p className="text-xs text-slate-400 font-medium uppercase mb-2">Photos</p>
+                      <p className="text-xs text-muted-foreground font-medium uppercase mb-2">Photos</p>
                       <div className="grid grid-cols-3 gap-2">
                         {report.images.map((img, i) => {
                           const url = typeof img === 'string' ? img : img.url;
                           const desc = typeof img === 'object' ? img.description : null;
                           return (
-                            <div key={i} className="rounded-lg border border-slate-200 overflow-hidden">
+                            <div key={i} className="rounded-lg border border-border overflow-hidden">
                               <button onClick={() => {
                                 const urls = report.images.map(image => typeof image === 'string' ? image : image.url);
                                 setLightboxPhotos(urls);
@@ -205,7 +205,7 @@ export default function InspectionReportsSection({ project, customer, sale, curr
                               }} className="w-full">
                                 <SignedImage src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover cursor-pointer hover:opacity-90" />
                               </button>
-                              {desc && <p className="text-xs text-slate-500 px-2 py-1 bg-white truncate">{desc}</p>}
+                              {desc && <p className="text-xs text-muted-foreground px-2 py-1 bg-white truncate">{desc}</p>}
                             </div>
                           );
                         })}
@@ -214,8 +214,8 @@ export default function InspectionReportsSection({ project, customer, sale, curr
                   )}
                   {report.customer_signature && (
                     <div>
-                      <p className="text-xs text-slate-400 font-medium uppercase mb-1">Customer Signature</p>
-                      <SignedImage src={report.customer_signature} alt="Customer Signature" className="h-20 border border-slate-200 rounded-lg bg-white" />
+                      <p className="text-xs text-muted-foreground font-medium uppercase mb-1">Customer Signature</p>
+                      <SignedImage src={report.customer_signature} alt="Customer Signature" className="h-20 border border-border rounded-lg bg-white" />
                     </div>
                   )}
                 </div>
@@ -232,12 +232,12 @@ export default function InspectionReportsSection({ project, customer, sale, curr
             <DialogTitle>Send Report PDF</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <p className="text-sm text-slate-500">Select recipients for this inspection report:</p>
+            <p className="text-sm text-muted-foreground">Select recipients for this inspection report:</p>
             <div className="flex flex-wrap gap-2">
               {resendEmails.map(email => (
-                <span key={email} className="flex items-center gap-1 bg-indigo-50 text-indigo-700 text-xs px-2 py-1 rounded-full">
+                <span key={email} className="flex items-center gap-1 bg-info/12 text-info text-xs px-2 py-1 rounded-full">
                   {email}
-                  <button type="button" onClick={() => setResendEmails(prev => prev.filter(e => e !== email))} className="hover:text-red-500 transition-colors">
+                  <button type="button" onClick={() => setResendEmails(prev => prev.filter(e => e !== email))} className="hover:text-crit transition-colors">
                     <X className="w-3 h-3" />
                   </button>
                 </span>
@@ -259,7 +259,7 @@ export default function InspectionReportsSection({ project, customer, sale, curr
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResendModal(null)}>Cancel</Button>
-            <Button onClick={handleResendConfirm} disabled={!resendEmails.length} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleResendConfirm} disabled={!resendEmails.length} className="bg-info hover:bg-info">
               <Send className="w-4 h-4 mr-1" /> Send
             </Button>
           </DialogFooter>
@@ -285,15 +285,15 @@ function Row({ label, value, block, className }) {
   if (block) {
     return (
       <div className={className}>
-        <p className="text-xs text-slate-400 font-medium uppercase mb-0.5">{label}</p>
-        <p className="text-slate-700 whitespace-pre-wrap">{value}</p>
+        <p className="text-xs text-muted-foreground font-medium uppercase mb-0.5">{label}</p>
+        <p className="text-foreground whitespace-pre-wrap">{value}</p>
       </div>
     );
   }
   return (
     <div className={className}>
-      <p className="text-xs text-slate-400 font-medium uppercase mb-0.5">{label}</p>
-      <p className="text-slate-700">{value}</p>
+      <p className="text-xs text-muted-foreground font-medium uppercase mb-0.5">{label}</p>
+      <p className="text-foreground">{value}</p>
     </div>
   );
 }

@@ -392,13 +392,13 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
           </div>
 
           {/* Worry Free Guarantee */}
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+          <div className="flex items-center gap-3 p-3 bg-muted rounded-lg border border-border">
             <Checkbox
               id="worry_free_guarantee"
               checked={!!form.worry_free_guarantee}
               onCheckedChange={v => set('worry_free_guarantee', v)}
             />
-            <Label htmlFor="worry_free_guarantee" className="cursor-pointer font-medium text-slate-700">
+            <Label htmlFor="worry_free_guarantee" className="cursor-pointer font-medium text-foreground">
               Worry Free Guarantee Applicable
             </Label>
           </div>
@@ -409,9 +409,9 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
             <div className="mt-2 space-y-2">
               <div className="flex flex-wrap gap-2">
                 {emailRecipients.map(email => (
-                  <span key={email} className="flex items-center gap-1 bg-indigo-50 text-indigo-700 text-xs px-2 py-1 rounded-full">
+                  <span key={email} className="flex items-center gap-1 bg-info/12 text-info text-xs px-2 py-1 rounded-full">
                     {email}
-                    <button type="button" onClick={() => removeEmail(email)} className="hover:text-red-500 transition-colors">
+                    <button type="button" onClick={() => removeEmail(email)} className="hover:text-crit transition-colors">
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -440,12 +440,12 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
               {images.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">
                   {images.map((url, i) => (
-                    <div key={i} className="relative group rounded-lg overflow-hidden border border-slate-200">
+                    <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
                       <SignedImage src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover cursor-pointer hover:opacity-90" onClick={() => openSignedFile(url)} />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
-                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-crit text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -453,12 +453,12 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
                   ))}
                 </div>
               )}
-              <label className="flex items-center justify-center gap-2 w-full p-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
+              <label className="flex items-center justify-center gap-2 w-full p-3 border-2 border-dashed border-border rounded-lg hover:border-info/25 hover:bg-info/12 transition-colors cursor-pointer">
                 <input type="file" accept="image/*" multiple onChange={handleImageUpload} disabled={uploadingImage} className="hidden" />
                 {uploadingImage ? (
-                  <><Loader2 className="w-4 h-4 text-indigo-600 animate-spin" /><span className="text-sm text-slate-600">Uploading...</span></>
+                  <><Loader2 className="w-4 h-4 text-info animate-spin" /><span className="text-sm text-muted-foreground">Uploading...</span></>
                 ) : (
-                  <><Upload className="w-4 h-4 text-slate-400" /><span className="text-sm text-slate-600">Click to upload photos (select multiple)</span></>
+                  <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">Click to upload photos (select multiple)</span></>
                 )}
               </label>
             </div>
@@ -471,25 +471,25 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
               {files.length > 0 && (
                 <div className="space-y-1">
                   {files.map((file, i) => (
-                    <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200 group">
-                      <Paperclip className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                      <span className="flex-1 text-sm text-slate-700 truncate">{file.name}</span>
+                    <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-muted border border-border group">
+                      <Paperclip className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                      <span className="flex-1 text-sm text-foreground truncate">{file.name}</span>
                       <Button type="button" size="sm" variant="ghost" onClick={() => openSignedFile(file.url)} className="h-7 px-2">
                         <Download className="w-3 h-3" />
                       </Button>
-                      <button type="button" onClick={() => removeFile(i)} className="text-red-400 hover:text-red-600 transition-colors">
+                      <button type="button" onClick={() => removeFile(i)} className="text-crit hover:text-crit transition-colors">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
                 </div>
               )}
-              <label className="flex items-center justify-center gap-2 w-full p-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
+              <label className="flex items-center justify-center gap-2 w-full p-3 border-2 border-dashed border-border rounded-lg hover:border-info/25 hover:bg-info/12 transition-colors cursor-pointer">
                 <input type="file" multiple onChange={handleFileUpload} disabled={uploadingFile} className="hidden" />
                 {uploadingFile ? (
-                  <><Loader2 className="w-4 h-4 text-indigo-600 animate-spin" /><span className="text-sm text-slate-600">Uploading...</span></>
+                  <><Loader2 className="w-4 h-4 text-info animate-spin" /><span className="text-sm text-muted-foreground">Uploading...</span></>
                 ) : (
-                  <><Paperclip className="w-4 h-4 text-slate-400" /><span className="text-sm text-slate-600">Click to attach files (select multiple)</span></>
+                  <><Paperclip className="w-4 h-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">Click to attach files (select multiple)</span></>
                 )}
               </label>
             </div>
@@ -499,7 +499,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
           <div>
             <div className="flex items-center justify-between mb-2">
               <Label>Customer Signature</Label>
-              <Button type="button" variant="ghost" size="sm" onClick={clearSignature} className="text-slate-500">
+              <Button type="button" variant="ghost" size="sm" onClick={clearSignature} className="text-muted-foreground">
                 <Eraser className="w-4 h-4 mr-1" /> Clear
               </Button>
             </div>
@@ -507,7 +507,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
               ref={canvasRef}
               width={580}
               height={140}
-              className="w-full border-2 border-dashed border-slate-300 rounded-lg bg-white touch-none cursor-crosshair"
+              className="w-full border-2 border-dashed border-border rounded-lg bg-white touch-none cursor-crosshair"
               onMouseDown={startDraw}
               onMouseMove={draw}
               onMouseUp={endDraw}
@@ -516,7 +516,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
               onTouchMove={draw}
               onTouchEnd={endDraw}
             />
-            <p className="text-xs text-slate-400 mt-1">Sign above using your mouse or finger</p>
+            <p className="text-xs text-muted-foreground mt-1">Sign above using your mouse or finger</p>
           </div>
         </div>
 
@@ -525,7 +525,7 @@ export default function InspectionReportForm({ open, onClose, onSave, project, c
           <Button onClick={() => onSave(buildPayload(), false)} disabled={saving} variant="outline">
             {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save Draft'}
           </Button>
-          <Button onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+          <Button onClick={handleSave} disabled={saving} className="bg-info hover:bg-info">
             {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save & Submit'}
           </Button>
         </DialogFooter>

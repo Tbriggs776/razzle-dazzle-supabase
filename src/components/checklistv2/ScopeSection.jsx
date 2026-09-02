@@ -29,39 +29,39 @@ export default function ScopeSection({ formData, onChange }) {
       {/* Header */}
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-teal-50 border-b border-teal-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-teal-50 border-b border-teal-200"
       )}>
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-9 h-9 rounded-lg flex items-center justify-center",
-            isComplete ? "bg-green-100" : "bg-teal-100"
+            isComplete ? "bg-good/12" : "bg-teal-100"
           )}>
             {isComplete
-              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
+              ? <CheckCircle2 className="w-5 h-5 text-good" />
               : <Ruler className="w-5 h-5 text-teal-600" />
             }
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 5 — Scope</p>
-            <p className="text-xs text-slate-500">Gap-fill from discovery — confirm rooms, flooring type & special flags</p>
+            <p className="font-bold text-foreground">Section 5 — Scope</p>
+            <p className="text-xs text-muted-foreground">Gap-fill from discovery — confirm rooms, flooring type & special flags</p>
           </div>
         </div>
         {isComplete && (
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>
+          <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>
         )}
       </div>
 
       <div className="p-5 space-y-5 bg-white">
 
         {/* Reflect & Gap-Fill */}
-        <div className="rounded-lg border-2 border-slate-200 bg-slate-50 p-4 space-y-3">
+        <div className="rounded-lg border-2 border-border bg-muted p-4 space-y-3">
           <div>
-            <p className="text-sm font-semibold text-slate-800 italic">
+            <p className="text-sm font-semibold text-foreground italic">
               "OK let me make sure I've got the scope right. From what you've described, we're looking at [reflect rooms, sq footage, current flooring]. Anything I'm missing?"
             </p>
           </div>
           <div className="space-y-1.5">
-            <Label>Scope Summary / Gap-Fill Notes <span className="text-red-500">*</span></Label>
+            <Label>Scope Summary / Gap-Fill Notes <span className="text-crit">*</span></Label>
             <LocalTextarea
               value={formData.scope_gap_fill_notes || ''}
               onBlur={(v) => onChange('scope_gap_fill_notes', v)}
@@ -72,9 +72,9 @@ export default function ScopeSection({ formData, onChange }) {
         </div>
 
         {/* Flooring type (if not captured) */}
-        <div className="rounded-lg border-2 border-slate-200 bg-slate-50 p-4 space-y-3">
-          <p className="text-sm font-semibold text-slate-800 italic">
-            "What type of flooring are you leaning toward — or are you open to options?" <span className="text-xs font-normal text-slate-500 not-italic">(if not already captured)</span>
+        <div className="rounded-lg border-2 border-border bg-muted p-4 space-y-3">
+          <p className="text-sm font-semibold text-foreground italic">
+            "What type of flooring are you leaning toward — or are you open to options?" <span className="text-xs font-normal text-muted-foreground not-italic">(if not already captured)</span>
           </p>
           <div className="flex flex-wrap gap-2">
             {FLOORING_OPTIONS.map(option => {
@@ -88,7 +88,7 @@ export default function ScopeSection({ formData, onChange }) {
                     'px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors',
                     selected
                       ? 'bg-teal-600 text-white border-teal-600'
-                      : 'bg-white text-slate-700 border-slate-300 hover:border-teal-400'
+                      : 'bg-white text-foreground border-border hover:border-teal-400'
                   )}
                 >
                   {option}
@@ -99,9 +99,9 @@ export default function ScopeSection({ formData, onChange }) {
         </div>
 
         {/* Pets / Kids */}
-        <div className="rounded-lg border-2 border-slate-200 bg-slate-50 p-4 space-y-3">
-          <p className="text-sm font-semibold text-slate-800 italic">
-            "Any pets or kids I should know about for durability planning?" <span className="text-xs font-normal text-slate-500 not-italic">(if not already captured)</span>
+        <div className="rounded-lg border-2 border-border bg-muted p-4 space-y-3">
+          <p className="text-sm font-semibold text-foreground italic">
+            "Any pets or kids I should know about for durability planning?" <span className="text-xs font-normal text-muted-foreground not-italic">(if not already captured)</span>
           </p>
           <LocalTextarea
             value={formData.scope_pets_kids_notes || ''}
@@ -113,7 +113,7 @@ export default function ScopeSection({ formData, onChange }) {
 
         {/* Special Flags */}
         <div className="space-y-3">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Special Situation Flags</p>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Special Situation Flags</p>
 
           {/* Over existing tile */}
           <div
@@ -121,24 +121,24 @@ export default function ScopeSection({ formData, onChange }) {
             className={cn(
               "flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
               formData.scope_flag_over_tile
-                ? "border-orange-400 bg-orange-50"
-                : "border-slate-200 bg-slate-50 hover:border-orange-300"
+                ? "border-warn bg-warn/12"
+                : "border-border bg-muted hover:border-warn/25"
             )}
           >
             <Checkbox
               checked={formData.scope_flag_over_tile || false}
               onCheckedChange={(checked) => onChange('scope_flag_over_tile', checked)}
-              className="mt-0.5 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+              className="mt-0.5 data-[state=checked]:bg-warn data-[state=checked]:border-warn"
             />
             <div>
-              <p className="font-semibold text-slate-800 text-sm">⚠ Caller wants to install over existing tile</p>
-              <p className="text-xs text-slate-500 mt-0.5">Triggers warranty / dustless demo talking point</p>
+              <p className="font-semibold text-foreground text-sm">⚠ Caller wants to install over existing tile</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Triggers warranty / dustless demo talking point</p>
             </div>
           </div>
           {formData.scope_flag_over_tile && (
-            <div className="ml-4 p-4 bg-orange-50 border-2 border-orange-300 rounded-lg space-y-2">
-              <p className="text-xs font-bold text-orange-700 uppercase tracking-wide">Script — Over Tile</p>
-              <p className="text-sm text-orange-800 italic leading-relaxed">
+            <div className="ml-4 p-4 bg-warn/12 border-2 border-warn/25 rounded-lg space-y-2">
+              <p className="text-xs font-bold text-warn uppercase tracking-wide">Script — Over Tile</p>
+              <p className="text-sm text-warn italic leading-relaxed">
                 "Want to flag something for you up front, because it ties directly into our lifetime labor warranty. We don't install LVP, laminate, or hardwood over existing tile. The reason is our warranty — we stand behind every install for a lifetime, and installing over tile creates risk we can't guarantee around. The good news: we include the tile demo as part of the project — you don't have to remove anything yourself. And we use a dustless tile demo system that cuts the dust and cleanup down to almost nothing. So we just remove what's there, prep the subfloor, and lay the new floor right. That's how we have to do it to honor the warranty — and honestly, it's how it should be done."
               </p>
             </div>
@@ -150,27 +150,27 @@ export default function ScopeSection({ formData, onChange }) {
             className={cn(
               "flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
               formData.scope_flag_out_of_scope
-                ? "border-red-400 bg-red-50"
-                : "border-slate-200 bg-slate-50 hover:border-red-300"
+                ? "border-crit bg-crit/12"
+                : "border-border bg-muted hover:border-crit/25"
             )}
           >
             <Checkbox
               checked={formData.scope_flag_out_of_scope || false}
               onCheckedChange={(checked) => onChange('scope_flag_out_of_scope', checked)}
-              className="mt-0.5 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
+              className="mt-0.5 data-[state=checked]:bg-crit data-[state=checked]:border-crit"
             />
             <div>
-              <p className="font-semibold text-slate-800 text-sm">⚠ Caller mentioned out-of-scope work</p>
-              <p className="text-xs text-slate-500 mt-0.5">Bathroom, kitchen, drywall, cabinets, etc. → see Section 9 exit line</p>
+              <p className="font-semibold text-foreground text-sm">⚠ Caller mentioned out-of-scope work</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Bathroom, kitchen, drywall, cabinets, etc. → see Section 9 exit line</p>
             </div>
           </div>
         </div>
 
         {/* 5a — Baseboards */}
-        <div className="rounded-lg border-2 border-slate-200 bg-slate-50 p-4 space-y-3">
+        <div className="rounded-lg border-2 border-border bg-muted p-4 space-y-3">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">5a — Baseboards</p>
-            <p className="text-sm font-semibold text-slate-800 italic">"Are we including new baseboards in this project?"</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">5a — Baseboards</p>
+            <p className="text-sm font-semibold text-foreground italic">"Are we including new baseboards in this project?"</p>
           </div>
           <div className="flex gap-2">
             {['Yes', 'No', 'Unsure'].map(opt => (
@@ -182,7 +182,7 @@ export default function ScopeSection({ formData, onChange }) {
                   'px-4 py-2 rounded-lg border text-sm font-medium transition-colors',
                   formData.scope_baseboards === opt
                     ? 'bg-teal-600 text-white border-teal-600'
-                    : 'bg-white text-slate-700 border-slate-300 hover:border-teal-400'
+                    : 'bg-white text-foreground border-border hover:border-teal-400'
                 )}
               >
                 {opt}
@@ -199,10 +199,10 @@ export default function ScopeSection({ formData, onChange }) {
         </div>
 
         {/* 5b — Tile Removal */}
-        <div className="rounded-lg border-2 border-slate-200 bg-slate-50 p-4 space-y-3">
+        <div className="rounded-lg border-2 border-border bg-muted p-4 space-y-3">
           <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">5b — Tile Removal</p>
-            <p className="text-sm font-semibold text-slate-800 italic">Is tile being pulled as part of this project?</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">5b — Tile Removal</p>
+            <p className="text-sm font-semibold text-foreground italic">Is tile being pulled as part of this project?</p>
           </div>
           <div className="flex gap-2">
             {['Yes', 'No'].map(opt => (
@@ -214,7 +214,7 @@ export default function ScopeSection({ formData, onChange }) {
                   'px-4 py-2 rounded-lg border text-sm font-medium transition-colors',
                   formData.scope_tile_removal === opt
                     ? 'bg-teal-600 text-white border-teal-600'
-                    : 'bg-white text-slate-700 border-slate-300 hover:border-teal-400'
+                    : 'bg-white text-foreground border-border hover:border-teal-400'
                 )}
               >
                 {opt}
@@ -222,8 +222,8 @@ export default function ScopeSection({ formData, onChange }) {
             ))}
           </div>
           {formData.scope_tile_removal === 'Yes' && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800 italic">
+            <div className="p-3 bg-info/12 border border-info/25 rounded-lg">
+              <p className="text-sm text-info italic">
                 "And since we're pulling out tile — quick heads up. Tile demo is a dust disaster — weeks of cleanup, dust in places you didn't even know dust could get to. We have a dustless tile demo system that cuts that down to almost nothing. It's an optional add-on the designer can quote you on at the consult — most customers who add it say it's worth every dollar for skipping weeks of dust."
               </p>
             </div>

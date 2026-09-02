@@ -18,8 +18,8 @@ import { invokeFailure, invokeNotSent, deliveryNote } from '@/lib/invokeResult';
 
 const STATUS_STYLES = {
   draft: 'bg-secondary text-muted-foreground border-border',
-  sent: 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
-  signed: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
+  sent: 'bg-warn/12 text-warn border-warn/25',
+  signed: 'bg-good/12 text-good border-good/25'
 };
 
 export default function ManualDesignMods() {
@@ -430,7 +430,7 @@ export default function ManualDesignMods() {
                       </div>
                       <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                         {mod.status === 'signed' ? (
-                          <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
+                          <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-good/25 rounded-lg hover:bg-good/12 transition-colors text-good dark:hover:bg-good/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
                           </a>
                         ) : (
@@ -443,7 +443,7 @@ export default function ManualDesignMods() {
                                 <ExternalLink className="w-3 h-3" />Customer Link
                               </button>
                             )}
-                            <button onClick={() => handleResend(mod)} disabled={sendingId === mod.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10">
+                            <button onClick={() => handleResend(mod)} disabled={sendingId === mod.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-warn/25 rounded-lg hover:bg-warn/12 transition-colors text-warn disabled:opacity-50 dark:hover:bg-warn/10">
                               {sendingId === mod.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                               {sendingId === mod.id ? 'Sending...' : mod.email_sent_at ? 'Resend' : 'Send'}
                             </button>
@@ -481,7 +481,7 @@ export default function ManualDesignMods() {
                       </div>
                       <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                         {mod.status === 'signed' ? (
-                          <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
+                          <a href={`/DesignModView?id=${mod.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-good/25 rounded-lg hover:bg-good/12 transition-colors text-good dark:hover:bg-good/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
                           </a>
                         ) : (
@@ -494,7 +494,7 @@ export default function ManualDesignMods() {
                                 <ExternalLink className="w-3 h-3" />Customer Link
                               </button>
                             )}
-                            <button onClick={() => handleResend(mod)} disabled={sendingId === mod.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10">
+                            <button onClick={() => handleResend(mod)} disabled={sendingId === mod.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-warn/25 rounded-lg hover:bg-warn/12 transition-colors text-warn disabled:opacity-50 dark:hover:bg-warn/10">
                               {sendingId === mod.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                               {sendingId === mod.id ? 'Sending...' : mod.email_sent_at ? 'Resend' : 'Send'}
                             </button>
@@ -563,7 +563,7 @@ export default function ManualDesignMods() {
                             <span className="font-medium text-foreground">
                               {appt._lead ? `${appt._lead.first_name} ${appt._lead.last_name}` : 'Unknown Customer'}
                             </span>
-                            <Badge variant="outline" className="bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25">
+                            <Badge variant="outline" className="bg-good/12 text-good border-good/25">
                               <CheckCircle2 className="w-3 h-3 mr-1" />signed
                             </Badge>
                           </div>
@@ -577,7 +577,7 @@ export default function ManualDesignMods() {
                         <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                           <SignedFileLink
                             src={appt.pre_install_checklist_signature_url}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-good/25 rounded-lg hover:bg-good/12 transition-colors text-good dark:hover:bg-good/10"
                           >
                             <CheckCircle2 className="w-3 h-3" />View Signature
                           </SignedFileLink>
@@ -626,7 +626,7 @@ export default function ManualDesignMods() {
                       </div>
                       <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                         {record.status === 'signed' ? (
-                          <a href={`/PreInstallChecklistView?id=${record.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
+                          <a href={`/PreInstallChecklistView?id=${record.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-good/25 rounded-lg hover:bg-good/12 transition-colors text-good dark:hover:bg-good/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
                           </a>
                         ) : (
@@ -639,7 +639,7 @@ export default function ManualDesignMods() {
                                 <ExternalLink className="w-3 h-3" />Customer Link
                               </button>
                             )}
-                            <button onClick={() => piResend(record)} disabled={sendingId === record.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10">
+                            <button onClick={() => piResend(record)} disabled={sendingId === record.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-warn/25 rounded-lg hover:bg-warn/12 transition-colors text-warn disabled:opacity-50 dark:hover:bg-warn/10">
                               {sendingId === record.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                               {sendingId === record.id ? 'Sending...' : record.email_sent_at ? 'Resend' : 'Send'}
                             </button>
@@ -776,7 +776,7 @@ export default function ManualDesignMods() {
                       </div>
                       <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                         {contract.status === 'signed' ? (
-                          <a href={`/ManualSalesContractView?id=${contract.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700 dark:border-green-500/40 dark:text-green-300 dark:hover:bg-green-500/10">
+                          <a href={`/ManualSalesContractView?id=${contract.id}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-good/25 rounded-lg hover:bg-good/12 transition-colors text-good dark:hover:bg-good/10">
                             <CheckCircle2 className="w-3 h-3" />View Signed
                           </a>
                         ) : (
@@ -789,7 +789,7 @@ export default function ManualDesignMods() {
                                 <ExternalLink className="w-3 h-3" />Customer Link
                               </button>
                             )}
-                            <button onClick={() => scResend(contract)} disabled={sendingId === contract.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors text-amber-700 disabled:opacity-50 dark:border-amber-500/40 dark:text-amber-300 dark:hover:bg-amber-500/10">
+                            <button onClick={() => scResend(contract)} disabled={sendingId === contract.id} className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-warn/25 rounded-lg hover:bg-warn/12 transition-colors text-warn disabled:opacity-50 dark:hover:bg-warn/10">
                               {sendingId === contract.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
                               {sendingId === contract.id ? 'Sending...' : contract.email_sent_at ? 'Resend' : 'Send'}
                             </button>

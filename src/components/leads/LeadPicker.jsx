@@ -83,7 +83,7 @@ export default function LeadPicker({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className={cn('h-12 w-full justify-between border-slate-200 font-normal', className)}
+          className={cn('h-12 w-full justify-between border-border font-normal', className)}
         >
           <span className={cn('truncate', !selected && 'text-muted-foreground')}>
             {selected ? label(selected) : 'Select a lead'}

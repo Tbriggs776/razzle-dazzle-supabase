@@ -39,25 +39,25 @@ export default function SuperSaleSection({ formData, onChange }) {
       {/* Header */}
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-purple-50 border-b border-purple-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-purple-50 border-b border-purple-200"
       )}>
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-9 h-9 rounded-lg flex items-center justify-center",
-            isComplete ? "bg-green-100" : "bg-purple-100"
+            isComplete ? "bg-good/12" : "bg-purple-100"
           )}>
             {isComplete
-              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
+              ? <CheckCircle2 className="w-5 h-5 text-good" />
               : <Sparkles className="w-5 h-5 text-purple-600" />
             }
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 6 — The Razzle Dazzle Super Sale</p>
-            <p className="text-xs text-slate-500">Deliver the headline pitch before walking through the value stack</p>
+            <p className="font-bold text-foreground">Section 6 — The Razzle Dazzle Super Sale</p>
+            <p className="text-xs text-muted-foreground">Deliver the headline pitch before walking through the value stack</p>
           </div>
         </div>
         {isComplete && (
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>
+          <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>
         )}
       </div>
 
@@ -89,8 +89,8 @@ export default function SuperSaleSection({ formData, onChange }) {
         </div>
 
         {/* Transition note */}
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-          <p className="text-xs text-slate-500 font-medium">
+        <div className="rounded-lg border border-border bg-muted px-4 py-3">
+          <p className="text-xs text-muted-foreground font-medium">
             📌 Section 7 picks up immediately — these two sections work together as <strong>headline → detail</strong>. Move directly into the value stack after delivering this.
           </p>
         </div>
@@ -101,19 +101,19 @@ export default function SuperSaleSection({ formData, onChange }) {
           className={cn(
             "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all select-none",
             isComplete
-              ? "border-green-400 bg-green-50"
-              : "border-slate-200 bg-slate-50 hover:border-purple-300"
+              ? "border-good bg-good/12"
+              : "border-border bg-muted hover:border-purple-300"
           )}
         >
           <div className={cn(
             "w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors",
-            isComplete ? "bg-green-500 border-green-500" : "border-slate-400 bg-white"
+            isComplete ? "bg-good border-good" : "border-border bg-white"
           )}>
             {isComplete && <CheckCircle2 className="w-3 h-3 text-white" />}
           </div>
           <p className={cn(
             "text-sm font-semibold",
-            isComplete ? "text-green-800" : "text-slate-700"
+            isComplete ? "text-good" : "text-foreground"
           )}>
             Super Sale headline delivered — ready to walk through what's included
           </p>

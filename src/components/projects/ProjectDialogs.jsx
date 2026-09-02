@@ -61,7 +61,7 @@ export default function ProjectDialogs({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
-            <Button onClick={handleAssignSubmit} disabled={updateProjectMutation.isPending} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleAssignSubmit} disabled={updateProjectMutation.isPending} className="bg-info hover:bg-info">
               {updateProjectMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Assign Team'}
             </Button>
           </DialogFooter>
@@ -101,7 +101,7 @@ export default function ProjectDialogs({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
-            <Button onClick={handleEditSubmit} disabled={updateProjectMutation.isPending} className="bg-indigo-600 hover:bg-indigo-700">
+            <Button onClick={handleEditSubmit} disabled={updateProjectMutation.isPending} className="bg-info hover:bg-info">
               {updateProjectMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save Changes'}
             </Button>
           </DialogFooter>
@@ -136,7 +136,7 @@ export default function ProjectDialogs({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRescheduleDialog(false)}>Cancel</Button>
-            <Button onClick={handleRescheduleSubmit} disabled={updateProjectMutation.isPending} className="bg-yellow-600 hover:bg-yellow-700">
+            <Button onClick={handleRescheduleSubmit} disabled={updateProjectMutation.isPending} className="bg-warn hover:bg-warn">
               {updateProjectMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Update Date'}
             </Button>
           </DialogFooter>
@@ -171,7 +171,7 @@ export default function ProjectDialogs({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSetInstallationDialog(false)}>Cancel</Button>
-            <Button onClick={handleSetInstallationSubmit} disabled={updateProjectMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleSetInstallationSubmit} disabled={updateProjectMutation.isPending} className="bg-info hover:bg-info">
               {updateProjectMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Set Date'}
             </Button>
           </DialogFooter>
@@ -187,7 +187,7 @@ export default function ProjectDialogs({
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
-            <Button onClick={onDeleteConfirm} disabled={deleteProjectMutation.isPending} className="bg-red-600 hover:bg-red-700">
+            <Button onClick={onDeleteConfirm} disabled={deleteProjectMutation.isPending} className="bg-crit hover:bg-crit">
               {deleteProjectMutation.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Deleting...</> : 'Delete Project'}
             </Button>
           </DialogFooter>

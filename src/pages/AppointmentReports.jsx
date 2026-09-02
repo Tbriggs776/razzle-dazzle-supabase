@@ -805,7 +805,7 @@ export default function AppointmentReports() {
                   <CardTitle className="text-sm font-medium">Rescheduled Yesterday</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{rescheduleCounts.yesterday}</div>
+                  <div className="text-2xl font-bold text-warn">{rescheduleCounts.yesterday}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -813,7 +813,7 @@ export default function AppointmentReports() {
                   <CardTitle className="text-sm font-medium">Rescheduled Last 7 Days</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{rescheduleCounts.last7}</div>
+                  <div className="text-2xl font-bold text-warn">{rescheduleCounts.last7}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -821,7 +821,7 @@ export default function AppointmentReports() {
                   <CardTitle className="text-sm font-medium">Rescheduled Last 30 Days</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{rescheduleCounts.last30}</div>
+                  <div className="text-2xl font-bold text-warn">{rescheduleCounts.last30}</div>
                 </CardContent>
               </Card>
             </div>
@@ -909,7 +909,7 @@ export default function AppointmentReports() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                            <p className="text-lg font-bold text-good">
                               ${csr.totalValue.toLocaleString()}
                             </p>
                             <p className="text-xs text-muted-foreground">total value</p>
@@ -962,7 +962,7 @@ export default function AppointmentReports() {
                           {apt.appointment_date && format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')} • {apt.appointment_block}
                         </p>
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info/12 text-info border border-info/25">
                         {apt.status}
                       </span>
                     </div>
@@ -1008,7 +1008,7 @@ export default function AppointmentReports() {
               .map(apt => {
                 const checklist = allChecklists.find(c => c.appointment === apt.id);
                 return (
-                  <div key={apt.id} className="p-4 bg-red-50 rounded-lg border border-red-200 dark:bg-red-500/10 dark:border-red-500/25">
+                  <div key={apt.id} className="p-4 bg-crit/12 rounded-lg border border-crit/25">
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="text-sm font-medium text-foreground">
@@ -1023,7 +1023,7 @@ export default function AppointmentReports() {
                           </p>
                         )}
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-crit/12 text-crit border border-crit/25">
                         Cancelled
                       </span>
                     </div>
@@ -1057,7 +1057,7 @@ export default function AppointmentReports() {
               .map(apt => {
                 const checklist = allChecklists.find(c => c.appointment === apt.id);
                 return (
-                  <div key={apt.id} className="p-4 bg-yellow-50 rounded-lg border border-yellow-200 dark:bg-yellow-500/10 dark:border-yellow-500/25">
+                  <div key={apt.id} className="p-4 bg-warn/12 rounded-lg border border-warn/25">
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <p className="text-sm font-medium text-foreground">
@@ -1072,7 +1072,7 @@ export default function AppointmentReports() {
                           </p>
                         )}
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warn/12 text-warn border border-warn/25">
                         Rescheduled
                       </span>
                     </div>
@@ -1118,7 +1118,7 @@ export default function AppointmentReports() {
                       <p className="text-xs text-muted-foreground">
                         {apt.appointment_date && format(new Date(apt.appointment_date + 'T00:00:00'), 'MMM d, yyyy')} • {apt.status}
                         {projectStatus && (
-                          <span className="ml-1 text-green-700 dark:text-green-400">• Project: {projectStatus}</span>
+                          <span className="ml-1 text-good">• Project: {projectStatus}</span>
                         )}
                       </p>
                     </div>

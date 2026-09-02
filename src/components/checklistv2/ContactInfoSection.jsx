@@ -48,29 +48,29 @@ export default function ContactInfoSection({ formData, onChange }) {
   const is1978OrBefore = formData.home_built_era === 'On or before 1978';
 
   return (
-    <div className="border-2 border-blue-200 rounded-xl overflow-hidden">
+    <div className="border-2 border-info/25 rounded-xl overflow-hidden">
       {/* Section Header */}
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-blue-50 border-b border-blue-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-info/12 border-b border-info/25"
       )}>
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-9 h-9 rounded-lg flex items-center justify-center",
-            isComplete ? "bg-green-100" : "bg-blue-100"
+            isComplete ? "bg-good/12" : "bg-info/12"
           )}>
             {isComplete
-              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
-              : <User className="w-5 h-5 text-blue-600" />
+              ? <CheckCircle2 className="w-5 h-5 text-good" />
+              : <User className="w-5 h-5 text-info" />
             }
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 3 — Customer Contact Info</p>
-            <p className="text-xs text-slate-500">Name, phone, email & address</p>
+            <p className="font-bold text-foreground">Section 3 — Customer Contact Info</p>
+            <p className="text-xs text-muted-foreground">Name, phone, email & address</p>
           </div>
         </div>
         {isComplete && (
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>
+          <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>
         )}
       </div>
 
@@ -78,7 +78,7 @@ export default function ContactInfoSection({ formData, onChange }) {
         {/* Name */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>First Name <span className="text-red-500">*</span></Label>
+            <Label>First Name <span className="text-crit">*</span></Label>
             <LocalInput
               value={formData.customer_first_name || ''}
               onBlur={(v) => onChange('customer_first_name', v)}
@@ -86,7 +86,7 @@ export default function ContactInfoSection({ formData, onChange }) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Last Name <span className="text-red-500">*</span></Label>
+            <Label>Last Name <span className="text-crit">*</span></Label>
             <LocalInput
               value={formData.customer_last_name || ''}
               onBlur={(v) => onChange('customer_last_name', v)}
@@ -98,7 +98,7 @@ export default function ContactInfoSection({ formData, onChange }) {
         {/* Phones */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>Phone <span className="text-red-500">*</span></Label>
+            <Label>Phone <span className="text-crit">*</span></Label>
             <LocalPhoneInput
               value={formData.customer_phone || ''}
               onBlur={(v) => onChange('customer_phone', v)}
@@ -115,7 +115,7 @@ export default function ContactInfoSection({ formData, onChange }) {
 
         {/* Email */}
         <div className="space-y-1.5">
-          <Label>Email <span className="text-red-500">*</span></Label>
+          <Label>Email <span className="text-crit">*</span></Label>
           <LocalInput
             type="email"
             value={formData.customer_email || ''}
@@ -126,7 +126,7 @@ export default function ContactInfoSection({ formData, onChange }) {
 
         {/* Address */}
         <div className="space-y-1.5">
-          <Label>Street Address <span className="text-red-500">*</span></Label>
+          <Label>Street Address <span className="text-crit">*</span></Label>
           <LocalInput
             value={formData.customer_street || ''}
             onBlur={(v) => onChange('customer_street', v)}
@@ -136,7 +136,7 @@ export default function ContactInfoSection({ formData, onChange }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1.5">
-            <Label>City <span className="text-red-500">*</span></Label>
+            <Label>City <span className="text-crit">*</span></Label>
             <Input
               value={formData.city || ''}
               onChange={(e) => onChange('city', e.target.value)}
@@ -144,7 +144,7 @@ export default function ContactInfoSection({ formData, onChange }) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label>State <span className="text-red-500">*</span></Label>
+            <Label>State <span className="text-crit">*</span></Label>
             <Input
               value={formData.state || ''}
               onChange={(e) => onChange('state', e.target.value)}
@@ -152,7 +152,7 @@ export default function ContactInfoSection({ formData, onChange }) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Postal Code <span className="text-red-500">*</span></Label>
+            <Label>Postal Code <span className="text-crit">*</span></Label>
             <Input
               value={formData.postal_code || ''}
               onChange={(e) => onChange('postal_code', e.target.value)}
@@ -172,12 +172,12 @@ export default function ContactInfoSection({ formData, onChange }) {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-slate-100 pt-4 space-y-4">
+        <div className="border-t border-border pt-4 space-y-4">
 
           {/* Address confirmation */}
           <div className="space-y-1.5">
-            <Label className="font-semibold text-slate-700">
-              "And just to confirm — is this the address where the flooring is going in?" <span className="text-red-500">*</span>
+            <Label className="font-semibold text-foreground">
+              "And just to confirm — is this the address where the flooring is going in?" <span className="text-crit">*</span>
             </Label>
             <Select value={formData.lives_at_address} onValueChange={(val) => onChange('lives_at_address', val)}>
               <SelectTrigger>
@@ -192,8 +192,8 @@ export default function ContactInfoSection({ formData, onChange }) {
 
           {/* Home built era */}
           <div className="space-y-1.5">
-            <Label className="font-semibold text-slate-700">
-              "What year was the home built?" <span className="text-red-500">*</span>
+            <Label className="font-semibold text-foreground">
+              "What year was the home built?" <span className="text-crit">*</span>
             </Label>
             <Select value={formData.home_built_era} onValueChange={(val) => onChange('home_built_era', val)}>
               <SelectTrigger>
@@ -205,11 +205,11 @@ export default function ContactInfoSection({ formData, onChange }) {
               </SelectContent>
             </Select>
             {is1978OrBefore && (
-              <div className="flex items-center gap-3 p-4 bg-red-50 border-2 border-red-500 rounded-lg mt-2">
+              <div className="flex items-center gap-3 p-4 bg-crit/12 border-2 border-crit rounded-lg mt-2">
                 <span className="text-3xl">🛑</span>
                 <div>
-                  <p className="text-red-700 font-bold text-lg">STOP — On or Before 1978</p>
-                  <p className="text-red-600 text-sm font-medium">Asbestos risk — notify the DC and follow proper protocol before scheduling.</p>
+                  <p className="text-crit font-bold text-lg">STOP — On or Before 1978</p>
+                  <p className="text-crit text-sm font-medium">Asbestos risk — notify the DC and follow proper protocol before scheduling.</p>
                 </div>
               </div>
             )}
@@ -217,8 +217,8 @@ export default function ContactInfoSection({ formData, onChange }) {
 
           {/* Owner occupied */}
           <div className="space-y-1.5">
-            <Label className="font-semibold text-slate-700">
-              "And is this a home you own, or a rental?" <span className="text-red-500">*</span>
+            <Label className="font-semibold text-foreground">
+              "And is this a home you own, or a rental?" <span className="text-crit">*</span>
             </Label>
             <Select value={formData.owner_occupied_status} onValueChange={(val) => onChange('owner_occupied_status', val)}>
               <SelectTrigger>

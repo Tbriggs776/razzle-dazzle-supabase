@@ -180,8 +180,8 @@ export default function ContractDiscrepancyReport() {
   return (
     <div>
       {/* Controls */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-6">
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Date Range (Sale Date)</h2>
+      <div className="bg-white rounded-2xl border border-border p-6 mb-6">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Date Range (Sale Date)</h2>
         <div className="flex gap-2 flex-wrap mb-4">
           {DATE_PRESETS.map(p => (
             <button
@@ -189,8 +189,8 @@ export default function ContractDiscrepancyReport() {
               onClick={() => { setActivePreset(p.label); setDateFrom(p.from()); setDateTo(p.to()); }}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
                 activePreset === p.label
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+                  ? 'bg-info text-white border-info'
+                  : 'bg-white text-muted-foreground border-border hover:border-info/25'
               }`}
             >
               {p.label}
@@ -199,16 +199,16 @@ export default function ContractDiscrepancyReport() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600">From</label>
-            <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setActivePreset('custom'); }} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white" />
+            <label className="text-xs font-medium text-muted-foreground">From</label>
+            <input type="date" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setActivePreset('custom'); }} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-white" />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600">To</label>
-            <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setActivePreset('custom'); }} className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white" />
+            <label className="text-xs font-medium text-muted-foreground">To</label>
+            <input type="date" value={dateTo} onChange={e => { setDateTo(e.target.value); setActivePreset('custom'); }} className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-white" />
           </div>
         </div>
         <div className="flex justify-end">
-          <Button onClick={handleRun} disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 gap-2">
+          <Button onClick={handleRun} disabled={loading} className="bg-info hover:bg-info gap-2">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             Run Report
           </Button>
@@ -216,7 +216,7 @@ export default function ContractDiscrepancyReport() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-red-700 text-sm flex items-center gap-2">
+        <div className="bg-crit/12 border border-crit/25 rounded-xl p-4 mb-6 text-crit text-sm flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 flex-shrink-0" />
           {error}
         </div>
@@ -226,29 +226,29 @@ export default function ContractDiscrepancyReport() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl border border-slate-200 p-4">
-              <p className="text-xs text-slate-500 mb-1">Total Compared</p>
-              <p className="text-2xl font-bold text-slate-800">{rows.length}</p>
+            <div className="bg-white rounded-xl border border-border p-4">
+              <p className="text-xs text-muted-foreground mb-1">Total Compared</p>
+              <p className="text-2xl font-bold text-foreground">{rows.length}</p>
             </div>
-            <div className="bg-white rounded-xl border border-red-200 p-4">
-              <p className="text-xs text-red-500 mb-1">Discrepancies</p>
-              <p className="text-2xl font-bold text-red-600">{counts.discrepancy}</p>
+            <div className="bg-white rounded-xl border border-crit/25 p-4">
+              <p className="text-xs text-crit mb-1">Discrepancies</p>
+              <p className="text-2xl font-bold text-crit">{counts.discrepancy}</p>
             </div>
-            <div className="bg-white rounded-xl border border-green-200 p-4">
-              <p className="text-xs text-green-600 mb-1">Matching</p>
-              <p className="text-2xl font-bold text-green-700">{counts.match}</p>
+            <div className="bg-white rounded-xl border border-good/25 p-4">
+              <p className="text-xs text-good mb-1">Matching</p>
+              <p className="text-2xl font-bold text-good">{counts.match}</p>
             </div>
-            <div className="bg-white rounded-xl border border-amber-200 p-4">
-              <p className="text-xs text-amber-600 mb-1">Net Variance</p>
-              <p className={`text-2xl font-bold ${Math.abs(totalDiff) > 0.5 ? 'text-red-600' : 'text-slate-400'}`}>
+            <div className="bg-white rounded-xl border border-warn/25 p-4">
+              <p className="text-xs text-warn mb-1">Net Variance</p>
+              <p className={`text-2xl font-bold ${Math.abs(totalDiff) > 0.5 ? 'text-crit' : 'text-muted-foreground'}`}>
                 {formatCurrency(totalDiff)}
               </p>
             </div>
           </div>
 
           {/* Filters + Table */}
-          <div className="bg-white rounded-2xl border border-slate-200">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+          <div className="bg-white rounded-2xl border border-border">
+            <div className="px-6 py-4 border-b border-border flex items-center gap-3 flex-wrap">
               <div className="flex gap-1.5 flex-1">
                 {[
                   { key: 'all', label: `All (${rows.length})` },
@@ -262,7 +262,7 @@ export default function ContractDiscrepancyReport() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                       filter === f.key
                         ? 'bg-slate-800 text-white border-slate-800'
-                        : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                        : 'bg-white text-muted-foreground border-border hover:border-border'
                     }`}
                   >
                     {f.label}
@@ -282,34 +282,34 @@ export default function ContractDiscrepancyReport() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100">
+                  <tr className="bg-muted border-b border-border">
                     {['Invoice #', 'Customer', 'Sale Date', 'DB Contract $', 'RFMS Total $', 'Difference', 'Status'].map(h => (
-                      <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                      <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-border">
                   {filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-12 text-slate-400">No records match this filter</td>
+                      <td colSpan={7} className="text-center py-12 text-muted-foreground">No records match this filter</td>
                     </tr>
                   ) : filtered.map((row, i) => (
                     <tr
                       key={i}
                       className={
-                        row.status === 'discrepancy' ? 'bg-red-50 hover:bg-red-100 transition-colors' :
-                        row.status === 'match' ? 'hover:bg-slate-50 transition-colors' :
-                        'bg-amber-50 hover:bg-amber-100 transition-colors'
+                        row.status === 'discrepancy' ? 'bg-crit/12 hover:bg-crit/12 transition-colors' :
+                        row.status === 'match' ? 'hover:bg-muted transition-colors' :
+                        'bg-warn/12 hover:bg-warn/12 transition-colors'
                       }
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-indigo-700 whitespace-nowrap">{row.invoice_number || '—'}</td>
-                      <td className="px-4 py-3 text-slate-800 whitespace-nowrap">{row.customerName}</td>
-                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">{row.sale_date ? row.sale_date.slice(0, 10) : '—'}</td>
-                      <td className="px-4 py-3 font-medium text-slate-800 whitespace-nowrap">{formatCurrency(row.dbAmount)}</td>
-                      <td className="px-4 py-3 font-medium text-slate-800 whitespace-nowrap">{formatCurrency(row.rfmsTotal)}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-info whitespace-nowrap">{row.invoice_number || '—'}</td>
+                      <td className="px-4 py-3 text-foreground whitespace-nowrap">{row.customerName}</td>
+                      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{row.sale_date ? row.sale_date.slice(0, 10) : '—'}</td>
+                      <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">{formatCurrency(row.dbAmount)}</td>
+                      <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">{formatCurrency(row.rfmsTotal)}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {row.diff != null ? (
-                          <span className={`font-semibold ${Math.abs(row.diff) < 0.5 ? 'text-slate-400' : row.diff > 0 ? 'text-red-600' : 'text-amber-600'}`}>
+                          <span className={`font-semibold ${Math.abs(row.diff) < 0.5 ? 'text-muted-foreground' : row.diff > 0 ? 'text-crit' : 'text-warn'}`}>
                             {row.diff > 0 ? '+' : ''}{formatCurrency(row.diff)}
                           </span>
                         ) : '—'}
@@ -327,7 +327,7 @@ export default function ContractDiscrepancyReport() {
       )}
 
       {!rows && !loading && (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16 text-muted-foreground">
           <AlertTriangle className="w-12 h-12 mx-auto mb-4 opacity-20" />
           <p>Select a date range and run the report to compare contract amounts against RFMS</p>
         </div>
@@ -338,12 +338,12 @@ export default function ContractDiscrepancyReport() {
 
 function StatusBadge({ status }) {
   const map = {
-    match:        { label: 'Match', cls: 'bg-green-100 text-green-700 border-green-200' },
-    discrepancy:  { label: 'Discrepancy', cls: 'bg-red-100 text-red-700 border-red-200' },
-    not_in_rfms:  { label: 'Not in RFMS', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
+    match:        { label: 'Match', cls: 'bg-good/12 text-good border-good/25' },
+    discrepancy:  { label: 'Discrepancy', cls: 'bg-crit/12 text-crit border-crit/25' },
+    not_in_rfms:  { label: 'Not in RFMS', cls: 'bg-warn/12 text-warn border-warn/25' },
     not_in_db:    { label: 'Not in Razzle', cls: 'bg-purple-100 text-purple-700 border-purple-200' },
-    no_db_amount: { label: 'No Contract $', cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+    no_db_amount: { label: 'No Contract $', cls: 'bg-muted text-muted-foreground border-border' },
   };
-  const { label, cls } = map[status] || { label: status, cls: 'bg-slate-100 text-slate-600 border-slate-200' };
+  const { label, cls } = map[status] || { label: status, cls: 'bg-muted text-muted-foreground border-border' };
   return <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${cls}`}>{label}</span>;
 }

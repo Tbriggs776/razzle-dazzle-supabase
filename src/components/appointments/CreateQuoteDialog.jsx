@@ -75,9 +75,9 @@ export default function CreateQuoteDialog({ open, onClose, lead, appointment, ap
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Quoted Amount (optional)</label>
+            <label className="text-sm font-medium text-foreground">Quoted Amount (optional)</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
               <input
                 type="number"
                 step="0.01"
@@ -89,7 +89,7 @@ export default function CreateQuoteDialog({ open, onClose, lead, appointment, ap
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Expiration Date (optional)</label>
+            <label className="text-sm font-medium text-foreground">Expiration Date (optional)</label>
             <input
               type="date"
               value={quoteExpirationDate}
@@ -98,7 +98,7 @@ export default function CreateQuoteDialog({ open, onClose, lead, appointment, ap
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Notes (optional)</label>
+            <label className="text-sm font-medium text-foreground">Notes (optional)</label>
             <textarea
               rows={3}
               placeholder="Any notes about this quote..."

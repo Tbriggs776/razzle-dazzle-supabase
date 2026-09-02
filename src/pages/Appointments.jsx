@@ -407,10 +407,10 @@ export default function Appointments() {
                   setSelectedStatPeriod({ type: 'today', date: today });
                   setShowStatModal(true);
                 }}
-                className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-500/10 dark:to-indigo-500/15 rounded-lg p-3 border border-indigo-200 dark:border-indigo-500/25 cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-500/10 dark:to-indigo-500/15 rounded-lg p-3 border border-info/25 cursor-pointer hover:shadow-md transition-shadow"
               >
-                <div className="text-xs text-indigo-600 dark:text-indigo-300 font-medium">Booked Today</div>
-                <div className="text-2xl font-bold text-indigo-900 dark:text-indigo-200">{bookedToday}</div>
+                <div className="text-xs text-info font-medium">Booked Today</div>
+                <div className="text-2xl font-bold text-info">{bookedToday}</div>
               </button>
               <button
                 onClick={() => {
@@ -437,20 +437,20 @@ export default function Appointments() {
                   setSelectedStatPeriod({ type: '3daysago', date: threeDaysAgo });
                   setShowStatModal(true);
                 }}
-                className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-500/10 dark:to-orange-500/15 rounded-lg p-3 border border-orange-200 dark:border-orange-500/25 cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-500/10 dark:to-orange-500/15 rounded-lg p-3 border border-warn/25 cursor-pointer hover:shadow-md transition-shadow"
               >
-                <div className="text-xs text-orange-600 dark:text-orange-300 font-medium">3 Days Ago</div>
-                <div className="text-2xl font-bold text-orange-900 dark:text-orange-200">{booked3DaysAgo}</div>
+                <div className="text-xs text-warn font-medium">3 Days Ago</div>
+                <div className="text-2xl font-bold text-warn">{booked3DaysAgo}</div>
               </button>
               <button
                 onClick={() => {
                   setSelectedStatPeriod({ type: 'last7days', start: last7DaysStart, end: today });
                   setShowStatModal(true);
                 }}
-                className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/15 rounded-lg p-3 border border-blue-200 dark:border-blue-500/25 cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/15 rounded-lg p-3 border border-info/25 cursor-pointer hover:shadow-md transition-shadow"
               >
-                <div className="text-xs text-blue-600 dark:text-blue-300 font-medium">Last 7 Days</div>
-                <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">{bookedLast7Days}</div>
+                <div className="text-xs text-info font-medium">Last 7 Days</div>
+                <div className="text-2xl font-bold text-info">{bookedLast7Days}</div>
               </button>
             </div>
 
@@ -786,23 +786,23 @@ export default function Appointments() {
                             <Badge
                               className={
                                 appointment.status === 'Scheduled' || appointment.status === 'Rescheduled'
-                                  ? 'bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-500/15 dark:text-green-300 dark:hover:bg-green-500/15'
+                                  ? 'bg-good/12 text-good hover:bg-good/12 dark:hover:bg-good/15'
                                   : appointment.status === 'Cancelled'
-                                  ? 'bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/15'
+                                  ? 'bg-crit/12 text-crit hover:bg-crit/12 dark:hover:bg-crit/15'
                                   : appointment.status === 'Completed' || appointment.status === 'Sold'
-                                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-100 dark:bg-blue-500/15 dark:text-blue-300 dark:hover:bg-blue-500/15'
+                                  ? 'bg-info/12 text-info hover:bg-info/12 dark:hover:bg-info/15'
                                   : 'bg-secondary text-secondary-foreground hover:bg-secondary'
                               }
                             >
                               {appointment.status}
                             </Badge>
                             {appointment.rfms_sync_status === 'synced' && (
-                              <Badge className="bg-green-50 text-green-700 hover:bg-green-50 border border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25">
+                              <Badge className="bg-good/12 text-good hover:bg-good/12 border border-good/25">
                                 RFMS
                               </Badge>
                             )}
                             {appointment.rfms_sync_status === 'error' && (
-                              <Badge className="bg-red-50 text-red-700 hover:bg-red-50 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
+                              <Badge className="bg-crit/12 text-crit hover:bg-crit/12 border border-crit/25">
                                 RFMS Error
                               </Badge>
                             )}
@@ -813,7 +813,7 @@ export default function Appointments() {
                                   <Badge
                                     className={cn('border font-mono text-xs',
                                       appointment.google_calendar_event_id
-                                        ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25'
+                                        ? 'bg-info/12 text-info border-info/25'
                                         : 'bg-secondary text-muted-foreground border-border'
                                     )}
                                   >
@@ -861,8 +861,8 @@ export default function Appointments() {
                                   className={cn(
                                     "text-xs font-medium",
                                     completedCount === totalCount 
-                                      ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25"
-                                      : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25"
+                                      ? "bg-good/12 text-good border-good/25"
+                                      : "bg-warn/12 text-warn border-warn/25"
                                   )}
                                 >
                                   <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -952,8 +952,8 @@ export default function Appointments() {
                                 className={cn(
                                   "text-xs font-medium",
                                   completedCount === totalCount 
-                                    ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25"
-                                    : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25"
+                                    ? "bg-good/12 text-good border-good/25"
+                                    : "bg-warn/12 text-warn border-warn/25"
                                 )}
                               >
                                 <CheckCircle2 className="w-3 h-3 mr-1" />

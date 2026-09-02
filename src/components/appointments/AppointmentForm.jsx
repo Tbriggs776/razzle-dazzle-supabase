@@ -153,9 +153,9 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Lead Information */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Lead Information</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Lead Information</h3>
         <div className="space-y-2">
-          <Label htmlFor="customer" className="text-slate-700">Lead *</Label>
+          <Label htmlFor="customer" className="text-foreground">Lead *</Label>
           <LeadPicker
             value={formData.customer}
             onChange={(id) => handleChange('customer', id)}
@@ -165,12 +165,12 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
 
       {/* Appointment Details */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Appointment Details</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Appointment Details</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="status" className="text-slate-700">Status *</Label>
+            <Label htmlFor="status" className="text-foreground">Status *</Label>
             <Select value={formData.status} onValueChange={(value) => handleChange('status', value)} required>
-              <SelectTrigger className="h-12 border-slate-200">
+              <SelectTrigger className="h-12 border-border">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
@@ -183,7 +183,7 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="appointment_date" className="text-slate-700">
+            <Label htmlFor="appointment_date" className="text-foreground">
               Appointment Date {requiresDate && '*'}
             </Label>
             <Input
@@ -192,15 +192,15 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
               value={formData.appointment_date}
               onChange={(e) => handleChange('appointment_date', e.target.value)}
               required={requiresDate}
-              className="h-12 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+              className="h-12 border-border focus:border-info focus:ring-info transition-all"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="appointment_block" className="text-slate-700">Time Block</Label>
+          <Label htmlFor="appointment_block" className="text-foreground">Time Block</Label>
           <Select value={formData.appointment_block} onValueChange={(value) => handleChange('appointment_block', value)}>
-            <SelectTrigger className="h-12 border-slate-200">
+            <SelectTrigger className="h-12 border-border">
               <SelectValue placeholder="Select time block" />
             </SelectTrigger>
             <SelectContent>
@@ -217,9 +217,9 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
         {formData.status === 'Cancelled' && (
           <div className="space-y-4 pt-2">
             <div className="space-y-2">
-              <Label htmlFor="cancelled_reason_select" className="text-slate-700">Cancellation Reason *</Label>
+              <Label htmlFor="cancelled_reason_select" className="text-foreground">Cancellation Reason *</Label>
               <Select value={formData.cancelled_reason_select} onValueChange={(value) => { handleChange('cancelled_reason_select', value); setReasonError(''); }}>
-                <SelectTrigger className="h-12 border-slate-200">
+                <SelectTrigger className="h-12 border-border">
                   <SelectValue placeholder="Select a reason..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -231,18 +231,18 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
             </div>
             {formData.cancelled_reason_select === 'Other' && (
               <div className="space-y-2">
-                <Label htmlFor="cancelled_reason_other" className="text-slate-700">Please specify</Label>
+                <Label htmlFor="cancelled_reason_other" className="text-foreground">Please specify</Label>
                 <Textarea
                   id="cancelled_reason_other"
                   value={formData.cancelled_reason_other}
                   onChange={(e) => { handleChange('cancelled_reason_other', e.target.value); setReasonError(''); }}
                   placeholder="Enter the reason for cancelling this appointment..."
-                  className="min-h-24 border-slate-200 focus:border-red-500 focus:ring-red-500"
+                  className="min-h-24 border-border focus:border-crit focus:ring-crit"
                 />
               </div>
             )}
             {reasonError && (
-              <p className="text-sm text-red-600">{reasonError}</p>
+              <p className="text-sm text-crit">{reasonError}</p>
             )}
           </div>
         )}
@@ -250,12 +250,12 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
 
       {/* Team Assignment */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Team Assignment</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Team Assignment</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="assigned_csr" className="text-slate-700">Customer Service Rep</Label>
+            <Label htmlFor="assigned_csr" className="text-foreground">Customer Service Rep</Label>
             <Select value={formData.assigned_csr} onValueChange={(value) => handleChange('assigned_csr', value)}>
-              <SelectTrigger className="h-12 border-slate-200">
+              <SelectTrigger className="h-12 border-border">
                 <SelectValue placeholder="Select CSR" />
               </SelectTrigger>
               <SelectContent>
@@ -269,9 +269,9 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="assigned_dc" className="text-slate-700">Design Consultant</Label>
+            <Label htmlFor="assigned_dc" className="text-foreground">Design Consultant</Label>
             <Select value={formData.assigned_dc} onValueChange={(value) => handleChange('assigned_dc', value)}>
-              <SelectTrigger className="h-12 border-slate-200">
+              <SelectTrigger className="h-12 border-border">
                 <SelectValue placeholder="Select DC" />
               </SelectTrigger>
               <SelectContent>
@@ -289,15 +289,15 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
 
       {/* Location */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Location</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Location</h3>
         <div className="space-y-2">
-          <Label htmlFor="location_address" className="text-slate-700">Address</Label>
+          <Label htmlFor="location_address" className="text-foreground">Address</Label>
           <AddressAutocomplete
             id="location_address"
             value={formData.location_address}
             onChange={(value) => handleChange('location_address', value)}
             onPlaceSelected={(addressData) => handleChange('location_address', addressData.formatted_address)}
-            className="h-12 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+            className="h-12 border-border focus:border-info focus:ring-info transition-all"
             placeholder="Start typing an address..."
           />
         </div>
@@ -305,30 +305,30 @@ export default function AppointmentForm({ appointment, onSubmit, onCancel, isLoa
 
       {/* Internal Notes */}
       <div className="space-y-6">
-        <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Internal Notes</h3>
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Internal Notes</h3>
         <Textarea
           id="internal_notes"
           value={formData.internal_notes}
           onChange={(e) => handleChange('internal_notes', e.target.value)}
-          className="min-h-32 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 transition-all resize-none"
+          className="min-h-32 border-border focus:border-info focus:ring-info transition-all resize-none"
           placeholder="Add internal notes about this appointment..."
         />
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-4 pt-6 border-t border-slate-100">
+      <div className="flex items-center justify-end gap-4 pt-6 border-t border-border">
         <Button
           type="button"
           variant="ghost"
           onClick={onCancel}
-          className="px-6 h-11 text-slate-600 hover:text-slate-800 hover:bg-slate-100"
+          className="px-6 h-11 text-muted-foreground hover:text-foreground hover:bg-muted"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={isLoading}
-          className="px-8 h-11 bg-indigo-600 hover:bg-indigo-700 text-white transition-all"
+          className="px-8 h-11 bg-info hover:bg-info text-white transition-all"
         >
           {isLoading ? (
             <>

@@ -27,11 +27,11 @@ const getSaleGPPct = (sale, catalogCostMap) => {
 // Matrix columns: count of each appointment status per design consultant
 const MATRIX_COLUMNS = [
   { key: 'total', label: 'Total Appts', color: 'text-foreground' },
-  { key: 'Sold', label: 'Sold', color: 'text-green-600' },
-  { key: 'One-Leg', label: 'One-Leg', color: 'text-yellow-600' },
-  { key: 'Pitch and Miss', label: 'Pitch & Miss', color: 'text-orange-600' },
-  { key: 'Lost', label: 'Lost', color: 'text-red-600' },
-  { key: 'Credit Decline', label: 'Credit Decline', color: 'text-rose-600' },
+  { key: 'Sold', label: 'Sold', color: 'text-good' },
+  { key: 'One-Leg', label: 'One-Leg', color: 'text-warn' },
+  { key: 'Pitch and Miss', label: 'Pitch & Miss', color: 'text-warn' },
+  { key: 'Lost', label: 'Lost', color: 'text-crit' },
+  { key: 'Credit Decline', label: 'Credit Decline', color: 'text-crit' },
   { key: 'Cancelled', label: 'Cancelled', color: 'text-muted-foreground' },
   { key: 'Rescheduled', label: 'Rescheduled', color: 'text-cyan-600' },
 ];
@@ -294,13 +294,13 @@ export default function DCPerformanceMatrix() {
                         {col.label}
                       </th>
                     ))}
-                    <th className="text-center font-semibold text-emerald-700 dark:text-emerald-400 px-3 py-2 whitespace-nowrap">
+                    <th className="text-center font-semibold text-good px-3 py-2 whitespace-nowrap">
                       Total Sales Value
                     </th>
-                    <th className="text-center font-semibold text-emerald-700 dark:text-emerald-400 px-3 py-2 whitespace-nowrap">
+                    <th className="text-center font-semibold text-good px-3 py-2 whitespace-nowrap">
                       Avg Order Value
                     </th>
-                    <th className="text-center font-semibold text-blue-700 dark:text-blue-400 px-3 py-2 whitespace-nowrap">
+                    <th className="text-center font-semibold text-info px-3 py-2 whitespace-nowrap">
                       Avg GP%
                     </th>
                     <th className="text-center font-semibold text-foreground px-3 py-2 whitespace-nowrap">
@@ -322,13 +322,13 @@ export default function DCPerformanceMatrix() {
                           {row.counts[col.key] || 0}
                         </td>
                       ))}
-                      <td className="text-center px-3 py-2 font-semibold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
+                      <td className="text-center px-3 py-2 font-semibold text-good whitespace-nowrap">
                         {formatCurrency(row.totalRevenue)}
                       </td>
-                      <td className="text-center px-3 py-2 font-semibold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
+                      <td className="text-center px-3 py-2 font-semibold text-good whitespace-nowrap">
                         {formatCurrency(row.aov)}
                       </td>
-                      <td className="text-center px-3 py-2 font-semibold text-blue-700 dark:text-blue-400 whitespace-nowrap">
+                      <td className="text-center px-3 py-2 font-semibold text-info whitespace-nowrap">
                         {row.gpCount > 0 ? `${row.avgGP.toFixed(1)}%` : '—'}
                       </td>
                       <td className="text-center px-3 py-2 font-semibold text-foreground">
@@ -349,13 +349,13 @@ export default function DCPerformanceMatrix() {
                         {totals[col.key] || 0}
                       </td>
                     ))}
-                    <td className="text-center px-3 py-2 text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
+                    <td className="text-center px-3 py-2 text-good whitespace-nowrap">
                       {formatCurrency(totals.totalRevenue)}
                     </td>
-                    <td className="text-center px-3 py-2 text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
+                    <td className="text-center px-3 py-2 text-good whitespace-nowrap">
                       {formatCurrency(totals.aov)}
                     </td>
-                    <td className="text-center px-3 py-2 text-blue-700 dark:text-blue-400 whitespace-nowrap">
+                    <td className="text-center px-3 py-2 text-info whitespace-nowrap">
                       {totals.avgGP > 0 ? `${totals.avgGP.toFixed(1)}%` : '—'}
                     </td>
                     <td className="text-center px-3 py-2 text-foreground">

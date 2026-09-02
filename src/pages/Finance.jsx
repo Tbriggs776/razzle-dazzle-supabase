@@ -219,7 +219,7 @@ export default function Finance() {
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-2">
-                    <span className="whitespace-nowrap text-sm font-semibold text-amber-600 dark:text-amber-400">
+                    <span className="whitespace-nowrap text-sm font-semibold text-warn">
                       {money(short)} short
                     </span>
                     <Button

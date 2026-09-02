@@ -11,9 +11,9 @@ import { SignedImage, openSignedFile } from '@/lib/fileUrl';
 const CATEGORIES = ['Pre-Install', 'In Progress', 'Post-Install'];
 
 const statusColors = {
-  Completed: 'bg-green-100 text-green-800 border-green-200',
-  Pending: 'bg-slate-100 text-slate-600 border-slate-200',
-  'N/A': 'bg-yellow-100 text-yellow-700 border-yellow-200'
+  Completed: 'bg-good/12 text-good border-good/25',
+  Pending: 'bg-muted text-muted-foreground border-border',
+  'N/A': 'bg-warn/12 text-warn border-warn/25'
 };
 
 export default function InstallationCheckpointsSection({ project, currentUser }) {
@@ -121,17 +121,17 @@ export default function InstallationCheckpointsSection({ project, currentUser })
 
   if (templatesLoading || checkpointsLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2 flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 text-indigo-600 animate-spin" />
+      <div className="bg-white rounded-2xl border border-border p-6 md:col-span-2 flex items-center justify-center py-12">
+        <Loader2 className="w-6 h-6 text-info animate-spin" />
       </div>
     );
   }
 
   if (templates.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2">
-        <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">Installation Checkpoints</h2>
-        <p className="text-sm text-slate-400 text-center py-6">
+      <div className="bg-white rounded-2xl border border-border p-6 md:col-span-2">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">Installation Checkpoints</h2>
+        <p className="text-sm text-muted-foreground text-center py-6">
           No checkpoint templates configured yet. Add templates in the Settings to get started.
         </p>
       </div>
@@ -149,20 +149,20 @@ export default function InstallationCheckpointsSection({ project, currentUser })
   const completedCount = checkpoints.filter(c => c.status === 'Completed').length;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2">
+    <div className="bg-white rounded-2xl border border-border p-6 md:col-span-2">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Installation Checkpoints</h2>
-          <p className="text-xs text-slate-400 mt-0.5">{completedCount} of {totalCount} completed</p>
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Installation Checkpoints</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">{completedCount} of {totalCount} completed</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-2 w-32 bg-slate-200 rounded-full overflow-hidden">
+          <div className="h-2 w-32 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-green-500 rounded-full transition-all"
+              className="h-full bg-good rounded-full transition-all"
               style={{ width: totalCount > 0 ? `${(completedCount / totalCount) * 100}%` : '0%' }}
             />
           </div>
-          <span className="text-xs text-slate-500 font-medium">{totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%</span>
+          <span className="text-xs text-muted-foreground font-medium">{totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%</span>
         </div>
       </div>
 
@@ -172,15 +172,15 @@ export default function InstallationCheckpointsSection({ project, currentUser })
           const isExpanded = expandedCategories[cat];
 
           return (
-            <div key={cat} className="border border-slate-200 rounded-xl overflow-hidden">
+            <div key={cat} className="border border-border rounded-xl overflow-hidden">
               <button
                 onClick={() => toggleCategory(cat)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 bg-muted hover:bg-muted transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
-                  <span className="font-semibold text-slate-700 text-sm">{cat}</span>
-                  <span className="text-xs text-slate-400">({catCompleted}/{items.length})</span>
+                  {isExpanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                  <span className="font-semibold text-foreground text-sm">{cat}</span>
+                  <span className="text-xs text-muted-foreground">({catCompleted}/{items.length})</span>
                 </div>
                 <div className="flex gap-1">
                   {items.map(t => {
@@ -188,7 +188,7 @@ export default function InstallationCheckpointsSection({ project, currentUser })
                     return (
                       <div
                         key={t.id}
-                        className={cn('w-2.5 h-2.5 rounded-full border', cp?.status === 'Completed' ? 'bg-green-500 border-green-500' : cp?.status === 'N/A' ? 'bg-yellow-400 border-yellow-400' : 'bg-white border-slate-300')}
+                        className={cn('w-2.5 h-2.5 rounded-full border', cp?.status === 'Completed' ? 'bg-good border-good' : cp?.status === 'N/A' ? 'bg-warn border-warn' : 'bg-white border-border')}
                       />
                     );
                   })}
@@ -196,7 +196,7 @@ export default function InstallationCheckpointsSection({ project, currentUser })
               </button>
 
               {isExpanded && (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-border">
                   {items.map(template => {
                     const cp = getCheckpoint(template.id);
                     const status = cp?.status || 'Pending';
@@ -206,23 +206,23 @@ export default function InstallationCheckpointsSection({ project, currentUser })
                     const notesChanged = editingNotes[template.id] !== undefined && editingNotes[template.id] !== (cp?.notes || '');
 
                     return (
-                      <div key={template.id} className={cn('p-4 transition-colors', status === 'Completed' ? 'bg-green-50/40' : 'bg-white')}>
+                      <div key={template.id} className={cn('p-4 transition-colors', status === 'Completed' ? 'bg-good/12/40' : 'bg-white')}>
                         <div className="flex items-start gap-3">
                           <div className="flex-shrink-0 mt-0.5">
                             {status === 'Completed'
-                              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
-                              : <Circle className="w-5 h-5 text-slate-300" />
+                              ? <CheckCircle2 className="w-5 h-5 text-good" />
+                              : <Circle className="w-5 h-5 text-muted-foreground" />
                             }
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 flex-wrap">
                               <div>
-                                <p className={cn('font-medium text-sm', status === 'Completed' ? 'text-slate-600 line-through decoration-green-500' : 'text-slate-800')}>
+                                <p className={cn('font-medium text-sm', status === 'Completed' ? 'text-muted-foreground line-through decoration-green-500' : 'text-foreground')}>
                                   {template.name}
-                                  {template.required_photos && <span className="ml-1 text-xs text-red-500">*photo req.</span>}
+                                  {template.required_photos && <span className="ml-1 text-xs text-crit">*photo req.</span>}
                                 </p>
                                 {template.description && (
-                                  <p className="text-xs text-slate-500 mt-0.5">{template.description}</p>
+                                  <p className="text-xs text-muted-foreground mt-0.5">{template.description}</p>
                                 )}
                               </div>
                               <Badge className={cn('border text-xs flex-shrink-0', statusColors[status])}>{status}</Badge>
@@ -230,7 +230,7 @@ export default function InstallationCheckpointsSection({ project, currentUser })
 
                             {/* Completed timestamp */}
                             {status === 'Completed' && cp?.completed_date && (
-                              <div className="flex items-center gap-1.5 mt-2 text-xs text-green-700 bg-green-100 rounded-lg px-2 py-1 w-fit">
+                              <div className="flex items-center gap-1.5 mt-2 text-xs text-good bg-good/12 rounded-lg px-2 py-1 w-fit">
                                 <Clock className="w-3 h-3" />
                                 <span>
                                   Completed by <strong>{cp.completed_by_name || cp.completed_by_email}</strong> on{' '}
@@ -247,7 +247,7 @@ export default function InstallationCheckpointsSection({ project, currentUser })
                                 onChange={e => setEditingNotes(prev => ({ ...prev, [template.id]: e.target.value }))}
                                 placeholder="Add notes..."
                                 rows={2}
-                                className="flex-1 text-xs rounded-lg border border-slate-200 px-2 py-1.5 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-300 resize-none"
+                                className="flex-1 text-xs rounded-lg border border-border px-2 py-1.5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-info/25 resize-none"
                               />
                               {notesChanged && (
                                 <Button size="sm" variant="outline" onClick={() => handleSaveNotes(template)} className="text-xs h-auto">Save</Button>
@@ -262,12 +262,12 @@ export default function InstallationCheckpointsSection({ project, currentUser })
                                     <SignedImage
                                       src={url}
                                       alt="checkpoint"
-                                      className="w-16 h-16 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-90"
+                                      className="w-16 h-16 object-cover rounded-lg border border-border cursor-pointer hover:opacity-90"
                                       onClick={() => openSignedFile(url)}
                                     />
                                     <button
                                       onClick={() => handleDeletePhoto(template, i)}
-                                      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                      className="absolute -top-1 -right-1 w-4 h-4 bg-crit rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
                                       <X className="w-2.5 h-2.5 text-white" />
                                     </button>
@@ -283,7 +283,7 @@ export default function InstallationCheckpointsSection({ project, currentUser })
                                   size="sm"
                                   onClick={() => handleMarkStatus(template, 'Completed')}
                                   disabled={isSaving}
-                                  className="bg-green-600 hover:bg-green-700 text-xs h-7"
+                                  className="bg-good hover:bg-good text-xs h-7"
                                 >
                                   {isSaving ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
                                   Mark Complete
@@ -295,7 +295,7 @@ export default function InstallationCheckpointsSection({ project, currentUser })
                                   variant="outline"
                                   onClick={() => handleMarkStatus(template, 'Pending')}
                                   disabled={isSaving}
-                                  className="border-slate-300 text-slate-600 text-xs h-7"
+                                  className="border-border text-muted-foreground text-xs h-7"
                                 >
                                   Undo
                                 </Button>
@@ -306,12 +306,12 @@ export default function InstallationCheckpointsSection({ project, currentUser })
                                   variant="outline"
                                   onClick={() => handleMarkStatus(template, 'N/A')}
                                   disabled={isSaving}
-                                  className="border-yellow-200 text-yellow-700 text-xs h-7"
+                                  className="border-warn/25 text-warn text-xs h-7"
                                 >
                                   N/A
                                 </Button>
                               )}
-                              <label className={cn('inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs cursor-pointer transition-colors h-7', isUploading ? 'border-indigo-200 text-indigo-400' : 'border-indigo-200 text-indigo-600 hover:bg-indigo-50')}>
+                              <label className={cn('inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs cursor-pointer transition-colors h-7', isUploading ? 'border-info/25 text-info' : 'border-info/25 text-info hover:bg-info/12')}>
                                 <input type="file" accept="image/*" multiple className="hidden" disabled={isUploading} onChange={e => { handlePhotoUpload(template, e.target.files); e.target.value = ''; }} />
                                 {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}
                                 {isUploading ? 'Uploading...' : 'Add Photos'}

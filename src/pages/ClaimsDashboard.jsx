@@ -17,9 +17,9 @@ import ProjectClaimForm from '@/components/projects/ProjectClaimForm';
 import InspectionReportForm from '@/components/projects/InspectionReportForm';
 
 const claimTypeColors = {
-  'Claim': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'Repair': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
-  'Short Item': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
+  'Claim': 'bg-crit/12 text-crit border-crit/25',
+  'Repair': 'bg-warn/12 text-warn border-warn/25',
+  'Short Item': 'bg-warn/12 text-warn border-warn/25',
   'Product Swap': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
 };
 
@@ -460,7 +460,7 @@ export default function ClaimsDashboard() {
               <section>
                 {activeTab === 'all' && (
                   <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
-                    <ClipboardList className="w-5 h-5 text-orange-500" /> Claims / Repairs / Short Items ({filteredClaims.length})
+                    <ClipboardList className="w-5 h-5 text-warn" /> Claims / Repairs / Short Items ({filteredClaims.length})
                   </h2>
                 )}
                 {filteredClaims.length === 0 ? (
@@ -506,9 +506,9 @@ export default function ClaimsDashboard() {
                                  {claim.is_cancelled ? (
                                    <Badge className="bg-secondary text-muted-foreground border-border border text-xs">Cancelled</Badge>
                                  ) : claim.is_completed ? (
-                                   <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25 border text-xs">Completed</Badge>
+                                   <Badge className="bg-good/12 text-good border-good/25 border text-xs">Completed</Badge>
                                  ) : (
-                                   <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25 border text-xs">Open</Badge>
+                                   <Badge className="bg-warn/12 text-warn border-warn/25 border text-xs">Open</Badge>
                                  )}
                                </td>
                               <td className="px-4 py-3">
@@ -523,7 +523,7 @@ export default function ClaimsDashboard() {
                                  {!claim.is_cancelled && (
                                    <button
                                      onClick={(e) => { e.stopPropagation(); handleCompleteClaim(claim); }}
-                                     className={claim.is_completed ? 'text-green-500 hover:text-muted-foreground transition-colors' : 'text-muted-foreground hover:text-green-600 transition-colors'}
+                                     className={claim.is_completed ? 'text-good hover:text-muted-foreground transition-colors' : 'text-muted-foreground hover:text-good transition-colors'}
                                      title={claim.is_completed ? 'Mark Incomplete' : 'Mark Completed'}
                                    >
                                      <CheckCircle2 className="w-4 h-4" />
@@ -532,7 +532,7 @@ export default function ClaimsDashboard() {
                                  {!claim.is_cancelled && (
                                    <button
                                      onClick={(e) => { e.stopPropagation(); handleCancelClaim(claim); }}
-                                     className="text-muted-foreground hover:text-orange-600 transition-colors"
+                                     className="text-muted-foreground hover:text-warn transition-colors"
                                      title="Cancel"
                                    >
                                      <XCircle className="w-4 h-4" />
@@ -604,10 +604,10 @@ export default function ClaimsDashboard() {
                               </td>
                             ))}
                             <td className="px-4 py-3 text-center">
-                              {data.open > 0 ? <span className="bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300 text-xs font-semibold px-2 py-1 rounded-full">{data.open}</span> : <span className="text-muted-foreground/60">—</span>}
+                              {data.open > 0 ? <span className="bg-warn/12 text-warn text-xs font-semibold px-2 py-1 rounded-full">{data.open}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                             <td className="px-4 py-3 text-center">
-                              {data.completed > 0 ? <span className="bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300 text-xs font-semibold px-2 py-1 rounded-full">{data.completed}</span> : <span className="text-muted-foreground/60">—</span>}
+                              {data.completed > 0 ? <span className="bg-good/12 text-good text-xs font-semibold px-2 py-1 rounded-full">{data.completed}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                             <td className="px-4 py-3 text-center">
                               {data.cancelled > 0 ? <span className="bg-secondary text-muted-foreground text-xs font-semibold px-2 py-1 rounded-full">{data.cancelled}</span> : <span className="text-muted-foreground/60">—</span>}
@@ -658,10 +658,10 @@ export default function ClaimsDashboard() {
                               </td>
                             ))}
                             <td className="px-4 py-3 text-center">
-                              {data.open > 0 ? <span className="bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300 text-xs font-semibold px-2 py-1 rounded-full">{data.open}</span> : <span className="text-muted-foreground/60">—</span>}
+                              {data.open > 0 ? <span className="bg-warn/12 text-warn text-xs font-semibold px-2 py-1 rounded-full">{data.open}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                             <td className="px-4 py-3 text-center">
-                              {data.completed > 0 ? <span className="bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300 text-xs font-semibold px-2 py-1 rounded-full">{data.completed}</span> : <span className="text-muted-foreground/60">—</span>}
+                              {data.completed > 0 ? <span className="bg-good/12 text-good text-xs font-semibold px-2 py-1 rounded-full">{data.completed}</span> : <span className="text-muted-foreground/60">—</span>}
                             </td>
                             <td className="px-4 py-3 text-center">
                               {data.cancelled > 0 ? <span className="bg-secondary text-muted-foreground text-xs font-semibold px-2 py-1 rounded-full">{data.cancelled}</span> : <span className="text-muted-foreground/60">—</span>}

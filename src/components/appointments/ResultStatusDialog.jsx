@@ -10,12 +10,12 @@ import { cn } from '@/lib/utils';
 const NON_SOLD_STATUSES = ['Lost', 'Pitch and Miss', 'One-Leg', 'Credit Decline', 'Follow-Up'];
 
 const RESULT_OPTIONS = [
-  { status: 'Lost', label: 'Lost', className: 'border-red-200 text-red-600 hover:bg-red-50' },
-  { status: 'Pitch and Miss', label: 'Pitch and Miss', className: 'border-orange-200 text-orange-600 hover:bg-orange-50' },
-  { status: 'One-Leg', label: 'One-Leg', className: 'border-yellow-200 text-yellow-600 hover:bg-yellow-50' },
-  { status: 'Credit Decline', label: 'Credit Decline', className: 'border-rose-200 text-rose-600 hover:bg-rose-50' },
-  { status: 'Follow-Up', label: 'Follow-Up', className: 'border-red-200 text-red-600 hover:bg-red-50' },
-  { status: 'Completed', label: 'Completed', className: 'border-slate-200 text-slate-600 hover:bg-slate-50' }
+  { status: 'Lost', label: 'Lost', className: 'border-crit/25 text-crit hover:bg-crit/12' },
+  { status: 'Pitch and Miss', label: 'Pitch and Miss', className: 'border-warn/25 text-warn hover:bg-warn/12' },
+  { status: 'One-Leg', label: 'One-Leg', className: 'border-warn/25 text-warn hover:bg-warn/12' },
+  { status: 'Credit Decline', label: 'Credit Decline', className: 'border-crit/25 text-crit hover:bg-crit/12' },
+  { status: 'Follow-Up', label: 'Follow-Up', className: 'border-crit/25 text-crit hover:bg-crit/12' },
+  { status: 'Completed', label: 'Completed', className: 'border-border text-muted-foreground hover:bg-muted' }
 ];
 
 export default function ResultStatusDialog({ open, onOpenChange, appointment, currentUser, onConfirm, isLoading }) {
@@ -63,15 +63,15 @@ export default function ResultStatusDialog({ open, onOpenChange, appointment, cu
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-slate-800">Mark Appointment Result</DialogTitle>
-          <DialogDescription className="text-slate-500 mt-2">
+          <DialogTitle className="text-xl font-bold text-foreground">Mark Appointment Result</DialogTitle>
+          <DialogDescription className="text-muted-foreground mt-2">
             Set the outcome for this appointment. The customer will be notified automatically for non-sold results.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label className="text-slate-700">Result Status *</Label>
+            <Label className="text-foreground">Result Status *</Label>
             <div className="grid grid-cols-2 gap-2">
               {RESULT_OPTIONS.map((opt) => (
                 <Button
@@ -82,7 +82,7 @@ export default function ResultStatusDialog({ open, onOpenChange, appointment, cu
                   className={cn(
                     "h-11",
                     opt.className,
-                    selectedStatus === opt.status && "ring-2 ring-offset-1 ring-indigo-400"
+                    selectedStatus === opt.status && "ring-2 ring-offset-1 ring-info"
                   )}
                 >
                   {opt.label}
@@ -93,9 +93,9 @@ export default function ResultStatusDialog({ open, onOpenChange, appointment, cu
 
           {requiresDealSize && (
             <div className="space-y-2">
-              <Label htmlFor="result-deal-size" className="text-slate-700">Deal Size *</Label>
+              <Label htmlFor="result-deal-size" className="text-foreground">Deal Size *</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
                 <Input
                   id="result-deal-size"
                   type="number"
@@ -106,12 +106,12 @@ export default function ResultStatusDialog({ open, onOpenChange, appointment, cu
                   className="pl-7"
                 />
               </div>
-              <p className="text-xs text-slate-500">Enter the estimated deal size for this appointment</p>
+              <p className="text-xs text-muted-foreground">Enter the estimated deal size for this appointment</p>
             </div>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="result-notes" className="text-slate-700">Notes (optional)</Label>
+            <Label htmlFor="result-notes" className="text-foreground">Notes (optional)</Label>
             <Textarea
               id="result-notes"
               placeholder={`Add notes about this ${selectedStatus ? selectedStatus.toLowerCase() : 'result'} outcome...`}
@@ -126,7 +126,7 @@ export default function ResultStatusDialog({ open, onOpenChange, appointment, cu
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="border-slate-200"
+            className="border-border"
           >
             Cancel
           </Button>
@@ -134,9 +134,9 @@ export default function ResultStatusDialog({ open, onOpenChange, appointment, cu
             onClick={handleSubmit}
             disabled={!canSubmit || isLoading}
             className={cn(
-              "bg-indigo-600 hover:bg-indigo-700",
-              selectedStatus === 'Lost' && "bg-red-600 hover:bg-red-700",
-              selectedStatus === 'Pitch and Miss' && "bg-orange-600 hover:bg-orange-700",
+              "bg-info hover:bg-info",
+              selectedStatus === 'Lost' && "bg-crit hover:bg-crit",
+              selectedStatus === 'Pitch and Miss' && "bg-warn hover:bg-warn",
               selectedStatus === 'Completed' && "bg-slate-600 hover:bg-slate-700"
             )}
           >

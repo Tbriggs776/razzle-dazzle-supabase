@@ -150,11 +150,11 @@ export default function PreInstallChecklistView() {
     return (
       <div className="min-h-screen bg-background py-10 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto bg-card rounded-2xl shadow-lg p-8">
-          <div className="flex items-center gap-3 mb-6 p-4 bg-green-50 border border-green-200 rounded-xl dark:bg-green-500/10 dark:border-green-500/25">
-            <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
+          <div className="flex items-center gap-3 mb-6 p-4 bg-good/12 border border-good/25 rounded-xl">
+            <CheckCircle2 className="w-6 h-6 text-good flex-shrink-0" />
             <div>
-              <p className="font-semibold text-green-800 dark:text-green-300">Pre-Installation Checklist Signed</p>
-              <p className="text-sm text-green-600 dark:text-green-400">Signed on {signedDate}</p>
+              <p className="font-semibold text-good">Pre-Installation Checklist Signed</p>
+              <p className="text-sm text-good">Signed on {signedDate}</p>
             </div>
           </div>
 
@@ -246,10 +246,10 @@ export default function PreInstallChecklistView() {
         </div>
 
         {checklist.product_info && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm dark:bg-blue-500/10 dark:border-blue-500/25">
-            <span className="font-semibold text-blue-800 dark:text-blue-300">Product Confirmed: </span>
-            <span className="text-blue-700 dark:text-blue-300">{checklist.product_info}</span>
-            <p className="text-blue-600 dark:text-blue-400 text-xs mt-1">I am confirming the product style and color is correct. If I am not home the day of the installation, you agree to allow us to install this style and color.</p>
+          <div className="mb-4 p-3 bg-info/12 border border-info/25 rounded-lg text-sm">
+            <span className="font-semibold text-info">Product Confirmed: </span>
+            <span className="text-info">{checklist.product_info}</span>
+            <p className="text-info text-xs mt-1">I am confirming the product style and color is correct. If I am not home the day of the installation, you agree to allow us to install this style and color.</p>
           </div>
         )}
 

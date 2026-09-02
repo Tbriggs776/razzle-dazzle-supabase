@@ -16,9 +16,9 @@ import { Plus, Send, Loader2, PenLine, CheckCircle2, Clock, ExternalLink, Pen } 
 import { format } from 'date-fns';
 
 const STATUS_STYLES = {
-  draft: 'bg-slate-100 text-slate-600 border-slate-200',
-  sent: 'bg-amber-100 text-amber-700 border-amber-200',
-  signed: 'bg-green-100 text-green-700 border-green-200'
+  draft: 'bg-muted text-muted-foreground border-border',
+  sent: 'bg-warn/12 text-warn border-warn/25',
+  signed: 'bg-good/12 text-good border-good/25'
 };
 
 export default function DesignModsSection({ project, customer, sale }) {
@@ -111,17 +111,17 @@ export default function DesignModsSection({ project, customer, sale }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-slate-100 p-6 md:col-span-2"
+      className="bg-white rounded-2xl border border-border p-6 md:col-span-2"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <PenLine className="w-5 h-5 text-blue-600" />
-          <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">Design Modifications</h2>
+          <PenLine className="w-5 h-5 text-info" />
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Design Modifications</h2>
         </div>
         <Button
           size="sm"
           onClick={() => { resetForm(); setShowDialog(true); }}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-info hover:bg-info"
         >
           <Plus className="w-4 h-4 mr-1" />
           New Design Mod
@@ -129,24 +129,24 @@ export default function DesignModsSection({ project, customer, sale }) {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-slate-400" /></div>
+        <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
       ) : designMods.length === 0 ? (
-        <p className="text-sm text-slate-400 text-center py-8">No design modifications yet</p>
+        <p className="text-sm text-muted-foreground text-center py-8">No design modifications yet</p>
       ) : (
         <div className="space-y-3">
           {designMods.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).map(mod => (
-            <div key={mod.id} className="border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div key={mod.id} className="border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="font-medium text-slate-800">{mod.customer_first_name} {mod.customer_last_name}</span>
+                  <span className="font-medium text-foreground">{mod.customer_first_name} {mod.customer_last_name}</span>
                   <Badge variant="outline" className={STATUS_STYLES[mod.status]}>
                     {mod.status === 'signed' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
                     {mod.status}
                   </Badge>
-                  {mod.job_number && <span className="text-xs text-slate-500">Job #{mod.job_number}</span>}
+                  {mod.job_number && <span className="text-xs text-muted-foreground">Job #{mod.job_number}</span>}
                 </div>
-                <p className="text-sm text-slate-600 line-clamp-2">{mod.products_or_changes}</p>
-                <div className="flex items-center gap-3 mt-1 text-xs text-slate-400 flex-wrap">
+                <p className="text-sm text-muted-foreground line-clamp-2">{mod.products_or_changes}</p>
+                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
                   {mod.value_added_costs != null && <span>${Number(mod.value_added_costs).toLocaleString()}</span>}
                   {mod.funds_collected_terms && <span>• {mod.funds_collected_terms}</span>}
                   {mod.signed_at && <span>• Signed {format(new Date(mod.signed_at), 'MMM d, yyyy')}</span>}
@@ -159,7 +159,7 @@ export default function DesignModsSection({ project, customer, sale }) {
                     href={`/DesignModView?id=${mod.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-green-300 rounded-lg hover:bg-green-50 transition-colors text-green-700"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-good/25 rounded-lg hover:bg-good/12 transition-colors text-good"
                   >
                     <CheckCircle2 className="w-3 h-3" />
                     View Signed
@@ -252,7 +252,7 @@ export default function DesignModsSection({ project, customer, sale }) {
             <Button
               onClick={() => createMutation.mutate(form)}
               disabled={createMutation.isPending || !form.products_or_changes}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-info hover:bg-info"
             >
               {createMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Create & Send to Customer

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 // Semantic status chip. tone ∈ good | warn | crit | info | neutral.
 // Domain labels (Synced, Overdue, Scheduled, Installed, Draft, …) map onto these five
-// at the call site — one component replaces every ad-hoc bg-green-100 / bg-red-100 pill.
+// at the call site — one component replaces every ad-hoc bg-good/12 / bg-crit/12 pill.
 const TONES = { good: 'good', warn: 'warn', crit: 'crit', info: 'info', neutral: 'neutral' };
 
 export default function StatusPill({ tone = 'neutral', dot = false, className, children }) {

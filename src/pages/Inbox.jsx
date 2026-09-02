@@ -88,7 +88,7 @@ export default function Inbox() {
           className={cn(
             'mt-0.5 h-4 w-4 shrink-0',
             n.severity === 'crit' ? 'text-destructive'
-              : n.severity === 'warn' ? 'text-amber-600 dark:text-amber-400'
+              : n.severity === 'warn' ? 'text-warn'
               : 'text-muted-foreground',
           )}
         />

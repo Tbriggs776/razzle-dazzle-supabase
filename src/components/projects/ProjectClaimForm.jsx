@@ -218,20 +218,20 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
             <Textarea rows={4} value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Describe the issue..." />
           </div>
 
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+          <div className="flex items-center gap-3 p-3 bg-muted rounded-lg border border-border">
             <Checkbox
               id="need_to_order_material"
               checked={!!form.need_to_order_material}
               onCheckedChange={v => set('need_to_order_material', v)}
             />
-            <Label htmlFor="need_to_order_material" className="cursor-pointer font-medium text-slate-700">
+            <Label htmlFor="need_to_order_material" className="cursor-pointer font-medium text-foreground">
               Need to Order Material
             </Label>
           </div>
 
           {/* Billing fields */}
-          <div className="grid grid-cols-1 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Billing Info</p>
+          <div className="grid grid-cols-1 gap-3 p-3 bg-muted rounded-lg border border-border">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Billing Info</p>
             <div className="flex flex-wrap gap-4">
               {form.claim_type !== 'Short Item' && (
                 <div className="flex items-center gap-2">
@@ -240,7 +240,7 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
                     checked={!!form.billable_repair}
                     onCheckedChange={v => set('billable_repair', v)}
                   />
-                  <Label htmlFor="billable_repair" className="cursor-pointer text-slate-700">Billable Repair</Label>
+                  <Label htmlFor="billable_repair" className="cursor-pointer text-foreground">Billable Repair</Label>
                 </div>
               )}
               <div className="flex items-center gap-2">
@@ -249,7 +249,7 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
                   checked={!!form.is_back_charge}
                   onCheckedChange={v => { set('is_back_charge', v); if (!v) set('back_charge_party', ''); }}
                 />
-                <Label htmlFor="is_back_charge" className="cursor-pointer text-slate-700">Back Charge</Label>
+                <Label htmlFor="is_back_charge" className="cursor-pointer text-foreground">Back Charge</Label>
               </div>
             </div>
             {form.is_back_charge && (
@@ -293,12 +293,12 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
               {images.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">
                   {images.map((url, i) => (
-                    <div key={i} className="relative group rounded-lg overflow-hidden border border-slate-200">
+                    <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
                       <SignedImage src={url} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover cursor-pointer hover:opacity-90" onClick={() => openSignedFile(url)} />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
-                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-crit text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -306,12 +306,12 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
                   ))}
                 </div>
               )}
-              <label className="flex items-center justify-center gap-2 w-full p-3 border-2 border-dashed border-slate-300 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer">
+              <label className="flex items-center justify-center gap-2 w-full p-3 border-2 border-dashed border-border rounded-lg hover:border-info/25 hover:bg-info/12 transition-colors cursor-pointer">
                 <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} className="hidden" />
                 {uploadingImage ? (
-                  <><Loader2 className="w-4 h-4 text-indigo-600 animate-spin" /><span className="text-sm text-slate-600">Uploading...</span></>
+                  <><Loader2 className="w-4 h-4 text-info animate-spin" /><span className="text-sm text-muted-foreground">Uploading...</span></>
                 ) : (
-                  <><Upload className="w-4 h-4 text-slate-400" /><span className="text-sm text-slate-600">Click to upload a photo</span></>
+                  <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">Click to upload a photo</span></>
                 )}
               </label>
             </div>
@@ -323,9 +323,9 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
             <div className="mt-2 space-y-2">
               <div className="flex flex-wrap gap-2">
                 {emailRecipients.map(email => (
-                  <span key={email} className="flex items-center gap-1 bg-indigo-50 text-indigo-700 text-xs px-2 py-1 rounded-full">
+                  <span key={email} className="flex items-center gap-1 bg-info/12 text-info text-xs px-2 py-1 rounded-full">
                     {email}
-                    <button type="button" onClick={() => setEmailRecipients(prev => prev.filter(e => e !== email))} className="hover:text-red-500 transition-colors">
+                    <button type="button" onClick={() => setEmailRecipients(prev => prev.filter(e => e !== email))} className="hover:text-crit transition-colors">
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -350,10 +350,10 @@ export default function ProjectClaimForm({ open, onClose, onSave, project, custo
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button variant="outline" onClick={() => handleSave(false)} disabled={saving} className="border-slate-300 text-slate-700">
+          <Button variant="outline" onClick={() => handleSave(false)} disabled={saving} className="border-border text-foreground">
             {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save (No Email)'}
           </Button>
-          <Button onClick={() => handleSave(true)} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700">
+          <Button onClick={() => handleSave(true)} disabled={saving} className="bg-info hover:bg-info">
             {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save & Send'}
           </Button>
         </DialogFooter>

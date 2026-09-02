@@ -100,16 +100,16 @@ export default function CopyTable({ projectsWithDates, customers }) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-        <p className="text-sm font-semibold text-slate-700">Schedule Table ({rows.length} jobs)</p>
+    <div className="bg-white rounded-xl border border-border overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <p className="text-sm font-semibold text-foreground">Schedule Table ({rows.length} jobs)</p>
         <button
           onClick={handleCopy}
           className={cn(
             'flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors',
             copied
-              ? 'bg-green-50 border-green-300 text-green-700'
-              : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'
+              ? 'bg-good/12 border-good/25 text-good'
+              : 'bg-white border-border text-muted-foreground hover:bg-muted'
           )}
         >
           {copied ? <><Check className="w-3.5 h-3.5" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy Table</>}
@@ -117,32 +117,32 @@ export default function CopyTable({ projectsWithDates, customers }) {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
-          <thead className="bg-slate-50 border-b border-slate-200">
+          <thead className="bg-muted border-b border-border">
             <tr>
               {['Customer','Invoice #','Address','Crew','Date','End Date','Start','End','Job Status','Status','Glue?','Glue Item'].map(h => (
-                <th key={h} className="px-3 py-2 text-left font-semibold text-slate-500 whitespace-nowrap">{h}</th>
+                <th key={h} className="px-3 py-2 text-left font-semibold text-muted-foreground whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {rows.map((r, i) => (
-              <tr key={i} className={cn('hover:bg-slate-50 transition-colors', r.isGlueDown && 'bg-red-50')}>
-                <td className="px-3 py-2 font-medium text-slate-800 whitespace-nowrap">{r.name}</td>
-                <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{r.invoice}</td>
-                <td className="px-3 py-2 text-slate-500 max-w-[180px] truncate">{r.address}</td>
-                <td className="px-3 py-2 text-slate-700 whitespace-nowrap">{r.crew}</td>
-                <td className="px-3 py-2 text-slate-700 whitespace-nowrap">{r.dateRaw ? formatRFMSDate(r.dateRaw) : r.date}</td>
-                <td className="px-3 py-2 text-slate-700 whitespace-nowrap">{r.endDateRaw ? formatRFMSDate(r.endDateRaw) : ''}</td>
-                <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{formatTime(r.startTime)}</td>
-                <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{formatTime(r.endTime)}</td>
-                <td className="px-3 py-2 text-slate-500 whitespace-nowrap">{r.jobStatus}</td>
+              <tr key={i} className={cn('hover:bg-muted transition-colors', r.isGlueDown && 'bg-crit/12')}>
+                <td className="px-3 py-2 font-medium text-foreground whitespace-nowrap">{r.name}</td>
+                <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{r.invoice}</td>
+                <td className="px-3 py-2 text-muted-foreground max-w-[180px] truncate">{r.address}</td>
+                <td className="px-3 py-2 text-foreground whitespace-nowrap">{r.crew}</td>
+                <td className="px-3 py-2 text-foreground whitespace-nowrap">{r.dateRaw ? formatRFMSDate(r.dateRaw) : r.date}</td>
+                <td className="px-3 py-2 text-foreground whitespace-nowrap">{r.endDateRaw ? formatRFMSDate(r.endDateRaw) : ''}</td>
+                <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{formatTime(r.startTime)}</td>
+                <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{formatTime(r.endTime)}</td>
+                <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{r.jobStatus}</td>
                 <td className="px-3 py-2 whitespace-nowrap">
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700">{r.status}</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-foreground">{r.status}</span>
                 </td>
                 <td className="px-3 py-2 whitespace-nowrap">
-                  {r.isGlueDown && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">🔧 YES</span>}
+                  {r.isGlueDown && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-crit/12 text-crit">🔧 YES</span>}
                 </td>
-                <td className="px-3 py-2 text-slate-500 max-w-[150px] truncate">{r.glueDesc}</td>
+                <td className="px-3 py-2 text-muted-foreground max-w-[150px] truncate">{r.glueDesc}</td>
               </tr>
             ))}
           </tbody>

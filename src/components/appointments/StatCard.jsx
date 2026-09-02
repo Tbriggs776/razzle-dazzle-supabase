@@ -25,15 +25,15 @@ export default function StatCard({ label, value, prev, prevSuffix = '', color = 
       {sub && <p className="text-[11px] text-muted-foreground/70 mt-0.5">{sub}</p>}
       {realDelta != null && (
         <div className="flex items-center gap-1 mt-1.5 text-[11px]">
-          {goodIsUp && !invertTrend && <TrendingUp className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />}
-          {goodIsUp && invertTrend && <TrendingDown className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />}
-          {badIsDown && !invertTrend && <TrendingDown className="w-3 h-3 text-red-600 dark:text-red-400" />}
-          {badIsDown && invertTrend && <TrendingUp className="w-3 h-3 text-red-600 dark:text-red-400" />}
+          {goodIsUp && !invertTrend && <TrendingUp className="w-3 h-3 text-good" />}
+          {goodIsUp && invertTrend && <TrendingDown className="w-3 h-3 text-good" />}
+          {badIsDown && !invertTrend && <TrendingDown className="w-3 h-3 text-crit" />}
+          {badIsDown && invertTrend && <TrendingUp className="w-3 h-3 text-crit" />}
           {flat && <Minus className="w-3 h-3 text-muted-foreground/70" />}
           <span
             className={cn(
               'font-medium',
-              goodIsUp ? 'text-emerald-600 dark:text-emerald-400' : badIsDown ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground/70'
+              goodIsUp ? 'text-good' : badIsDown ? 'text-crit' : 'text-muted-foreground/70'
             )}
           >
             {up ? '+' : ''}{realDelta}{prevSuffix} vs last period

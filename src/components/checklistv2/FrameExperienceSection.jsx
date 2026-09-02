@@ -33,43 +33,43 @@ export default function FrameExperienceSection({ formData, onChange }) {
       {/* Section Header */}
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-purple-50 border-b border-purple-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-purple-50 border-b border-purple-200"
       )}>
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-9 h-9 rounded-lg flex items-center justify-center",
-            isComplete ? "bg-green-100" : "bg-purple-100"
+            isComplete ? "bg-good/12" : "bg-purple-100"
           )}>
             {isComplete
-              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
+              ? <CheckCircle2 className="w-5 h-5 text-good" />
               : <Sparkles className="w-5 h-5 text-purple-600" />
             }
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 2 — Frame the Experience</p>
-            <p className="text-xs text-slate-500">Differentiate Floor Daddy & set expectations</p>
+            <p className="font-bold text-foreground">Section 2 — Frame the Experience</p>
+            <p className="text-xs text-muted-foreground">Differentiate Floor Daddy & set expectations</p>
           </div>
         </div>
         {isComplete && (
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>
+          <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>
         )}
       </div>
 
       <div className="p-5 space-y-5 bg-white">
         {/* Script */}
         <Accordion type="single" collapsible defaultValue="script">
-          <AccordionItem value="script" className="border border-slate-200 rounded-lg overflow-hidden">
-            <AccordionTrigger className="px-4 py-3 hover:no-underline bg-slate-50 hover:bg-slate-100 text-sm font-semibold text-slate-700">
+          <AccordionItem value="script" className="border border-border rounded-lg overflow-hidden">
+            <AccordionTrigger className="px-4 py-3 hover:no-underline bg-muted hover:bg-muted text-sm font-semibold text-foreground">
               📋 View Script
             </AccordionTrigger>
             <AccordionContent className="px-0 pb-0">
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-border">
                 {SCRIPT_BLOCKS.map((block, idx) => (
                   <div key={idx} className="flex gap-3 px-4 py-3">
                     <span className="flex-shrink-0 text-xs font-bold text-purple-600 bg-purple-50 border border-purple-200 px-2 py-1 rounded h-fit mt-0.5">
                       CSR
                     </span>
-                    <p className="text-sm text-slate-700 italic leading-relaxed">{block.text}</p>
+                    <p className="text-sm text-foreground italic leading-relaxed">{block.text}</p>
                   </div>
                 ))}
               </div>
@@ -86,16 +86,16 @@ export default function FrameExperienceSection({ formData, onChange }) {
               className={cn(
                 "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
                 formData[field]
-                  ? "border-green-400 bg-green-50"
-                  : "border-slate-200 bg-slate-50 hover:border-purple-300"
+                  ? "border-good bg-good/12"
+                  : "border-border bg-muted hover:border-purple-300"
               )}
             >
               <Checkbox
                 checked={formData[field] || false}
                 onCheckedChange={(checked) => onChange(field, checked)}
-                className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                className="data-[state=checked]:bg-good data-[state=checked]:border-good"
               />
-              <Label className="cursor-pointer font-medium text-slate-700">{label}</Label>
+              <Label className="cursor-pointer font-medium text-foreground">{label}</Label>
             </div>
           ))}
         </div>

@@ -22,17 +22,17 @@ const PRODUCT_TYPES = {
 const CHART_COLORS = ['#6366f1','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316','#84cc16'];
 
 const STATUS_COLORS = {
-  'Sold': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25',
-  'Lost': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'Pitch and Miss': 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25',
-  'One-Leg': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
-  'Credit Decline': 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/25',
+  'Sold': 'bg-good/12 text-good border-good/25',
+  'Lost': 'bg-crit/12 text-crit border-crit/25',
+  'Pitch and Miss': 'bg-warn/12 text-warn border-warn/25',
+  'One-Leg': 'bg-warn/12 text-warn border-warn/25',
+  'Credit Decline': 'bg-crit/12 text-crit border-crit/25',
   'Follow-Up': 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/25',
-  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
+  'Scheduled': 'bg-info/12 text-info border-info/25',
   'Rescheduled': 'bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/25',
   'Cancelled': 'bg-secondary text-secondary-foreground border-border',
-  'Completed': 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/25',
-  'In Route': 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/25',
+  'Completed': 'bg-info/12 text-info border-info/25',
+  'In Route': 'bg-info/12 text-info border-info/25',
   'On Site': 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-500/15 dark:text-teal-300 dark:border-teal-500/25',
   'Awaiting Assignment': 'bg-secondary text-secondary-foreground border-border',
 };
@@ -461,9 +461,9 @@ export default function AppointmentRehashReport() {
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
                               {row.saleAmount != null ? (
-                                <span className="font-semibold text-green-600 dark:text-green-400">${row.saleAmount.toLocaleString()}</span>
+                                <span className="font-semibold text-good">${row.saleAmount.toLocaleString()}</span>
                               ) : (
-                                <span className="text-xs text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-500/25">No amount</span>
+                                <span className="text-xs text-warn font-medium bg-warn/12 px-2 py-0.5 rounded-full border border-warn/25">No amount</span>
                               )}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap text-muted-foreground text-xs">{row.dcName}</td>

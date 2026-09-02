@@ -213,7 +213,7 @@ export default function RFMSCustomers() {
               <h1 className="text-3xl font-bold text-foreground">RFMS Development</h1>
               <p className="text-muted-foreground mt-1">Query RFMS API data</p>
             </div>
-            <Badge className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25 ml-2">Admin Only</Badge>
+            <Badge className="bg-warn/12 text-warn border-warn/25 ml-2">Admin Only</Badge>
           </div>
         </motion.div>
 
@@ -255,7 +255,7 @@ export default function RFMSCustomers() {
                 </Button>
               </div>
             </div>
-            {error && <div className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-500/15 dark:border-red-500/25 dark:text-red-300 rounded-xl p-4 mb-6 text-sm">{error}</div>}
+            {error && <div className="bg-crit/12 border border-crit/25 text-crit rounded-xl p-4 mb-6 text-sm">{error}</div>}
             {results !== null && (
               <>
                 <div className="bg-card rounded-2xl border border-border">
@@ -331,7 +331,7 @@ export default function RFMSCustomers() {
               </div>
             </div>
 
-            {ordersError && <div className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-500/15 dark:border-red-500/25 dark:text-red-300 rounded-xl p-4 mb-6 text-sm">{ordersError}</div>}
+            {ordersError && <div className="bg-crit/12 border border-crit/25 text-crit rounded-xl p-4 mb-6 text-sm">{ordersError}</div>}
 
             {ordersResults !== null && (
               <>
@@ -340,8 +340,8 @@ export default function RFMSCustomers() {
                   {[
                     { label: 'Total Orders', value: rfmsOrders.length, color: 'text-foreground' },
                     { label: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, color: 'text-primary' },
-                    { label: 'Total Paid', value: `$${totalPaid.toLocaleString()}`, color: 'text-emerald-700 dark:text-emerald-400' },
-                    { label: 'Balance Due', value: `$${totalBalance.toLocaleString()}`, color: totalBalance > 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground' },
+                    { label: 'Total Paid', value: `$${totalPaid.toLocaleString()}`, color: 'text-good' },
+                    { label: 'Balance Due', value: `$${totalBalance.toLocaleString()}`, color: totalBalance > 0 ? 'text-crit' : 'text-muted-foreground' },
                   ].map(s => (
                     <div key={s.label} className="bg-card rounded-xl border border-border p-4">
                       <p className="text-xs text-muted-foreground mb-1">{s.label}</p>
@@ -357,7 +357,7 @@ export default function RFMSCustomers() {
                       {loadingCached ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '💾'}
                       {loadingCached ? 'Loading...' : 'Load Saved'}
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleCheckOnHold} disabled={checkingOnHold} className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/10">
+                    <Button variant="outline" size="sm" onClick={handleCheckOnHold} disabled={checkingOnHold} className="gap-1 border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10">
                       {checkingOnHold ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '📦'}
                       {checkingOnHold
                         ? `Checking... ${onHoldProgress.checked}/${onHoldProgress.total}`
@@ -366,7 +366,7 @@ export default function RFMSCustomers() {
                           : 'Check On Order'}
                     </Button>
                     {Object.keys(onHoldMap).length > 0 && (
-                      <Button variant="outline" size="sm" onClick={() => exportCSV(rfmsOrders.filter(o => onHoldMap[o.documentNumber]?.hasOnHold === true))} className="gap-1 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-500/30 dark:text-amber-300 dark:hover:bg-amber-500/10">
+                      <Button variant="outline" size="sm" onClick={() => exportCSV(rfmsOrders.filter(o => onHoldMap[o.documentNumber]?.hasOnHold === true))} className="gap-1 border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10">
                         <Download className="w-3.5 h-3.5" /> Export On Order
                       </Button>
                     )}
@@ -412,7 +412,7 @@ function OrdersTable({ orders, onHoldMap = {} }) {
             const onHoldInfo = onHoldMap[order.documentNumber];
             const isOnHold = onHoldInfo?.hasOnHold === true;
             return (
-              <tr key={i} className={`hover:bg-secondary transition-colors ${isOnHold ? 'bg-amber-50 dark:bg-amber-500/10' : ''}`}>
+              <tr key={i} className={`hover:bg-secondary transition-colors ${isOnHold ? 'bg-warn/12' : ''}`}>
                 <td className="px-4 py-3 text-foreground whitespace-nowrap font-mono text-xs">{order.documentNumber || '—'}</td>
                 <td className="px-4 py-3 text-foreground whitespace-nowrap">{order.orderDate || '—'}</td>
                 <td className="px-4 py-3 text-foreground whitespace-nowrap">{first || '—'}</td>
@@ -425,16 +425,16 @@ function OrdersTable({ orders, onHoldMap = {} }) {
                 <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{c.postalCode || '—'}</td>
                 <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{order.salesperson1 || '—'}</td>
                 <td className="px-4 py-3 text-foreground whitespace-nowrap font-medium">${(order.grandTotal || 0).toLocaleString()}</td>
-                <td className="px-4 py-3 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">${(order.paid || 0).toLocaleString()}</td>
+                <td className="px-4 py-3 text-good whitespace-nowrap">${(order.paid || 0).toLocaleString()}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={order.balanceDue > 0 ? 'text-red-600 dark:text-red-400 font-medium' : 'text-muted-foreground'}>
+                  <span className={order.balanceDue > 0 ? 'text-crit font-medium' : 'text-muted-foreground'}>
                     ${(order.balanceDue || 0).toLocaleString()}
                   </span>
                 </td>
                 {hasOnHoldData && (
                   <td className="px-4 py-3 whitespace-nowrap">
                     {isOnHold ? (
-                      <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-0.5 rounded-full border border-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25">
+                      <span className="inline-flex items-center gap-1 bg-warn/12 text-warn text-xs font-semibold px-2 py-0.5 rounded-full border border-warn/25">
                         📦 On Order
                       </span>
                     ) : (

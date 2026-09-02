@@ -59,29 +59,29 @@ export default function DiscoverySection({ formData, onChange }) {
   const isComplete = answeredCount === QUESTIONS.length;
 
   return (
-    <div className="border-2 border-amber-200 rounded-xl overflow-hidden">
+    <div className="border-2 border-warn/25 rounded-xl overflow-hidden">
       {/* Header */}
       <div className={cn(
         "flex items-center justify-between px-5 py-4",
-        isComplete ? "bg-green-50 border-b border-green-200" : "bg-amber-50 border-b border-amber-200"
+        isComplete ? "bg-good/12 border-b border-good/25" : "bg-warn/12 border-b border-warn/25"
       )}>
         <div className="flex items-center gap-3">
           <div className={cn(
             "w-9 h-9 rounded-lg flex items-center justify-center",
-            isComplete ? "bg-green-100" : "bg-amber-100"
+            isComplete ? "bg-good/12" : "bg-warn/12"
           )}>
             {isComplete
-              ? <CheckCircle2 className="w-5 h-5 text-green-600" />
-              : <Search className="w-5 h-5 text-amber-600" />
+              ? <CheckCircle2 className="w-5 h-5 text-good" />
+              : <Search className="w-5 h-5 text-warn" />
             }
           </div>
           <div>
-            <p className="font-bold text-slate-800">Section 4 — Discovery</p>
-            <p className="text-xs text-slate-500">5 questions, in order — {answeredCount} of 5 answered</p>
+            <p className="font-bold text-foreground">Section 4 — Discovery</p>
+            <p className="text-xs text-muted-foreground">5 questions, in order — {answeredCount} of 5 answered</p>
           </div>
         </div>
         {isComplete && (
-          <span className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-1 rounded-full">Complete</span>
+          <span className="text-xs font-semibold text-good bg-good/12 px-3 py-1 rounded-full">Complete</span>
         )}
       </div>
 
@@ -91,20 +91,20 @@ export default function DiscoverySection({ formData, onChange }) {
           return (
             <div key={q.field} className={cn(
               "rounded-lg border-2 p-4 space-y-3 transition-colors",
-              answered ? "border-green-300 bg-green-50/40" : "border-slate-200 bg-slate-50"
+              answered ? "border-good/25 bg-good/12/40" : "border-border bg-muted"
             )}>
               <div className="flex items-start gap-3">
                 <span className={cn(
                   "flex-shrink-0 text-xs font-bold px-2 py-1 rounded border h-fit",
                   answered
-                    ? "bg-green-100 border-green-400 text-green-700"
-                    : "bg-amber-100 border-amber-300 text-amber-700"
+                    ? "bg-good/12 border-good text-good"
+                    : "bg-warn/12 border-warn/25 text-warn"
                 )}>
                   {q.number}
                 </span>
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold text-slate-800 italic">{q.prompt}</p>
-                  <p className="text-xs text-slate-500">{q.hint}</p>
+                  <p className="text-sm font-semibold text-foreground italic">{q.prompt}</p>
+                  <p className="text-xs text-muted-foreground">{q.hint}</p>
                 </div>
               </div>
               <LocalTextarea

@@ -244,10 +244,10 @@ export default function CancelledProjects() {
               <p className="text-muted-foreground mt-1">Cancelled and pending cancellation projects</p>
             </div>
             <div className="flex flex-wrap items-center gap-3 gap-y-2 text-sm text-muted-foreground">
-              <span className="bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-medium dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
+              <span className="bg-crit/12 text-crit border border-crit/25 rounded-lg px-3 py-1.5 font-medium">
                 {cancelledProjects.length} Cancelled
               </span>
-              <span className="bg-orange-100 text-orange-700 border border-orange-200 rounded-lg px-3 py-1.5 font-medium dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25">
+              <span className="bg-warn/12 text-warn border border-warn/25 rounded-lg px-3 py-1.5 font-medium">
                 {pendingCancellationProjects.length} Pending Cancellation
               </span>
             </div>
@@ -276,14 +276,14 @@ export default function CancelledProjects() {
             <Button
               variant={filterType === 'cancelled' ? 'default' : 'outline'}
               onClick={() => setFilterType('cancelled')}
-              className={cn("h-9 whitespace-nowrap", filterType === 'cancelled' ? 'bg-red-600 hover:bg-red-700 text-white' : 'border-red-200 text-red-700 hover:bg-red-50 dark:border-red-500/30 dark:text-red-300 dark:hover:bg-red-500/10')}
+              className={cn("h-9 whitespace-nowrap", filterType === 'cancelled' ? 'bg-crit hover:bg-crit text-white' : 'border-crit/25 text-crit hover:bg-crit/12 dark:hover:bg-crit/10')}
             >
               🚫 Cancelled ({cancelledProjects.length})
             </Button>
             <Button
               variant={filterType === 'pending_cancellation' ? 'default' : 'outline'}
               onClick={() => setFilterType('pending_cancellation')}
-              className={cn("h-9 whitespace-nowrap", filterType === 'pending_cancellation' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-500/30 dark:text-orange-300 dark:hover:bg-orange-500/10')}
+              className={cn("h-9 whitespace-nowrap", filterType === 'pending_cancellation' ? 'bg-warn hover:bg-warn text-white' : 'border-warn/25 text-warn hover:bg-warn/12 dark:hover:bg-warn/10')}
             >
               ⚠️ Pending Cancellation ({pendingCancellationProjects.length})
             </Button>
@@ -322,7 +322,7 @@ export default function CancelledProjects() {
                   transition={{ delay: index * 0.04 }}
                   className={cn(
                     "bg-card rounded-xl border transition-all hover:shadow-md",
-                    isCancelled ? "border-red-200 hover:border-red-300 dark:border-red-500/30 dark:hover:border-red-500/50" : "border-orange-200 hover:border-orange-300 dark:border-orange-500/30 dark:hover:border-orange-500/50"
+                    isCancelled ? "border-crit/25 hover:border-crit/25 dark:hover:border-crit/50" : "border-warn/25 hover:border-warn/25 dark:hover:border-warn/50"
                   )}
                 >
                   <div className="px-6 pt-4 pb-0 flex flex-wrap justify-end gap-2 gap-y-2">
@@ -330,7 +330,7 @@ export default function CancelledProjects() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
+                        className="border-good/25 text-good hover:bg-good/12 dark:hover:bg-good/10"
                         disabled={uncancelling === project.id}
                         onClick={(e) => {
                           e.preventDefault();
@@ -350,7 +350,7 @@ export default function CancelledProjects() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-500/30 dark:text-green-300 dark:hover:bg-green-500/10"
+                          className="border-good/25 text-good hover:bg-good/12 dark:hover:bg-good/10"
                           disabled={clearingPending === project.id}
                           onClick={(e) => {
                             e.preventDefault();
@@ -401,7 +401,7 @@ export default function CancelledProjects() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-500/30 dark:text-blue-300 dark:hover:bg-blue-500/10"
+                        className="border-info/25 text-info hover:bg-info/12 dark:hover:bg-info/10"
                         disabled={savingAttempt === project.id}
                         onClick={(e) => {
                           e.preventDefault();
@@ -422,25 +422,25 @@ export default function CancelledProjects() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           {isCancelled ? (
-                            <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                            <XCircle className="w-5 h-5 text-crit flex-shrink-0" />
                           ) : (
-                            <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                            <AlertTriangle className="w-5 h-5 text-warn flex-shrink-0" />
                           )}
                           <h3 className="text-lg font-semibold text-foreground">{customerName}</h3>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {isCancelled && (
-                            <Badge className="bg-red-100 text-red-800 border border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25">
+                            <Badge className="bg-crit/12 text-crit border border-crit/25">
                               🚫 Cancelled
                             </Badge>
                           )}
                           {isPendingCancellation && !isCancelled && (
-                            <Badge className="bg-orange-100 text-orange-800 border border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25">
+                            <Badge className="bg-warn/12 text-warn border border-warn/25">
                               ⚠️ Pending Cancellation
                             </Badge>
                           )}
                           {isPendingCancellation && isCancelled && (
-                            <Badge className="bg-orange-100 text-orange-800 border border-orange-200 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/25">
+                            <Badge className="bg-warn/12 text-warn border border-warn/25">
                               ⚠️ Pending Cancellation
                             </Badge>
                           )}
@@ -455,12 +455,12 @@ export default function CancelledProjects() {
 
                     {/* Save attempt indicator */}
                     {project.cancellation_save_attempt_by && (
-                      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-3 space-y-1 dark:bg-blue-500/10 dark:border-blue-500/20">
-                        <p className="text-xs text-blue-700 dark:text-blue-300">
+                      <div className="bg-info/12 border border-blue-100 rounded-lg p-3 mb-3 space-y-1">
+                        <p className="text-xs text-info">
                           <span className="font-medium">🛠️ Working this — trying to save:</span> {project.cancellation_save_attempt_by}
                         </p>
                         {project.cancellation_save_attempt_date && (
-                          <p className="text-xs text-blue-600 dark:text-blue-300">
+                          <p className="text-xs text-info">
                             Flagged {format(new Date(project.cancellation_save_attempt_date), 'MMM d, yyyy h:mm a')}
                           </p>
                         )}
@@ -469,17 +469,17 @@ export default function CancelledProjects() {
 
                     {/* Cancellation details */}
                     {isCancelled && (project.cancelled_by || project.cancelled_date || project.cancelled_reason) && (
-                      <div className="bg-red-50 border border-red-100 rounded-lg p-3 mb-3 space-y-1 dark:bg-red-500/10 dark:border-red-500/20">
+                      <div className="bg-crit/12 border border-red-100 rounded-lg p-3 mb-3 space-y-1">
                         {project.cancelled_by && (
-                          <p className="text-xs text-red-700 dark:text-red-300"><span className="font-medium">Cancelled by:</span> {project.cancelled_by}</p>
+                          <p className="text-xs text-crit"><span className="font-medium">Cancelled by:</span> {project.cancelled_by}</p>
                         )}
                         {project.cancelled_date && (
-                          <p className="text-xs text-red-700 dark:text-red-300">
+                          <p className="text-xs text-crit">
                             <span className="font-medium">Date:</span> {format(new Date(project.cancelled_date), 'MMM d, yyyy h:mm a')}
                           </p>
                         )}
                         {project.cancelled_reason && (
-                          <p className="text-xs text-red-700 dark:text-red-300"><span className="font-medium">Reason:</span> {project.cancelled_reason}</p>
+                          <p className="text-xs text-crit"><span className="font-medium">Reason:</span> {project.cancelled_reason}</p>
                         )}
                       </div>
                     )}
@@ -490,8 +490,8 @@ export default function CancelledProjects() {
                         <span>Created: {project.created_date ? format(new Date(project.created_date), 'MMM d, yyyy') : 'N/A'}</span>
                       </div>
                       {isPendingCancellation && !isCancelled && project.pending_cancellation_date && (
-                        <div className="flex items-center gap-2 text-sm text-orange-600 font-medium dark:text-orange-400">
-                          <AlertTriangle className="w-4 h-4 text-orange-500" />
+                        <div className="flex items-center gap-2 text-sm text-warn font-medium">
+                          <AlertTriangle className="w-4 h-4 text-warn" />
                           <span>Pending Cancel: {format(new Date(project.pending_cancellation_date), 'MMM d, yyyy')} ({Math.floor((Date.now() - new Date(project.pending_cancellation_date).getTime()) / 86400000)} days)</span>
                         </div>
                       )}
