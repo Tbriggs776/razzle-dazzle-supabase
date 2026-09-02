@@ -154,14 +154,17 @@ function ReviewCarousel() {
   );
 }
 
-// Semantic status colors (kept distinct from the brand accent), dark-mode aware.
+// Semantic tokens, not palette colours. Each of these carried an explicit dark:
+// variant; the tokens are theme-aware, so the duplication goes with them — and a
+// customer reading this on a phone in dark mode now gets the same contrast we
+// designed for, rather than whatever green-800-on-green-500/15 happens to give.
 const statusColors = {
   'Lead': 'bg-secondary text-secondary-foreground border-border',
-  'Awaiting Assignment': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/25',
-  'Scheduled': 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/25',
-  'Rescheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/25',
-  'Cancelled': 'bg-red-100 text-red-800 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/25',
-  'Completed': 'bg-green-100 text-green-800 border-green-200 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/25'
+  'Awaiting Assignment': 'bg-warn/12 text-warn border-warn/25',
+  'Scheduled': 'bg-info/12 text-info border-info/25',
+  'Rescheduled': 'bg-warn/12 text-warn border-warn/25',
+  'Cancelled': 'bg-crit/12 text-crit border-crit/25',
+  'Completed': 'bg-good/12 text-good border-good/25',
 };
 
 export default function LeadAppointmentView() {
@@ -239,7 +242,10 @@ export default function LeadAppointmentView() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="bg-card border-b border-border">
+      {/* Navy hero, matching the customer tracker — this is the same customer, days
+          earlier in the same relationship, and the two pages should not look like
+          they came from different companies. */}
+      <header className="bg-sidebar">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-7">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -248,22 +254,28 @@ export default function LeadAppointmentView() {
           >
             {/* Logo */}
             <div className="flex flex-col items-center sm:items-start">
-              <BrandLogo imgClassName="h-10 sm:h-11" />
-              <p className="text-[9px] font-medium tracking-[0.18em] text-muted-foreground uppercase mt-1.5">
+              <BrandLogo imgClassName="h-10 sm:h-11" onDark />
+              <p className="text-[9px] font-medium tracking-[0.18em] text-sidebar-foreground uppercase mt-2">
                 Sexy Flooring · Quality Install
               </p>
             </div>
 
             {/* Appointment Header */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6">
-              <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg ring-4 ring-brand-gold/25 mx-auto sm:mx-0">
+              <div className="w-20 h-20 rounded-2xl bg-brand-pink flex items-center justify-center text-white shadow-lg ring-4 ring-brand-pink/25 mx-auto sm:mx-0">
                 <CalendarIcon className="w-10 h-10" />
               </div>
 
               <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Your Appointment</h2>
-                <p className="text-muted-foreground text-sm mt-2">Questions or need to modify your appointment?</p>
-                <a href="tel:5555550100" className="text-primary font-bold text-xl mt-1 inline-block hover:underline">(555) 555-0100</a>
+                <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">Your Appointment</h2>
+                <p className="text-sidebar-foreground text-sm mt-2">Questions or need to modify your appointment?</p>
+                {/* Was a 555 placeholder, shipped to customers. This is Customer
+                    Care, the same line the project tracker labels "Customer Care";
+                    the other Floor Daddy number (480-805-5740) is Installation
+                    Questions and is the wrong one for a pre-install appointment.
+                    Deliberately not repeating the old digits here — a placeholder
+                    audit should come back clean. */}
+                <a href="tel:602-313-3000" className="text-white font-bold text-xl mt-1 inline-block hover:underline">602-313-3000</a>
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-3">
                   <Badge variant="secondary" className={cn('border', statusColors[appointment.status])}>
                     {appointment.status}
