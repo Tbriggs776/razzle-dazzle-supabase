@@ -154,7 +154,6 @@ function ReviewCarousel() {
   );
 }
 
-// Semantic status colors (kept distinct from the brand accent), dark-mode aware.
 // Semantic tokens, not palette colours. Each of these carried an explicit dark:
 // variant; the tokens are theme-aware, so the duplication goes with them — and a
 // customer reading this on a phone in dark mode now gets the same contrast we
@@ -276,7 +275,7 @@ export default function LeadAppointmentView() {
                     Questions and is the wrong one for a pre-install appointment.
                     Deliberately not repeating the old digits here — a placeholder
                     audit should come back clean. */}
-                <a href="tel:480-764-2412" className="text-white font-bold text-xl mt-1 inline-block hover:underline">480-764-2412</a>
+                <a href="tel:602-313-3000" className="text-white font-bold text-xl mt-1 inline-block hover:underline">602-313-3000</a>
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-3">
                   <Badge variant="secondary" className={cn('border', statusColors[appointment.status])}>
                     {appointment.status}

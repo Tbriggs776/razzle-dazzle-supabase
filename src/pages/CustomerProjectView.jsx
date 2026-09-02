@@ -114,7 +114,7 @@ export default function CustomerProjectView() {
           <h2 className="font-display text-xl font-semibold text-foreground mb-2">Project not found</h2>
           <p className="text-muted-foreground">
             Please check your link, or call Customer Care on{' '}
-            <a href="tel:480-764-2412" className="font-semibold text-brand-pink hover:underline">480-764-2412</a>{' '}
+            <a href="tel:602-313-3000" className="font-semibold text-brand-pink hover:underline">602-313-3000</a>{' '}
             for a new one.
           </p>
         </div>

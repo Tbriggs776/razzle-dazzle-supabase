@@ -26,7 +26,7 @@ const CHECKLIST_ITEMS = [
   },
   {
     id: 'install_date', title: 'Installation Date',
-    text: 'will be confirmed by our installation center prior to your scheduled installation. If we are unable to reach you, and for your installation to occur as scheduled, it is vital that you notify our Customer Service team at 480-764-2412 and reference your contract number. They can be reached from 8 a.m. to 9 p.m. (MST) Monday through Friday and Saturday from 8 a.m. to 5pm (MST).'
+    text: 'will be confirmed by our installation center prior to your scheduled installation. If we are unable to reach you, and for your installation to occur as scheduled, it is vital that you notify our Customer Service team at 602-313-3000 and reference your contract number. They can be reached from 8 a.m. to 9 p.m. (MST) Monday through Friday and Saturday from 8 a.m. to 5pm (MST).'
   },
   {
     id: 'delivery', title: 'Delivery Times',
