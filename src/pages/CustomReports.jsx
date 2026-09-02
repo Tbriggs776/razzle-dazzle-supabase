@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Play, Save, Download, Plus, X, Loader2, Table2, Trash2, Lock, Users,
+  GripVertical, ChevronUp, ChevronDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -70,6 +71,7 @@ export default function CustomReports() {
   const [name, setName] = useState('');
   const [loadedId, setLoadedId] = useState(null);
   const [visibility, setVisibility] = useState('private');
+  const [dragFrom, setDragFrom] = useState(null);
 
   const { data: subjects = [] } = useQuery({
     queryKey: ['reportSubjects'],
@@ -175,6 +177,17 @@ export default function CustomReports() {
 
   const toggleColumn = (key) =>
     patch({ columns: def.columns.includes(key) ? def.columns.filter((c) => c !== key) : [...def.columns, key] });
+
+  // Column ORDER is the report's order: run_report emits the select list in this
+  // sequence and returns json rather than jsonb precisely so it survives the trip.
+  const moveColumn = (from, to) => {
+    if (from == null || to == null || from === to) return;
+    if (to < 0 || to >= def.columns.length) return;
+    const next = [...def.columns];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    patch({ columns: next });
+  };
 
   const card = 'rounded-xl border border-border bg-card p-4';
 
@@ -296,28 +309,73 @@ export default function CustomReports() {
                 )}
               </div>
 
-              {/* Columns */}
+              {/* Columns — chosen ones are ordered, the rest are a palette */}
               <div className={card}>
-                <h3 className="font-display text-sm font-bold">Columns</h3>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {fields.map((f) => (
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h3 className="font-display text-sm font-bold">Columns</h3>
+                  {def.columns.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Drag to reorder — the table and the CSV follow this order.
+                    </p>
+                  )}
+                </div>
+
+                {def.columns.length > 0 && (
+                  <ol className="mt-3 space-y-1">
+                    {def.columns.map((key, i) => (
+                      <li
+                        key={key}
+                        draggable
+                        onDragStart={() => setDragFrom(i)}
+                        onDragEnd={() => setDragFrom(null)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => { e.preventDefault(); moveColumn(dragFrom, i); setDragFrom(null); }}
+                        className={cn(
+                          'flex items-center gap-2 rounded-lg border border-border bg-background px-2 py-1.5',
+                          dragFrom === i && 'opacity-40',
+                        )}
+                      >
+                        <GripVertical className="h-4 w-4 shrink-0 cursor-grab text-muted-foreground" />
+                        <span className="w-5 shrink-0 text-center font-mono text-[11px] text-muted-foreground tabular-nums">{i + 1}</span>
+                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                          {fieldByKey[key]?.label ?? key}
+                        </span>
+                        {/* Arrows as well as dragging: HTML5 drag does not fire on touch,
+                            and this gets opened on phones. */}
+                        <button onClick={() => moveColumn(i, i - 1)} disabled={i === 0}
+                                className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                                aria-label={`Move ${fieldByKey[key]?.label ?? key} up`}>
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button onClick={() => moveColumn(i, i + 1)} disabled={i === def.columns.length - 1}
+                                className="rounded p-1 text-muted-foreground hover:bg-muted disabled:opacity-30"
+                                aria-label={`Move ${fieldByKey[key]?.label ?? key} down`}>
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </button>
+                        <button onClick={() => toggleColumn(key)}
+                                className="rounded p-1 text-muted-foreground hover:text-crit"
+                                aria-label={`Remove ${fieldByKey[key]?.label ?? key}`}>
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+
+                <p className="mt-3 text-xs font-medium text-muted-foreground">
+                  {def.columns.length ? 'Add another' : 'Pick columns — leave empty for all of them'}
+                </p>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {fields.filter((f) => !def.columns.includes(f.key)).map((f) => (
                     <button
                       key={f.key}
                       onClick={() => toggleColumn(f.key)}
-                      className={cn(
-                        'rounded-full border px-2.5 py-1 text-xs transition-colors',
-                        def.columns.includes(f.key)
-                          ? 'border-brand-pink bg-brand-pink text-white'
-                          : 'border-border text-muted-foreground hover:bg-muted',
-                      )}
+                      className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted"
                     >
                       {f.label}
                     </button>
                   ))}
                 </div>
-                {!def.columns.length && (
-                  <p className="mt-2 text-xs text-muted-foreground">Nothing ticked — every column will be returned.</p>
-                )}
               </div>
 
               {/* Filters */}
