@@ -41,6 +41,9 @@ const ENTITY_TABLE = {
   Installer: 'installer',
   InstallerMember: 'installer_member',
   LeadDisposition: 'lead_disposition',
+  Report: 'report',
+  ReportField: 'report_field',
+  ReportSubject: 'report_subject',
   Sop: 'sop',
   SopVersion: 'sop_version',
   SopCapture: 'sop_capture',
@@ -632,6 +635,11 @@ const RPC_FUNCTIONS = {
     p_recall_date: p.recallDate ?? null, p_note: p.note ?? null,
   }],
   reopenLead:       (p) => ['reopen_lead', { p_lead_id: p.leadId }],
+  // ── Custom reports ────────────────────────────────────────────────────────
+  // The definition goes in, rows come out. run_report is SECURITY INVOKER, so the
+  // caller's RLS decides the rows and the caller's module permission decides whether
+  // the subject is reachable at all — there is nothing to check on this side.
+  runReport:        (p) => ['run_report', { p_def: p.definition ?? p }],
   // ── Playbooks ─────────────────────────────────────────────────────────────
   // The ack is the training record; it and every other write goes through a
   // SECURITY DEFINER RPC — the tables have no client write path at all.
