@@ -230,6 +230,21 @@ async function applyDnd(s: any, c: any, contactId: string | null) {
   return out;
 }
 
+// A medium is a small closed vocabulary. GHL's attributionSource.medium is the
+// INTEGRATION that created the contact -- "zapier", "survey", "manual", "form" -- not
+// a marketing medium, and mapping it into source_medium put plumbing into an
+// attribution column on 139 leads before anyone looked. Anything outside the
+// vocabulary is something that wandered into the wrong field; drop it rather than
+// store it, because a wrong value is worse than an empty one in a report.
+const MEDIA = new Set([
+  'cpc', 'ppc', 'paid', 'paid_social', 'paidsocial', 'social', 'organic', 'email',
+  'referral', 'direct', 'display', 'video', 'affiliate', 'sms', 'none',
+]);
+const medium = (v: unknown) => {
+  const m = String(v ?? '').trim().toLowerCase();
+  return MEDIA.has(m) ? m : null;
+};
+
 function toLead(c: any, locationId: string | null) {
   const src = String(c.source ?? c.attributionSource?.sessionSource ?? '').trim().toLowerCase();
   const attr = c.attributionSource ?? c.attributions?.[0] ?? {};
@@ -244,7 +259,16 @@ function toLead(c: any, locationId: string | null) {
     zip: c.postalCode ?? c.postal_code ?? null,
     source_channel: CHANNEL_BY_SOURCE[src] ?? 'unattributed',
     source_campaign: attr.campaign ?? attr.utmCampaign ?? null,
-    source_medium: attr.medium ?? attr.utmMedium ?? null,
+    // The two columns have different jobs, and conflating them is what caused this.
+    //   source_medium  Razzle's NORMALISED medium -- trustworthy for reporting, so it
+    //                  takes utmMedium first (the real medium) and drops anything
+    //                  outside the vocabulary rather than storing plumbing.
+    //   utm_medium     the RAW utm_medium as received, kept verbatim even when the
+    //                  advertiser has stuffed an ad-set name in it. It is the raw
+    //                  truth of what arrived, and 20 existing leads carry Facebook
+    //                  ad-set names there that appear in no other column -- dropping
+    //                  new ones would lose that dimension for the sake of tidiness.
+    source_medium: medium(attr.utmMedium) ?? medium(attr.medium),
     utm_source: attr.utmSource ?? null,
     utm_medium: attr.utmMedium ?? null,
     utm_campaign: attr.campaign ?? attr.utmCampaign ?? null,
