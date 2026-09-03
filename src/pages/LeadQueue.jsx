@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import {
   PhoneCall, MessageSquare, Mail, Loader2, UserPlus, CalendarClock, MapPin,
-  Timer, Inbox, ArrowRight, Voicemail, PhoneOff, CheckCircle2,
+  Timer, Inbox, ArrowRight, Voicemail, PhoneOff, CheckCircle2, PhoneIncoming,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -305,6 +305,52 @@ function LeadRow({ lead, onLog, onDisposition, onBook, booking }) {
             {lead.csr_name && <span className="text-xs text-muted-foreground">{lead.csr_name}</span>}
             {!lead.assigned_csr && <span className="text-xs text-warn">unclaimed</span>}
           </div>
+
+          {/* THEY CALLED US. attempt_count only counts outbound, so without this a lead
+              who spoke to us for two minutes still reads as an uncontacted first dial —
+              and the CSR finds out on the phone. The provider's own summary is worth
+              more here than anything else on the card: on the lead that prompted this
+              it said the caller was a contractor trying to SELL us tile. */}
+          {lead.inbound_count > 0 && (
+            <div className="mt-2 rounded-lg border border-info/25 bg-info/10 p-2.5">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span className="inline-flex items-center gap-1.5 font-semibold text-info">
+                  <PhoneIncoming className="h-3.5 w-3.5" />
+                  They called us{lead.inbound_count > 1 ? ` ${lead.inbound_count}×` : ''}
+                </span>
+                {lead.last_inbound_at && (
+                  <span className="text-muted-foreground">
+                    {new Date(lead.last_inbound_at).toLocaleString('en-US', {
+                      month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+                    })}
+                  </span>
+                )}
+                {lead.last_inbound_seconds != null && (
+                  <span className="tabular-nums text-muted-foreground">
+                    {Math.floor(lead.last_inbound_seconds / 60)}m {lead.last_inbound_seconds % 60}s
+                    {lead.last_inbound_answered === false && ' · missed'}
+                  </span>
+                )}
+                {lead.last_inbound_score != null && (
+                  <span className={cn(
+                    'rounded-full px-2 py-0.5 font-semibold tabular-nums',
+                    // Their scale is 0-100. Below 40 is the band worth a second look
+                    // before someone spends a call on it.
+                    lead.last_inbound_score >= 70 ? 'bg-good/15 text-good'
+                      : lead.last_inbound_score >= 40 ? 'bg-warn/15 text-warn'
+                      : 'bg-crit/15 text-crit',
+                  )}>
+                    score {lead.last_inbound_score}
+                  </span>
+                )}
+              </div>
+              {lead.last_inbound_summary && (
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                  {lead.last_inbound_summary}
+                </p>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Button size="sm" className="min-h-11 gap-1.5" onClick={() => onLog(lead)}>
