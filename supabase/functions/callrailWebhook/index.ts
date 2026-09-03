@@ -168,7 +168,14 @@ Deno.serve(async (req) => {
       provider: 'callrail',
       provider_message_id: callId,
       callrail_id: callId,
+      callrail_person_id: p.person_id ?? null,
       callrail_recording_id: p.recording ? String(p.recording).split('/').pop() ?? null : null,
+      // CallRail's own qualification. On the lead that prompted this work it read
+      // "a contractor trying to SELL tile, not a customer" -- which is worth more to
+      // whoever picks the call up than anything else in the payload.
+      lead_score: Number.isFinite(Number(p.lead_score)) ? Number(p.lead_score) : null,
+      lead_explanation: p.lead_explanation ?? null,
+      landing_page_url: p.landing_page_url ?? null,
       tracking_phone_number: p.tracking_phone_number ?? null,
       source_name: p.source_name ?? null,
       campaign_name: p.campaign ?? p.utm_campaign ?? null,
@@ -179,16 +186,49 @@ Deno.serve(async (req) => {
       sent_by: 'CallRail',
     };
 
+    // Conflict on the PRIMARY KEY, not on callrail_id. communication_callrail_id_uniq
+    // is a PARTIAL index (WHERE callrail_id IS NOT NULL) and PostgREST cannot target a
+    // partial index for ON CONFLICT -- it fails with "no unique or exclusion constraint
+    // matching", which reads like a missing index rather than an unusable one.
+    // row.id is `cr_<callId>`, so the primary key gives the same idempotency, and the
+    // partial index still blocks a duplicate arriving by any other path.
     const { error: writeErr } = await s.from('communication')
-      .upsert(row, { onConflict: 'callrail_id', ignoreDuplicates: false });
+      .upsert(row, { onConflict: 'id', ignoreDuplicates: false });
     if (writeErr) {
       console.error('communication write failed', writeErr.message);
       return Response.json({ error: writeErr.message }, { status: 500, headers: cors });
     }
 
+    // Fill the attribution the Zapier hop drops. GHL receives a name, a phone and a
+    // pool name; CallRail has the campaign, the gclid and the landing page. Only ever
+    // fills what is empty -- a value already set outranks a later guess.
+    if (leadId) {
+      const { error: attrErr } = await s.rpc('reconcile_callrail_calls');
+      if (attrErr) console.error('reconcile after write failed', attrErr.message);
+      const patch: Record<string, unknown> = {};
+      if (p.utm_source) patch.utm_source = p.utm_source;
+      if (p.utm_medium) patch.utm_medium = p.utm_medium;
+      if (p.utm_campaign) patch.utm_campaign = p.utm_campaign;
+      if (p.utm_term) patch.utm_term = p.utm_term;
+      if (p.utm_content) patch.utm_content = p.utm_content;
+      if (p.gclid) patch.gclid = p.gclid;
+      if (Object.keys(patch).length) {
+        // Coalesce in SQL rather than here: two calls for one lead must not let the
+        // second overwrite the first touch's attribution.
+        const { data: cur } = await s.from('lead')
+          .select('utm_source,utm_medium,utm_campaign,utm_term,utm_content,gclid')
+          .eq('id', leadId).maybeSingle();
+        const merged = Object.fromEntries(
+          Object.entries(patch).filter(([k]) => !(cur as any)?.[k]),
+        );
+        if (Object.keys(merged).length) await s.from('lead').update(merged).eq('id', leadId);
+      }
+    }
+
     return Response.json({
       ok: true, call_id: callId, lead_id: leadId, lead_created: leadCreated,
       lead_creation_enabled: mayCreateLeads,
+      lead_score: row.lead_score,
     }, { headers: cors });
   } catch (e) {
     console.error('callrailWebhook', (e as Error).message);
